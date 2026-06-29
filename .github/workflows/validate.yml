@@ -1,0 +1,49 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Lint valid examples (must pass)
+        run: npm run lint:valid
+
+      - name: Lint invalid examples (negative test, must fail)
+        run: |
+          if npm run lint:invalid; then
+            echo "::error::invalid examples unexpectedly passed lint — a rule is not firing"
+            exit 1
+          else
+            echo "invalid examples correctly rejected"
+          fi
+
+      - name: Moddle round-trip
+        run: npm run roundtrip
+
+      - name: XSD core conformance
+        run: npm run xsd
+
+      - name: Extension XSD up to date (drift guard)
+        run: npm run xsd:gen:check
+
+      - name: XSD extension conformance (BPMN core + extension)
+        run: npm run xsd:ext
+
+      - name: Package conventions
+        run: npm run conventions

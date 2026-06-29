@@ -1,0 +1,56 @@
+name: deploy-demo
+
+# Build the demo/ modeler playground and publish it to GitHub Pages.
+# Enable once under Settings -> Pages -> Source: "GitHub Actions".
+# Independent of validate.yml and release-please.yml — a demo deploy is not a
+# package gate and is not coupled to releases.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least-privilege token scopes required by actions/deploy-pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two Pages deploys at once; let an in-progress run finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies (workspaces incl. demo)
+        run: npm install --no-audit --no-fund
+
+      - name: Build demo
+        # Project Pages serve from https://<owner>.github.io/<repo>/, so assets
+        # must be requested from that sub-path.
+        run: npm --prefix demo run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: demo/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

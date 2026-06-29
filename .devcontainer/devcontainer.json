@@ -1,0 +1,30 @@
+{
+  "name": "bpmn-extension-template",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+
+  // Install xmllint (for the xsd / xsd:ext checks) and all workspace deps.
+  // The `demo` workspace pulls in bpmn-js + properties-panel + vite, so the
+  // modeler is ready to run after the container is created.
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libxml2-utils && npm install --no-audit --no-fund",
+
+  // Bring the modeler up automatically (idempotent: skip if already running).
+  // --host exposes it on 0.0.0.0 so the forwarded port works in Codespaces.
+  "postAttachCommand": "pgrep -f 'vite' >/dev/null 2>&1 || (nohup npm --prefix demo run dev -- --host --port 5173 >/tmp/vite-demo.log 2>&1 &)",
+
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "BPMN modeler demo",
+      "onAutoForward": "openPreview"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
