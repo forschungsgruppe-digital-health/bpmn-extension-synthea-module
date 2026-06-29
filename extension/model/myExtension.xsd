@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GENERATED from the moddle descriptor by tools/moddle-to-xsd.mjs. Do not edit by hand. -->
+<!-- Scope: STRUCTURE only. Semantic rules (e.g. required attributes) live in the bpmnlint plugin. -->
+<!-- extension version 0.1.0 (kept in sync by Release Please) x-release-please-version -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:myext="http://example.com/schema/my-extension/1.0"
+            targetNamespace="http://example.com/schema/my-extension/1.0"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+  <xsd:element name="annotation" type="myext:tAnnotation"/>
+  <xsd:complexType name="tAnnotation">
+    <xsd:sequence>
+      <xsd:element ref="myext:note" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="category" type="xsd:string"/>
+    <xsd:attribute name="reviewed" type="xsd:boolean" default="false"/>
+  </xsd:complexType>
+
+  <xsd:element name="note" type="myext:tNote"/>
+  <xsd:complexType name="tNote">
+    <xsd:simpleContent>
+      <xsd:extension base="xsd:string">
+        <xsd:attribute name="author" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:simpleContent>
+  </xsd:complexType>
+
+</xsd:schema>

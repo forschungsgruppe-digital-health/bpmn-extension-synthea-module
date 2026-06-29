@@ -1,0 +1,44 @@
+{
+  "name": "bpmn-js-my-extension",
+  "version": "0.1.0",
+  "description": "Template for a custom BPMN 2.0 / bpmn.io extension with automated conformance checks.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "extension/lint/bpmnlint-plugin-myext",
+    "demo"
+  ],
+  "files": [
+    "extension"
+  ],
+  "scripts": {
+    "lint:valid": "bpmnlint \"examples/valid/**/*.bpmn\"",
+    "lint:invalid": "bpmnlint \"examples/invalid/**/*.bpmn\"",
+    "roundtrip": "node tools/moddle-roundtrip.mjs",
+    "xsd": "bash tools/validate-xsd.sh",
+    "xsd:gen": "node tools/moddle-to-xsd.mjs",
+    "xsd:gen:check": "node tools/moddle-to-xsd.mjs --check",
+    "xsd:ext": "node tools/validate-xsd-ext.mjs",
+    "conventions": "node tools/check-package-conventions.mjs",
+    "validate": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run conventions",
+    "demo": "npm --prefix demo run dev",
+    "demo:build": "npm --prefix demo run build"
+  },
+  "peerDependencies": {
+    "bpmn-js": ">=17",
+    "diagram-js": ">=14",
+    "@bpmn-io/properties-panel": ">=3",
+    "bpmn-js-properties-panel": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "@bpmn-io/properties-panel": { "optional": true },
+    "bpmn-js-properties-panel": { "optional": true }
+  },
+  "devDependencies": {
+    "bpmn-moddle": "^9.0.1",
+    "bpmnlint": "^11.0.0"
+  }
+}

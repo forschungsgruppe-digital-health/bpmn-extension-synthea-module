@@ -1,0 +1,28 @@
+{
+  "name": "MyExtension",
+  "uri": "http://example.com/schema/my-extension/1.0",
+  "prefix": "myext",
+  "version": "0.1.0",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "Annotation",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "category", "type": "String", "isAttr": true },
+        { "name": "reviewed", "type": "Boolean", "isAttr": true, "default": false },
+        { "name": "note", "type": "Note", "isMany": true }
+      ]
+    },
+    {
+      "name": "Note",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "author", "type": "String", "isAttr": true },
+        { "name": "text", "type": "String", "isBody": true }
+      ]
+    }
+  ]
+}
