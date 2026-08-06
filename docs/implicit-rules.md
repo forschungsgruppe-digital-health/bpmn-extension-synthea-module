@@ -1,6 +1,6 @@
 # BPMN → Synthea: Conversion Rules
 
-Starting point: an arbitrary BPMN diagram (modeled with the `synthea:`, `fhir-mapping:`, and `medical-terminology:` extensions) exists and needs to be converted into a Synthea GMF `.json` module.
+Starting point: an arbitrary BPMN diagram (modeled with the `synthea:`, `fhirmap:`, and `term:` extensions) exists and needs to be converted into a Synthea GMF `.json` module.
 
 Core problem: several Synthea states share the same BPMN element (e.g. ten different states all end up as a `TextAnnotation`). The mapping tables below therefore list, per BPMN element, **all** candidate Synthea states plus the **disambiguation signal** the converter uses to decide between them — usually an extension attribute, occasionally a naming convention.
 
@@ -8,11 +8,11 @@ Core problem: several Synthea states share the same BPMN element (e.g. ten diffe
 
 ## A. The Three Extensions
 
-Before the mapping tables start referencing `fhir:resource` and friends, a short summary of what each extension supplies (details in `extension/model/synthea.json`, `fhir-mapping`, `medical-terminology`):
+Before the mapping tables start referencing `fhirmap:resourceType` and friends, a short summary of what each extension supplies (details in `extension/model/synthea.json`, `fhirmap` (package `@forschungsgruppe-digital-health/fhir-mapping`), `term` (package `@forschungsgruppe-digital-health/terminology`)):
 
 - **`synthea:`** — execution semantics: delay values, guard condition + polling behavior, probabilities, encounter constraint, encounter reference. Answers "how does this state behave."
-- **`fhir-mapping:`** — which state *type* is present at all (`fhir:resource="MedicationRequest"` etc.) — drives the disambiguation in Tables B/B.1. Answers "what kind of thing is this."
-- **`medical-terminology:`** — the clinical code (SNOMED/LOINC/RxNorm/NUBC) that goes into the `codes[]` array. Answers "exactly what it is."
+- **`fhirmap:`** — which state *type* is present at all (`fhirmap:resourceType="MedicationRequest"` etc.) — drives the disambiguation in Tables B/B.1. Answers "what kind of thing is this."
+- **`term:`** — the clinical code (SNOMED/LOINC/RxNorm/NUBC) that goes into the `codes[]` array. Answers "exactly what it is."
 
 Without all three together, reconversion is not unambiguously possible.
 
@@ -21,16 +21,18 @@ Without all three together, reconversion is not unambiguously possible.
 | Type | Attributes | Sits on | Why it's needed |
 |---|---|---|---|
 | `DelayConfig` | `delayShape`, `delayValue`, `delayUnit`, `distributionKind` | Timer intermediate event | carries Synthea's exact/range/distribution shape, which BPMN timers don't natively express |
-| `GuardConfig` | `reevaluate`, `pollInterval`, `allow` | Exclusive gateway | distinguishes a *polling* gateway (Guard) from a one-shot branching gateway, and carries the actual gate condition |
+| `GuardConfig` | `reevaluate`, `allow` | Exclusive gateway | distinguishes a *polling* gateway (Guard) from a one-shot branching gateway, and carries the actual gate condition. No poll-interval field — Guard always re-checks on the module's global simulation tick, not a per-instance interval (no such field exists in Synthea) |
 | `WellnessConfig` | `wellness` | TextAnnotation (Encounter) | marks that this Encounter blocks on the *next scheduled* visit, not any encounter |
 | `SubmoduleConfig` | `submoduleRef` | Call activity | pins down that a call activity is specifically a Synthea submodule reference — no return-mapping field exists in Synthea, continuation after the submodule just follows the calling state's own `transition` |
 | `ProbabilityConfig` | `probability`, `probabilityAttribute`, `probabilityDefault` | Sequence flow | BPMN has no native probabilistic branching — this is the only way to express `distributed_transition` weights |
 | `EncounterContext` | `requiresEncounterContext` | Task / SubProcess / TextAnnotation | encodes the structural rule that certain clinical states must occur inside an Encounter block |
 | `EncounterReference` | `targetEncounter` | Intermediate event (ConditionOnset/AllergyOnset) | Synthea's `target_encounter` field only exists on these two states, not on any other clinical state — see open points |
+| `Condition` | `conditionType`, `attribute`, `operator`, `value` | nested inside `GuardConfig.allow` or `ConditionConfig.condition` | a flat structured mirror of Synthea's logic vocabulary (see [Logic wiki](https://github.com/synthetichealth/synthea/wiki/Generic-Module-Framework:-Logic)) — deliberately not free text, since free text can't be reliably auto-translated back into a GMF condition object |
+| `ConditionConfig` | `condition` (nested `Condition`) | Sequence flow | carries the structured condition for a `conditional_transition` branch; the native BPMN `conditionExpression` on the same flow stays as the human-readable label only |
 
-**`fhir-mapping:` in detail** — a thin, one-attribute mapping (`fhir:resource="MedicationRequest"` etc.), not a full FHIR resource serialization; no patient data or clinical values live here. This is the attribute that drives disambiguation throughout the whole mapping table — without it, the BPMN→Synthea direction isn't mechanically resolvable, since a bare `TextAnnotation` is structurally meaningless on its own. Coverage gap: `VitalSign`, `Symptom`, `SetAttribute`, `Counter` have no FHIR resource by design (Synthea doesn't record them to the patient chart), so this extension structurally cannot disambiguate those four — see open points.
+**`fhirmap:` in detail** — conceptually a resource-type mapping (`fhirmap:resourceType="MedicationRequest"` etc.); the real `@forschungsgruppe-digital-health/fhir-mapping` package is actually richer (a `resourceMapping` element with `interaction`, `direction`, and nested `keyElement` bindings), but for BPMN→Synthea disambiguation only the resource type matters — no patient data or clinical values live here. This is the attribute that drives disambiguation throughout the whole mapping table — without it, the BPMN→Synthea direction isn't mechanically resolvable, since a bare `TextAnnotation` is structurally meaningless on its own. Coverage gap: `VitalSign`, `Symptom`, `SetAttribute`, `Counter` have no FHIR resource by design (Synthea doesn't record them to the patient chart), so this extension structurally cannot disambiguate those four — see open points.
 
-**`medical-terminology:` in detail** — attaches the coded vocabulary term (`{system, code, display}`) that gives a state clinical meaning beyond its resource type. Kept separate from `fhir-mapping:`, even though usually on the same element, because the two vary independently: resource type is fixed once the state's type is decided, the code varies per instance.
+**`term:` in detail** — attaches the coded vocabulary term (`{system, code, display}`) that gives a state clinical meaning beyond its resource type. Kept separate from `fhirmap:`, even though usually on the same element, because the two vary independently: resource type is fixed once the state's type is decided, the code varies per instance.
 
 | Vocabulary | States | Note |
 |---|---|---|
@@ -47,14 +49,14 @@ Without all three together, reconversion is not unambiguously possible.
 | BPMN element | Candidate Synthea state(s) | Disambiguation signal | What gets carried into the JSON |
 |---|---|---|---|
 | Start event | `Initial` | unambiguous, no disambiguation needed | nothing further, plain entry point |
-| End event | `Terminal` **or** `Death` | `fhir:resource="Patient.deceased"` present → `Death`; otherwise → `Terminal` | for `Death`: reference to codes (cause of death) if attached to the element |
-| Exclusive gateway **with** `synthea:GuardConfig` | `Guard` | extension attributes `reevaluate`/`pollInterval`/`allow` present | `allow` (free-text body holding the condition, e.g. as a serialized JSON-Logic object), `pollInterval`; like any other state, can also carry a `distributed_transition`/`conditional_transition` (officially documented, see the Age_Guard example) |
+| End event | `Terminal` **or** `Death` | `fhirmap:resourceType="Patient.deceased"` present → `Death`; otherwise → `Terminal` | for `Death`: reference to codes (cause of death) if attached to the element |
+| Exclusive gateway **with** `synthea:GuardConfig` | `Guard` | extension attributes `reevaluate`/`allow` present | `allow` (nested `synthea:Condition` element: `conditionType`/`attribute`/`operator`/`value`); Guard always re-checks on the module's global tick, no per-instance poll interval (no such field in Synthea); like any other state, can also carry a `distributed_transition`/`conditional_transition` (officially documented, see the Age_Guard example) |
 | Sequence flow with no intermediate node (a bare connection between two activities with no element of its own) **or** exclusive gateway **without** `synthea:GuardConfig` | `Simple` | no element present (plain pass-through) **or** gateway without `GuardConfig` — both represent a stateless node that only carries a transition | for the plain pass-through: just `type: "Simple"`; for the gateway variant: the transition logic of the outgoing flows (`direct`/`conditional`/`distributed`, see table C) is attached directly to this Simple state |
-| Timer intermediate event | `Delay` | unambiguous (only Delay uses timer events) | `synthea:DelayConfig`: `delayShape` (`EXACT`/`RANGE`/`DISTRIBUTION`) determines the JSON shape; `delayValue`/`delayUnit`; when `delayShape="DISTRIBUTION"`, also `distributionKind` (`GAUSSIAN`/`UNIFORM`/`EXPONENTIAL`) |
+| Timer intermediate event | `Delay` | unambiguous (only Delay uses timer events) | `synthea:DelayConfig`: `delayShape` (`EXACT`/`RANGE`/`DISTRIBUTION`) determines the JSON shape; `delayValue`/`delayUnit`; when `delayShape="DISTRIBUTION"`, also `distributionKind` (`EXACT`/`GAUSSIAN`/`UNIFORM`/`EXPONENTIAL` — `EXACT` is a valid distribution kind here too, not only a top-level shape) |
 | Call activity | `CallSubmodule` | unambiguous (only CallSubmodule uses call activities) | `synthea:submoduleRef` → `submodule`; continuation after the submodule follows the calling state's own `transition` (no return-mapping field in Synthea) |
-| Task | `MedicationOrder`, `Procedure`, `ImagingStudy`, `Observation` | `fhir:resource` value on the task: `MedicationRequest` → MedicationOrder, `Procedure` → Procedure, `ImagingStudy` → ImagingStudy, `Observation` → Observation | codes from the `medical-terminology:` extension (RxNorm/SNOMED/LOINC depending on type), check the `requiresEncounterContext` flag |
-| Sub-process | `MultiObservation`, `DiagnosticReport`, `Physiology` | `fhir:resource` on the sub-process: `Observation` (multiple) → MultiObservation, `DiagnosticReport` → DiagnosticReport; `fhir:resource` **absent entirely** → `Physiology` (no FHIR equivalent, external simulation) | for MultiObservation/DiagnosticReport: contained task elements as an `observations` list; for Physiology: name/model reference from free text |
-| Intermediate event (non-timer, e.g. a generic intermediate event) | `ConditionOnset`, `ConditionEnd`, `AllergyOnset`, `AllergyEnd` | `fhir:resource`: `Condition` vs. `AllergyIntolerance` distinguishes diagnosis/allergy; name suffix (`_Onset`/`_End`) or a dedicated boolean attribute distinguishes onset/end | SNOMED code from `medical-terminology:`; `synthea:EncounterReference.targetEncounter` if present — **only** valid on ConditionOnset/AllergyOnset, not on ConditionEnd/AllergyEnd or any other state (see Section E) |
+| Task | `MedicationOrder`, `Procedure`, `ImagingStudy`, `Observation` | `fhirmap:resourceType` value on the task: `MedicationRequest` → MedicationOrder, `Procedure` → Procedure, `ImagingStudy` → ImagingStudy, `Observation` → Observation | codes from the `term:` extension (RxNorm/SNOMED/LOINC depending on type), check the `requiresEncounterContext` flag |
+| Sub-process | `MultiObservation`, `DiagnosticReport`, `Physiology` | `fhirmap:resourceType` on the sub-process: `Observation` (multiple) → MultiObservation, `DiagnosticReport` → DiagnosticReport; `fhirmap:resourceType` **absent entirely** → `Physiology` (no FHIR equivalent, external simulation) | for MultiObservation/DiagnosticReport: contained task elements as an `observations` list; for Physiology: name/model reference from free text |
+| Intermediate event (non-timer, e.g. a generic intermediate event) | `ConditionOnset`, `ConditionEnd`, `AllergyOnset`, `AllergyEnd` | `fhirmap:resourceType`: `Condition` vs. `AllergyIntolerance` distinguishes diagnosis/allergy; name suffix (`_Onset`/`_End`) or a dedicated boolean attribute distinguishes onset/end | SNOMED code from `term:`; `synthea:EncounterReference.targetEncounter` if present — **only** valid on ConditionOnset/AllergyOnset, not on ConditionEnd/AllergyEnd or any other state (see Section E) |
 | Text annotation | `Encounter`, `EncounterEnd`, `MedicationEnd`, `CarePlanStart`, `CarePlanEnd`, `Device`, `DeviceEnd`, `SupplyList`, `VitalSign`, `Symptom`, `SetAttribute`, `Counter` | see detail table B.1 below — **the biggest source of error**, since one annotation stands in for twelve different states | different fields depending on the recognized type, see below |
 
 ### B.1 Disambiguating text annotations
@@ -63,13 +65,13 @@ Since annotations are the largest collection point, a dedicated table:
 
 | Annotation represents | Recognition signal |
 |---|---|
-| `Encounter` | `fhir:resource="Encounter"` **and** no preceding `EncounterEnd` counterpart earlier in the path; `synthea:WellnessConfig.wellness` may be set |
-| `EncounterEnd` | `fhir:resource="Encounter"` **and** a preceding `Encounter` annotation exists in the same path (paired by order, not by ID reference) |
-| `MedicationEnd` | `fhir:resource="MedicationRequest"` **and** no corresponding `MedicationOrder` task at this exact point (rather, earlier in the path) |
-| `CarePlanStart` / `CarePlanEnd` | `fhir:resource="CarePlan"`; start/end paired by order, analogous to Encounter |
-| `Device` / `DeviceEnd` | `fhir:resource="Device"`; start/end analogous |
-| `SupplyList` | `fhir:resource="SupplyRequest"` |
-| `VitalSign`, `Symptom`, `SetAttribute`, `Counter` | **no** `fhir:resource` attribute present (these states produce no FHIR record) — distinguishing between them is currently only possible via an informal free-text convention in the note (e.g. prefix "Vital:", "Symptom:", "Set:", "Count:") — **this is not yet formally captured in an extension**, see open points |
+| `Encounter` | `fhirmap:resourceType="Encounter"` **and** no preceding `EncounterEnd` counterpart earlier in the path; `synthea:WellnessConfig.wellness` may be set |
+| `EncounterEnd` | `fhirmap:resourceType="Encounter"` **and** a preceding `Encounter` annotation exists in the same path (paired by order, not by ID reference) |
+| `MedicationEnd` | `fhirmap:resourceType="MedicationRequest"` **and** no corresponding `MedicationOrder` task at this exact point (rather, earlier in the path) |
+| `CarePlanStart` / `CarePlanEnd` | `fhirmap:resourceType="CarePlan"`; start/end paired by order, analogous to Encounter |
+| `Device` / `DeviceEnd` | `fhirmap:resourceType="Device"`; start/end analogous |
+| `SupplyList` | `fhirmap:resourceType="SupplyRequest"` |
+| `VitalSign`, `Symptom`, `SetAttribute`, `Counter` | **no** `fhirmap:resourceType` attribute present (these states produce no FHIR record) — distinguishing between them is currently only possible via an informal free-text convention in the note (e.g. prefix "Vital:", "Symptom:", "Set:", "Count:") — **this is not yet formally captured in an extension**, see open points |
 
 ---
 
@@ -80,7 +82,7 @@ Since annotations are the largest collection point, a dedicated table:
 | Exactly one outgoing flow, no condition, no probability | `direct_transition` | target state name |
 | Multiple outgoing flows, all carrying `synthea:ProbabilityConfig probability="..."` | `distributed_transition` | list of `{transition, distribution}`; check the sum (see lint rule `probability-sum-valid`) |
 | Multiple outgoing flows with `synthea:probabilityAttribute` instead of a fixed value | `distributed_transition` with a "named distribution" | `{transition, distribution: {attribute, default}}` |
-| Multiple outgoing flows with a `conditionExpression` (native BPMN) | `conditional_transition` | list of `{condition, transition}` in flow order |
+| Multiple outgoing flows with a `conditionExpression` (native BPMN) **and** `synthea:ConditionConfig.condition` | `conditional_transition` | list of `{condition, transition}` in flow order — `condition` comes from the structured `synthea:Condition`, **not** from parsing the free text of `conditionExpression`: free text can't be reliably translated back automatically. `conditionExpression` stays only as a human-readable on-diagram label |
 | One flow with no condition, modeled as the BPMN default flow within a conditional group | last `conditional_transition` element with no `condition` (implicit fallback) | target state with no condition field |
 | Conditional flows **without** a default flow | `conditional_transition` with no fallback → Synthea implicitly transitions to `Terminal` when nothing matches | the converter has to **synthesize** this implicit Terminal transition, since it isn't visible in the BPMN |
 | Last flow of a `distributed_transition` group without its own `probability` value | implicitly receives the remainder up to 1.0 | `distribution` = 1.0 − sum of the others |
@@ -95,8 +97,8 @@ Several consecutive `Simple` states (from chained gateways without `GuardConfig`
 
 ## E. Open Points
 
-- **Annotation disambiguation without a FHIR resource**: `VitalSign`, `Symptom`, `SetAttribute`, `Counter` have no `fhir:resource` and are so far only distinguishable via an informal free-text convention. Not robust — should eventually get its own extension attribute (e.g. `synthea:controlStateKind="vitalSign|symptom|setAttribute|counter"`) instead of relying on text parsing.
-- **`allow` condition as free text**: `GuardConfig.allow` is deliberately modeled as a string body rather than a structured type, since Synthea supports many condition types (Age, Gender, Date, Attribute, …). Pragmatic, but not validatable by the descriptor/XSD — correctness of the condition is the job of a lint rule that doesn't exist yet.
+- **Annotation disambiguation without a FHIR resource**: `VitalSign`, `Symptom`, `SetAttribute`, `Counter` have no `fhirmap:resourceType` and are so far only distinguishable via an informal free-text convention. Not robust — should eventually get its own extension attribute (e.g. `synthea:controlStateKind="vitalSign|symptom|setAttribute|counter"`) instead of relying on text parsing.
+- **`allow` condition is flat only**: `synthea:Condition` only expresses simple conditions (`conditionType`/`attribute`/`operator`/`value`), no nested combinators (`And`/`Or`/`Not`) like Synthea's real logic vocabulary. Deliberately taken over from the `bpmn-js-clinical-semantics` concept sketch (marked "illustrative only" there too) — a recursive combinator type is still open.
 - **`distributionKind` only valid when `delayShape="DISTRIBUTION"`**: the descriptor cannot enforce this dependency (two independent attributes) — also belongs in a not-yet-existing lint rule.
 - **Start/end pairing via annotations**: `Encounter`/`EncounterEnd`, `MedicationOrder`/`MedicationEnd`, `CarePlanStart`/`CarePlanEnd`, `Device`/`DeviceEnd` are currently paired only by order in the path, not by an explicit ID reference. With several similar elements in the same module, this is ambiguous.
 - **Missing transition types**: `lookup_table_transition`, `type_of_care_transition` are not covered in Table C — no BPMN pattern defined for them. (`complex_transition` is no longer a blocker, see Section D.)
