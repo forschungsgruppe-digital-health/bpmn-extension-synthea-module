@@ -179,7 +179,7 @@ if (isMain) {
   const descriptorPath =
     dIdx >= 0 && args[dIdx + 1]
       ? args[dIdx + 1]
-      : fileURLToPath(new URL('../extension/model/myExtension.json', import.meta.url));
+      : fileURLToPath(new URL('../extension/model/synthea.json', import.meta.url));
 
   const descriptor = JSON.parse(readFileSync(descriptorPath, 'utf8'));
   const { xsd, warnings } = generateXsd(descriptor);

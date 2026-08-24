@@ -22,16 +22,16 @@ well-formed XML in your own namespace**:
 ```xml
 <bpmn:task id="Task_1" name="Reviewed task">
   <bpmn:extensionElements>
-    <myext:annotation category="quality" reviewed="true">
-      <myext:note author="example">Looks good.</myext:note>
-    </myext:annotation>
+    <synthea:annotation category="quality" reviewed="true">
+      <synthea:note author="example">Looks good.</synthea:note>
+    </synthea:annotation>
   </bpmn:extensionElements>
 </bpmn:task>
 ```
 
 Two rules make this safe:
 
-- **Your data lives in your own namespace** (`myext:`, bound to a URI you own) —
+- **Your data lives in your own namespace** (`synthea:`, bound to a URI you own) —
   never under `bpmn:`. A tool that doesn't know your extension simply ignores
   the foreign-namespace content and the rest of the diagram still works.
 - **The standard XSD does not police your data.** The schema declares
@@ -95,8 +95,8 @@ all of them, but it helps to know the layers:
 | **[bpmn-js](https://github.com/bpmn-io/bpmn-js)** | editor/viewer | The BPMN modeler/viewer built on diagram-js. Renders a `.bpmn` file as an editable diagram. | A `peerDependency`; your optional `extension/src/` modules plug into it via `additionalModules`. |
 | **[moddle](https://github.com/bpmn-io/moddle)** | meta-model | A library for describing a data model in JSON and mapping it to/from objects. The generic engine. | Indirect — the engine underneath bpmn-moddle. |
 | **[bpmn-moddle](https://github.com/bpmn-io/bpmn-moddle)** | meta-model (BPMN) | moddle pre-loaded with the BPMN 2.0 model. Reads BPMN XML into JS objects (`fromXML`) and writes them back (`toXML`). Accepts **extra descriptors** so it understands *your* namespace too. | `tools/moddle-roundtrip.mjs` registers your descriptor and round-trips every example. |
-| **[bpmnlint](https://github.com/bpmn-io/bpmnlint)** | linter | Rule engine that walks the parsed model and reports violations. Ships `recommended` rules; accepts custom **plugins** and **moddleExtensions**. | `extension/lint/bpmnlint-plugin-myext/` + `.bpmnlintrc`. |
-| **[properties-panel](https://github.com/bpmn-io/properties-panel)** + **[bpmn-js-properties-panel](https://github.com/bpmn-io/bpmn-js-properties-panel)** | editor UI | The properties-panel framework (form entries) and its bpmn-js integration — where custom form controls for your data live. | **Optional** peer deps; the sample `extension/src/MyExtPropertiesProvider.js` uses them, exercised in `demo/`. |
+| **[bpmnlint](https://github.com/bpmn-io/bpmnlint)** | linter | Rule engine that walks the parsed model and reports violations. Ships `recommended` rules; accepts custom **plugins** and **moddleExtensions**. | `extension/lint/bpmnlint-plugin-synthea/` + `.bpmnlintrc`. |
+| **[properties-panel](https://github.com/bpmn-io/properties-panel)** + **[bpmn-js-properties-panel](https://github.com/bpmn-io/bpmn-js-properties-panel)** | editor UI | The properties-panel framework (form entries) and its bpmn-js integration — where custom form controls for your data live. | **Optional** peer deps; the sample `extension/src/SyntheaPropertiesProvider.js` uses them, exercised in `demo/`. |
 
 The key idea: **bpmn-moddle is the read/write layer, bpmn-js is the UI layer, and
 bpmnlint is the rules layer.** Your extension teaches each of them about your
@@ -114,7 +114,7 @@ cover *different parts of the file*:
   elements only. The template runs it via `xmllint` (`npm run xsd`) to prove
   your example diagrams are structurally valid BPMN. Because of
   `processContents="lax"`, it stops at the boundary of `extensionElements`.
-- **The moddle descriptor** (`extension/model/myExtension.json`) is effectively
+- **The moddle descriptor** (`extension/model/synthea.json`) is effectively
   *the schema for your extension data*. It declares your namespace, prefix, and
   the typed shape of each custom element (which attributes, which child
   elements, which are repeatable). bpmn-moddle uses it to parse and serialise
@@ -179,7 +179,7 @@ flowchart LR
 ```
 
 - **bpmn-moddle** turns XML into objects and back. With your descriptor
-  registered, your `myext:` data survives the trip; without it, the data would
+  registered, your `synthea:` data survives the trip; without it, the data would
   be dropped on save. The **round-trip tool** asserts exactly this.
 - **bpmn-js** (optional) lets a human render and edit those objects. Your
   `extension/src/` modules decide how your data is shown and changed.
@@ -195,11 +195,11 @@ call. See [`README.md`](../README.md) for the exact commands and the CI wiring.
 A consumer plugs your extension into a bpmn-js `Modeler` (or `Viewer`) through
 two separate slots, and the distinction *is* the mental model:
 
-- **`moddleExtensions: { myext: <descriptor> }`** — the **data layer**. Registers
-  your moddle descriptor so bpmn-moddle can read and write your `myext:` data.
+- **`moddleExtensions: { synthea: <descriptor> }`** — the **data layer**. Registers
+  your moddle descriptor so bpmn-moddle can read and write your `synthea:` data.
   **Required**: without it, your custom data is silently dropped the next time
   the diagram is saved.
-- **`additionalModules: [ myExtModule ]`** — the **UI layer**. Injects your
+- **`additionalModules: [ syntheaModule ]`** — the **UI layer**. Injects your
   optional `extension/src/` bpmn-js module (the properties-panel group, a custom
   renderer, palette entries, …). **Optional**: it only changes the editing
   experience; the data is valid and round-trips with or without it.
@@ -230,7 +230,7 @@ See [`demo/README.md`](../demo/README.md).
 | **bpmnlint** | The BPMN linter; runs `recommended` plus your plugin's rules over the parsed model. |
 | **lint plugin** | A package (`bpmnlint-plugin-*`) of custom rules enforcing semantics the descriptor and XSD cannot express. |
 | **`extensionElements`** | The standard BPMN container under any element that holds foreign-namespace custom data. |
-| **namespace / prefix / URI** | Your data lives in its own XML namespace, identified by a stable URI you own and referenced via a short prefix (here `myext`). |
+| **namespace / prefix / URI** | Your data lives in its own XML namespace, identified by a stable URI you own and referenced via a short prefix (here `synthea`). |
 | **`processContents="lax"`** | The XSD setting on `extensionElements` that makes a validator skip (rather than reject) content it has no schema for — why the XSD never checks your data. |
 | **round-trip** | Parsing XML to objects and serialising back; proves your data is understood and lossless. |
 | **XSD (BPMN20.xsd)** | The official XML Schema for the BPMN core; validates `bpmn:` structure only. |
@@ -245,7 +245,7 @@ See [`demo/README.md`](../demo/README.md).
 - [bpmn-js-examples](https://github.com/bpmn-io/bpmn-js-examples) — the official
   example collection. The ones that map directly onto this template:
   - [custom-meta-model](https://github.com/bpmn-io/bpmn-js-examples/tree/main/custom-meta-model) — defining a moddle model extension (the descriptor side).
-  - [properties-panel-extension](https://github.com/bpmn-io/bpmn-js-examples/tree/main/properties-panel-extension) — adding a custom properties-panel group (the pattern `extension/src/MyExtPropertiesProvider.js` follows).
+  - [properties-panel-extension](https://github.com/bpmn-io/bpmn-js-examples/tree/main/properties-panel-extension) — adding a custom properties-panel group (the pattern `extension/src/SyntheaPropertiesProvider.js` follows).
   - [custom-elements](https://github.com/bpmn-io/bpmn-js-examples/tree/main/custom-elements) and [custom-modeling-rules](https://github.com/bpmn-io/bpmn-js-examples/tree/main/custom-modeling-rules) — custom rendering and modeling rules for `extension/src/`.
 - [bpmnlint-plugin-example](https://github.com/bpmn-io/bpmnlint-plugin-example) — how to define, test, and consume custom lint rules (scaffold one with `npm init bpmnlint-plugin`).
 

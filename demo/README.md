@@ -1,7 +1,7 @@
 # Modeling playground (demo)
 
 An interactive [bpmn-js](https://bpmn.io) modeler for **trying your extension by
-hand** — open a diagram, select the task, edit the `Annotation (myext)` group in
+hand** — open a diagram, select the task, edit the `Annotation (synthea)` group in
 the properties panel, and download the resulting XML to see your custom data.
 
 This is a **private, non-published** workspace (it is not in the npm package's
@@ -13,14 +13,14 @@ remain the source of truth for pass/fail.
 
 It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copies:
 
-- `moddleExtensions: { myext: <descriptor> }` — `../extension/model/myExtension.json`
-- `additionalModules: [ …, myExtModule ]` — `../extension/src/index.js` (the sample properties-panel provider)
+- `moddleExtensions: { synthea: <descriptor> }` — `../extension/model/synthea.json`
+- `additionalModules: [ …, syntheaModule ]` — `../extension/src/index.js` (the sample properties-panel provider)
 - seed diagram — `../examples/valid/minimal-valid.bpmn` (imported via `?raw`)
 
 So whatever you change in `extension/` is reflected here on the next reload.
 
 The two slots are the whole mental model: **`moddleExtensions` is the data layer**
-(parse/serialise — required, or your `myext:` data is dropped on save) and
+(parse/serialise — required, or your `synthea:` data is dropped on save) and
 **`additionalModules` is the UI layer** (the editing controls — optional). See
 [`../docs/concepts.md`](../docs/concepts.md).
 

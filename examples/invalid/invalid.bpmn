@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
+                   xmlns:fhirmap="https://forschungsgruppe-digital-health.github.io/schema/fhirmap/1.0"
+                   id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="Process_1" isExecutable="false">
+
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- probability-sum-valid: two fixed probabilities summing to 1.4 -->
+    <bpmn:task id="Task_Branch" name="Branch">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_P1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_P2</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_A" name="A">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Simple" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_P1</bpmn:incoming>
+      <bpmn:outgoing>Flow_A_Out</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_B" name="B">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Simple" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_P2</bpmn:incoming>
+      <bpmn:outgoing>Flow_B_Out</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:endEvent id="EndEvent_A">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Terminal" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_A_Out</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_B">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Terminal" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_B_Out</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_Branch" />
+    <bpmn:sequenceFlow id="Flow_A_Out" sourceRef="Task_A" targetRef="EndEvent_A" />
+    <bpmn:sequenceFlow id="Flow_B_Out" sourceRef="Task_B" targetRef="EndEvent_B" />
+
+    <bpmn:sequenceFlow id="Flow_P1" sourceRef="Task_Branch" targetRef="Task_A">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probability="0.8" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_P2" sourceRef="Task_Branch" targetRef="Task_B">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probability="0.6" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <!-- negate-requires-condition: negate=true on an empty Condition -->
+    <bpmn:task id="Task_CondSource" name="Cond source">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Simple" />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_Cond_Bad</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:endEvent id="EndEvent_Cond">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Terminal" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Cond_Bad</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Cond_Bad" sourceRef="Task_CondSource" targetRef="EndEvent_Cond">
+      <bpmn:extensionElements>
+        <synthea:ConditionConfig>
+          <synthea:condition negate="true" />
+        </synthea:ConditionConfig>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <!-- state-type-fhirmap-consistent: stateType="Procedure" but
+         fhirmap:resourceType is absent -->
+    <bpmn:task id="Task_Procedure_Bad" name="Bad procedure mapping">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+  </bpmn:process>
+</bpmn:definitions>

@@ -16,9 +16,9 @@
   "packages": {
     ".": {
       "extra-files": [
-        { "type": "json", "path": "extension/lint/bpmnlint-plugin-myext/package.json", "jsonpath": "$.version" },
-        { "type": "json", "path": "extension/model/myExtension.json", "jsonpath": "$.version" },
-        "extension/model/myExtension.xsd"
+        { "type": "json", "path": "extension/lint/bpmnlint-plugin-synthea/package.json", "jsonpath": "$.version" },
+        { "type": "json", "path": "extension/model/synthea.json", "jsonpath": "$.version" },
+        "extension/model/synthea.xsd"
       ]
     }
   }

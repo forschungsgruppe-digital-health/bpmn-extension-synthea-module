@@ -7,7 +7,7 @@ check tools, agent skills, and CI workflows so that conformance is enforced
 automatically from the first commit.
 
 > Use this repo as a GitHub template (green **Use this template** button), then
-> rename the placeholder extension (`myext` / `MyExtension`) to your own.
+> rename the placeholder extension (`synthea` / `Synthea`) to your own.
 >
 > **New to bpmn.io?** Read [`docs/concepts.md`](docs/concepts.md) first — it
 > explains what a BPMN extension *is*, what each library (bpmn-js, bpmn-moddle,
@@ -29,7 +29,7 @@ strictly required; the rest are added as your use case needs them.
 | Part | Required? | Location | What it does |
 |------|-----------|----------|--------------|
 | **Moddle model descriptor** | Yes | `extension/model/*.json` | Declares the data your extension stores in the BPMN XML (a namespace, prefix, and typed properties). This is what makes your custom data readable and writable. |
-| **Lint plugin** | Recommended | `extension/lint/bpmnlint-plugin-myext/` | Custom [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that enforce the *semantics* of your data — constraints the XSD cannot express. |
+| **Lint plugin** | Recommended | `extension/lint/bpmnlint-plugin-synthea/` | Custom [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that enforce the *semantics* of your data — constraints the XSD cannot express. |
 | **bpmn-js modules** | Optional | `extension/src/` | Editor/viewer behaviour: custom renderer, palette entries, context-pad actions, modeling rules, properties-panel groups. Injected via `additionalModules`. Ships a sample properties-panel provider you can run in the [demo](#modeling-playground-demo). |
 | **Examples** | Recommended | `examples/` | Abstract diagrams that exercise the extension, used as test fixtures. |
 
@@ -52,7 +52,7 @@ flowchart TB
 
   subgraph FILE["A .bpmn diagram"]
     C["BPMN core elements<br/>bpmn: namespace"]
-    E["Your data under extensionElements<br/>myext: namespace"]
+    E["Your data under extensionElements<br/>synthea: namespace"]
   end
 
   M -->|"defines the shape of"| E
@@ -74,20 +74,20 @@ nested `note` children:
 ```xml
 <bpmn:task id="Task_1" name="Reviewed task">
   <bpmn:extensionElements>
-    <myext:annotation category="quality" reviewed="true">
-      <myext:note author="example">Looks good.</myext:note>
-    </myext:annotation>
+    <synthea:annotation category="quality" reviewed="true">
+      <synthea:note author="example">Looks good.</synthea:note>
+    </synthea:annotation>
   </bpmn:extensionElements>
 </bpmn:task>
 ```
 
-The matching moddle descriptor (`extension/model/myExtension.json`):
+The matching moddle descriptor (`extension/model/synthea.json`):
 
 ```json
 {
-  "name": "MyExtension",
+  "name": "Synthea",
   "uri": "http://example.com/schema/my-extension/1.0",
-  "prefix": "myext",
+  "prefix": "synthea",
   "types": [
     {
       "name": "Annotation",
@@ -125,15 +125,15 @@ children use `"isMany": true`; element text uses `"isBody": true`.
 │   └── adr/                   # architecture decision records (TEMPLATE.md)
 ├── extension/                 # >>> YOUR extension goes here <<<
 │   ├── model/
-│   │   ├── myExtension.json    # moddle descriptor (rename me) — source of truth
-│   │   └── myExtension.xsd     # generated from the descriptor (npm run xsd:gen)
+│   │   ├── synthea.json    # moddle descriptor (rename me) — source of truth
+│   │   └── synthea.xsd     # generated from the descriptor (npm run xsd:gen)
 │   ├── lint/
-│   │   └── bpmnlint-plugin-myext/
+│   │   └── bpmnlint-plugin-synthea/
 │   │       ├── index.js
 │   │       └── rules/annotation-requires-category.js
 │   └── src/                    # optional bpmn-js modules
 │       ├── index.js            # the additionalModules entry
-│       └── MyExtPropertiesProvider.js  # sample properties-panel group
+│       └── SyntheaPropertiesProvider.js  # sample properties-panel group
 ├── demo/                       # interactive modeler playground (private, not published)
 │   ├── index.html
 │   ├── vite.config.js          # base path comes from $BASE_PATH (for Pages)
@@ -167,9 +167,9 @@ children use `"isMany": true`; element text uses `"isBody": true`.
 2. **Install dependencies:** `npm install` (Node 22+; an `engines` field enforces
    this). It also pulls the bpmn-js UI stack and Vite via the `demo/` workspace —
    that is expected, not bloat (the published package ships only `extension/`).
-3. **Rename the placeholder** everywhere: `myext` → your prefix,
-   `MyExtension` → your name, and rename
-   `extension/lint/bpmnlint-plugin-myext/` accordingly. Set a stable, owned
+3. **Rename the placeholder** everywhere: `synthea` → your prefix,
+   `Synthea` → your name, and rename
+   `extension/lint/bpmnlint-plugin-synthea/` accordingly. Set a stable, owned
    `uri` in the descriptor.
 4. **Model your data** in `extension/model/<your>.json`.
 5. **Write rules** in the lint plugin for any constraint the XSD cannot check.
@@ -186,7 +186,7 @@ children use `"isMany": true`; element text uses `"isBody": true`.
 ## Modeling playground (demo)
 
 `demo/` is an interactive bpmn-js modeler for trying the extension **by hand**:
-open a diagram, select the task, edit the `Annotation (myext)` group in the
+open a diagram, select the task, edit the `Annotation (synthea)` group in the
 properties panel, and download the XML to see your custom data. It wires the
 **real** descriptor (`moddleExtensions` — the *data* layer) and the sample
 `extension/src/` module (`additionalModules` — the *UI* layer), so it exercises

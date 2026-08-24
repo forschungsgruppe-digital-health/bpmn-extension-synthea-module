@@ -1,5 +1,5 @@
 {
-  "name": "bpmn-js-my-extension",
+  "name": "bpmn-js-synthea-extension",
   "version": "0.1.0",
   "description": "Template for a custom BPMN 2.0 / bpmn.io extension with automated conformance checks.",
   "type": "module",
@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "workspaces": [
-    "extension/lint/bpmnlint-plugin-myext",
+    "extension/lint/bpmnlint-plugin-synthea",
     "demo"
   ],
   "files": [

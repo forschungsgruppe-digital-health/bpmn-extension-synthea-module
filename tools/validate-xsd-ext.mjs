@@ -41,7 +41,7 @@ try {
 }
 
 const descriptor = JSON.parse(
-  readFileSync(new URL('../extension/model/myExtension.json', import.meta.url), 'utf8')
+  readFileSync(new URL('../extension/model/synthea.json', import.meta.url), 'utf8')
 );
 const { xsd, warnings } = generateXsd(descriptor);
 warnings.forEach((w) => console.error(`warning: ${w}`));

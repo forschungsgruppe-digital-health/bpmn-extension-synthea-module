@@ -11,9 +11,9 @@ The extension's data, however, lives in several artifacts that should agree on a
 single version so a consumer can tell which release a file came from:
 
 - the published package (`package.json`),
-- the lint plugin (`extension/lint/bpmnlint-plugin-myext/package.json`),
-- the moddle descriptor (`extension/model/myExtension.json`),
-- the generated XSD (`extension/model/myExtension.xsd`).
+- the lint plugin (`extension/lint/bpmnlint-plugin-synthea/package.json`),
+- the moddle descriptor (`extension/model/synthea.json`),
+- the generated XSD (`extension/model/synthea.xsd`).
 
 There is a trap: the moddle descriptor's namespace `uri`
 (`http://example.com/schema/my-extension/1.0`) embeds a version, but that is the

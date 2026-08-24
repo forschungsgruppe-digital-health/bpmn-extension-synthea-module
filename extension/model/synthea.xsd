@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GENERATED from the moddle descriptor by tools/moddle-to-xsd.mjs. Do not edit by hand. -->
+<!-- Scope: STRUCTURE only. Semantic rules (e.g. required attributes) live in the bpmnlint plugin. -->
+<!-- extension version 0.1.0 (kept in sync by Release Please) x-release-please-version -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
+            targetNamespace="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+  <xsd:element name="probabilityConfig" type="synthea:tProbabilityConfig"/>
+  <xsd:complexType name="tProbabilityConfig">
+    <xsd:attribute name="probability" type="xsd:string"/>
+    <xsd:attribute name="probabilityAttribute" type="xsd:string"/>
+    <xsd:attribute name="probabilityDefault" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="condition" type="synthea:tCondition"/>
+  <xsd:complexType name="tCondition">
+    <xsd:attribute name="conditionType" type="xsd:string"/>
+    <xsd:attribute name="attribute" type="xsd:string"/>
+    <xsd:attribute name="operator" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:string"/>
+    <xsd:attribute name="negate" type="xsd:boolean" default="false"/>
+  </xsd:complexType>
+
+  <xsd:element name="conditionConfig" type="synthea:tConditionConfig"/>
+  <xsd:complexType name="tConditionConfig">
+    <xsd:sequence>
+      <xsd:element ref="synthea:condition" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="stateType" type="synthea:tStateType"/>
+  <xsd:complexType name="tStateType"/>
+
+  <xsd:element name="stateTypeConfig" type="synthea:tStateTypeConfig"/>
+  <xsd:complexType name="tStateTypeConfig">
+    <xsd:attribute name="stateType" type="xsd:string"/>
+  </xsd:complexType>
+
+</xsd:schema>

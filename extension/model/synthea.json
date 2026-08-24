@@ -1,0 +1,81 @@
+{
+  "name": "Synthea",
+  "uri": "https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0",
+  "prefix": "synthea",
+  "version": "0.1.0",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "ProbabilityConfig",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "probability", "type": "Float", "isAttr": true },
+        { "name": "probabilityAttribute", "type": "String", "isAttr": true },
+        { "name": "probabilityDefault", "type": "Float", "isAttr": true }
+      ]
+    },
+    {
+      "name": "Condition",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "conditionType", "type": "String", "isAttr": true },
+        { "name": "attribute", "type": "String", "isAttr": true },
+        { "name": "operator", "type": "String", "isAttr": true },
+        { "name": "value", "type": "String", "isAttr": true },
+        { "name": "negate", "type": "Boolean", "isAttr": true, "default": false }
+      ]
+    },
+    {
+      "name": "ConditionConfig",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "condition", "type": "Condition" }
+      ]
+    },
+    {
+      "name": "StateType",
+      "isEnum": true,
+      "literalValues": [
+        { "name": "Initial" },
+        { "name": "Terminal" },
+        { "name": "Simple" },
+        { "name": "Guard" },
+        { "name": "Delay" },
+        { "name": "SetAttribute" },
+        { "name": "Counter" },
+        { "name": "CallSubmodule" },
+        { "name": "Encounter" },
+        { "name": "EncounterEnd" },
+        { "name": "ConditionOnset" },
+        { "name": "ConditionEnd" },
+        { "name": "AllergyOnset" },
+        { "name": "AllergyEnd" },
+        { "name": "MedicationOrder" },
+        { "name": "MedicationEnd" },
+        { "name": "CarePlanStart" },
+        { "name": "CarePlanEnd" },
+        { "name": "Procedure" },
+        { "name": "ImagingStudy" },
+        { "name": "Device" },
+        { "name": "DeviceEnd" },
+        { "name": "SupplyList" },
+        { "name": "VitalSign" },
+        { "name": "Observation" },
+        { "name": "MultiObservation" },
+        { "name": "DiagnosticReport" },
+        { "name": "Symptom" },
+        { "name": "Death" },
+        { "name": "Physiology" }
+      ]
+    },
+    {
+      "name": "StateTypeConfig",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "stateType", "type": "StateType", "isAttr": true }
+      ]
+    }
+  ]
+}

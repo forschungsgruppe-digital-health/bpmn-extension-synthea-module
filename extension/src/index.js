@@ -1,16 +1,14 @@
-import MyExtPropertiesProvider from './MyExtPropertiesProvider.js';
+import SyntheaPropertiesProvider from './SyntheaPropertiesProvider.js';
 
 /**
- * The OPTIONAL bpmn-js editor module for this extension, injected via
- * `additionalModules`. It adds a properties-panel group for authoring the
- * <myext:annotation> data. The extension data is valid with or without this
- * module — the moddle descriptor and the lint plugin are what define and
- * enforce it. This only changes the editing experience.
- *
- * A real extension can add more here: a custom renderer, palette entries,
- * context-pad actions, or modeling rules.
+ * The bpmn-js editor module for the synthea extension, injected via
+ * `additionalModules`. Adds properties-panel groups for exactly three
+ * synthea: extension types: StateTypeConfig, ProbabilityConfig, and
+ * ConditionConfig/Condition (incl. `negate`). See README.md for what's
+ * deliberately left out (Guard, Delay, Encounter context, Pair reference,
+ * Lookup table, Composite condition — full extension only).
  */
 export default {
-  __init__: ['myExtPropertiesProvider'],
-  myExtPropertiesProvider: ['type', MyExtPropertiesProvider]
+  __init__: ['syntheaPropertiesProvider'],
+  syntheaPropertiesProvider: ['type', SyntheaPropertiesProvider]
 };

@@ -1,7 +1,0 @@
-{
-  "name": "bpmnlint-plugin-myext",
-  "version": "0.1.0",
-  "description": "Custom bpmnlint rules for the MyExtension BPMN extension.",
-  "main": "index.js",
-  "license": "MIT"
-}

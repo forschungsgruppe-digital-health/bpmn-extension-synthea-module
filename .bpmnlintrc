@@ -1,9 +1,11 @@
 {
-  "extends": [
-    "bpmnlint:recommended",
-    "plugin:myext/recommended"
+  "plugins": [
+    "synthea"
   ],
   "moddleExtensions": {
-    "myext": "./extension/model/myExtension.json"
-  }
+    "synthea": "./extension/model/synthea.json"
+  },
+  "extends": [
+    "plugin:synthea/all"
+  ]
 }

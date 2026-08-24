@@ -1,0 +1,19 @@
+{
+  "name": "bpmnlint-plugin-synthea",
+  "version": "0.1.0",
+  "description": "Reference-only bpmnlint plugin covering just ProbabilityConfig, Condition/ConditionConfig and StateTypeConfig from the synthea: BPMN extension.",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "index.js",
+    "lib",
+    "rules"
+  ],
+  "peerDependencies": {
+    "bpmnlint": ">=9"
+  },
+  "dependencies": {
+    "bpmnlint-utils": "^1.1.0"
+  }
+}

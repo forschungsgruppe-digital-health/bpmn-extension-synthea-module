@@ -2,7 +2,7 @@
   "name": "bpmn-js-my-extension-demo",
   "private": true,
   "version": "0.0.0",
-  "description": "Interactive modeling playground for the MyExtension bpmn.io extension. Not published.",
+  "description": "Interactive modeling playground for the Synthea bpmn.io extension. Not published.",
   "type": "module",
   "scripts": {
     "dev": "vite",

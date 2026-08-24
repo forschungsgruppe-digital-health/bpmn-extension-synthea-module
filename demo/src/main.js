@@ -10,13 +10,9 @@ import {
   BpmnPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 
-// The extension under test — wired exactly as a real consumer would:
-//   - moddleExtensions: the descriptor (read/write the custom data)
-//   - additionalModules: the optional editor module (the properties-panel group)
-// Both come straight from the repo, so the demo exercises the real artifacts.
-import myExtModule from '../../extension/src/index.js';
-import myExtModdle from '../../extension/model/myExtension.json';
-import diagramXML from '../../examples/valid/minimal-valid.bpmn?raw';
+import syntheaModule from '../../extension/src/index.js';
+import syntheaModdle from '../../extension/model/synthea.json';
+import diagramXML from '../../synthea-lung-cancer.bpmn?raw';
 
 const modeler = new BpmnModeler({
   container: '#canvas',
@@ -24,10 +20,10 @@ const modeler = new BpmnModeler({
   additionalModules: [
     BpmnPropertiesPanelModule,
     BpmnPropertiesProviderModule,
-    myExtModule
+    syntheaModule
   ],
   moddleExtensions: {
-    myext: myExtModdle
+    synthea: syntheaModdle
   }
 });
 
@@ -50,7 +46,7 @@ document.querySelector('#download').addEventListener('click', async () => {
     const blob = new Blob([xml], { type: 'application/xml' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'diagram.bpmn';
+    link.download = 'synthea-lung-cancer.bpmn';
     link.click();
     URL.revokeObjectURL(link.href);
   } catch (err) {

@@ -12,10 +12,10 @@ import { readFileSync, globSync } from 'node:fs';
 import BpmnModdle from 'bpmn-moddle';
 
 const descriptor = JSON.parse(
-  readFileSync(new URL('../extension/model/myExtension.json', import.meta.url))
+  readFileSync(new URL('../extension/model/synthea.json', import.meta.url))
 );
 
-const moddle = new BpmnModdle({ myext: descriptor });
+const moddle = new BpmnModdle({ synthea: descriptor });
 
 const files = globSync('examples/**/*.bpmn');
 let failed = 0;
