@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Process_SymptomCheck" name="Symptom Check" isExecutable="false">
+    <bpmn2:task id="Activity_09zww0t" name="Symptom: Cough">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Cough</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_0nas7yd</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_0wi8jf7</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_1batema" name="Symptom: Bloody Cough">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Bloody Cough</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_0wi8jf7</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_07qpz6c</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_0rxntsb" name="Symptom: Shortness of Breath">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Shortness of Breath</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_07qpz6c</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_0o223g5</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_0zsv8np" name="Symptom: Fever">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Fever</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_0o223g5</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_1511r3y</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_019ld1f" name="Symptom: Sweats">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Sweats</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_0nej94m</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_02yrran</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_06q46hf" name="Symptom: Decrease in appetite">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Decrease in appetite</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_0915hfo</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_0ua3i1k</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_0trj5nx" name="Symptom: Head and neck swelling">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Head and neck swelling</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_1511r3y</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_0nej94m</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_0pguieh" name="Symptom: Decrease in weight">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Decrease in weight</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_0ua3i1k</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_14bux9h</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_1cifk2a" name="Symptom: Fatigue">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Fatigue</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_02yrran</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_0915hfo</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_0rgg05p" name="Symptom: Chest Pain">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Symptom: Chest Pain</i18n:translation>
+        <synthea:stateTypeConfig stateType="Symptom" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_14bux9h</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_1h17e1u</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:startEvent id="Event_1jt71dv" name="Initial">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Initial</i18n:translation>
+      </bpmn2:extensionElements>
+      <bpmn2:outgoing>Flow_0nas7yd</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:endEvent id="Event_1ioncum" name="Terminal">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Terminal</i18n:translation>
+        <synthea:stateTypeConfig stateType="Terminal" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_1h17e1u</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="Flow_0nas7yd" sourceRef="Event_1jt71dv" targetRef="Activity_09zww0t" />
+    <bpmn2:sequenceFlow id="Flow_0wi8jf7" sourceRef="Activity_09zww0t" targetRef="Activity_1batema" />
+    <bpmn2:sequenceFlow id="Flow_07qpz6c" sourceRef="Activity_1batema" targetRef="Activity_0rxntsb" />
+    <bpmn2:sequenceFlow id="Flow_0o223g5" sourceRef="Activity_0rxntsb" targetRef="Activity_0zsv8np" />
+    <bpmn2:sequenceFlow id="Flow_1511r3y" sourceRef="Activity_0zsv8np" targetRef="Activity_0trj5nx" />
+    <bpmn2:sequenceFlow id="Flow_0nej94m" sourceRef="Activity_0trj5nx" targetRef="Activity_019ld1f" />
+    <bpmn2:sequenceFlow id="Flow_02yrran" sourceRef="Activity_019ld1f" targetRef="Activity_1cifk2a" />
+    <bpmn2:sequenceFlow id="Flow_0915hfo" sourceRef="Activity_1cifk2a" targetRef="Activity_06q46hf" />
+    <bpmn2:sequenceFlow id="Flow_0ua3i1k" sourceRef="Activity_06q46hf" targetRef="Activity_0pguieh" />
+    <bpmn2:sequenceFlow id="Flow_14bux9h" sourceRef="Activity_0pguieh" targetRef="Activity_0rgg05p" />
+    <bpmn2:sequenceFlow id="Flow_1h17e1u" sourceRef="Activity_0rgg05p" targetRef="Event_1ioncum" />
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_SymptomCheck">
+      <bpmndi:BPMNShape id="BPMNShape_1eqgq4n" bpmnElement="Activity_09zww0t">
+        <dc:Bounds x="300" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1g27uyg" bpmnElement="Activity_1batema">
+        <dc:Bounds x="510" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0b8urbp" bpmnElement="Activity_0rxntsb">
+        <dc:Bounds x="710" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1lk1qsi" bpmnElement="Activity_0zsv8np">
+        <dc:Bounds x="890" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1qw6a6l" bpmnElement="Activity_019ld1f">
+        <dc:Bounds x="1240" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0tqx8l0" bpmnElement="Activity_06q46hf">
+        <dc:Bounds x="1560" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0kpc9qi" bpmnElement="Activity_0trj5nx">
+        <dc:Bounds x="1060" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_00auzu5" bpmnElement="Activity_0pguieh">
+        <dc:Bounds x="1720" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1cdt87y" bpmnElement="Activity_1cifk2a">
+        <dc:Bounds x="1400" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1t1gpyr" bpmnElement="Activity_0rgg05p">
+        <dc:Bounds x="1880" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_14vxibw" bpmnElement="Event_1jt71dv">
+        <dc:Bounds x="212" y="642" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="217" y="685" width="26" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_09d8n8t" bpmnElement="Event_1ioncum">
+        <dc:Bounds x="2092" y="642" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2089" y="685" width="42" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_0kscrz3" bpmnElement="Flow_0nas7yd">
+        <di:waypoint x="248" y="660" />
+        <di:waypoint x="300" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_04o354d" bpmnElement="Flow_0wi8jf7">
+        <di:waypoint x="400" y="660" />
+        <di:waypoint x="510" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0g90goa" bpmnElement="Flow_07qpz6c">
+        <di:waypoint x="610" y="660" />
+        <di:waypoint x="710" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_045d4fo" bpmnElement="Flow_0o223g5">
+        <di:waypoint x="810" y="660" />
+        <di:waypoint x="890" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0sw4owt" bpmnElement="Flow_1511r3y">
+        <di:waypoint x="990" y="660" />
+        <di:waypoint x="1060" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0pz8l1s" bpmnElement="Flow_0nej94m">
+        <di:waypoint x="1160" y="660" />
+        <di:waypoint x="1240" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_02dhn68" bpmnElement="Flow_02yrran">
+        <di:waypoint x="1340" y="660" />
+        <di:waypoint x="1400" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0ybfg9g" bpmnElement="Flow_0915hfo">
+        <di:waypoint x="1500" y="660" />
+        <di:waypoint x="1560" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_1onltek" bpmnElement="Flow_0ua3i1k">
+        <di:waypoint x="1660" y="660" />
+        <di:waypoint x="1720" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0xtram9" bpmnElement="Flow_14bux9h">
+        <di:waypoint x="1820" y="660" />
+        <di:waypoint x="1880" y="660" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0xhb0pc" bpmnElement="Flow_1h17e1u">
+        <di:waypoint x="1980" y="660" />
+        <di:waypoint x="2092" y="660" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
