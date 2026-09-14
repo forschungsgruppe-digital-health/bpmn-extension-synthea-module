@@ -21,7 +21,7 @@ const ENCOUNTER_CONTEXT_TYPE = 'synthea:EncounterContext';
 const ENCOUNTER_REFERENCE_TYPE = 'synthea:EncounterReference';
 
 const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE', 'DISTRIBUTION'];
-const DELAY_DISTRIBUTION_KIND_VALUES = ['UNIFORM', 'GAUSSIAN', 'EXPONENTIAL'];
+const DELAY_DISTRIBUTION_KIND_VALUES = ['EXACT', 'UNIFORM', 'GAUSSIAN', 'EXPONENTIAL'];
 
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
