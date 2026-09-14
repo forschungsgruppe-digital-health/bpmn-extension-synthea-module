@@ -9,17 +9,20 @@ import { useService } from 'bpmn-js-properties-panel';
 
 const LOW_PRIORITY = 500;
 
-// --- synthea: extension type names --------------------------------------
-// Only the three types this reference package covers. See the full
-// SyntheaPropertiesProvider.js for the complete extension.
 
 const PROBABILITY_TYPE = 'synthea:ProbabilityConfig';
 const CONDITION_CONFIG_TYPE = 'synthea:ConditionConfig';
 const STATE_TYPE = 'synthea:StateTypeConfig';
+const DELAY_TYPE = 'synthea:DelayConfig';
+const GUARD_TYPE = 'synthea:GuardConfig';
+const WELLNESS_TYPE = 'synthea:WellnessConfig';
+const SUBMODULE_TYPE = 'synthea:SubmoduleConfig';
+const ENCOUNTER_CONTEXT_TYPE = 'synthea:EncounterContext';
+const ENCOUNTER_REFERENCE_TYPE = 'synthea:EncounterReference';
 
-// Mirrors the StateType enum in synthea.json — kept in sync by hand,
-// since bpmn-moddle doesn't expose enum literals at runtime in a form
-// convenient for a <select>.
+const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE', 'DISTRIBUTION'];
+const DELAY_DISTRIBUTION_KIND_VALUES = ['UNIFORM', 'GAUSSIAN', 'EXPONENTIAL'];
+
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
   'CallSubmodule', 'Encounter', 'EncounterEnd', 'ConditionOnset', 'ConditionEnd',
@@ -29,43 +32,47 @@ const STATE_TYPE_VALUES = [
   'Death', 'Physiology'
 ];
 
-/**
- * Properties panel provider — covers exactly three synthea: types:
- *  - "State type"   on End Events, Tasks, SubProcesses and Intermediate
- *                    Catch/Throw Events — the elements where the plain
- *                    BPMN type alone is ambiguous
- *  - "Probability"  on Sequence Flows — distributed_transition weights
- *  - "Condition"    on Sequence Flows — conditional_transition condition
- *                    (+ negate for Not)
- *
- * This is a deliberately reduced reference implementation for
- * documentation/demo purposes — it does not yet cover Delay, Guard,
- * Encounter context, Pair reference, Lookup table or Composite condition
- * (planned for the full extension).
- */
-export default function SyntheaPropertiesProvider(propertiesPanel, injector) {
+
+export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector) {
   this.getGroups = function (element) {
     return function (groups) {
 
       if (is(element, 'bpmn:EndEvent')) {
         groups.push(createStateTypeGroup(element));
+        groups.push(createWellnessGroup(element));
       }
 
       if (is(element, 'bpmn:Task')) {
         groups.push(createStateTypeGroup(element));
+        groups.push(createWellnessGroup(element));
       }
 
       if (is(element, 'bpmn:SubProcess') && !is(element, 'bpmn:CallActivity')) {
         groups.push(createStateTypeGroup(element));
+        groups.push(createWellnessGroup(element));
       }
 
       if (is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent')) {
         groups.push(createStateTypeGroup(element));
+        groups.push(createDelayGroup(element));
+        groups.push(createEncounterReferenceGroup(element));
       }
 
       if (is(element, 'bpmn:SequenceFlow')) {
         groups.push(createProbabilityGroup(element));
         groups.push(createConditionGroup(element));
+      }
+
+      if (is(element, 'bpmn:ExclusiveGateway') || is(element, 'bpmn:InclusiveGateway')) {
+        groups.push(createGuardGroup(element));
+      }
+
+      if (is(element, 'bpmn:TextAnnotation')) {
+        groups.push(createEncounterContextGroup(element));
+      }
+
+      if (is(element, 'bpmn:CallActivity')) {
+        groups.push(createSubmoduleGroup(element));
       }
 
       return groups;
@@ -75,7 +82,7 @@ export default function SyntheaPropertiesProvider(propertiesPanel, injector) {
   propertiesPanel.registerProvider(LOW_PRIORITY, this);
 }
 
-SyntheaPropertiesProvider.$inject = ['propertiesPanel', 'injector'];
+SyntheaMiniPropertiesProvider.$inject = ['propertiesPanel', 'injector'];
 
 // --- groups ------------------------------------------------------------
 
@@ -111,6 +118,73 @@ function createConditionGroup(element) {
       { id: 'synthea-condition-operator', element, component: FlowConditionOperatorEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-condition-value', element, component: FlowConditionValueEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-condition-negate', element, component: FlowConditionNegateEntry }
+    ]
+  };
+}
+
+function createDelayGroup(element) {
+  return {
+    id: 'synthea-delay',
+    label: 'Delay (synthea)',
+    entries: [
+      { id: 'synthea-delay-shape', element, component: DelayShapeEntry },
+      { id: 'synthea-delay-value', element, component: DelayValueEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-delay-unit', element, component: DelayUnitEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-delay-distribution-kind', element, component: DelayDistributionKindEntry }
+    ]
+  };
+}
+
+function createGuardGroup(element) {
+  return {
+    id: 'synthea-guard',
+    label: 'Guard (synthea)',
+    entries: [
+      { id: 'synthea-guard-condition-type', element, component: GuardConditionTypeEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-guard-condition-attribute', element, component: GuardConditionAttributeEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-guard-condition-operator', element, component: GuardConditionOperatorEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-guard-condition-value', element, component: GuardConditionValueEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-guard-condition-negate', element, component: GuardConditionNegateEntry }
+    ]
+  };
+}
+
+function createWellnessGroup(element) {
+  return {
+    id: 'synthea-wellness',
+    label: 'Wellness (synthea)',
+    entries: [
+      { id: 'synthea-wellness-value', element, component: WellnessEntry }
+    ]
+  };
+}
+
+function createSubmoduleGroup(element) {
+  return {
+    id: 'synthea-submodule',
+    label: 'Submodule',
+    entries: [
+      { id: 'synthea-submodule-ref', element, component: SubmoduleEntry, isEdited: isTextFieldEntryEdited }
+    ]
+  };
+}
+
+function createEncounterContextGroup(element) {
+  return {
+    id: 'synthea-encounter-context',
+    label: 'Encounter Context',
+    entries: [
+      { id: 'synthea-encounter-context-value', element, component: EncounterContextEntry }
+    ]
+  };
+}
+
+function createEncounterReferenceGroup(element) {
+  return {
+    id: 'synthea-encounter-reference',
+    label: 'Encounter Reference',
+    entries: [
+      { id: 'synthea-encounter-reference-value', element, component: EncounterReferenceEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
 }
@@ -251,6 +325,94 @@ const FlowConditionAttributeEntry = makeNestedConditionTextEntry(getFlowConditio
 const FlowConditionOperatorEntry = makeNestedConditionTextEntry(getFlowCondition, ensureFlowCondition, 'operator', 'Operator (e.g. <=, ==, >)');
 const FlowConditionValueEntry = makeNestedConditionTextEntry(getFlowCondition, ensureFlowCondition, 'value', 'Value');
 const FlowConditionNegateEntry = makeNestedConditionCheckboxEntry(getFlowCondition, ensureFlowCondition, 'negate', 'Negate (Not)');
+
+function makeSelecetEntry(type, prop, label, values) {
+  return function Entry(props) {
+    const { element, id } = props;
+    const modeling = useService('modeling');
+    const bpmnFactory = useService('bpmnFactory');
+    const translate = useService('translate');
+
+    const getValue = () => {
+      const config = getExtension(element, type);
+      return config ? config.get(prop) || '' : '';
+    };
+
+    const setValue = (value) => {
+      if (!value) {
+        const config = getExtension(element, type);
+        if (config) {
+          modeling.updateModdleProperties(element, config, { [prop]: undefined });
+        }
+        return;
+      }
+      const config = ensureExtension(element, type, bpmnFactory, modeling);
+      modeling.updateModdleProperties(element, config, { [prop]: value });
+    };
+
+    const getOptions = () => [
+      { value: '', label: translate('<none>') },
+      ...values.map((v) => ({ value: v, label: v }))
+    ];
+
+    return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
+  };
+}
+
+const DelayShapeEntry = makeSelecetEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES);
+const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value');
+const DelayUnitEntry = makeTextEntry(DELAY_TYPE, 'delayUnit', 'Delay unit');
+const DelayDistributionKindEntry = makeSelecetEntry(DELAY_TYPE, 'distributionKind', 'Delay distribution kind', DELAY_DISTRIBUTION_KIND_VALUES);
+
+function getGuardCondition(element) {
+  const cfg = getExtension(element, GUARD_TYPE);
+  return cfg ? cfg.get('allow') || null : null;
+}
+
+function ensureGuardCondition(element, bpmnFactory, modeling) {
+  const cfg = ensureExtension(element, GUARD_TYPE, bpmnFactory, modeling);
+
+  let allow = cfg.get('allow');
+  if (!allow) {
+    allow = bpmnFactory.create('synthea:Condition', {});
+    allow.$parent = cfg;
+    modeling.updateModdleProperties(element, cfg, { allow });
+  }
+
+  return allow;
+}
+
+const GuardConditionTypeEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'conditionType', 'Condition type (e.g. Attribute, Age, Gender)');
+const GuardConditionAttributeEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'attribute', 'Attribute name');
+const GuardConditionOperatorEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'operator', 'Operator (e.g. <=, ==, >)');
+const GuardConditionValueEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'value', 'Value');
+const GuardConditionNegateEntry = makeNestedConditionCheckboxEntry(getGuardCondition, ensureGuardCondition, 'negate', 'Negate (Not)');
+
+function makeCheckboxEntry(type, prop, label) {
+  return function Entry(props) {
+    const { element, id } = props;
+    const modeling = useService('modeling');
+    const bpmnFactory = useService('bpmnFactory');
+    const translate = useService('translate');
+
+    const getValue = () => {
+      const config = getExtension(element, type);
+      return config ? !!config.get(prop) : false;
+    };
+
+    const setValue = (value) => {
+      const config = ensureExtension(element, type, bpmnFactory, modeling);
+      modeling.updateModdleProperties(element, config, { [prop]: !!value });
+    };
+
+    return CheckboxEntry({ element, id, label: translate(label), getValue, setValue });
+  };
+}
+
+const WellnessEntry = makeCheckboxEntry(WELLNESS_TYPE, 'wellness', 'Wellness');
+const SubmoduleEntry = makeTextEntry(SUBMODULE_TYPE, 'submodule', 'Submodule reference');
+const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'requiresEncounterContext', 'Encounter context');
+const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 
 // --- moddle helpers --------------------------------------------------------
 

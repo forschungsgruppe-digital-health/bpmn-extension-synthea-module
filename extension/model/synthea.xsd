@@ -8,11 +8,18 @@
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
 
-  <xsd:element name="probabilityConfig" type="synthea:tProbabilityConfig"/>
-  <xsd:complexType name="tProbabilityConfig">
-    <xsd:attribute name="probability" type="xsd:string"/>
-    <xsd:attribute name="probabilityAttribute" type="xsd:string"/>
-    <xsd:attribute name="probabilityDefault" type="xsd:string"/>
+  <xsd:element name="delayShape" type="synthea:tDelayShape"/>
+  <xsd:complexType name="tDelayShape"/>
+
+  <xsd:element name="delayDistributionKind" type="synthea:tDelayDistributionKind"/>
+  <xsd:complexType name="tDelayDistributionKind"/>
+
+  <xsd:element name="delayConfig" type="synthea:tDelayConfig"/>
+  <xsd:complexType name="tDelayConfig">
+    <xsd:attribute name="delayShape" type="xsd:string"/>
+    <xsd:attribute name="delayValue" type="xsd:string"/>
+    <xsd:attribute name="delayUnit" type="xsd:string"/>
+    <xsd:attribute name="distributionKind" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="condition" type="synthea:tCondition"/>
@@ -24,11 +31,38 @@
     <xsd:attribute name="negate" type="xsd:boolean" default="false"/>
   </xsd:complexType>
 
-  <xsd:element name="conditionConfig" type="synthea:tConditionConfig"/>
-  <xsd:complexType name="tConditionConfig">
+  <xsd:element name="guardConfig" type="synthea:tGuardConfig"/>
+  <xsd:complexType name="tGuardConfig">
     <xsd:sequence>
       <xsd:element ref="synthea:condition" minOccurs="0" maxOccurs="1"/>
     </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="wellnessConfig" type="synthea:tWellnessConfig"/>
+  <xsd:complexType name="tWellnessConfig">
+    <xsd:attribute name="wellness" type="xsd:boolean" default="false"/>
+  </xsd:complexType>
+
+  <xsd:element name="submoduleConfig" type="synthea:tSubmoduleConfig"/>
+  <xsd:complexType name="tSubmoduleConfig">
+    <xsd:attribute name="submodule" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="probabilityConfig" type="synthea:tProbabilityConfig"/>
+  <xsd:complexType name="tProbabilityConfig">
+    <xsd:attribute name="probability" type="xsd:string"/>
+    <xsd:attribute name="probabilityAttribute" type="xsd:string"/>
+    <xsd:attribute name="probabilityDefault" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="encounterContext" type="synthea:tEncounterContext"/>
+  <xsd:complexType name="tEncounterContext">
+    <xsd:attribute name="requiresEncounterContext" type="xsd:boolean" default="false"/>
+  </xsd:complexType>
+
+  <xsd:element name="encounterReference" type="synthea:tEncounterReference"/>
+  <xsd:complexType name="tEncounterReference">
+    <xsd:attribute name="targetEncounter" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="stateType" type="synthea:tStateType"/>
@@ -37,6 +71,13 @@
   <xsd:element name="stateTypeConfig" type="synthea:tStateTypeConfig"/>
   <xsd:complexType name="tStateTypeConfig">
     <xsd:attribute name="stateType" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="conditionConfig" type="synthea:tConditionConfig"/>
+  <xsd:complexType name="tConditionConfig">
+    <xsd:sequence>
+      <xsd:element ref="synthea:condition" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
   </xsd:complexType>
 
 </xsd:schema>

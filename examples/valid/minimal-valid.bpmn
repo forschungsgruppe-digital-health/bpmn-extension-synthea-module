@@ -74,5 +74,62 @@
     <bpmn:sequenceFlow id="Flow_A_Out" sourceRef="Task_A" targetRef="EndEvent_A" />
     <bpmn:sequenceFlow id="Flow_B_Out" sourceRef="Task_B" targetRef="EndEvent_B" />
 
+    <!-- guard-state-requires-guard-config + guard-allow-requires-condition:
+         stateType="Guard" with a complete GuardConfig.allow -->
+    <bpmn:exclusiveGateway id="Gateway_Guard_Good" name="Guard (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+        <synthea:GuardConfig>
+          <synthea:allow conditionType="Attribute" attribute="ready_for_op" operator="==" value="true" />
+        </synthea:GuardConfig>
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
+    <!-- callsubmodule-requires-submodule-config: stateType="CallSubmodule" with a submodule target -->
+    <bpmn:callActivity id="CallActivity_Good" name="Call submodule (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="CallSubmodule" />
+        <synthea:SubmoduleConfig submodule="medications/otc_pain_reliever" />
+      </bpmn:extensionElements>
+    </bpmn:callActivity>
+
+    <!-- delay-requires-shape: stateType="Delay" with a delayShape -->
+    <bpmn:intermediateCatchEvent id="Delay_Good" name="Delay (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Delay" />
+        <synthea:DelayConfig delayShape="EXACT" delayValue="10" delayUnit="days" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- delay-distribution-kind-requires-distribution-shape: distributionKind set
+         together with delayShape="DISTRIBUTION" -->
+    <bpmn:intermediateCatchEvent id="Delay_Distribution_Good" name="Delay distribution (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Delay" />
+        <synthea:DelayConfig delayShape="DISTRIBUTION" distributionKind="GAUSSIAN" delayValue="5" delayUnit="days" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- encounter-reference-requires-condition-or-allergy-context: targetEncounter
+         on a ConditionOnset state -->
+    <bpmn:intermediateCatchEvent id="ConditionOnset_Good" name="Condition onset (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ConditionOnset" />
+        <fhirmap:resourceMapping resourceType="Condition" />
+        <synthea:EncounterReference targetEncounter="Encounter_1" />
+      </bpmn:extensionElements>
+    </bpmn:intermediateCatchEvent>
+
+    <!-- wellness-requires-encounter-state: WellnessConfig on an Encounter state -->
+    <bpmn:task id="Encounter_Wellness_Good" name="Encounter wellness (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Encounter" />
+        <fhirmap:resourceMapping resourceType="Encounter" />
+        <synthea:WellnessConfig wellness="true" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
   </bpmn:process>
 </bpmn:definitions>

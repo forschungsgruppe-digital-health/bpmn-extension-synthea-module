@@ -94,5 +94,66 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- guard-state-requires-guard-config: stateType="Guard" with no GuardConfig at all -->
+    <bpmn:exclusiveGateway id="Gateway_Guard_NoConfig" name="Guard (missing GuardConfig)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
+    <!-- guard-allow-requires-condition: GuardConfig present but allow is empty -->
+    <bpmn:exclusiveGateway id="Gateway_Guard_EmptyAllow" name="Guard (empty allow)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+        <synthea:GuardConfig>
+          <synthea:allow />
+        </synthea:GuardConfig>
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
+    <!-- callsubmodule-requires-submodule-config: stateType="CallSubmodule" with no submodule target -->
+    <bpmn:callActivity id="CallActivity_NoSubmodule" name="Call submodule (missing target)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="CallSubmodule" />
+      </bpmn:extensionElements>
+    </bpmn:callActivity>
+
+    <!-- delay-requires-shape: stateType="Delay" with no DelayConfig -->
+    <bpmn:intermediateCatchEvent id="Delay_NoShape" name="Delay (missing shape)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Delay" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- delay-distribution-kind-requires-distribution-shape: distributionKind set
+         while delayShape is "EXACT", not "DISTRIBUTION" -->
+    <bpmn:intermediateCatchEvent id="Delay_BadDistributionKind" name="Delay (bad distribution kind)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Delay" />
+        <synthea:DelayConfig delayShape="EXACT" distributionKind="GAUSSIAN" delayValue="10" delayUnit="days" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- encounter-reference-requires-condition-or-allergy-context: targetEncounter
+         on a ConditionEnd state (only ConditionOnset/AllergyOnset are valid) -->
+    <bpmn:intermediateCatchEvent id="ConditionEnd_BadReference" name="Condition end (bad reference)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ConditionEnd" />
+        <fhirmap:resourceMapping resourceType="Condition" />
+        <synthea:EncounterReference targetEncounter="Encounter_1" />
+      </bpmn:extensionElements>
+    </bpmn:intermediateCatchEvent>
+
+    <!-- wellness-requires-encounter-state: WellnessConfig on a state that isn't
+         Encounter/EncounterEnd -->
+    <bpmn:task id="Terminal_Wellness_Bad" name="Wellness on wrong state">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Simple" />
+        <synthea:WellnessConfig wellness="true" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
   </bpmn:process>
 </bpmn:definitions>
