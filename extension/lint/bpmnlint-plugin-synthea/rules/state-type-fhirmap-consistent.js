@@ -22,8 +22,6 @@ const ALLOWED = {
   Observation: ['Observation'],
   MultiObservation: ['Observation'],
   DiagnosticReport: ['DiagnosticReport'],
-  Encounter: ['Encounter'],
-  EncounterEnd: ['Encounter'],
   CarePlanStart: ['CarePlan'],
   CarePlanEnd: ['CarePlan'],
   Device: ['Device'],
