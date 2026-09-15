@@ -1,8 +1,9 @@
 # Modeling playground (demo)
 
 An interactive [bpmn-js](https://bpmn.io) modeler for **trying your extension by
-hand** — open a diagram, select the task, edit the `Annotation (synthea)` group in
-the properties panel, and download the resulting XML to see your custom data.
+hand** — open a diagram, select an element, edit its `(synthea)` properties
+groups (e.g. `State type`, `Encounter Context`), and download the resulting
+XML to see your custom data.
 
 This is a **private, non-published** workspace (it is not in the npm package's
 `files`). It exists to demonstrate and manually test the extension; the
@@ -15,7 +16,7 @@ It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copi
 
 - `moddleExtensions: { synthea: <descriptor> }` — `../extension/model/synthea.json`
 - `additionalModules: [ …, syntheaModule ]` — `../extension/src/index.js` (the sample properties-panel provider)
-- seed diagram — `../examples/valid/minimal-valid.bpmn` (imported via `?raw`)
+- seed diagram — `../lung-cancer/synthea-lung-cancer.bpmn` (imported via `?raw`)
 
 So whatever you change in `extension/` is reflected here on the next reload.
 
@@ -24,9 +25,10 @@ The two slots are the whole mental model: **`moddleExtensions` is the data layer
 **`additionalModules` is the UI layer** (the editing controls — optional). See
 [`../docs/concepts.md`](../docs/concepts.md).
 
-> The sample panel edits `category` and `reviewed` only. The descriptor's `note`
-> child is present in the seed XML as a richer example but has no panel entry yet
-> — adding one is a good first exercise.
+> The sample panel covers all nine `synthea:` types (`ProbabilityConfig`,
+> `ConditionConfig`/`Condition`, `StateTypeConfig`, `DelayConfig`, `GuardConfig`,
+> `SubmoduleConfig`, `EncounterContext`, `EncounterReference`) — see
+> `SyntheaPropertiesProvider.js` for which BPMN element each group appears on.
 
 ## Run it
 
