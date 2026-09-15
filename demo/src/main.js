@@ -12,7 +12,7 @@ import {
 
 import syntheaModule from '../../extension/src/index.js';
 import syntheaModdle from '../../extension/model/synthea.json';
-import diagramXML from '../../synthea-lung-cancer.bpmn?raw';
+import diagramXML from '../../lung-cancer/synthea-lung-cancer.bpmn?raw';
 
 const modeler = new BpmnModeler({
   container: '#canvas',
@@ -30,7 +30,12 @@ const modeler = new BpmnModeler({
 async function openDiagram(xml) {
   try {
     await modeler.importXML(xml);
-    modeler.get('canvas').zoom('fit-viewport');
+
+    // Zooming immediately after import can run before the #canvas container
+    // has a laid-out, non-zero size (e.g. right after initial page load),
+    // which makes diagram-js compute a non-finite scale factor. Deferring to
+    // the next animation frame guarantees layout has settled first.
+    requestAnimationFrame(() => modeler.get('canvas').zoom('fit-viewport'));
   } catch (err) {
     console.error('failed to import diagram', err);
   }
