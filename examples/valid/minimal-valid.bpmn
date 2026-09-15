@@ -139,5 +139,42 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- probability-sum-valid: two probabilityAttribute-only flows must NOT
+         count as "unfixed" (Table C: a named/dynamic distribution, not an
+         omission) -->
+    <bpmn:task id="Task_AttrBranch_Good" name="Attribute branch (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Simple" />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_Attr1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Attr2</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:endEvent id="EndEvent_Attr1">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Terminal" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Attr1</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="EndEvent_Attr2">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Terminal" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Attr2</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Attr1" sourceRef="Task_AttrBranch_Good" targetRef="EndEvent_Attr1">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probabilityAttribute="p_attr_1" probabilityDefault="0.5" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_Attr2" sourceRef="Task_AttrBranch_Good" targetRef="EndEvent_Attr2">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probabilityAttribute="p_attr_2" probabilityDefault="0.5" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
   </bpmn:process>
 </bpmn:definitions>

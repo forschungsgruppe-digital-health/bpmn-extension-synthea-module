@@ -7,6 +7,14 @@ const { is, getExtension } = require('../lib/utils');
  * gateway/state must sum to <= 1.0. Flag if the sum exceeds 1.0, or if
  * more than one flow in the group omits `probability` (ambiguous which
  * one absorbs the implicit remainder).
+ *
+ * A flow using `probabilityAttribute` instead (implicit-rules.md Table C:
+ * "named/dynamic distribution") is deliberately fixed in a different sense
+ * — its actual value is only known at simulation time, not at design time
+ * — so it counts as neither "fixed" (it contributes nothing to the sum,
+ * since there's no design-time number to add) nor "unfixed" (it doesn't
+ * compete for the implicit 1.0-minus-sum remainder the way an omitted
+ * `probability` does).
  */
 module.exports = function() {
 
@@ -28,6 +36,10 @@ module.exports = function() {
     outgoing.forEach((flow) => {
       const probability = getExtension(flow, 'synthea:ProbabilityConfig');
       const raw = probability.probability;
+
+      if (probability.probabilityAttribute) {
+        return;
+      }
 
       // bpmn-moddle does not coerce custom-extension "Float" attributes to
       // Number — they come back as strings straight from the XML, so this
