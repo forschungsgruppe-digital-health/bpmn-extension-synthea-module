@@ -146,12 +146,19 @@
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
 
-    <!-- wellness-requires-encounter-state: WellnessConfig on a state that isn't
-         Encounter/EncounterEnd -->
-    <bpmn:task id="Terminal_Wellness_Bad" name="Wellness on wrong state">
+    <!-- wellness-consistent-within-encounter: two states sharing one encounterId
+         disagree on wellness -->
+    <bpmn:task id="EncounterB_Member1_Bad" name="Encounter B member 1 (bad)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Simple" />
-        <synthea:WellnessConfig wellness="true" />
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_B" wellness="true" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="EncounterB_Member2_Bad" name="Encounter B member 2 (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_B" wellness="false" />
       </bpmn:extensionElements>
     </bpmn:task>
 

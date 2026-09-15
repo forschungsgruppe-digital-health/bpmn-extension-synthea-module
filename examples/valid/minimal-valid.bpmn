@@ -122,12 +122,20 @@
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
 
-    <!-- wellness-requires-encounter-state: WellnessConfig on an Encounter state -->
-    <bpmn:task id="Encounter_Wellness_Good" name="Encounter wellness (good)">
+    <!-- wellness-consistent-within-encounter: two states sharing one encounterId
+         agree on wellness (ADR-0003: encounter scope derived from EncounterContext,
+         no explicit Encounter/EncounterEnd states) -->
+    <bpmn:task id="EncounterA_Member1_Good" name="Encounter A member 1 (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Encounter" />
-        <fhirmap:resourceMapping resourceType="Encounter" />
-        <synthea:WellnessConfig wellness="true" />
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_A" wellness="true" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="EncounterA_Member2_Good" name="Encounter A member 2 (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_A" wellness="true" />
       </bpmn:extensionElements>
     </bpmn:task>
 

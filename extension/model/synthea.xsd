@@ -38,11 +38,6 @@
     </xsd:sequence>
   </xsd:complexType>
 
-  <xsd:element name="wellnessConfig" type="synthea:tWellnessConfig"/>
-  <xsd:complexType name="tWellnessConfig">
-    <xsd:attribute name="wellness" type="xsd:boolean" default="false"/>
-  </xsd:complexType>
-
   <xsd:element name="submoduleConfig" type="synthea:tSubmoduleConfig"/>
   <xsd:complexType name="tSubmoduleConfig">
     <xsd:attribute name="submodule" type="xsd:string"/>
@@ -58,6 +53,8 @@
   <xsd:element name="encounterContext" type="synthea:tEncounterContext"/>
   <xsd:complexType name="tEncounterContext">
     <xsd:attribute name="requiresEncounterContext" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="encounterId" type="xsd:string"/>
+    <xsd:attribute name="wellness" type="xsd:boolean" default="false"/>
   </xsd:complexType>
 
   <xsd:element name="encounterReference" type="synthea:tEncounterReference"/>

@@ -11,7 +11,7 @@ module.exports = {
         'synthea/delay-distribution-kind-requires-distribution-shape': 'error',
         'synthea/delay-requires-shape': 'error',
         'synthea/encounter-reference-requires-condition-or-allergy-context': 'warn',
-        'synthea/wellness-requires-encounter-state': 'error'
+        'synthea/wellness-consistent-within-encounter': 'error'
       }
     }
   },
@@ -25,6 +25,6 @@ module.exports = {
     'delay-distribution-kind-requires-distribution-shape': './rules/delay-distribution-kind-requires-distribution-shape',
     'delay-requires-shape': './rules/delay-requires-shape',
     'encounter-reference-requires-condition-or-allergy-context': './rules/encounter-reference-requires-condition-or-allergy-context',
-    'wellness-requires-encounter-state': './rules/wellness-requires-encounter-state'
+    'wellness-consistent-within-encounter': './rules/wellness-consistent-within-encounter'
   }
 };

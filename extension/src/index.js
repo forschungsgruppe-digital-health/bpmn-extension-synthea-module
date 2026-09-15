@@ -2,11 +2,11 @@ import SyntheaPropertiesProvider from './SyntheaPropertiesProvider.js';
 
 /**
  * The bpmn-js editor module for the synthea extension, injected via
- * `additionalModules`. Adds properties-panel groups for exactly three
- * synthea: extension types: StateTypeConfig, ProbabilityConfig, and
- * ConditionConfig/Condition (incl. `negate`). See README.md for what's
- * deliberately left out (Guard, Delay, Encounter context, Pair reference,
- * Lookup table, Composite condition — full extension only).
+ * `additionalModules`. Adds properties-panel groups for all nine synthea:
+ * extension types: StateTypeConfig, ProbabilityConfig, ConditionConfig/
+ * Condition (incl. `negate`), DelayConfig, GuardConfig, SubmoduleConfig,
+ * EncounterContext (incl. `encounterId`/`wellness`, see ADR-0003) and
+ * EncounterReference.
  */
 export default {
   __init__: ['syntheaPropertiesProvider'],

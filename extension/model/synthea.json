@@ -27,9 +27,6 @@
     { "name": "GuardConfig", "superClass": ["Element"], "properties": [
       { "name": "allow", "type": "Condition" }
     ]},
-    { "name": "WellnessConfig", "superClass": ["Element"], "properties": [
-      { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false }
-    ]},
     { "name": "SubmoduleConfig", "superClass": ["Element"], "properties": [
       { "name": "submodule", "type": "String", "isAttr": true }
     ]},
@@ -39,7 +36,9 @@
       { "name": "probabilityDefault", "type": "Float", "isAttr": true }
     ]},
     { "name": "EncounterContext", "superClass": ["Element"], "properties": [
-      { "name": "requiresEncounterContext", "type": "Boolean", "isAttr": true, "default": false }
+      { "name": "requiresEncounterContext", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "encounterId", "type": "String", "isAttr": true },
+      { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false }
     ]},
     { "name": "EncounterReference", "superClass": ["Element"], "properties": [
       { "name": "targetEncounter", "type": "String", "isAttr": true }
@@ -47,7 +46,7 @@
     { "name": "StateType", "isEnum": true, "literalValues": [
       { "name": "Initial" }, { "name": "Terminal" }, { "name": "Simple" }, { "name": "Guard" },
       { "name": "Delay" }, { "name": "SetAttribute" }, { "name": "Counter" }, { "name": "CallSubmodule" },
-      { "name": "Encounter" }, { "name": "EncounterEnd" }, { "name": "ConditionOnset" }, { "name": "ConditionEnd" },
+      { "name": "ConditionOnset" }, { "name": "ConditionEnd" },
       { "name": "AllergyOnset" }, { "name": "AllergyEnd" }, { "name": "MedicationOrder" }, { "name": "MedicationEnd" },
       { "name": "CarePlanStart" }, { "name": "CarePlanEnd" }, { "name": "Procedure" }, { "name": "ImagingStudy" },
       { "name": "Device" }, { "name": "DeviceEnd" }, { "name": "SupplyList" }, { "name": "VitalSign" },

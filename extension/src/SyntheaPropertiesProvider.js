@@ -15,7 +15,6 @@ const CONDITION_CONFIG_TYPE = 'synthea:ConditionConfig';
 const STATE_TYPE = 'synthea:StateTypeConfig';
 const DELAY_TYPE = 'synthea:DelayConfig';
 const GUARD_TYPE = 'synthea:GuardConfig';
-const WELLNESS_TYPE = 'synthea:WellnessConfig';
 const SUBMODULE_TYPE = 'synthea:SubmoduleConfig';
 const ENCOUNTER_CONTEXT_TYPE = 'synthea:EncounterContext';
 const ENCOUNTER_REFERENCE_TYPE = 'synthea:EncounterReference';
@@ -25,7 +24,7 @@ const DELAY_DISTRIBUTION_KIND_VALUES = ['EXACT', 'UNIFORM', 'GAUSSIAN', 'EXPONEN
 
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
-  'CallSubmodule', 'Encounter', 'EncounterEnd', 'ConditionOnset', 'ConditionEnd',
+  'CallSubmodule', 'ConditionOnset', 'ConditionEnd',
   'AllergyOnset', 'AllergyEnd', 'MedicationOrder', 'MedicationEnd', 'CarePlanStart',
   'CarePlanEnd', 'Procedure', 'ImagingStudy', 'Device', 'DeviceEnd', 'SupplyList',
   'VitalSign', 'Observation', 'MultiObservation', 'DiagnosticReport', 'Symptom',
@@ -39,23 +38,24 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
 
       if (is(element, 'bpmn:EndEvent')) {
         groups.push(createStateTypeGroup(element));
-        groups.push(createWellnessGroup(element));
+        groups.push(createEncounterContextGroup(element));
       }
 
       if (is(element, 'bpmn:Task')) {
         groups.push(createStateTypeGroup(element));
-        groups.push(createWellnessGroup(element));
+        groups.push(createEncounterContextGroup(element));
       }
 
       if (is(element, 'bpmn:SubProcess') && !is(element, 'bpmn:CallActivity')) {
         groups.push(createStateTypeGroup(element));
-        groups.push(createWellnessGroup(element));
+        groups.push(createEncounterContextGroup(element));
       }
 
       if (is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createDelayGroup(element));
         groups.push(createEncounterReferenceGroup(element));
+        groups.push(createEncounterContextGroup(element));
       }
 
       if (is(element, 'bpmn:SequenceFlow')) {
@@ -149,16 +149,6 @@ function createGuardGroup(element) {
   };
 }
 
-function createWellnessGroup(element) {
-  return {
-    id: 'synthea-wellness',
-    label: 'Wellness (synthea)',
-    entries: [
-      { id: 'synthea-wellness-value', element, component: WellnessEntry }
-    ]
-  };
-}
-
 function createSubmoduleGroup(element) {
   return {
     id: 'synthea-submodule',
@@ -174,7 +164,9 @@ function createEncounterContextGroup(element) {
     id: 'synthea-encounter-context',
     label: 'Encounter Context',
     entries: [
-      { id: 'synthea-encounter-context-value', element, component: EncounterContextEntry }
+      { id: 'synthea-encounter-context-value', element, component: EncounterContextEntry },
+      { id: 'synthea-encounter-context-id', element, component: EncounterIdEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-encounter-context-wellness', element, component: EncounterWellnessEntry }
     ]
   };
 }
@@ -409,9 +401,10 @@ function makeCheckboxEntry(type, prop, label) {
   };
 }
 
-const WellnessEntry = makeCheckboxEntry(WELLNESS_TYPE, 'wellness', 'Wellness');
 const SubmoduleEntry = makeTextEntry(SUBMODULE_TYPE, 'submodule', 'Submodule reference');
 const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'requiresEncounterContext', 'Encounter context');
+const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
+const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 
 // --- moddle helpers --------------------------------------------------------
