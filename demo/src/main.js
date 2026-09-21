@@ -27,15 +27,51 @@ const modeler = new BpmnModeler({
   }
 });
 
+// Zooming immediately after import can run before (a) the #canvas container
+// has a laid-out, non-zero size (e.g. right after initial page load, CSS/font
+// loading still settling) and/or (b) diagram-js has actually rendered the
+// imported elements, so their combined bounding box is still 0x0 — either one
+// makes diagram-js compute a non-finite scale factor. A single
+// requestAnimationFrame is not always enough for either condition, so poll
+// both the container's rendered size and the default layer's content bbox
+// across frames (bounded, so a genuinely broken layout/render doesn't spin
+// forever) before zooming, and don't let a still-failing zoom take down the
+// whole import.
+function waitForLayout(canvas, maxFrames = 30) {
+  return new Promise((resolve) => {
+    let frames = 0;
+    const container = canvas.getContainer();
+
+    function check() {
+      const { width, height } = container.getBoundingClientRect();
+      const bbox = canvas.getDefaultLayer().getBBox();
+      const ready = width > 0 && height > 0 && bbox.width > 0 && bbox.height > 0;
+
+      if (ready || frames >= maxFrames) {
+        resolve();
+        return;
+      }
+
+      frames += 1;
+      requestAnimationFrame(check);
+    }
+
+    requestAnimationFrame(check);
+  });
+}
+
 async function openDiagram(xml) {
   try {
     await modeler.importXML(xml);
 
-    // Zooming immediately after import can run before the #canvas container
-    // has a laid-out, non-zero size (e.g. right after initial page load),
-    // which makes diagram-js compute a non-finite scale factor. Deferring to
-    // the next animation frame guarantees layout has settled first.
-    requestAnimationFrame(() => modeler.get('canvas').zoom('fit-viewport'));
+    const canvas = modeler.get('canvas');
+    await waitForLayout(canvas);
+
+    try {
+      canvas.zoom('fit-viewport');
+    } catch (zoomErr) {
+      console.error('failed to fit viewport (diagram is still imported and usable)', zoomErr);
+    }
   } catch (err) {
     console.error('failed to import diagram', err);
   }
