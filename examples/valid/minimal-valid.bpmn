@@ -109,7 +109,7 @@
     <bpmn:intermediateCatchEvent id="Delay_Distribution_Good" name="Delay distribution (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Delay" />
-        <synthea:DelayConfig delayShape="DISTRIBUTION" distributionKind="GAUSSIAN" delayValue="5" delayUnit="days" />
+        <synthea:DelayConfig delayShape="DISTRIBUTION" distributionKind="GAUSSIAN" delayValue="5" delayValueHigh="1.5" delayUnit="days" />
       </bpmn:extensionElements>
       <bpmn:timerEventDefinition />
     </bpmn:intermediateCatchEvent>
@@ -195,6 +195,15 @@
         <fhirmap:resourceMapping resourceType="Condition" />
         <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
+    </bpmn:intermediateCatchEvent>
+
+    <!-- delay-range-requires-high-value: delayShape="RANGE" with both delayValue and delayValueHigh -->
+    <bpmn:intermediateCatchEvent id="Delay_Range_Good" name="Delay range (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Delay" />
+        <synthea:DelayConfig delayShape="RANGE" delayValue="3" delayValueHigh="5" delayUnit="months" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
     </bpmn:intermediateCatchEvent>
 
   </bpmn:process>

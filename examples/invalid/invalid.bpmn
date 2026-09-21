@@ -188,5 +188,14 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- delay-range-requires-high-value: delayShape="RANGE" with no delayValueHigh -->
+    <bpmn:intermediateCatchEvent id="Delay_Range_NoHigh" name="Delay range (missing high)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Delay" />
+        <synthea:DelayConfig delayShape="RANGE" delayValue="3" delayUnit="months" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
   </bpmn:process>
 </bpmn:definitions>

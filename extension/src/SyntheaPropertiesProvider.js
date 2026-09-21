@@ -138,6 +138,7 @@ function createDelayGroup(element) {
     entries: [
       { id: 'synthea-delay-shape', element, component: DelayShapeEntry },
       { id: 'synthea-delay-value', element, component: DelayValueEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-delay-value-high', element, component: DelayValueHighEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-delay-unit', element, component: DelayUnitEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-delay-distribution-kind', element, component: DelayDistributionKindEntry }
     ]
@@ -393,7 +394,8 @@ function makeSelecetEntry(type, prop, label, values) {
 }
 
 const DelayShapeEntry = makeSelecetEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES);
-const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value');
+const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value (exact/low/mean, per shape)');
+const DelayValueHighEntry = makeTextEntry(DELAY_TYPE, 'delayValueHigh', 'Delay value, high/second (range high, uniform high, or gaussian std. deviation)');
 const DelayUnitEntry = makeTextEntry(DELAY_TYPE, 'delayUnit', 'Delay unit');
 const DelayDistributionKindEntry = makeSelecetEntry(DELAY_TYPE, 'distributionKind', 'Delay distribution kind', DELAY_DISTRIBUTION_KIND_VALUES);
 

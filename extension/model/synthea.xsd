@@ -18,6 +18,7 @@
   <xsd:complexType name="tDelayConfig">
     <xsd:attribute name="delayShape" type="xsd:string"/>
     <xsd:attribute name="delayValue" type="xsd:string"/>
+    <xsd:attribute name="delayValueHigh" type="xsd:string"/>
     <xsd:attribute name="delayUnit" type="xsd:string"/>
     <xsd:attribute name="distributionKind" type="xsd:string"/>
   </xsd:complexType>

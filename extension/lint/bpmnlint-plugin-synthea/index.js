@@ -14,7 +14,8 @@ module.exports = {
         'synthea/wellness-consistent-within-encounter': 'error',
         'synthea/counter-requires-action': 'error',
         'synthea/set-attribute-requires-attribute': 'error',
-        'synthea/assign-to-attribute-requires-valid-state': 'warn'
+        'synthea/assign-to-attribute-requires-valid-state': 'warn',
+        'synthea/delay-range-requires-high-value': 'error'
       }
     }
   },
@@ -31,6 +32,7 @@ module.exports = {
     'wellness-consistent-within-encounter': './rules/wellness-consistent-within-encounter',
     'counter-requires-action': './rules/counter-requires-action',
     'set-attribute-requires-attribute': './rules/set-attribute-requires-attribute',
-    'assign-to-attribute-requires-valid-state': './rules/assign-to-attribute-requires-valid-state'
+    'assign-to-attribute-requires-valid-state': './rules/assign-to-attribute-requires-valid-state',
+    'delay-range-requires-high-value': './rules/delay-range-requires-high-value'
   }
 };
