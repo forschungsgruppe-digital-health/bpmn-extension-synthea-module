@@ -26,6 +26,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stem Cells Set bone_marrow = True</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
+        <synthea:setAttributeConfig attribute="bone_marrow" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0jhspua</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0p8q6xn</bpmn2:outgoing>
@@ -70,6 +71,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set Mean(lung_cancer_los) = 3</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
+        <synthea:setAttributeConfig attribute="lung_cancer_los" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1wu1rz7</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0l2qjq2</bpmn2:outgoing>
@@ -78,6 +80,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">increment value of attribute "lung_cancer_los" by 2</i18n:translation>
         <synthea:stateTypeConfig stateType="Counter" />
+        <synthea:counterConfig attribute="lung_cancer_los" action="increment" amount="2" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0l2qjq2</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0efsncp</bpmn2:outgoing>
@@ -86,6 +89,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">decrement value of attribute "lung_cancer_los" by 1</i18n:translation>
         <synthea:stateTypeConfig stateType="Counter" />
+        <synthea:counterConfig attribute="lung_cancer_los" action="decrement" amount="1" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0efsncp</bpmn2:incoming>
       <bpmn2:incoming>Flow_0p0pz6a</bpmn2:incoming>
@@ -206,6 +210,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Delay: 1 day</i18n:translation>
         <synthea:stateTypeConfig stateType="Delay" />
+        <synthea:delayConfig delayShape="EXACT" delayValue="1" delayUnit="days" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0t2z418</bpmn2:incoming>
       <bpmn2:incoming>Flow_01o3k8p</bpmn2:incoming>
@@ -228,6 +233,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">SCLC Treatment Delay: 21-28 days</i18n:translation>
         <synthea:stateTypeConfig stateType="Delay" />
+        <synthea:delayConfig delayShape="RANGE" delayValue="21" delayValueHigh="28" delayUnit="days" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB1_sclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0t3aexs</bpmn2:outgoing>
@@ -239,6 +245,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">NSCLC Treatment Delay: 28-35 days</i18n:translation>
         <synthea:stateTypeConfig stateType="Delay" />
+        <synthea:delayConfig delayShape="RANGE" delayValue="28" delayValueHigh="35" delayUnit="days" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB1_nsclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1eee7nb</bpmn2:outgoing>
