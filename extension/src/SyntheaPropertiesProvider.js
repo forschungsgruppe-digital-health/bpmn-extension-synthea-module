@@ -176,7 +176,8 @@ function createEncounterContextGroup(element) {
     entries: [
       { id: 'synthea-encounter-context-value', element, component: EncounterContextEntry },
       { id: 'synthea-encounter-context-id', element, component: EncounterIdEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-encounter-context-wellness', element, component: EncounterWellnessEntry }
+      { id: 'synthea-encounter-context-wellness', element, component: EncounterWellnessEntry },
+      { id: 'synthea-encounter-context-reason', element, component: EncounterReasonEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
 }
@@ -448,6 +449,7 @@ const SubmoduleEntry = makeTextEntry(SUBMODULE_TYPE, 'submodule', 'Submodule ref
 const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'requiresEncounterContext', 'Encounter context');
 const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
 const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter');
+const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Reason (attribute name or State_Name)');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
 const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);

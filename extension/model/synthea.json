@@ -39,7 +39,8 @@
     { "name": "EncounterContext", "superClass": ["Element"], "properties": [
       { "name": "requiresEncounterContext", "type": "Boolean", "isAttr": true, "default": false },
       { "name": "encounterId", "type": "String", "isAttr": true },
-      { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false }
+      { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "reason", "type": "String", "isAttr": true }
     ]},
     { "name": "EncounterReference", "superClass": ["Element"], "properties": [
       { "name": "targetEncounter", "type": "String", "isAttr": true }
