@@ -25,9 +25,10 @@ The two slots are the whole mental model: **`moddleExtensions` is the data layer
 **`additionalModules` is the UI layer** (the editing controls — optional). See
 [`../docs/concepts.md`](../docs/concepts.md).
 
-> The sample panel covers all nine `synthea:` types (`ProbabilityConfig`,
+> The sample panel covers all twelve `synthea:` types (`ProbabilityConfig`,
 > `ConditionConfig`/`Condition`, `StateTypeConfig`, `DelayConfig`, `GuardConfig`,
-> `SubmoduleConfig`, `EncounterContext`, `EncounterReference`) — see
+> `SubmoduleConfig`, `EncounterContext`, `EncounterReference`, `CounterConfig`,
+> `SetAttributeConfig`, `AssignToAttributeConfig`) — see
 > `SyntheaPropertiesProvider.js` for which BPMN element each group appears on.
 
 ## Run it

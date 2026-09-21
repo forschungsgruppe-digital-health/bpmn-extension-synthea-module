@@ -7,6 +7,14 @@ const { is } = require('../lib/utils');
  * has nothing to negate. synthea:Condition itself has no `id` (it's a
  * nested value, not a flow node), so the report is attached to the
  * nearest ancestor that has one (the enclosing sequence flow).
+ *
+ * Note on `negate` itself: real Synthea has no negate/not boolean at all —
+ * negation is expressed only via a separate `Not` condition wrapping the
+ * inner one. `negate="true"` here is a documented bridging construct,
+ * defined as equivalent to that `Not` wrapper (see implicit-rules.md
+ * Section A); this rule only guards against an empty/meaningless negation,
+ * it does not — and cannot — validate the Not-equivalence itself, since
+ * that's an export-time (tools/bpmn2gmf) concern, not a structural one.
  */
 module.exports = function() {
 
