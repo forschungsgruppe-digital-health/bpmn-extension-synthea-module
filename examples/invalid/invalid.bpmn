@@ -151,6 +151,7 @@
     <bpmn:task id="EncounterB_Member1_Bad" name="Encounter B member 1 (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
         <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_B" wellness="true" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -158,7 +159,32 @@
     <bpmn:task id="EncounterB_Member2_Bad" name="Encounter B member 2 (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
         <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_B" wellness="false" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- counter-requires-action: stateType="Counter" with no CounterConfig at all -->
+    <bpmn:task id="Task_Counter_NoConfig" name="Counter (missing config)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Counter" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- set-attribute-requires-attribute: stateType="SetAttribute" with no SetAttributeConfig -->
+    <bpmn:task id="Task_SetAttribute_NoConfig" name="Set attribute (missing config)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- assign-to-attribute-requires-valid-state: attribute set on a Procedure state
+         (not one of ConditionOnset/AllergyOnset/MedicationOrder/CarePlanStart/Device) -->
+    <bpmn:task id="Procedure_AssignBad" name="Procedure with assign (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:task>
 

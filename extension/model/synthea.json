@@ -43,6 +43,20 @@
     { "name": "EncounterReference", "superClass": ["Element"], "properties": [
       { "name": "targetEncounter", "type": "String", "isAttr": true }
     ]},
+    { "name": "CounterAction", "isEnum": true, "literalValues": [
+      {"name": "increment"}, {"name": "decrement"}
+    ]},
+    { "name": "CounterConfig", "superClass": ["Element"], "properties": [
+      { "name": "attribute", "type": "String", "isAttr": true },
+      { "name": "action", "type": "CounterAction", "isAttr": true },
+      { "name": "amount", "type": "Float", "isAttr": true }
+    ]},
+    { "name": "SetAttributeConfig", "superClass": ["Element"], "properties": [
+      { "name": "attribute", "type": "String", "isAttr": true }
+    ]},
+    { "name": "AssignToAttributeConfig", "superClass": ["Element"], "properties": [
+      { "name": "attribute", "type": "String", "isAttr": true }
+    ]},
     { "name": "StateType", "isEnum": true, "literalValues": [
       { "name": "Initial" }, { "name": "Terminal" }, { "name": "Simple" }, { "name": "Guard" },
       { "name": "Delay" }, { "name": "SetAttribute" }, { "name": "Counter" }, { "name": "CallSubmodule" },

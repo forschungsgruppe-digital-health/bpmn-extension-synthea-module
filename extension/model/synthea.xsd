@@ -62,6 +62,26 @@
     <xsd:attribute name="targetEncounter" type="xsd:string"/>
   </xsd:complexType>
 
+  <xsd:element name="counterAction" type="synthea:tCounterAction"/>
+  <xsd:complexType name="tCounterAction"/>
+
+  <xsd:element name="counterConfig" type="synthea:tCounterConfig"/>
+  <xsd:complexType name="tCounterConfig">
+    <xsd:attribute name="attribute" type="xsd:string"/>
+    <xsd:attribute name="action" type="xsd:string"/>
+    <xsd:attribute name="amount" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="setAttributeConfig" type="synthea:tSetAttributeConfig"/>
+  <xsd:complexType name="tSetAttributeConfig">
+    <xsd:attribute name="attribute" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="assignToAttributeConfig" type="synthea:tAssignToAttributeConfig"/>
+  <xsd:complexType name="tAssignToAttributeConfig">
+    <xsd:attribute name="attribute" type="xsd:string"/>
+  </xsd:complexType>
+
   <xsd:element name="stateType" type="synthea:tStateType"/>
   <xsd:complexType name="tStateType"/>
 

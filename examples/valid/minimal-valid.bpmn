@@ -30,10 +30,12 @@
       <bpmn:outgoing>Flow_A_Out</bpmn:outgoing>
     </bpmn:task>
 
-    <!-- state-type-fhirmap-consistent: stateType="SetAttribute" allows an absent resourceType -->
+    <!-- state-type-fhirmap-consistent: stateType="SetAttribute" allows an absent resourceType;
+         set-attribute-requires-attribute: SetAttributeConfig has an attribute name -->
     <bpmn:task id="Task_B" name="B">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="smoker" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_P2</bpmn:incoming>
       <bpmn:outgoing>Flow_B_Out</bpmn:outgoing>
@@ -128,6 +130,7 @@
     <bpmn:task id="EncounterA_Member1_Good" name="Encounter A member 1 (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
         <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_A" wellness="true" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -135,6 +138,7 @@
     <bpmn:task id="EncounterA_Member2_Good" name="Encounter A member 2 (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
         <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_A" wellness="true" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -175,6 +179,23 @@
         <synthea:ProbabilityConfig probabilityAttribute="p_attr_2" probabilityDefault="0.5" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
+
+    <!-- counter-requires-action: CounterConfig has both attribute and action -->
+    <bpmn:task id="Task_Counter_Good" name="Counter (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Counter" />
+        <synthea:CounterConfig attribute="chemo_cycles" action="increment" amount="1" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- assign-to-attribute-requires-valid-state: attribute set on a ConditionOnset state -->
+    <bpmn:intermediateCatchEvent id="ConditionOnset_AssignGood" name="Condition onset with assign (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ConditionOnset" />
+        <fhirmap:resourceMapping resourceType="Condition" />
+        <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
+      </bpmn:extensionElements>
+    </bpmn:intermediateCatchEvent>
 
   </bpmn:process>
 </bpmn:definitions>

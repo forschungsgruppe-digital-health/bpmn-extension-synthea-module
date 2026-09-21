@@ -18,9 +18,13 @@ const GUARD_TYPE = 'synthea:GuardConfig';
 const SUBMODULE_TYPE = 'synthea:SubmoduleConfig';
 const ENCOUNTER_CONTEXT_TYPE = 'synthea:EncounterContext';
 const ENCOUNTER_REFERENCE_TYPE = 'synthea:EncounterReference';
+const COUNTER_TYPE = 'synthea:CounterConfig';
+const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
+const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
 
 const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE', 'DISTRIBUTION'];
 const DELAY_DISTRIBUTION_KIND_VALUES = ['EXACT', 'UNIFORM', 'GAUSSIAN', 'EXPONENTIAL'];
+const COUNTER_ACTION_VALUES = ['increment', 'decrement'];
 
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
@@ -44,6 +48,9 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       if (is(element, 'bpmn:Task')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createEncounterContextGroup(element));
+        groups.push(createCounterGroup(element));
+        groups.push(createSetAttributeGroup(element));
+        groups.push(createAssignToAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:SubProcess') && !is(element, 'bpmn:CallActivity')) {
@@ -56,6 +63,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createDelayGroup(element));
         groups.push(createEncounterReferenceGroup(element));
         groups.push(createEncounterContextGroup(element));
+        groups.push(createAssignToAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:SequenceFlow')) {
@@ -69,6 +77,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
 
       if (is(element, 'bpmn:TextAnnotation')) {
         groups.push(createEncounterContextGroup(element));
+        groups.push(createAssignToAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:CallActivity')) {
@@ -177,6 +186,38 @@ function createEncounterReferenceGroup(element) {
     label: 'Encounter Reference',
     entries: [
       { id: 'synthea-encounter-reference-value', element, component: EncounterReferenceEntry, isEdited: isTextFieldEntryEdited }
+    ]
+  };
+}
+
+function createCounterGroup(element) {
+  return {
+    id: 'synthea-counter',
+    label: 'Counter (synthea)',
+    entries: [
+      { id: 'synthea-counter-attribute', element, component: CounterAttributeEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-counter-action', element, component: CounterActionEntry },
+      { id: 'synthea-counter-amount', element, component: CounterAmountEntry, isEdited: isTextFieldEntryEdited }
+    ]
+  };
+}
+
+function createSetAttributeGroup(element) {
+  return {
+    id: 'synthea-set-attribute',
+    label: 'Set Attribute (synthea)',
+    entries: [
+      { id: 'synthea-set-attribute-value', element, component: SetAttributeEntry, isEdited: isTextFieldEntryEdited }
+    ]
+  };
+}
+
+function createAssignToAttributeGroup(element) {
+  return {
+    id: 'synthea-assign-to-attribute',
+    label: 'Assign to Attribute (synthea)',
+    entries: [
+      { id: 'synthea-assign-to-attribute-value', element, component: AssignToAttributeEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
 }
@@ -406,6 +447,11 @@ const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'require
 const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
 const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
+const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
+const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
+const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
+const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name');
+const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribute', 'Assign result to attribute');
 
 // --- moddle helpers --------------------------------------------------------
 

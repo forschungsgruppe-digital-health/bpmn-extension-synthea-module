@@ -11,7 +11,10 @@ module.exports = {
         'synthea/delay-distribution-kind-requires-distribution-shape': 'error',
         'synthea/delay-requires-shape': 'error',
         'synthea/encounter-reference-requires-condition-or-allergy-context': 'warn',
-        'synthea/wellness-consistent-within-encounter': 'error'
+        'synthea/wellness-consistent-within-encounter': 'error',
+        'synthea/counter-requires-action': 'error',
+        'synthea/set-attribute-requires-attribute': 'error',
+        'synthea/assign-to-attribute-requires-valid-state': 'warn'
       }
     }
   },
@@ -25,6 +28,9 @@ module.exports = {
     'delay-distribution-kind-requires-distribution-shape': './rules/delay-distribution-kind-requires-distribution-shape',
     'delay-requires-shape': './rules/delay-requires-shape',
     'encounter-reference-requires-condition-or-allergy-context': './rules/encounter-reference-requires-condition-or-allergy-context',
-    'wellness-consistent-within-encounter': './rules/wellness-consistent-within-encounter'
+    'wellness-consistent-within-encounter': './rules/wellness-consistent-within-encounter',
+    'counter-requires-action': './rules/counter-requires-action',
+    'set-attribute-requires-attribute': './rules/set-attribute-requires-attribute',
+    'assign-to-attribute-requires-valid-state': './rules/assign-to-attribute-requires-valid-state'
   }
 };
