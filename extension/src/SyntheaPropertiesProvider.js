@@ -21,6 +21,7 @@ const ENCOUNTER_REFERENCE_TYPE = 'synthea:EncounterReference';
 const COUNTER_TYPE = 'synthea:CounterConfig';
 const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
+const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
 
 const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE', 'DISTRIBUTION'];
 const DELAY_DISTRIBUTION_KIND_VALUES = ['EXACT', 'UNIFORM', 'GAUSSIAN', 'EXPONENTIAL'];
@@ -43,6 +44,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       if (is(element, 'bpmn:EndEvent')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createEncounterContextGroup(element));
+        groups.push(createReferencedByAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:Task')) {
@@ -51,6 +53,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createCounterGroup(element));
         groups.push(createSetAttributeGroup(element));
         groups.push(createAssignToAttributeGroup(element));
+        groups.push(createReferencedByAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
@@ -64,6 +67,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createEncounterReferenceGroup(element));
         groups.push(createEncounterContextGroup(element));
         groups.push(createAssignToAttributeGroup(element));
+        groups.push(createReferencedByAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:SequenceFlow')) {
@@ -78,6 +82,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       if (is(element, 'bpmn:TextAnnotation')) {
         groups.push(createEncounterContextGroup(element));
         groups.push(createAssignToAttributeGroup(element));
+        groups.push(createReferencedByAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:CallActivity')) {
@@ -220,6 +225,16 @@ function createAssignToAttributeGroup(element) {
     label: 'Assign to Attribute',
     entries: [
       { id: 'synthea-assign-to-attribute-value', element, component: AssignToAttributeEntry, isEdited: isTextFieldEntryEdited }
+    ]
+  };
+}
+
+function createReferencedByAttributeGroup(element) {
+  return {
+    id: 'synthea-referenced-by-attribute',
+    label: 'Referenced by Attribute',
+    entries: [
+      { id: 'synthea-referenced-by-attribute-value', element, component: ReferencedByAttributeEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
 }
@@ -456,6 +471,7 @@ const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', CO
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
 const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name');
 const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribute', 'Assign result to attribute');
+const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute');
 
 // --- moddle helpers --------------------------------------------------------
 

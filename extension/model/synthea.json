@@ -59,6 +59,9 @@
     { "name": "AssignToAttributeConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true }
     ]},
+    { "name": "ReferencedByAttributeConfig", "superClass": ["Element"], "properties": [
+      { "name": "attribute", "type": "String", "isAttr": true }
+    ]},
     { "name": "StateType", "isEnum": true, "literalValues": [
       { "name": "Initial" }, { "name": "Terminal" }, { "name": "Simple" }, { "name": "Guard" },
       { "name": "Delay" }, { "name": "SetAttribute" }, { "name": "Counter" }, { "name": "CallSubmodule" },

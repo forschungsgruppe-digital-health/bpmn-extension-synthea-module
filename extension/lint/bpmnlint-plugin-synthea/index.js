@@ -15,7 +15,8 @@ module.exports = {
         'synthea/counter-requires-action': 'error',
         'synthea/set-attribute-requires-attribute': 'error',
         'synthea/assign-to-attribute-requires-valid-state': 'warn',
-        'synthea/delay-range-requires-high-value': 'error'
+        'synthea/delay-range-requires-high-value': 'error',
+        'synthea/referenced-by-attribute-requires-valid-state': 'warn'
       }
     }
   },
@@ -33,6 +34,7 @@ module.exports = {
     'counter-requires-action': './rules/counter-requires-action',
     'set-attribute-requires-attribute': './rules/set-attribute-requires-attribute',
     'assign-to-attribute-requires-valid-state': './rules/assign-to-attribute-requires-valid-state',
-    'delay-range-requires-high-value': './rules/delay-range-requires-high-value'
+    'delay-range-requires-high-value': './rules/delay-range-requires-high-value',
+    'referenced-by-attribute-requires-valid-state': './rules/referenced-by-attribute-requires-valid-state'
   }
 };

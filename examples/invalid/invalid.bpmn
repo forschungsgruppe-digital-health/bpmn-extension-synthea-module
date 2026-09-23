@@ -197,5 +197,15 @@
       <bpmn:timerEventDefinition />
     </bpmn:intermediateCatchEvent>
 
+    <!-- referenced-by-attribute-requires-valid-state: attribute set on a Procedure state
+         (not one of ConditionEnd/AllergyEnd/MedicationEnd/CarePlanEnd/DeviceEnd/Death) -->
+    <bpmn:task id="Procedure_ReferencedBad" name="Procedure with referenced-by (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:ReferencedByAttributeConfig attribute="lung_cancer_diagnosis_date" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
   </bpmn:process>
 </bpmn:definitions>

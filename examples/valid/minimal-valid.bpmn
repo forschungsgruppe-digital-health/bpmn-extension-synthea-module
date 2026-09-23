@@ -206,5 +206,13 @@
       <bpmn:timerEventDefinition />
     </bpmn:intermediateCatchEvent>
 
+    <!-- referenced-by-attribute-requires-valid-state: attribute set on a Death state -->
+    <bpmn:endEvent id="Death_ReferencedGood" name="Death (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Death" />
+        <synthea:ReferencedByAttributeConfig attribute="lung_cancer_diagnosis_date" />
+      </bpmn:extensionElements>
+    </bpmn:endEvent>
+
   </bpmn:process>
 </bpmn:definitions>

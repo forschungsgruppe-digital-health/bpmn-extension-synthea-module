@@ -84,6 +84,11 @@
     <xsd:attribute name="attribute" type="xsd:string"/>
   </xsd:complexType>
 
+  <xsd:element name="referencedByAttributeConfig" type="synthea:tReferencedByAttributeConfig"/>
+  <xsd:complexType name="tReferencedByAttributeConfig">
+    <xsd:attribute name="attribute" type="xsd:string"/>
+  </xsd:complexType>
+
   <xsd:element name="stateType" type="synthea:tStateType"/>
   <xsd:complexType name="tStateType"/>
 

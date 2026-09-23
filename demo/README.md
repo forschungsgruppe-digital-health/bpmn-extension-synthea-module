@@ -20,8 +20,8 @@ It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copi
   **Pathway** dropdown in the toolbar: the main `synthea-lung-cancer.bpmn` module plus its four
   submodules (`lung-cancer-probabilities-submodule.bpmn`, `lung-cancer-treatment-submodule.bpmn`,
   `symptom-check-submodule.bpmn`, `anemia-submodule.bpmn`). The main module's four `CallSubmodule`
-  states are drawn as small placeholder sub-processes on the canvas — their actual content lives in
-  these separate files, not inline.
+  states are `bpmn:callActivity` elements (`calledElement` pointing at each submodule's process id)
+  — their actual content lives in these separate files, not inline.
 
 So whatever you change in `extension/` is reflected here on the next reload.
 
@@ -30,10 +30,10 @@ The two slots are the whole mental model: **`moddleExtensions` is the data layer
 **`additionalModules` is the UI layer** (the editing controls — optional). See
 [`../docs/concepts.md`](../docs/concepts.md).
 
-> The sample panel covers all twelve `synthea:` types (`ProbabilityConfig`,
+> The sample panel covers all thirteen `synthea:` types (`ProbabilityConfig`,
 > `ConditionConfig`/`Condition`, `StateTypeConfig`, `DelayConfig`, `GuardConfig`,
 > `SubmoduleConfig`, `EncounterContext`, `EncounterReference`, `CounterConfig`,
-> `SetAttributeConfig`, `AssignToAttributeConfig`) — see
+> `SetAttributeConfig`, `AssignToAttributeConfig`, `ReferencedByAttributeConfig`) — see
 > `SyntheaPropertiesProvider.js` for which BPMN element each group appears on.
 
 ## Run it
