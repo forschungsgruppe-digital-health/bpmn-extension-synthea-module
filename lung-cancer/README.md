@@ -14,6 +14,34 @@ module; the other four are its submodules, called via `bpmn:callActivity`
 
 The demo app's Pathway dropdown loads all five directly from here.
 
+## ⚠️ Submodule path placeholder (needs confirming before `tools/bpmn2gmf`)
+
+`calledElement` above is a BPMN-internal reference (the target process id,
+resolved within this file set) and needs no further decision. But each
+`callActivity` also carries a `synthea:submoduleConfig submodule="..."`
+value, which is the field that matters for the *actual* Synthea export:
+
+| File | `synthea:submoduleConfig submodule="..."` |
+|---|---|
+| `lung-cancer-probabilities-submodule.bpmn` | `lung_cancer_probabilities_submodule` |
+| `lung-cancer-treatment-submodule.bpmn` | `lung_cancer_treatment_submodule` |
+| `symptom-check-submodule.bpmn` | `symptom_check_submodule` |
+| `anemia-submodule.bpmn` | `anemia_submodule` |
+
+In real Synthea GMF, a `CallSubmodule` state's `submodule` field is a file
+path relative to Synthea's `modules/` directory (e.g.
+`"submodule": "medications/otc_pain_reliever"` → Synthea looks for
+`modules/medications/otc_pain_reliever.json`). These four values are a
+plausible guess (each source file's basename in snake_case, no folder
+prefix) — not a confirmed convention, since `tools/bpmn2gmf` doesn't exist
+yet and hasn't decided how/where it will name its output JSON files.
+
+**Before relying on these for a real export:** confirm (or change) these
+four strings so they match whatever `tools/bpmn2gmf` actually names/places
+the generated submodule JSON files as. If they don't match, Synthea will
+fail to find the submodule at simulation time even though everything here
+validates cleanly.
+
 ## BPMN conformance class (SYN-1)
 
 Checked against the modeling conventions in
