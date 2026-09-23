@@ -98,7 +98,7 @@ SyntheaMiniPropertiesProvider.$inject = ['propertiesPanel', 'injector'];
 function createStateTypeGroup(element) {
   return {
     id: 'synthea-state-type',
-    label: 'State type (synthea)',
+    label: 'State type',
     entries: [
       { id: 'synthea-state-type-value', element, component: StateTypeEntry }
     ]
@@ -108,7 +108,7 @@ function createStateTypeGroup(element) {
 function createProbabilityGroup(element) {
   return {
     id: 'synthea-probability',
-    label: 'Probability (synthea)',
+    label: 'Probability',
     entries: [
       { id: 'synthea-probability-value', element, component: ProbabilityEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-probability-attribute', element, component: ProbabilityAttributeEntry, isEdited: isTextFieldEntryEdited },
@@ -120,7 +120,7 @@ function createProbabilityGroup(element) {
 function createConditionGroup(element) {
   return {
     id: 'synthea-condition',
-    label: 'Condition (synthea)',
+    label: 'Condition',
     entries: [
       { id: 'synthea-condition-type', element, component: FlowConditionTypeEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-condition-attribute', element, component: FlowConditionAttributeEntry, isEdited: isTextFieldEntryEdited },
@@ -134,7 +134,7 @@ function createConditionGroup(element) {
 function createDelayGroup(element) {
   return {
     id: 'synthea-delay',
-    label: 'Delay (synthea)',
+    label: 'Delay',
     entries: [
       { id: 'synthea-delay-shape', element, component: DelayShapeEntry },
       { id: 'synthea-delay-value', element, component: DelayValueEntry, isEdited: isTextFieldEntryEdited },
@@ -148,7 +148,7 @@ function createDelayGroup(element) {
 function createGuardGroup(element) {
   return {
     id: 'synthea-guard',
-    label: 'Guard (synthea)',
+    label: 'Guard',
     entries: [
       { id: 'synthea-guard-condition-type', element, component: GuardConditionTypeEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-guard-condition-attribute', element, component: GuardConditionAttributeEntry, isEdited: isTextFieldEntryEdited },
@@ -195,7 +195,7 @@ function createEncounterReferenceGroup(element) {
 function createCounterGroup(element) {
   return {
     id: 'synthea-counter',
-    label: 'Counter (synthea)',
+    label: 'Counter',
     entries: [
       { id: 'synthea-counter-attribute', element, component: CounterAttributeEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-counter-action', element, component: CounterActionEntry },
@@ -207,7 +207,7 @@ function createCounterGroup(element) {
 function createSetAttributeGroup(element) {
   return {
     id: 'synthea-set-attribute',
-    label: 'Set Attribute (synthea)',
+    label: 'Set Attribute',
     entries: [
       { id: 'synthea-set-attribute-value', element, component: SetAttributeEntry, isEdited: isTextFieldEntryEdited }
     ]
@@ -217,7 +217,7 @@ function createSetAttributeGroup(element) {
 function createAssignToAttributeGroup(element) {
   return {
     id: 'synthea-assign-to-attribute',
-    label: 'Assign to Attribute (synthea)',
+    label: 'Assign to Attribute',
     entries: [
       { id: 'synthea-assign-to-attribute-value', element, component: AssignToAttributeEntry, isEdited: isTextFieldEntryEdited }
     ]

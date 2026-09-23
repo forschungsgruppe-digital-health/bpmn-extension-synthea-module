@@ -1,7 +1,7 @@
 # Modeling playground (demo)
 
 An interactive [bpmn-js](https://bpmn.io) modeler for **trying your extension by
-hand** — open a diagram, select an element, edit its `(synthea)` properties
+hand** — open a diagram, select an element, edit its `synthea:` properties
 groups (e.g. `State type`, `Encounter Context`), and download the resulting
 XML to see your custom data.
 

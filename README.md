@@ -186,8 +186,9 @@ children use `"isMany": true`; element text uses `"isBody": true`.
 ## Modeling playground (demo)
 
 `demo/` is an interactive bpmn-js modeler for trying the extension **by hand**:
-open a diagram, select the task, edit the `Annotation (synthea)` group in the
-properties panel, and download the XML to see your custom data. It wires the
+open a diagram, select an element, edit its `synthea:` properties groups (e.g.
+`State type`, `Encounter Context`) in the properties panel, and download the
+XML to see your custom data. It wires the
 **real** descriptor (`moddleExtensions` — the *data* layer) and the sample
 `extension/src/` module (`additionalModules` — the *UI* layer), so it exercises
 your actual artifacts, not copies. See [`docs/concepts.md`](docs/concepts.md) for
