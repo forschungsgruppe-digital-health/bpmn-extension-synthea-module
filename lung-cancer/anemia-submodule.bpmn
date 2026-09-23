@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:cp="http://www.helict.de/bpmn4cp" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:cp="http://www.helict.de/bpmn4cp" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:fhirmap="https://forschungsgruppe-digital-health.github.io/schema/fhirmap/1.0" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
   <bpmn2:process id="Process_AnemiaSubmodule" name="Anemia Submodule" isExecutable="false">
     <bpmn2:extensionElements>
       <cp:bibliographyItem id="BibliographyItem_35a4g50" refLabel="1" />
@@ -13,6 +13,8 @@
     <bpmn2:task id="Activity_088ilt7" name="Diagnosis: Anemia">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: Anemia</i18n:translation>
+        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <fhirmap:resourceMapping resourceType="Condition" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0yr1p8q</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0m9llqd</bpmn2:outgoing>
@@ -44,6 +46,8 @@
     <bpmn2:task id="Activity_0v2ypfd" name="Diagnostic Area: CBC_Panel_F_Severe">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Severe</i18n:translation>
+        <synthea:stateTypeConfig stateType="Observation" />
+        <fhirmap:resourceMapping resourceType="Observation" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_14lbqcy</bpmn2:incoming>
       <bpmn2:incoming>Flow_0wjuj6o</bpmn2:incoming>
@@ -52,6 +56,8 @@
     <bpmn2:task id="Activity_15f8jor" name="Diagnostic Area: CBC_Panel_F_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Routine</i18n:translation>
+        <synthea:stateTypeConfig stateType="Observation" />
+        <fhirmap:resourceMapping resourceType="Observation" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_00jy2p5</bpmn2:incoming>
       <bpmn2:incoming>Flow_0k3wt2u</bpmn2:incoming>
@@ -60,6 +66,8 @@
     <bpmn2:task id="Activity_1lxvqqm" name="Diagnostic Area: CBC_Panel_M_Severe">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Severe</i18n:translation>
+        <synthea:stateTypeConfig stateType="Observation" />
+        <fhirmap:resourceMapping resourceType="Observation" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ney2yb</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0ism7fl</bpmn2:outgoing>
@@ -67,6 +75,8 @@
     <bpmn2:task id="Activity_0pre54w" name="Diagnostic Area: CBC_Panel_M_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Routine</i18n:translation>
+        <synthea:stateTypeConfig stateType="Observation" />
+        <fhirmap:resourceMapping resourceType="Observation" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0d66jrp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jv67ia</bpmn2:outgoing>
@@ -74,6 +84,8 @@
     <bpmn2:task id="Activity_1p29dw2" name="Procedure: Peripheral_Blood_Smear">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Peripheral_Blood_Smear</i18n:translation>
+        <synthea:stateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1mfa232</bpmn2:incoming>
       <bpmn2:incoming>Flow_0ningp2</bpmn2:incoming>
@@ -84,6 +96,8 @@
     <bpmn2:task id="Activity_1tigvib" name="Procedure: Review_Of_Systems">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Review_Of_Systems</i18n:translation>
+        <synthea:stateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0lu5fq8</bpmn2:incoming>
       <bpmn2:outgoing>Flow_19k5r5d</bpmn2:outgoing>
@@ -91,6 +105,7 @@
     <bpmn2:task id="Activity_16v2nz4" name="Collect_Social_and_Nutrition_History">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Collect_Social_and_Nutrition_History</i18n:translation>
+        <synthea:stateTypeConfig stateType="Simple" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_19k5r5d</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0x52yk3</bpmn2:outgoing>
@@ -98,6 +113,8 @@
     <bpmn2:task id="Activity_10pb6z3" name="Procedure: Brief_Examination">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Brief_Examination</i18n:translation>
+        <synthea:stateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0m0kss6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_00pq6jn</bpmn2:outgoing>
@@ -110,6 +127,8 @@
     <bpmn2:intermediateCatchEvent id="Event_0viis4b" name="Delay: 1 hour">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Delay: 1 hour</i18n:translation>
+        <synthea:stateTypeConfig stateType="Delay" />
+        <synthea:delayConfig delayShape="EXACT" delayValue="1" delayUnit="hours" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1mpyj00</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0598yo2</bpmn2:outgoing>
@@ -118,6 +137,7 @@
     <bpmn2:task id="Activity_1i88uwn" name="Administer_Medications">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Administer_Medications</i18n:translation>
+        <synthea:stateTypeConfig stateType="Simple" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0ehe4px</bpmn2:incoming>
       <bpmn2:incoming>Flow_1dsdxrh</bpmn2:incoming>
@@ -127,6 +147,8 @@
     <bpmn2:task id="Activity_03w5xy1" name="Procedure: Transfusion">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Transfusion</i18n:translation>
+        <synthea:stateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0598yo2</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02kkd88</bpmn2:outgoing>
@@ -140,6 +162,8 @@
     <bpmn2:task id="Activity_0racf1x" name="Medication Prescription: Iron_Supplement">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Iron_Supplement</i18n:translation>
+        <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <fhirmap:resourceMapping resourceType="MedicationRequest" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1o10yzv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0hektv4</bpmn2:outgoing>
@@ -147,6 +171,8 @@
     <bpmn2:task id="Activity_1m99prq" name="Medication Prescription: Vitamin B12 Booster">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Vitamin B12 Booster</i18n:translation>
+        <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <fhirmap:resourceMapping resourceType="MedicationRequest" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0oagdnt</bpmn2:incoming>
       <bpmn2:incoming>Flow_1m2ndgk</bpmn2:incoming>
@@ -160,6 +186,8 @@
     <bpmn2:intermediateCatchEvent id="Event_1ockgq0" name="Delay: 1 days">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Delay: 1 days</i18n:translation>
+        <synthea:stateTypeConfig stateType="Delay" />
+        <synthea:delayConfig delayShape="EXACT" delayValue="1" delayUnit="days" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02kkd88</bpmn2:incoming>
       <bpmn2:outgoing>Flow_001mmn1</bpmn2:outgoing>
@@ -173,6 +201,8 @@
     <bpmn2:task id="Activity_0pblc11" name="Diagnostic Area: Blood_Panel_F_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_F_Routine</i18n:translation>
+        <synthea:stateTypeConfig stateType="Observation" />
+        <fhirmap:resourceMapping resourceType="Observation" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ly2iqa</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1s5liut</bpmn2:outgoing>
@@ -180,6 +210,8 @@
     <bpmn2:task id="Activity_1igh2cb" name="Diagnostic Area: Blood_Panel_M_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_M_Routine</i18n:translation>
+        <synthea:stateTypeConfig stateType="Observation" />
+        <fhirmap:resourceMapping resourceType="Observation" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1co6iv8</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1dsdxrh</bpmn2:outgoing>
@@ -192,6 +224,7 @@
     <bpmn2:endEvent id="Event_0nd7btx" name="Terminal">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Terminal</i18n:translation>
+        <synthea:stateTypeConfig stateType="Terminal" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ds7zvs</bpmn2:incoming>
       <bpmn2:incoming>Flow_1lt1gyl</bpmn2:incoming>
@@ -200,6 +233,8 @@
     <bpmn2:task id="Activity_18nhi1m" name="Procedure: Medication_Reconciliation">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Medication_Reconciliation</i18n:translation>
+        <synthea:stateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0x52yk3</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0m0kss6</bpmn2:outgoing>
