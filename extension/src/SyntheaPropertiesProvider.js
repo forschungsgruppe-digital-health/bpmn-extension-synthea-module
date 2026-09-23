@@ -53,6 +53,10 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createSetAttributeGroup(element));
         groups.push(createAssignToAttributeGroup(element));
         groups.push(createReferencedByAttributeGroup(element));
+
+        if (isConditionOrAllergyOnset(element)) {
+          groups.push(createEncounterReferenceGroup(element));
+        }
       }
 
       if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
@@ -63,10 +67,13 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       if (is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createDelayGroup(element));
-        groups.push(createEncounterReferenceGroup(element));
         groups.push(createEncounterContextGroup(element));
         groups.push(createAssignToAttributeGroup(element));
         groups.push(createReferencedByAttributeGroup(element));
+
+        if (isConditionOrAllergyOnset(element)) {
+          groups.push(createEncounterReferenceGroup(element));
+        }
       }
 
       if (is(element, 'bpmn:SequenceFlow')) {
@@ -473,6 +480,13 @@ const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribut
 const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute');
 
 // --- moddle helpers --------------------------------------------------------
+
+function isConditionOrAllergyOnset(element) {
+  const config = getExtension(element, STATE_TYPE);
+  const stateType = config ? config.get('stateType') : undefined;
+
+  return stateType === 'ConditionOnset' || stateType === 'AllergyOnset';
+}
 
 function getExtension(element, type) {
   const extensionElements = getBusinessObject(element).get('extensionElements');
