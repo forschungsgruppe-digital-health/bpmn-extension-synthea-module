@@ -6,17 +6,13 @@
   "xml": { "tagAlias": "lowerCase" },
   "types": [
     { "name": "DelayShape", "isEnum": true, "literalValues": [
-      {"name": "EXACT"}, {"name": "RANGE"}, {"name": "DISTRIBUTION"}
-    ]},
-    { "name": "DelayDistributionKind", "isEnum": true, "literalValues": [
-      {"name": "EXACT"}, {"name": "GAUSSIAN"}, {"name": "UNIFORM"}, {"name": "EXPONENTIAL"}
+      {"name": "EXACT"}, {"name": "RANGE"}
     ]},
     { "name": "DelayConfig", "superClass": ["Element"], "properties": [
       { "name": "delayShape", "type": "DelayShape", "isAttr": true },
       { "name": "delayValue", "type": "String", "isAttr": true },
       { "name": "delayValueHigh", "type": "String", "isAttr": true },
-      { "name": "delayUnit", "type": "String", "isAttr": true },
-      { "name": "distributionKind", "type": "DelayDistributionKind", "isAttr": true }
+      { "name": "delayUnit", "type": "String", "isAttr": true }
     ]},
     { "name": "Condition", "superClass": ["Element"], "properties": [
       { "name": "conditionType", "type": "String", "isAttr": true },

@@ -23,8 +23,7 @@ const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
 const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
 
-const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE', 'DISTRIBUTION'];
-const DELAY_DISTRIBUTION_KIND_VALUES = ['EXACT', 'UNIFORM', 'GAUSSIAN', 'EXPONENTIAL'];
+const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE'];
 const COUNTER_ACTION_VALUES = ['increment', 'decrement'];
 
 const STATE_TYPE_VALUES = [
@@ -144,8 +143,7 @@ function createDelayGroup(element) {
       { id: 'synthea-delay-shape', element, component: DelayShapeEntry },
       { id: 'synthea-delay-value', element, component: DelayValueEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-delay-value-high', element, component: DelayValueHighEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-delay-unit', element, component: DelayUnitEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-delay-distribution-kind', element, component: DelayDistributionKindEntry }
+      { id: 'synthea-delay-unit', element, component: DelayUnitEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
 }
@@ -410,10 +408,9 @@ function makeSelecetEntry(type, prop, label, values) {
 }
 
 const DelayShapeEntry = makeSelecetEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES);
-const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value (exact/low/mean, per shape)');
-const DelayValueHighEntry = makeTextEntry(DELAY_TYPE, 'delayValueHigh', 'Delay value, high/second (range high, uniform high, or gaussian std. deviation)');
+const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value (exact value, or range low)');
+const DelayValueHighEntry = makeTextEntry(DELAY_TYPE, 'delayValueHigh', 'Delay value, high (range high, only for RANGE)');
 const DelayUnitEntry = makeTextEntry(DELAY_TYPE, 'delayUnit', 'Delay unit');
-const DelayDistributionKindEntry = makeSelecetEntry(DELAY_TYPE, 'distributionKind', 'Delay distribution kind', DELAY_DISTRIBUTION_KIND_VALUES);
 
 function getGuardCondition(element) {
   const cfg = getExtension(element, GUARD_TYPE);

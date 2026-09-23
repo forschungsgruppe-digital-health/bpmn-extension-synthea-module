@@ -104,16 +104,6 @@
       <bpmn:timerEventDefinition />
     </bpmn:intermediateCatchEvent>
 
-    <!-- delay-distribution-kind-requires-distribution-shape: distributionKind set
-         together with delayShape="DISTRIBUTION" -->
-    <bpmn:intermediateCatchEvent id="Delay_Distribution_Good" name="Delay distribution (good)">
-      <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Delay" />
-        <synthea:DelayConfig delayShape="DISTRIBUTION" distributionKind="GAUSSIAN" delayValue="5" delayValueHigh="1.5" delayUnit="days" />
-      </bpmn:extensionElements>
-      <bpmn:timerEventDefinition />
-    </bpmn:intermediateCatchEvent>
-
     <!-- encounter-reference-requires-condition-or-allergy-context: targetEncounter
          on a ConditionOnset state -->
     <bpmn:intermediateCatchEvent id="ConditionOnset_Good" name="Condition onset (good)">

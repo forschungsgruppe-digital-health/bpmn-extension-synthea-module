@@ -126,16 +126,6 @@
       <bpmn:timerEventDefinition />
     </bpmn:intermediateCatchEvent>
 
-    <!-- delay-distribution-kind-requires-distribution-shape: distributionKind set
-         while delayShape is "EXACT", not "DISTRIBUTION" -->
-    <bpmn:intermediateCatchEvent id="Delay_BadDistributionKind" name="Delay (bad distribution kind)">
-      <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Delay" />
-        <synthea:DelayConfig delayShape="EXACT" distributionKind="GAUSSIAN" delayValue="10" delayUnit="days" />
-      </bpmn:extensionElements>
-      <bpmn:timerEventDefinition />
-    </bpmn:intermediateCatchEvent>
-
     <!-- encounter-reference-requires-condition-or-allergy-context: targetEncounter
          on a ConditionEnd state (only ConditionOnset/AllergyOnset are valid) -->
     <bpmn:intermediateCatchEvent id="ConditionEnd_BadReference" name="Condition end (bad reference)">

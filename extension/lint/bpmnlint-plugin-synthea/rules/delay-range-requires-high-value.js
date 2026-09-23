@@ -1,19 +1,13 @@
 const { is } = require('../lib/utils');
 
-const TWO_PARAMETER_DISTRIBUTION_KINDS = ['GAUSSIAN', 'UNIFORM'];
-
 /**
- * SYN-23 — delayShape="RANGE", or distributionKind="GAUSSIAN"/"UNIFORM",
- * requires delayValueHigh.
+ * SYN-23 — delayShape="RANGE" requires delayValueHigh.
  *
- * Per the Synthea wiki, a v1 "range" delay needs low+high, and a v2
- * "distribution" delay needs two parameters for GAUSSIAN (mean+standard
- * deviation) and UNIFORM (low+high) — only EXACT and EXPONENTIAL need a
- * single number. synthea:DelayConfig flattens all of these into
- * delayValue (the first/primary number) + delayValueHigh (the second, only
- * meaningful for the three two-parameter cases above) — without
- * delayValueHigh, a RANGE or GAUSSIAN/UNIFORM delay is missing half its
- * definition and cannot round-trip into a real Synthea module.
+ * Per the Synthea wiki, a v1 "range" delay needs both a low and a high
+ * value. synthea:DelayConfig models this as delayValue (low) +
+ * delayValueHigh (high) — without delayValueHigh, a RANGE delay is
+ * missing half its definition and cannot round-trip into a real Synthea
+ * module.
  */
 module.exports = function() {
 
@@ -31,14 +25,6 @@ module.exports = function() {
       reporter.report(
         nearestReportableId(node),
         'delayShape is "RANGE" but delayValueHigh is not set — a range delay needs both a low and a high value.'
-      );
-      return;
-    }
-
-    if (node.delayShape === 'DISTRIBUTION' && TWO_PARAMETER_DISTRIBUTION_KINDS.includes(node.distributionKind)) {
-      reporter.report(
-        nearestReportableId(node),
-        `distributionKind is "${node.distributionKind}" but delayValueHigh is not set — ${node.distributionKind === 'GAUSSIAN' ? 'a Gaussian distribution needs a standard deviation' : 'a uniform distribution needs both a low and a high value'}.`
       );
     }
   }
