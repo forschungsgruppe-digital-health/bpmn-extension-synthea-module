@@ -111,6 +111,7 @@
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" display="Cisplatin 50 MG Injection" />
+        <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_07eksao</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0azdu8w</bpmn2:outgoing>
@@ -120,6 +121,7 @@
         <i18n:translation lang="de">Discontinue Medication: Chemotherapy IB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        <synthea:referencedByAttributeConfig attribute="chemotherapy_i_order" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0azdu8w</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1bb2p19</bpmn2:outgoing>
@@ -135,6 +137,7 @@
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="Etoposide 100mg Injection" />
+        <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_sclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_04aexph</bpmn2:outgoing>
@@ -145,6 +148,7 @@
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100mg Injection" />
+        <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_nsclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0a9d9nz</bpmn2:outgoing>
@@ -154,6 +158,7 @@
         <i18n:translation lang="de">Discontinue Medication: SCLC Chemotherapy IIB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        <synthea:referencedByAttributeConfig attribute="sclc_chemotherapy_ii_order" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_04aexph</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1fvxegi</bpmn2:outgoing>
@@ -163,6 +168,7 @@
         <i18n:translation lang="de">Discontinue Medication: NSCLC Chemotherapy IIB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        <synthea:referencedByAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0a9d9nz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeA2_nsclc</bpmn2:outgoing>
