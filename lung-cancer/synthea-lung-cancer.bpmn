@@ -95,7 +95,7 @@
       </bpmn2:timerEventDefinition>
     </bpmn2:intermediateCatchEvent>
     <bpmn2:sequenceFlow id="Flow_0yftkmm" sourceRef="Activity_075kjdy" targetRef="Event_1n1dk9c" />
-    <bpmn2:exclusiveGateway id="Gateway_18bs6oo">
+    <bpmn2:exclusiveGateway id="Gateway_18bs6oo" default="Flow_13y58hr">
       <bpmn2:incoming>Flow_084mcpx</bpmn2:incoming>
       <bpmn2:outgoing>Flow_17yiro0</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_13y58hr</bpmn2:outgoing>
@@ -195,7 +195,7 @@
         <bpmn2:timeDuration xsi:type="bpmn2:tFormalExpression">1-9 days</bpmn2:timeDuration>
       </bpmn2:timerEventDefinition>
     </bpmn2:intermediateCatchEvent>
-    <bpmn2:exclusiveGateway id="Gateway_1f7964q">
+    <bpmn2:exclusiveGateway id="Gateway_1f7964q" default="Flow_14hmhmz">
       <bpmn2:incoming>Flow_1jh6teb</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02tnxkc</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_14hmhmz</bpmn2:outgoing>
@@ -238,7 +238,7 @@
       <bpmn2:incoming>Flow_0w7qcbe</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1vkepxs</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_128lqmu">
+    <bpmn2:exclusiveGateway id="Gateway_128lqmu" default="Flow_0xltu63">
       <bpmn2:incoming>Flow_092d7h1</bpmn2:incoming>
       <bpmn2:outgoing>Flow_12hxynv</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1qe74a4</bpmn2:outgoing>
@@ -317,7 +317,7 @@
         <bpmn2:timeDate xsi:type="bpmn2:tFormalExpression">1-3 days</bpmn2:timeDate>
       </bpmn2:timerEventDefinition>
     </bpmn2:intermediateCatchEvent>
-    <bpmn2:exclusiveGateway id="Gateway_1nqy9eu">
+    <bpmn2:exclusiveGateway id="Gateway_1nqy9eu" default="Flow_0dqfmqh">
       <bpmn2:incoming>Flow_08nnzyn</bpmn2:incoming>
       <bpmn2:incoming>Flow_0zpyryl</bpmn2:incoming>
       <bpmn2:incoming>Flow_1e9afg2</bpmn2:incoming>
@@ -434,7 +434,7 @@
         <i18n:translation lang="de">else</i18n:translation>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:exclusiveGateway id="Gateway_07j08mi" name="Survival">
+    <bpmn2:exclusiveGateway id="Gateway_07j08mi" name="Survival" default="Flow_1inpm6t">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Survival</i18n:translation>
       </bpmn2:extensionElements>
@@ -442,7 +442,7 @@
       <bpmn2:outgoing>Flow_1i8q7mi</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1inpm6t</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_04i7102" name="Survival">
+    <bpmn2:exclusiveGateway id="Gateway_04i7102" name="Survival" default="Flow_02a5pgf">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Survival</i18n:translation>
       </bpmn2:extensionElements>
@@ -450,7 +450,7 @@
       <bpmn2:outgoing>Flow_0lw2jfp</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_02a5pgf</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_06fku0u">
+    <bpmn2:exclusiveGateway id="Gateway_06fku0u" default="Flow_0yraog6">
       <bpmn2:extensionElements>
         <i18n:translation lang="de" />
       </bpmn2:extensionElements>
@@ -458,7 +458,7 @@
       <bpmn2:outgoing>Flow_1hv4tpx</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0yraog6</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_194erkw" name="Survival">
+    <bpmn2:exclusiveGateway id="Gateway_194erkw" name="Survival" default="Flow_1c3az9j">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Survival</i18n:translation>
       </bpmn2:extensionElements>
@@ -698,7 +698,7 @@
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:exclusiveGateway id="Gateway_0fqthje">
+    <bpmn2:exclusiveGateway id="Gateway_0fqthje" default="Flow_08nnzyn">
       <bpmn2:incoming>Flow_1ekbixz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_15hulox</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_08nnzyn</bpmn2:outgoing>

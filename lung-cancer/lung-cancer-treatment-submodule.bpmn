@@ -17,7 +17,7 @@
       <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
       <bpmn2:outgoing>Flow_126huj4</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_0iu5rc0">
+    <bpmn2:exclusiveGateway id="Gateway_0iu5rc0" default="Flow_045p3wr">
       <bpmn2:incoming>Flow_126huj4</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jhspua</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_045p3wr</bpmn2:outgoing>
@@ -124,7 +124,7 @@
       <bpmn2:incoming>Flow_0azdu8w</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1bb2p19</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_typeA1">
+    <bpmn2:exclusiveGateway id="Gateway_typeA1" default="Flow_typeA1_nsclc">
       <bpmn2:incoming>Flow_1bb2p19</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeA1_sclc</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_typeA1_nsclc</bpmn2:outgoing>
@@ -191,7 +191,7 @@
       <bpmn2:incoming>Flow_1niwvy9</bpmn2:incoming>
       <bpmn2:outgoing>Flow_002ms2k</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_01b0ih8">
+    <bpmn2:exclusiveGateway id="Gateway_01b0ih8" default="Flow_0t2z418">
       <bpmn2:incoming>Flow_002ms2k</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1qje2av</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0t2z418</bpmn2:outgoing>
@@ -224,7 +224,7 @@
       <bpmn2:outgoing>Flow_15rf6kz</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0p0pz6a</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_typeB1">
+    <bpmn2:exclusiveGateway id="Gateway_typeB1" default="Flow_typeB1_nsclc">
       <bpmn2:incoming>Flow_15rf6kz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeB1_sclc</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_typeB1_nsclc</bpmn2:outgoing>
