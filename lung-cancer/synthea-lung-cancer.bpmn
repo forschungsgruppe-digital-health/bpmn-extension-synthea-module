@@ -133,9 +133,9 @@
         <synthea:probabilityConfig probability="0.2" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:task id="Activity_07bpac5" name="Diagnosis: Suspected Lung Cancer">
+    <bpmn2:task id="Activity_07bpac5" name="ConditionOnset: Suspected Lung Cancer">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">Diagnosis: Suspected Lung Cancer</i18n:translation>
+        <i18n:translation lang="de">ConditionOnset: Suspected Lung Cancer</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="162573006" display="Suspected lung cancer (situation)" />
