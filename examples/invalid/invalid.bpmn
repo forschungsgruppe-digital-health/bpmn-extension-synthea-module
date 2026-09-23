@@ -197,5 +197,16 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- referenced-by-attribute-matches-assign: attribute has no corresponding
+         assignToAttributeConfig anywhere in this process (valid state type,
+         so this element only trips the new rule, not the state-type one) -->
+    <bpmn:endEvent id="ConditionEnd_ReferencedUnmatched" name="Condition end with unmatched referenced-by (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ConditionEnd" />
+        <fhirmap:resourceMapping resourceType="Condition" />
+        <synthea:ReferencedByAttributeConfig attribute="never_assigned_attribute" />
+      </bpmn:extensionElements>
+    </bpmn:endEvent>
+
   </bpmn:process>
 </bpmn:definitions>
