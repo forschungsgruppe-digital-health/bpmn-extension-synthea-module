@@ -53,7 +53,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createAssignToAttributeGroup(element));
       }
 
-      if (is(element, 'bpmn:SubProcess') && !is(element, 'bpmn:CallActivity')) {
+      if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createEncounterContextGroup(element));
       }

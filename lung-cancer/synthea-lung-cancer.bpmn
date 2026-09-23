@@ -26,7 +26,7 @@
       </bpmn2:timerEventDefinition>
     </bpmn2:intermediateCatchEvent>
     <bpmn2:sequenceFlow id="Flow_0qd5uyu" sourceRef="Event_0ugbe77" targetRef="Event_0pks5ou" />
-    <bpmn2:subProcess id="Activity_1vm601n" name="Lung Cancer Probabilities" cp:selectionBehavior="all" cp:definitionCanonical="https://modeler.helict.eu/modeler/6a58fef799ae3e21509fa6dd">
+    <bpmn2:callActivity id="Activity_1vm601n" name="Lung Cancer Probabilities" cp:selectionBehavior="all" cp:definitionCanonical="https://modeler.helict.eu/modeler/6a58fef799ae3e21509fa6dd" calledElement="Process_LungCancerProbabilities">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Probabilities</i18n:translation>
         <cp:reference bibItemRef="BibliographyItem_1o2vo9v" />
@@ -35,7 +35,7 @@
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0s3bbsw</bpmn2:incoming>
       <bpmn2:outgoing>Flow_04ovtgp</bpmn2:outgoing>
-    </bpmn2:subProcess>
+    </bpmn2:callActivity>
     <bpmn2:sequenceFlow id="Flow_0s3bbsw" sourceRef="Event_0pks5ou" targetRef="Activity_1vm601n" />
     <bpmn2:exclusiveGateway id="Gateway_0qihhud" default="Flow_04qqbk6">
       <bpmn2:incoming>Flow_04ovtgp</bpmn2:incoming>
@@ -117,7 +117,7 @@
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_165jfdh" sourceRef="Activity_15ih3fq" targetRef="Event_1n1dk9c" />
-    <bpmn2:subProcess id="Activity_0910q2u" name="Symptom Check" cp:selectionBehavior="any">
+    <bpmn2:callActivity id="Activity_0910q2u" name="Symptom Check" cp:selectionBehavior="any" calledElement="Process_SymptomCheck">
       <bpmn2:extensionElements>
         <cp:reference bibItemRef="BibliographyItem_203p1sh" />
         <i18n:translation lang="de">Symptom Check</i18n:translation>
@@ -126,7 +126,7 @@
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_13y58hr</bpmn2:incoming>
       <bpmn2:outgoing>Flow_19enx2d</bpmn2:outgoing>
-    </bpmn2:subProcess>
+    </bpmn2:callActivity>
     <bpmn2:sequenceFlow id="Flow_13y58hr" name="20%" sourceRef="Gateway_18bs6oo" targetRef="Activity_0910q2u">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">20%</i18n:translation>
@@ -285,7 +285,7 @@
       <bpmn2:incoming>Flow_0xltu63</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jhzgwo</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:subProcess id="Activity_137ao8g" name="Anemia Submodule" cp:selectionBehavior="any">
+    <bpmn2:callActivity id="Activity_137ao8g" name="Anemia Submodule" cp:selectionBehavior="any" calledElement="Process_AnemiaSubmodule">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Anemia Submodule</i18n:translation>
         <cp:reference bibItemRef="BibliographyItem_1b4m2el" />
@@ -294,7 +294,7 @@
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1hknp91</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1e9afg2</bpmn2:outgoing>
-    </bpmn2:subProcess>
+    </bpmn2:callActivity>
     <bpmn2:scriptTask id="Activity_0zs1urs" name="Will Use Hospice Set hospice = true">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Will Use Hospice Set hospice = true</i18n:translation>
@@ -723,7 +723,7 @@
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0zpyryl" name="else" sourceRef="Gateway_11iwyj4" targetRef="Gateway_1nqy9eu" />
     <bpmn2:sequenceFlow id="Flow_1e9afg2" sourceRef="Activity_137ao8g" targetRef="Gateway_1nqy9eu" />
-    <bpmn2:subProcess id="Activity_LungCancerTreatmentCycle" name="Lung Cancer Treatment Cycle" cp:selectionBehavior="any">
+    <bpmn2:callActivity id="Activity_LungCancerTreatmentCycle" name="Lung Cancer Treatment Cycle" cp:selectionBehavior="any" calledElement="Process_LungCancerTreatmentCycle">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Treatment Cycle</i18n:translation>
         <cp:reference bibItemRef="BibliographyItem_0gk3f7q" />
@@ -731,7 +731,7 @@
         <synthea:submoduleConfig submodule="lung_cancer_treatment_submodule" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1260oh2</bpmn2:incoming>
-    </bpmn2:subProcess>
+    </bpmn2:callActivity>
     <bpmn2:scriptTask id="Activity_SetSurvivalTimeStageI" name="Set lung_cancer_survival_time = 2-6 years">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set lung_cancer_survival_time = 2-6 years</i18n:translation>
@@ -1083,7 +1083,7 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="5330" y="370" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_137ao8g_di" bpmnElement="Activity_137ao8g" isExpanded="false">
+      <bpmndi:BPMNShape id="Activity_137ao8g_di" bpmnElement="Activity_137ao8g">
         <dc:Bounds x="6260" y="120" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -1208,7 +1208,7 @@ biopsy of lung (procedure)</bpmn2:text>
           <dc:Bounds x="7545" y="675" width="30" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_LungCancerTreatmentCycle_di" bpmnElement="Activity_LungCancerTreatmentCycle" isExpanded="false">
+      <bpmndi:BPMNShape id="Activity_LungCancerTreatmentCycle_di" bpmnElement="Activity_LungCancerTreatmentCycle">
         <dc:Bounds x="8820" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
@@ -1875,15 +1875,11 @@ biopsy of lung (procedure)</bpmn2:text>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1r3cip1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1mrq63f" bpmnElement="Activity_1vm601n" />
   </bpmndi:BPMNDiagram>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1wxtn3o">
-    <bpmndi:BPMNPlane id="BPMNPlane_0mezrb7" bpmnElement="Activity_0910q2u" />
   </bpmndi:BPMNDiagram>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1uvpzjm">
-    <bpmndi:BPMNPlane id="BPMNPlane_1sgbm1t" bpmnElement="Activity_137ao8g" />
   </bpmndi:BPMNDiagram>
   <bpmndi:BPMNDiagram id="BPMNDiagram_LungCancerTreatmentCycle">
-    <bpmndi:BPMNPlane id="BPMNPlane_LungCancerTreatmentCycle" bpmnElement="Activity_LungCancerTreatmentCycle" />
   </bpmndi:BPMNDiagram>
 </bpmn2:definitions>
