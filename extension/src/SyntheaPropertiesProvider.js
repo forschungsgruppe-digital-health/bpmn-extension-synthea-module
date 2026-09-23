@@ -212,7 +212,8 @@ function createSetAttributeGroup(element) {
     id: 'synthea-set-attribute',
     label: 'Set Attribute',
     entries: [
-      { id: 'synthea-set-attribute-value', element, component: SetAttributeEntry, isEdited: isTextFieldEntryEdited }
+      { id: 'synthea-set-attribute-value', element, component: SetAttributeEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-set-attribute-assigned-value', element, component: SetAttributeValueEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
 }
@@ -467,6 +468,7 @@ const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribut
 const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
 const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name');
+const SetAttributeValueEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'value', 'Value to assign (numeric, boolean, or string)');
 const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribute', 'Assign result to attribute');
 const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute');
 

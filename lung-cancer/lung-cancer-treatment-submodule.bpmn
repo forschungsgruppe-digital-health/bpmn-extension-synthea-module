@@ -26,7 +26,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stem Cells Set bone_marrow = True</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="bone_marrow" />
+        <synthea:setAttributeConfig attribute="bone_marrow" value="true" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0jhspua</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0p8q6xn</bpmn2:outgoing>
@@ -71,7 +71,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set Mean(lung_cancer_los) = 3</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_los" />
+        <synthea:setAttributeConfig attribute="lung_cancer_los" value="3" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1wu1rz7</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0l2qjq2</bpmn2:outgoing>

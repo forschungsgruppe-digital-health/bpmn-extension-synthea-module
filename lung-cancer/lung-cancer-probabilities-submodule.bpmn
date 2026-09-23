@@ -28,7 +28,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Female_Smoker: probability_of_lung_cancer = 0.185</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" />
+        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" value="0.185" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_069pe3f</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1j4y7ok</bpmn2:outgoing>
@@ -37,7 +37,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Female_Quit: probability_of_lung_cancer = 0.026</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" />
+        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" value="0.026" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_11ty117</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0pgzk06</bpmn2:outgoing>
@@ -46,7 +46,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Female_Nonsmoker: probability_of_lung_cancer = 0.004</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" />
+        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" value="0.004" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_03pipu1</bpmn2:incoming>
       <bpmn2:outgoing>Flow_157l6po</bpmn2:outgoing>
@@ -55,7 +55,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Male_Smoker: probability_of_lung_cancer = 0.244</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" />
+        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" value="0.244" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_05fwd47</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1d2ran4</bpmn2:outgoing>
@@ -64,7 +64,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Male_Quit: probability_of_lung_cancer = 0.055</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" />
+        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" value="0.055" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_029pq7p</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0yxcemt</bpmn2:outgoing>
@@ -73,7 +73,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Male_Nonsmoker: probability_of_lung_cancer = 0.002</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" />
+        <synthea:setAttributeConfig attribute="probability_of_lung_cancer" value="0.002" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0bzbjwr</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0bt88om</bpmn2:outgoing>

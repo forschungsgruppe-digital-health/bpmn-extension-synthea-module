@@ -50,7 +50,8 @@
       { "name": "amount", "type": "Float", "isAttr": true }
     ]},
     { "name": "SetAttributeConfig", "superClass": ["Element"], "properties": [
-      { "name": "attribute", "type": "String", "isAttr": true }
+      { "name": "attribute", "type": "String", "isAttr": true },
+      { "name": "value", "type": "String", "isAttr": true }
     ]},
     { "name": "AssignToAttributeConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true }

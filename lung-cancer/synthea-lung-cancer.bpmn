@@ -60,7 +60,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Onset_Lung_Cancer: Set lung_cancer = true</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer" />
+        <synthea:setAttributeConfig attribute="lung_cancer" value="true" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_00o4kfe</bpmn2:incoming>
       <bpmn2:outgoing>Flow_03s8klv</bpmn2:outgoing>
@@ -75,7 +75,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Init_Lung_Cancer_Counter: Set lung_cancer_nondiagnosis_counter = 0</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_non_diagnosis_counter" />
+        <synthea:setAttributeConfig attribute="lung_cancer_non_diagnosis_counter" value="0" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_03s8klv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0yftkmm</bpmn2:outgoing>
@@ -204,7 +204,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Non-Small Cell Lung Cancer Set Lung Cancer Type = NSCLC</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="Lung Cancer Type" />
+        <synthea:setAttributeConfig attribute="Lung Cancer Type" value="NSCLC" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02tnxkc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1ka1k56</bpmn2:outgoing>
@@ -213,7 +213,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Small Cell Lung Cancer Set Lung Cancer Type = SCLC</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="Lung Cancer Type" />
+        <synthea:setAttributeConfig attribute="Lung Cancer Type" value="SCLC" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_14hmhmz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0w7qcbe</bpmn2:outgoing>
@@ -299,7 +299,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Will Use Hospice Set hospice = true</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="hospice" />
+        <synthea:setAttributeConfig attribute="hospice" value="true" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1x5iac6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0p5pfn9</bpmn2:outgoing>
@@ -328,7 +328,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Hospice Reason Set hospice_reason = [Lung Cancer]</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="hospice_reason" />
+        <synthea:setAttributeConfig attribute="hospice_reason" value="Lung Cancer" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0p5pfn9</bpmn2:incoming>
       <bpmn2:outgoing>Flow_05c2s62</bpmn2:outgoing>
@@ -736,7 +736,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set lung_cancer_survival_time = 2-6 years</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" />
+        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="2-6 years" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1jrrxax_SetSurvivalI</bpmn2:incoming>
       <bpmn2:outgoing>Flow_SetSurvivalI_07j08mi</bpmn2:outgoing>
@@ -747,7 +747,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set lung_cancer_survival_time = 16-28 months</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" />
+        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="16-28 months" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1fde72t_SetSurvivalII</bpmn2:incoming>
       <bpmn2:outgoing>Flow_SetSurvivalII_04i7102</bpmn2:outgoing>
@@ -758,7 +758,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set lung_cancer_survival_time = 9-18 months</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" />
+        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="9-18 months" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1f3gqqv_SetSurvivalIII</bpmn2:incoming>
       <bpmn2:outgoing>Flow_SetSurvivalIII_06fku0u</bpmn2:outgoing>
@@ -769,7 +769,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set lung_cancer_survival_time = 6-10 months</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" />
+        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="6-10 months" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1jfcv2y_SetSurvivalIV</bpmn2:incoming>
       <bpmn2:outgoing>Flow_SetSurvivalIV_194erkw</bpmn2:outgoing>

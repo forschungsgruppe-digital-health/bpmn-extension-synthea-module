@@ -4,11 +4,12 @@ const { is } = require('../lib/utils');
  * SYN-21 — SetAttribute state requires a synthea:SetAttributeConfig with an attribute name.
  *
  * A synthea:StateTypeConfig with stateType="SetAttribute" corresponds to a
- * Synthea SetAttribute state. Real Synthea also requires a value/valueCode/
- * range/expression choice, but that's clinical/simulation content out of
- * this extension's scope (deliberately, like ConditionOnset's terminology
- * codes) — synthea:SetAttributeConfig only carries the target attribute
- * name. Without even that, the state doesn't say what it's setting at all.
+ * Synthea SetAttribute state. synthea:SetAttributeConfig carries both the
+ * target attribute name and the value to assign it — value is optional
+ * here too (Synthea itself defaults to null when omitted, and also
+ * supports valueCode/range/expression instead of a plain value, which
+ * this extension doesn't model), but attribute is mandatory: without it,
+ * the state doesn't say what it's setting at all.
  */
 module.exports = function() {
 

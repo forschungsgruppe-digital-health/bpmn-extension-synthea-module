@@ -35,7 +35,7 @@
     <bpmn:task id="Task_B" name="B">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
-        <synthea:SetAttributeConfig attribute="smoker" />
+        <synthea:SetAttributeConfig attribute="smoker" value="true" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_P2</bpmn:incoming>
       <bpmn:outgoing>Flow_B_Out</bpmn:outgoing>
