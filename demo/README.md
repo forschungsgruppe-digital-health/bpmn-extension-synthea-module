@@ -16,7 +16,12 @@ It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copi
 
 - `moddleExtensions: { synthea: <descriptor> }` — `../extension/model/synthea.json`
 - `additionalModules: [ …, syntheaModule ]` — `../extension/src/index.js` (the sample properties-panel provider)
-- seed diagram — `../lung-cancer/synthea-lung-cancer.bpmn` (imported via `?raw`)
+- pathways — all five real `../lung-cancer/*.bpmn` files (imported via `?raw`), switchable via the
+  **Pathway** dropdown in the toolbar: the main `synthea-lung-cancer.bpmn` module plus its four
+  submodules (`lung-cancer-probabilities-submodule.bpmn`, `lung-cancer-treatment-submodule.bpmn`,
+  `symptom-check-submodule.bpmn`, `anemia-submodule.bpmn`). The main module's four `CallSubmodule`
+  states are drawn as small placeholder sub-processes on the canvas — their actual content lives in
+  these separate files, not inline.
 
 So whatever you change in `extension/` is reflected here on the next reload.
 

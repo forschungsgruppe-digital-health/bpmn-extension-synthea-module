@@ -12,7 +12,22 @@ import {
 
 import syntheaModule from '../../extension/src/index.js';
 import syntheaModdle from '../../extension/model/synthea.json';
-import diagramXML from '../../lung-cancer/synthea-lung-cancer.bpmn?raw';
+
+import mainPathwayXML from '../../lung-cancer/synthea-lung-cancer.bpmn?raw';
+import probabilitiesXML from '../../lung-cancer/lung-cancer-probabilities-submodule.bpmn?raw';
+import treatmentXML from '../../lung-cancer/lung-cancer-treatment-submodule.bpmn?raw';
+import symptomCheckXML from '../../lung-cancer/symptom-check-submodule.bpmn?raw';
+import anemiaXML from '../../lung-cancer/anemia-submodule.bpmn?raw';
+
+const PATHWAYS = [
+  { key: 'main', label: 'Lung Cancer (main pathway)', file: 'synthea-lung-cancer.bpmn', xml: mainPathwayXML },
+  { key: 'probabilities', label: 'Lung Cancer Probabilities (submodule)', file: 'lung-cancer-probabilities-submodule.bpmn', xml: probabilitiesXML },
+  { key: 'treatment', label: 'Lung Cancer Treatment Cycle (submodule)', file: 'lung-cancer-treatment-submodule.bpmn', xml: treatmentXML },
+  { key: 'symptom-check', label: 'Symptom Check (submodule)', file: 'symptom-check-submodule.bpmn', xml: symptomCheckXML },
+  { key: 'anemia', label: 'Anemia (submodule)', file: 'anemia-submodule.bpmn', xml: anemiaXML }
+];
+
+let currentPathway = PATHWAYS[0];
 
 const modeler = new BpmnModeler({
   container: '#canvas',
@@ -77,8 +92,22 @@ async function openDiagram(xml) {
   }
 }
 
+const pathwaySelect = document.querySelector('#pathway-select');
+PATHWAYS.forEach((pathway) => {
+  const option = document.createElement('option');
+  option.value = pathway.key;
+  option.textContent = pathway.label;
+  pathwaySelect.appendChild(option);
+});
+pathwaySelect.value = currentPathway.key;
+
+pathwaySelect.addEventListener('change', () => {
+  currentPathway = PATHWAYS.find((p) => p.key === pathwaySelect.value) || PATHWAYS[0];
+  openDiagram(currentPathway.xml);
+});
+
 document.querySelector('#load-example').addEventListener('click', () => {
-  openDiagram(diagramXML);
+  openDiagram(currentPathway.xml);
 });
 
 document.querySelector('#download').addEventListener('click', async () => {
@@ -87,7 +116,7 @@ document.querySelector('#download').addEventListener('click', async () => {
     const blob = new Blob([xml], { type: 'application/xml' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'synthea-lung-cancer.bpmn';
+    link.download = currentPathway.file;
     link.click();
     URL.revokeObjectURL(link.href);
   } catch (err) {
@@ -95,4 +124,4 @@ document.querySelector('#download').addEventListener('click', async () => {
   }
 });
 
-openDiagram(diagramXML);
+openDiagram(currentPathway.xml);

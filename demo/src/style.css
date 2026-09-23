@@ -34,6 +34,18 @@ body {
   flex: 1;
 }
 
+.toolbar .pathway-label {
+  color: #555;
+}
+
+.toolbar select {
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff;
+}
+
 .toolbar button {
   padding: 5px 12px;
   border: 1px solid #1a5dab;
