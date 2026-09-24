@@ -43,6 +43,7 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
         <term:coding system="http://loinc.org" code="24323-8" display="Comprehensive metabolic 2000 panel Serum or Plasma" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB2_out</bpmn2:incoming>
       <bpmn2:incoming>Flow_0rnk3iw</bpmn2:incoming>
@@ -54,6 +55,7 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
         <term:coding system="http://loinc.org" code="24357-6" display="Urinalysis macro (dipstick) panel Urine" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1772ltf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02g4inp</bpmn2:outgoing>
@@ -64,6 +66,7 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
         <term:coding system="http://loinc.org" code="58410-2" display="CBC panel Blood by Automated count" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02g4inp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1wu1rz7</bpmn2:outgoing>
@@ -102,6 +105,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="398171003" display="Hearing examination (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0vqvpbj</bpmn2:incoming>
       <bpmn2:outgoing>Flow_07eksao</bpmn2:outgoing>
@@ -113,6 +117,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" display="Cisplatin 50 MG Injection" />
         <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_07eksao</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0azdu8w</bpmn2:outgoing>
@@ -123,6 +128,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="chemotherapy_i_order" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0azdu8w</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1bb2p19</bpmn2:outgoing>
@@ -139,6 +145,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="Etoposide 100mg Injection" />
         <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_sclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_04aexph</bpmn2:outgoing>
@@ -150,6 +157,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100mg Injection" />
         <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_nsclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0a9d9nz</bpmn2:outgoing>
@@ -160,6 +168,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="sclc_chemotherapy_ii_order" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_04aexph</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1fvxegi</bpmn2:outgoing>
@@ -170,6 +179,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0a9d9nz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeA2_nsclc</bpmn2:outgoing>
@@ -185,6 +195,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="703423002" display="Combined chemotherapy and radiation therapy (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA2_out</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1niwvy9</bpmn2:outgoing>
@@ -194,6 +205,7 @@
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
         <synthea:stateTypeConfig stateType="VitalSign" />
         <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1niwvy9</bpmn2:incoming>
       <bpmn2:outgoing>Flow_002ms2k</bpmn2:outgoing>
@@ -209,6 +221,7 @@
         <synthea:stateTypeConfig stateType="ImagingStudy" />
         <fhirmap:resourceMapping resourceType="ImagingStudy" />
         <term:coding system="http://snomed.info/sct" code="16335031000119103" display="High resolution computed tomography of chest without contrast (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qje2av</bpmn2:incoming>
       <bpmn2:outgoing>Flow_01o3k8p</bpmn2:outgoing>
