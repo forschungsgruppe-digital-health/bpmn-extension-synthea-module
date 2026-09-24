@@ -148,6 +148,7 @@
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
         <synthea:stateTypeConfig stateType="VitalSign" />
         <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" wellness="false" encounterClass="emergency" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0179hmu</bpmn2:incoming>
       <bpmn2:outgoing>Flow_01tcpcf</bpmn2:outgoing>
@@ -158,6 +159,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="399208008" display="Plain X-ray of chest (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" wellness="false" encounterClass="emergency" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_01tcpcf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0yuj6ia</bpmn2:outgoing>
@@ -179,6 +181,7 @@
         <i18n:translation lang="de">Procedure: Chest CT Scan</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" wellness="false" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0b7k95z</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0y33dne</bpmn2:outgoing>
@@ -251,6 +254,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="167995008" display="Sputum microscopy (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_12hxynv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jljd1p</bpmn2:outgoing>
@@ -261,6 +265,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="91602002" display="Thoracentesis (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qe74a4</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0fei3qc</bpmn2:outgoing>
@@ -271,6 +276,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="432231006" display="Fine needle aspiration biopsy of lung (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_089g81c</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1qw95h4</bpmn2:outgoing>
@@ -281,6 +287,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="85765000" display="Fiberoptic bronchoscopy (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0xltu63</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jhzgwo</bpmn2:outgoing>

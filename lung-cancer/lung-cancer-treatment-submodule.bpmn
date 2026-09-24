@@ -13,6 +13,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="698354004" display="Magnetic resonance imaging for measurement of brain volume (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" wellness="false" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
       <bpmn2:outgoing>Flow_126huj4</bpmn2:outgoing>
