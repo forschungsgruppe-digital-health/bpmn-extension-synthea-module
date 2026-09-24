@@ -16,7 +16,8 @@ module.exports = {
         'synthea/assign-to-attribute-requires-valid-state': 'warn',
         'synthea/delay-range-requires-high-value': 'error',
         'synthea/referenced-by-attribute-requires-valid-state': 'warn',
-        'synthea/referenced-by-attribute-matches-assign': 'warn'
+        'synthea/referenced-by-attribute-matches-assign': 'warn',
+        'synthea/encounter-class-consistent-within-encounter': 'warn'
       }
     }
   },
@@ -35,6 +36,7 @@ module.exports = {
     'assign-to-attribute-requires-valid-state': './rules/assign-to-attribute-requires-valid-state',
     'delay-range-requires-high-value': './rules/delay-range-requires-high-value',
     'referenced-by-attribute-requires-valid-state': './rules/referenced-by-attribute-requires-valid-state',
-    'referenced-by-attribute-matches-assign': './rules/referenced-by-attribute-matches-assign'
+    'referenced-by-attribute-matches-assign': './rules/referenced-by-attribute-matches-assign',
+    'encounter-class-consistent-within-encounter': './rules/encounter-class-consistent-within-encounter'
   }
 };

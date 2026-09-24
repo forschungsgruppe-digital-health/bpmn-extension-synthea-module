@@ -154,6 +154,24 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- encounter-class-consistent-within-encounter: two states sharing one encounterId
+         disagree on encounterClass -->
+    <bpmn:task id="EncounterD_Member1_Bad" name="Encounter D member 1 (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_D" wellness="false" encounterClass="emergency" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="EncounterD_Member2_Bad" name="Encounter D member 2 (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_D" wellness="false" encounterClass="inpatient" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
     <!-- counter-requires-action: stateType="Counter" with no CounterConfig at all -->
     <bpmn:task id="Task_Counter_NoConfig" name="Counter (missing config)">
       <bpmn:extensionElements>

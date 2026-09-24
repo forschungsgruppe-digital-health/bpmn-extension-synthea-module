@@ -133,6 +133,24 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- encounter-class-consistent-within-encounter: non-wellness encounter with a
+         consistent encounterClass set on both members -->
+    <bpmn:task id="EncounterC_Member1_Good" name="Encounter C member 1 (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_C" wellness="false" encounterClass="emergency" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="EncounterC_Member2_Good" name="Encounter C member 2 (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_C" wellness="false" encounterClass="emergency" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
     <!-- probability-sum-valid: two probabilityAttribute-only flows must NOT
          count as "unfixed" (Table C: a named/dynamic distribution, not an
          omission) -->

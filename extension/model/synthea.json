@@ -32,10 +32,14 @@
       { "name": "probabilityAttribute", "type": "String", "isAttr": true },
       { "name": "probabilityDefault", "type": "Float", "isAttr": true }
     ]},
+    { "name": "EncounterClass", "isEnum": true, "literalValues": [
+      {"name": "wellness"}, {"name": "ambulatory"}, {"name": "emergency"}, {"name": "urgentcare"}, {"name": "inpatient"}, {"name": "outpatient"}
+    ]},
     { "name": "EncounterContext", "superClass": ["Element"], "properties": [
       { "name": "requiresEncounterContext", "type": "Boolean", "isAttr": true, "default": false },
       { "name": "encounterId", "type": "String", "isAttr": true },
       { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "encounterClass", "type": "EncounterClass", "isAttr": true },
       { "name": "reason", "type": "String", "isAttr": true }
     ]},
     { "name": "EncounterReference", "superClass": ["Element"], "properties": [

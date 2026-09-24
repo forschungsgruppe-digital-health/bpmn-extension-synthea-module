@@ -25,6 +25,7 @@ const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
 
 const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE'];
 const COUNTER_ACTION_VALUES = ['increment', 'decrement'];
+const ENCOUNTER_CLASS_VALUES = ['wellness', 'ambulatory', 'emergency', 'urgentcare', 'inpatient', 'outpatient'];
 
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
@@ -187,6 +188,7 @@ function createEncounterContextGroup(element) {
       { id: 'synthea-encounter-context-value', element, component: EncounterContextEntry },
       { id: 'synthea-encounter-context-id', element, component: EncounterIdEntry, isEdited: isTextFieldEntryEdited },
       { id: 'synthea-encounter-context-wellness', element, component: EncounterWellnessEntry },
+      { id: 'synthea-encounter-context-class', element, component: EncounterClassEntry },
       { id: 'synthea-encounter-context-reason', element, component: EncounterReasonEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
@@ -469,6 +471,7 @@ const SubmoduleEntry = makeTextEntry(SUBMODULE_TYPE, 'submodule', 'Submodule ref
 const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'requiresEncounterContext', 'Encounter context');
 const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
 const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter');
+const EncounterClassEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterClass', 'Encounter class (required for non-wellness encounters)', ENCOUNTER_CLASS_VALUES);
 const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Reason (attribute name or State_Name)');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
