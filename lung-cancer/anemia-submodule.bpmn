@@ -48,6 +48,7 @@
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Severe</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_14lbqcy</bpmn2:incoming>
       <bpmn2:incoming>Flow_0wjuj6o</bpmn2:incoming>
@@ -58,6 +59,7 @@
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_00jy2p5</bpmn2:incoming>
       <bpmn2:incoming>Flow_0k3wt2u</bpmn2:incoming>
@@ -68,6 +70,7 @@
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Severe</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ney2yb</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0ism7fl</bpmn2:outgoing>
@@ -77,6 +80,7 @@
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0d66jrp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jv67ia</bpmn2:outgoing>
@@ -86,6 +90,7 @@
         <i18n:translation lang="de">Procedure: Peripheral_Blood_Smear</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1mfa232</bpmn2:incoming>
       <bpmn2:incoming>Flow_0ningp2</bpmn2:incoming>
@@ -98,6 +103,7 @@
         <i18n:translation lang="de">Procedure: Review_Of_Systems</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0lu5fq8</bpmn2:incoming>
       <bpmn2:outgoing>Flow_19k5r5d</bpmn2:outgoing>
@@ -115,6 +121,7 @@
         <i18n:translation lang="de">Procedure: Brief_Examination</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0m0kss6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_00pq6jn</bpmn2:outgoing>
@@ -149,6 +156,7 @@
         <i18n:translation lang="de">Procedure: Transfusion</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0598yo2</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02kkd88</bpmn2:outgoing>
@@ -164,6 +172,7 @@
         <i18n:translation lang="de">Medication Prescription: Iron_Supplement</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1o10yzv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0hektv4</bpmn2:outgoing>
@@ -173,6 +182,7 @@
         <i18n:translation lang="de">Medication Prescription: Vitamin B12 Booster</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0oagdnt</bpmn2:incoming>
       <bpmn2:incoming>Flow_1m2ndgk</bpmn2:incoming>
@@ -203,6 +213,7 @@
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_F_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ly2iqa</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1s5liut</bpmn2:outgoing>
@@ -212,6 +223,7 @@
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_M_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1co6iv8</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1dsdxrh</bpmn2:outgoing>
@@ -235,6 +247,7 @@
         <i18n:translation lang="de">Procedure: Medication_Reconciliation</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0x52yk3</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0m0kss6</bpmn2:outgoing>
