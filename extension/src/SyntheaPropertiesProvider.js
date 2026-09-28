@@ -217,15 +217,27 @@ function createConditionGroup(element) {
 }
 
 function createDelayGroup(element) {
+  const config = getExtension(element, DELAY_TYPE);
+  const delayShape = config ? config.get('delayShape') : undefined;
+
+  const entries = [
+    { id: 'synthea-delay-shape', element, component: DelayShapeEntry },
+    { id: 'synthea-delay-value', element, component: DelayValueEntry, isEdited: isTextFieldEntryEdited }
+  ];
+
+  // delayValueHigh only means anything for RANGE (the low/high pair) —
+  // for EXACT there's only ever one number, so hide it instead of showing
+  // a field that would silently do nothing.
+  if (delayShape === 'RANGE') {
+    entries.push({ id: 'synthea-delay-value-high', element, component: DelayValueHighEntry, isEdited: isTextFieldEntryEdited });
+  }
+
+  entries.push({ id: 'synthea-delay-unit', element, component: DelayUnitEntry, isEdited: isTextFieldEntryEdited });
+
   return {
     id: 'synthea-delay',
     label: 'Delay',
-    entries: [
-      { id: 'synthea-delay-shape', element, component: DelayShapeEntry },
-      { id: 'synthea-delay-value', element, component: DelayValueEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-delay-value-high', element, component: DelayValueHighEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-delay-unit', element, component: DelayUnitEntry, isEdited: isTextFieldEntryEdited }
-    ]
+    entries
   };
 }
 
@@ -266,16 +278,28 @@ function createSubmoduleGroup(element) {
 }
 
 function createEncounterContextGroup(element) {
+  const config = getExtension(element, ENCOUNTER_CONTEXT_TYPE);
+  const wellness = config ? !!config.get('wellness') : false;
+
+  const entries = [
+    { id: 'synthea-encounter-context-value', element, component: EncounterContextEntry },
+    { id: 'synthea-encounter-context-id', element, component: EncounterIdEntry, isEdited: isTextFieldEntryEdited },
+    { id: 'synthea-encounter-context-wellness', element, component: EncounterWellnessEntry }
+  ];
+
+  // encounterClass is only meaningful (and, per Synthea, required) for
+  // non-wellness encounters — hide it once wellness is checked instead of
+  // showing a field with nothing to do.
+  if (!wellness) {
+    entries.push({ id: 'synthea-encounter-context-class', element, component: EncounterClassEntry });
+  }
+
+  entries.push({ id: 'synthea-encounter-context-reason', element, component: EncounterReasonEntry, isEdited: isTextFieldEntryEdited });
+
   return {
     id: 'synthea-encounter-context',
     label: 'Encounter Context',
-    entries: [
-      { id: 'synthea-encounter-context-value', element, component: EncounterContextEntry },
-      { id: 'synthea-encounter-context-id', element, component: EncounterIdEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-encounter-context-wellness', element, component: EncounterWellnessEntry },
-      { id: 'synthea-encounter-context-class', element, component: EncounterClassEntry },
-      { id: 'synthea-encounter-context-reason', element, component: EncounterReasonEntry, isEdited: isTextFieldEntryEdited }
-    ]
+    entries
   };
 }
 
