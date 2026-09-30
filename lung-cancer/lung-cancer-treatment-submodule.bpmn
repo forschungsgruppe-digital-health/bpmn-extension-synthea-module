@@ -35,8 +35,18 @@
     <bpmn2:exclusiveGateway id="Gateway_130sh5c">
       <bpmn2:incoming>Flow_0p8q6xn</bpmn2:incoming>
       <bpmn2:incoming>Flow_045p3wr</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0rnk3iw</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_gw130_to_careplan</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
+    <bpmn2:task id="Activity_CarePlan_SCLC" name="CarePlanStart: SCLC Treatment Plan">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">CarePlanStart: SCLC Treatment Plan</i18n:translation>
+        <synthea:stateTypeConfig stateType="CarePlanStart" />
+        <fhirmap:resourceMapping resourceType="CarePlan" />
+        <term:coding system="http://snomed.info/sct" code="182964004" display="Terminal care (regime/therapy)" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_gw130_to_careplan</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_careplan_to_recordcmp</bpmn2:outgoing>
+    </bpmn2:task>
     <bpmn2:task id="Activity_11vsro0" name="Diagnostic Area: Record_CMP">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CMP</i18n:translation>
@@ -46,7 +56,7 @@
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB2_out</bpmn2:incoming>
-      <bpmn2:incoming>Flow_0rnk3iw</bpmn2:incoming>
+      <bpmn2:incoming>Flow_careplan_to_recordcmp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1772ltf</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:task id="Activity_1rbjl3t" name="Diagnostic Area: Record_Urinalysis">
@@ -293,7 +303,8 @@
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0p8q6xn" sourceRef="Activity_0xuk3ku" targetRef="Gateway_130sh5c" />
-    <bpmn2:sequenceFlow id="Flow_0rnk3iw" sourceRef="Gateway_130sh5c" targetRef="Activity_11vsro0" />
+    <bpmn2:sequenceFlow id="Flow_gw130_to_careplan" sourceRef="Gateway_130sh5c" targetRef="Activity_CarePlan_SCLC" />
+    <bpmn2:sequenceFlow id="Flow_careplan_to_recordcmp" sourceRef="Activity_CarePlan_SCLC" targetRef="Activity_11vsro0" />
     <bpmn2:sequenceFlow id="Flow_1772ltf" sourceRef="Activity_11vsro0" targetRef="Activity_1rbjl3t" />
     <bpmn2:sequenceFlow id="Flow_02g4inp" sourceRef="Activity_1rbjl3t" targetRef="Activity_0g6jkau" />
     <bpmn2:sequenceFlow id="Flow_1wu1rz7" sourceRef="Activity_0g6jkau" targetRef="Activity_01m9cy0" />
@@ -439,19 +450,11 @@
       <bpmn2:text>End Encounter: End_Diagnosis_Encounter_IV</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:association id="Association_0lk2kks" associationDirection="None" sourceRef="Flow_045p3wr" targetRef="TextAnnotation_1m96ltu" />
-    <bpmn2:textAnnotation id="TextAnnotation_03sqk4x">
-      <bpmn2:text>CarePlanStart: SCLC Treatment Plan
-SNOMED-CT: 182964004 - Terminal care (regime/therapy)
-Activities: 133918004 - Comfort measures (regime/therapy),
-408957008 - Chronic pain control management (procedure),
-243072006 - Cancer education (procedure)</bpmn2:text>
-    </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_0tcsc9q" associationDirection="None" sourceRef="Flow_0rnk3iw" targetRef="TextAnnotation_03sqk4x" />
     <bpmn2:textAnnotation id="TextAnnotation_1s5cihb">
       <bpmn2:text>Encounter: SCLC Treatment Encounter (inpatient)
 SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
     </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Flow_0rnk3iw" targetRef="TextAnnotation_1s5cihb" />
+    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Flow_careplan_to_recordcmp" targetRef="TextAnnotation_1s5cihb" />
     <bpmn2:textAnnotation id="TextAnnotation_15dhow8">
       <bpmn2:text>End Encounter: End_SCLC_Treatment_Encounter</bpmn2:text>
     </bpmn2:textAnnotation>
@@ -492,6 +495,10 @@ SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_130sh5c_di" bpmnElement="Gateway_130sh5c" isMarkerVisible="true">
         <dc:Bounds x="9445" y="288" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_CarePlan_SCLC_di" bpmnElement="Activity_CarePlan_SCLC">
+        <dc:Bounds x="9538" y="273" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_11vsro0_di" bpmnElement="Activity_11vsro0">
         <dc:Bounds x="9680" y="273" width="100" height="80" />
@@ -644,9 +651,6 @@ SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
       <bpmndi:BPMNShape id="TextAnnotation_1m96ltu_di" bpmnElement="TextAnnotation_1m96ltu">
         <dc:Bounds x="9235" y="150" width="102" height="57" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_03sqk4x_di" bpmnElement="TextAnnotation_03sqk4x">
-        <dc:Bounds x="9537" y="150" width="102" height="57" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1s5cihb_di" bpmnElement="TextAnnotation_1s5cihb">
         <dc:Bounds x="9670" y="140" width="102" height="86" />
       </bpmndi:BPMNShape>
@@ -681,12 +685,13 @@ SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
         <di:waypoint x="9470" y="150" />
         <di:waypoint x="9470" y="288" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0rnk3iw_di" bpmnElement="Flow_0rnk3iw">
+      <bpmndi:BPMNEdge id="Flow_gw130_to_careplan_di" bpmnElement="Flow_gw130_to_careplan">
         <di:waypoint x="9495" y="313" />
+        <di:waypoint x="9538" y="313" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_careplan_to_recordcmp_di" bpmnElement="Flow_careplan_to_recordcmp">
+        <di:waypoint x="9638" y="313" />
         <di:waypoint x="9680" y="313" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="9733" y="118" width="73" height="27" />
-        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1772ltf_di" bpmnElement="Flow_1772ltf">
         <di:waypoint x="9780" y="313" />
@@ -881,10 +886,6 @@ SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
       <bpmndi:BPMNEdge id="Association_0lk2kks_di" bpmnElement="Association_0lk2kks">
         <di:waypoint x="9285" y="313" />
         <di:waypoint x="9286" y="207" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0tcsc9q_di" bpmnElement="Association_0tcsc9q">
-        <di:waypoint x="9587" y="313" />
-        <di:waypoint x="9588" y="207" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_047472w_di" bpmnElement="Association_047472w">
         <di:waypoint x="9587" y="313" />
