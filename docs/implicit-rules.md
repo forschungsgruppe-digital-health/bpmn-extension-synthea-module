@@ -48,6 +48,8 @@ Without all three together, reconversion is not unambiguously possible.
 | RxNorm | MedicationOrder/MedicationEnd | |
 | NUBC | `EncounterEnd.discharge_disposition` | a fourth, narrower vocabulary outside the original three-system scope |
 
+**Valid `unit` values** (per the Basics wiki): any `unit` field tied to a time/age quantity — `DelayConfig.delayUnit`, `Condition.unit` (used by both `Age` and `PriorState`) — should be one of `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`. These fields are free text in the schema (not an enum), since Synthea's `Measurement`-category units (e.g. for `Vital Sign`/`Observation` values) accept an arbitrary string instead — so this is a documentation convention for modelers, not something the panel enforces.
+
 ---
 
 ## B. Nodes (Flow Nodes)

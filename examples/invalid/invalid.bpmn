@@ -196,6 +196,14 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- attribute-name-lower-snake-case: attribute name is not lower_snake_case -->
+    <bpmn:task id="Task_SetAttribute_BadName" name="Set attribute (bad name)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="Lung Cancer Type" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
     <!-- assign-to-attribute-requires-valid-state: attribute set on a Procedure state
          (not one of ConditionOnset/AllergyOnset/MedicationOrder/CarePlanStart/Device) -->
     <bpmn:task id="Procedure_AssignBad" name="Procedure with assign (bad)">
