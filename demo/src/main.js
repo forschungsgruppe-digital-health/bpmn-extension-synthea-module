@@ -110,6 +110,21 @@ document.querySelector('#load-example').addEventListener('click', () => {
   openDiagram(currentPathway.xml);
 });
 
+document.querySelector('#new-diagram').addEventListener('click', async () => {
+  try {
+    await modeler.createDiagram();
+
+    currentPathway = { key: 'new', label: 'New diagram (unsaved)', file: 'new-diagram.bpmn', xml: null };
+    pathwaySelect.value = '';
+
+    const canvas = modeler.get('canvas');
+    await waitForLayout(canvas);
+    canvas.zoom('fit-viewport');
+  } catch (err) {
+    console.error('failed to create new diagram', err);
+  }
+});
+
 document.querySelector('#download').addEventListener('click', async () => {
   try {
     const { xml } = await modeler.saveXML({ format: true });
