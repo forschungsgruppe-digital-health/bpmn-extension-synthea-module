@@ -19,6 +19,10 @@ automatically from the first commit.
 build one) → [Modeling playground](#modeling-playground-demo) (see it run) →
 [`extension/`](extension/) (where your code goes).
 
+**Modeling a pathway with this extension?** Skip straight to
+[`docs/modeling-guide.md`](docs/modeling-guide.md) — task-by-task instructions
+for every `synthea:` type, not a conceptual intro.
+
 ---
 
 ## Anatomy of a BPMN extension
@@ -122,6 +126,9 @@ children use `"isMany": true`; element text uses `"isBody": true`.
 ├── .release-please-manifest.json
 ├── docs/
 │   ├── concepts.md            # primer: what an extension is + how the libs fit
+│   ├── synthea.md             # primer: Synthea GMF concepts, for this project
+│   ├── modeling-guide.md      # task-by-task guide to modeling with synthea:
+│   ├── implicit-rules.md      # full BPMN -> Synthea mapping reference
 │   └── adr/                   # architecture decision records (TEMPLATE.md)
 ├── extension/                 # >>> YOUR extension goes here <<<
 │   ├── model/
