@@ -172,7 +172,6 @@
         <i18n:translation lang="de">Medication Prescription: Iron_Supplement</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1o10yzv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0hektv4</bpmn2:outgoing>
@@ -182,7 +181,6 @@
         <i18n:translation lang="de">Medication Prescription: Vitamin B12 Booster</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0oagdnt</bpmn2:incoming>
       <bpmn2:incoming>Flow_1m2ndgk</bpmn2:incoming>

@@ -313,25 +313,27 @@ rule `wellness-consistent-within-encounter`) and on `encounterClass` (lint
 rule `encounter-class-consistent-within-encounter`, which also warns if a
 non-wellness group sets no class at all).
 
-**Known limitation:** this only works cleanly when each state belongs to
-exactly one encounter. If your diagram has two different encounter paths
-that later converge on shared states (e.g. via a common follow-up step),
-those shared states can only carry one `encounterId` — a second
-`encounterId` on the same element wouldn't actually resolve anything:
-`tools/bpmn2gmf` would still have to emit two separate generated states
-(one per encounter) for one diagram node, since a single generated Synthea
-state can't dynamically belong to different encounters depending on which
-path reached it. Two real options:
-- **Duplicate the shared element in the diagram** — draw it twice, once on
-  each incoming path, each copy with its own `encounterId`. More visible,
-  needs no schema change, and is the structurally honest fix (a concrete
-  example of this convergence exists today, unfixed, in
-  `anemia-submodule.bpmn`: `Administer_Medications` merges a branch from
-  `Anemia_Encounter` with one from `Consult_Referral_to_Experts_Encounter`
-  before reaching `Iron_Supplement`/`Vitamin B12 Booster`).
-- **Accept the imprecision** — tag the shared state with whichever
-  `encounterId` is the more common path, same as this project currently
-  does everywhere this comes up.
+**What if a state is reachable from more than one `encounterId` group?**
+Usually: **leave it untagged** (no `EncounterContext` at all), rather than
+forcing it onto one path's id. Real Synthea resolves encounter membership
+dynamically at simulation time (`current_encounter`) — whichever encounter
+is still open on the path actually taken stays active for an untagged
+state, which is exactly correct regardless of which path led there. This
+is confirmed directly against the real upstream `anemia_sub.json`:
+`Administer_Medications`/`Iron_Supplement`/`Vitamin B12 Booster` carry no
+encounter info at all there either, despite being reachable from both
+`Anemia_Encounter`'s own workup and, via `Consult_Referral_to_Experts_Encounter`,
+the blood-panel branch — our `anemia-submodule.bpmn` now matches this. A
+second `encounterId` field on the element wouldn't help here even if it
+existed: `tools/bpmn2gmf` would still have to emit two separate generated
+states for the one diagram node, which untagging already achieves more
+simply by not forcing a choice at all.
+
+The one case this *doesn't* cover: a shared state that must itself carry
+genuinely *different* `wellness`/`encounterClass` values depending on path
+— not just bookkeeping, an actual requirement. There, duplicate the
+element in the diagram instead: draw it twice, once per incoming path,
+each copy tagged independently with its own `encounterId`.
 
 See `implicit-rules.md` Section E for the full explanation of why (real
 Synthea doesn't have this problem; our static tagging approach trades that
