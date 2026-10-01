@@ -26,7 +26,7 @@
       </bpmn2:timerEventDefinition>
     </bpmn2:intermediateCatchEvent>
     <bpmn2:sequenceFlow id="Flow_0qd5uyu" sourceRef="Event_0ugbe77" targetRef="Event_0pks5ou" />
-    <bpmn2:callActivity id="Activity_1vm601n" name="Lung Cancer Probabilities" cp:selectionBehavior="all" cp:definitionCanonical="https://modeler.helict.eu/modeler/6a58fef799ae3e21509fa6dd" calledElement="Process_LungCancerProbabilities">
+    <bpmn2:callActivity id="Activity_1vm601n" name="Lung Cancer Probabilities" calledElement="Process_LungCancerProbabilities" cp:selectionBehavior="all" cp:definitionCanonical="https://modeler.helict.eu/modeler/6a58fef799ae3e21509fa6dd">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Probabilities</i18n:translation>
         <cp:reference bibItemRef="BibliographyItem_1o2vo9v" />
@@ -117,7 +117,7 @@
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_165jfdh" sourceRef="Activity_15ih3fq" targetRef="Event_1n1dk9c" />
-    <bpmn2:callActivity id="Activity_0910q2u" name="Symptom Check" cp:selectionBehavior="any" calledElement="Process_SymptomCheck">
+    <bpmn2:callActivity id="Activity_0910q2u" name="Symptom Check" calledElement="Process_SymptomCheck" cp:selectionBehavior="any">
       <bpmn2:extensionElements>
         <cp:reference bibItemRef="BibliographyItem_203p1sh" />
         <i18n:translation lang="de">Symptom Check</i18n:translation>
@@ -148,7 +148,7 @@
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
         <synthea:stateTypeConfig stateType="VitalSign" />
         <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" wellness="false" encounterClass="emergency" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0179hmu</bpmn2:incoming>
       <bpmn2:outgoing>Flow_01tcpcf</bpmn2:outgoing>
@@ -159,7 +159,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="399208008" display="Plain X-ray of chest (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" wellness="false" encounterClass="emergency" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_01tcpcf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0yuj6ia</bpmn2:outgoing>
@@ -181,7 +181,7 @@
         <i18n:translation lang="de">Procedure: Chest CT Scan</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" wellness="false" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0b7k95z</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0y33dne</bpmn2:outgoing>
@@ -254,7 +254,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="167995008" display="Sputum microscopy (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_12hxynv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jljd1p</bpmn2:outgoing>
@@ -265,7 +265,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="91602002" display="Thoracentesis (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qe74a4</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0fei3qc</bpmn2:outgoing>
@@ -276,7 +276,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="432231006" display="Fine needle aspiration biopsy of lung (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_089g81c</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1qw95h4</bpmn2:outgoing>
@@ -287,12 +287,12 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="85765000" display="Fiberoptic bronchoscopy (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" wellness="false" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0xltu63</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jhzgwo</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:callActivity id="Activity_137ao8g" name="Anemia Submodule" cp:selectionBehavior="any" calledElement="Process_AnemiaSubmodule">
+    <bpmn2:callActivity id="Activity_137ao8g" name="Anemia Submodule" calledElement="Process_AnemiaSubmodule" cp:selectionBehavior="any">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Anemia Submodule</i18n:translation>
         <cp:reference bibItemRef="BibliographyItem_1b4m2el" />
@@ -701,7 +701,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">anemia is nil</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="anemia" />
+          <synthea:condition conditionType="Attribute" attribute="anemia" operator="==" value="nil" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -730,7 +730,7 @@
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0zpyryl" name="else" sourceRef="Gateway_11iwyj4" targetRef="Gateway_1nqy9eu" />
     <bpmn2:sequenceFlow id="Flow_1e9afg2" sourceRef="Activity_137ao8g" targetRef="Gateway_1nqy9eu" />
-    <bpmn2:callActivity id="Activity_LungCancerTreatmentCycle" name="Lung Cancer Treatment Cycle" cp:selectionBehavior="any" calledElement="Process_LungCancerTreatmentCycle">
+    <bpmn2:callActivity id="Activity_LungCancerTreatmentCycle" name="Lung Cancer Treatment Cycle" calledElement="Process_LungCancerTreatmentCycle" cp:selectionBehavior="any">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Treatment Cycle</i18n:translation>
         <cp:reference bibItemRef="BibliographyItem_0gk3f7q" />
@@ -1209,12 +1209,6 @@ biopsy of lung (procedure)</bpmn2:text>
       <bpmndi:BPMNShape id="Gateway_0fqthje_di" bpmnElement="Gateway_0fqthje" isMarkerVisible="true">
         <dc:Bounds x="5885" y="135" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0y5ongf_di" bpmnElement="Event_0y5ongf">
-        <dc:Bounds x="7542" y="632" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="7545" y="675" width="30" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_LungCancerTreatmentCycle_di" bpmnElement="Activity_LungCancerTreatmentCycle">
         <dc:Bounds x="8820" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
@@ -1235,6 +1229,16 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="7420" y="530" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0y5ongf_di" bpmnElement="Event_0y5ongf">
+        <dc:Bounds x="8852" y="572" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="8855" y="615" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0hi7d1l_di" bpmnElement="Association_0hi7d1l">
+        <di:waypoint x="4708" y="340" />
+        <di:waypoint x="4724" y="374" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="TextAnnotation_1h8ai1n_di" bpmnElement="TextAnnotation_1h8ai1n">
         <dc:Bounds x="2240" y="30" width="150" height="72" />
         <bpmndi:BPMNLabel />
@@ -1249,10 +1253,6 @@ biopsy of lung (procedure)</bpmn2:text>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0uxrpft_di" bpmnElement="TextAnnotation_0uxrpft">
         <dc:Bounds x="4760" y="-40" width="130" height="72" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0w3cjkd_di" bpmnElement="TextAnnotation_0w3cjkd">
-        <dc:Bounds x="4760" y="360" width="140" height="72" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_16ps3m8_di" bpmnElement="TextAnnotation_16ps3m8">
@@ -1771,9 +1771,7 @@ biopsy of lung (procedure)</bpmn2:text>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_ToDeath_di" bpmnElement="Flow_ToDeath">
         <di:waypoint x="8870" y="371" />
-        <di:waypoint x="8870" y="491" />
-        <di:waypoint x="7560" y="491" />
-        <di:waypoint x="7560" y="632" />
+        <di:waypoint x="8870" y="572" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1nisonf_di" bpmnElement="Association_1nisonf">
         <di:waypoint x="2255" y="140" />
@@ -1790,10 +1788,6 @@ biopsy of lung (procedure)</bpmn2:text>
       <bpmndi:BPMNEdge id="Association_1c3q53s_di" bpmnElement="Association_1c3q53s">
         <di:waypoint x="4739" y="31" />
         <di:waypoint x="4760" y="16" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0hi7d1l_di" bpmnElement="Association_0hi7d1l">
-        <di:waypoint x="4739" y="333" />
-        <di:waypoint x="4780" y="360" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0o8x1l8_di" bpmnElement="Association_0o8x1l8">
         <di:waypoint x="5427" y="-96" />
@@ -1879,14 +1873,14 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="3638" y="140" />
         <di:waypoint x="3651" y="109" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0w3cjkd_di" bpmnElement="TextAnnotation_0w3cjkd">
+        <dc:Bounds x="4670" y="374" width="140" height="72" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1r3cip1">
-  </bpmndi:BPMNDiagram>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1wxtn3o">
-  </bpmndi:BPMNDiagram>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1uvpzjm">
-  </bpmndi:BPMNDiagram>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_LungCancerTreatmentCycle">
-  </bpmndi:BPMNDiagram>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1r3cip1" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1wxtn3o" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1uvpzjm" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_LungCancerTreatmentCycle" />
 </bpmn2:definitions>

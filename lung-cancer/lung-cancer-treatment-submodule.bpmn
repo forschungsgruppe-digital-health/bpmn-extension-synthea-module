@@ -13,7 +13,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="698354004" display="Magnetic resonance imaging for measurement of brain volume (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" wellness="false" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
       <bpmn2:outgoing>Flow_126huj4</bpmn2:outgoing>
@@ -53,7 +53,7 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
         <term:coding system="http://loinc.org" code="24323-8" display="Comprehensive metabolic 2000 panel Serum or Plasma" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB2_out</bpmn2:incoming>
       <bpmn2:incoming>Flow_careplan_to_recordcmp</bpmn2:incoming>
@@ -65,7 +65,7 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
         <term:coding system="http://loinc.org" code="24357-6" display="Urinalysis macro (dipstick) panel Urine" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1772ltf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02g4inp</bpmn2:outgoing>
@@ -76,12 +76,12 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <fhirmap:resourceMapping resourceType="Observation" />
         <term:coding system="http://loinc.org" code="58410-2" display="CBC panel Blood by Automated count" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02g4inp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1wu1rz7</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:scriptTask id="Activity_01m9cy0" name="Set Mean(lung_cancer_los) = 3">
+    <bpmn2:scriptTask id="Activity_01m9cy0" name="Set Mean (lung_cancer_los) = 3">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set Mean(lung_cancer_los) = 3</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
@@ -115,7 +115,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="398171003" display="Hearing examination (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0vqvpbj</bpmn2:incoming>
       <bpmn2:outgoing>Flow_07eksao</bpmn2:outgoing>
@@ -127,7 +127,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" display="Cisplatin 50 MG Injection" />
         <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_07eksao</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0azdu8w</bpmn2:outgoing>
@@ -138,7 +138,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="chemotherapy_i_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0azdu8w</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1bb2p19</bpmn2:outgoing>
@@ -155,7 +155,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="Etoposide 100mg Injection" />
         <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_sclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_04aexph</bpmn2:outgoing>
@@ -167,7 +167,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100mg Injection" />
         <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_nsclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0a9d9nz</bpmn2:outgoing>
@@ -178,7 +178,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="sclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_04aexph</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1fvxegi</bpmn2:outgoing>
@@ -189,7 +189,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0a9d9nz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeA2_nsclc</bpmn2:outgoing>
@@ -205,7 +205,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="703423002" display="Combined chemotherapy and radiation therapy (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA2_out</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1niwvy9</bpmn2:outgoing>
@@ -215,7 +215,7 @@
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
         <synthea:stateTypeConfig stateType="VitalSign" />
         <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1niwvy9</bpmn2:incoming>
       <bpmn2:outgoing>Flow_002ms2k</bpmn2:outgoing>
@@ -231,7 +231,7 @@
         <synthea:stateTypeConfig stateType="ImagingStudy" />
         <fhirmap:resourceMapping resourceType="ImagingStudy" />
         <term:coding system="http://snomed.info/sct" code="16335031000119103" display="High resolution computed tomography of chest without contrast (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" wellness="false" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qje2av</bpmn2:incoming>
       <bpmn2:outgoing>Flow_01o3k8p</bpmn2:outgoing>
@@ -451,10 +451,9 @@
     </bpmn2:textAnnotation>
     <bpmn2:association id="Association_0lk2kks" associationDirection="None" sourceRef="Flow_045p3wr" targetRef="TextAnnotation_1m96ltu" />
     <bpmn2:textAnnotation id="TextAnnotation_1s5cihb">
-      <bpmn2:text>Encounter: SCLC Treatment Encounter (inpatient)
-SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
+      <bpmn2:text>SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
     </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Flow_careplan_to_recordcmp" targetRef="TextAnnotation_1s5cihb" />
+    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Activity_CarePlan_SCLC" targetRef="TextAnnotation_1s5cihb" />
     <bpmn2:textAnnotation id="TextAnnotation_15dhow8">
       <bpmn2:text>End Encounter: End_SCLC_Treatment_Encounter</bpmn2:text>
     </bpmn2:textAnnotation>
@@ -600,17 +599,17 @@ SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
       <bpmndi:BPMNShape id="Gateway_typeB2_di" bpmnElement="Gateway_typeB2" isMarkerVisible="true">
         <dc:Bounds x="13945" y="288" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_15y26as_di" bpmnElement="Association_15y26as">
-        <di:waypoint x="13220" y="100" />
-        <di:waypoint x="13205" y="77" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1scgzan_di" bpmnElement="Association_1scgzan">
-        <di:waypoint x="13299" y="106" />
-        <di:waypoint x="13343" y="77" />
+      <bpmndi:BPMNEdge id="Association_047472w_di" bpmnElement="Association_047472w">
+        <di:waypoint x="9588" y="270" />
+        <di:waypoint x="9572" y="179" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0j1dz42_di" bpmnElement="Association_0j1dz42">
-        <di:waypoint x="12864" y="273" />
-        <di:waypoint x="12881" y="225" />
+        <di:waypoint x="12856" y="273" />
+        <di:waypoint x="12862" y="229" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0i0xiwk_di" bpmnElement="Association_0i0xiwk">
+        <di:waypoint x="13510" y="313" />
+        <di:waypoint x="13514" y="244" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="TextAnnotation_0se7hom_di" bpmnElement="TextAnnotation_0se7hom">
         <dc:Bounds x="8834" y="180" width="200" height="72" />
@@ -651,11 +650,11 @@ SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
       <bpmndi:BPMNShape id="TextAnnotation_1m96ltu_di" bpmnElement="TextAnnotation_1m96ltu">
         <dc:Bounds x="9235" y="150" width="102" height="57" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1s5cihb_di" bpmnElement="TextAnnotation_1s5cihb">
-        <dc:Bounds x="9670" y="140" width="102" height="86" />
+      <bpmndi:BPMNShape id="TextAnnotation_0p94u3s_di" bpmnElement="TextAnnotation_0p94u3s">
+        <dc:Bounds x="13130" y="20" width="108" height="57" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_15dhow8_di" bpmnElement="TextAnnotation_15dhow8">
-        <dc:Bounds x="13460" y="150" width="111" height="57" />
+      <bpmndi:BPMNShape id="TextAnnotation_0n168x7_di" bpmnElement="TextAnnotation_0n168x7">
+        <dc:Bounds x="13290" y="-9" width="106" height="86" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_TreatmentCycleStart_di" bpmnElement="Flow_TreatmentCycleStart">
         <di:waypoint x="8706" y="313" />
@@ -887,23 +886,24 @@ SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
         <di:waypoint x="9285" y="313" />
         <di:waypoint x="9286" y="207" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_047472w_di" bpmnElement="Association_047472w">
-        <di:waypoint x="9587" y="313" />
-        <di:waypoint x="9670" y="193" />
+      <bpmndi:BPMNEdge id="Association_15y26as_di" bpmnElement="Association_15y26as">
+        <di:waypoint x="13220" y="100" />
+        <di:waypoint x="13205" y="77" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0i0xiwk_di" bpmnElement="Association_0i0xiwk">
-        <di:waypoint x="13510" y="313" />
-        <di:waypoint x="13515" y="207" />
+      <bpmndi:BPMNEdge id="Association_1scgzan_di" bpmnElement="Association_1scgzan">
+        <di:waypoint x="13299" y="106" />
+        <di:waypoint x="13343" y="77" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_0p94u3s_di" bpmnElement="TextAnnotation_0p94u3s">
-        <dc:Bounds x="13130" y="20" width="108" height="57" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0n168x7_di" bpmnElement="TextAnnotation_0n168x7">
-        <dc:Bounds x="13290" y="-9" width="106" height="86" />
+      <bpmndi:BPMNShape id="TextAnnotation_1s5cihb_di" bpmnElement="TextAnnotation_1s5cihb">
+        <dc:Bounds x="9560" y="107" width="141.27313337587748" height="72" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1axtv0b_di" bpmnElement="TextAnnotation_1axtv0b">
-        <dc:Bounds x="12860" y="125" width="135" height="100" />
+        <dc:Bounds x="12830" y="129" width="135" height="100" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_15dhow8_di" bpmnElement="TextAnnotation_15dhow8">
+        <dc:Bounds x="13460" y="187" width="111" height="57" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
