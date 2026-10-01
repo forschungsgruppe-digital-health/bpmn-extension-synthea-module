@@ -87,6 +87,55 @@
       </bpmn:extensionElements>
     </bpmn:exclusiveGateway>
 
+    <!-- Age_Guard example (see docs/implicit-rules.md Table A): a Guard using
+         the Age conditionType instead of Attribute, waiting until the
+         patient turns 65 -->
+    <bpmn:exclusiveGateway id="Gateway_AgeGuard_Good" name="Age guard (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+        <synthea:GuardConfig>
+          <synthea:allow conditionType="Age" operator=">=" quantity="65" unit="years" />
+        </synthea:GuardConfig>
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
+    <!-- And combinator: nested conditions (age >= 45 AND gender == F),
+         verified against moddle's own export before writing this by hand -->
+    <bpmn:exclusiveGateway id="Gateway_AndGuard_Good" name="And guard (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+        <synthea:GuardConfig>
+          <synthea:allow conditionType="And">
+            <synthea:condition conditionType="Age" operator="&#62;=" quantity="45" unit="years" />
+            <synthea:condition conditionType="Gender" gender="F" />
+          </synthea:allow>
+        </synthea:GuardConfig>
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
+    <!-- Gender conditionType on a ConditionConfig (sequence flow) -->
+    <bpmn:task id="Task_GenderBranch_Good" name="Gender branch source (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Simple" />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_GenderBranch</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:endEvent id="EndEvent_GenderBranch">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Terminal" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_GenderBranch</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_GenderBranch" sourceRef="Task_GenderBranch_Good" targetRef="EndEvent_GenderBranch">
+      <bpmn:extensionElements>
+        <synthea:ConditionConfig>
+          <synthea:condition conditionType="Gender" gender="F" />
+        </synthea:ConditionConfig>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
     <!-- callsubmodule-requires-submodule-config: stateType="CallSubmodule" with a submodule target -->
     <bpmn:callActivity id="CallActivity_Good" name="Call submodule (good)">
       <bpmn:extensionElements>

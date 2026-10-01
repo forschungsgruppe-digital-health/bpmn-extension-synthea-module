@@ -27,6 +27,65 @@ const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE'];
 const COUNTER_ACTION_VALUES = ['increment', 'decrement'];
 const ENCOUNTER_CLASS_VALUES = ['wellness', 'ambulatory', 'emergency', 'urgentcare', 'inpatient', 'outpatient'];
 
+const CONDITION_TYPE_VALUES = [
+  'Attribute', 'Gender', 'Race', 'Socioeconomic Status', 'Age', 'Date', 'Symptom',
+  'Observation', 'Vital Sign', 'Active Condition', 'Active Medication', 'Active Allergy',
+  'Active CarePlan', 'PriorState', 'True', 'False', 'And', 'Or', 'At Least', 'At Most'
+];
+
+// Combinator types hold their sub-conditions in `conditions` instead of flat
+// fields — see MAX_NESTED_CONDITIONS below for the panel's (schema-unlimited,
+// UI-limited) nesting support.
+const CONDITION_COMBINATOR_TYPES = ['And', 'Or', 'At Least', 'At Most'];
+
+// Which Condition fields are meaningful for each conditionType — drives which
+// entries the Condition/Guard groups actually show. operator/value are the
+// Attribute-only pair; other types reuse operator (Age/Date/Symptom/
+// Observation/Vital Sign) or value (Symptom/Observation/Vital Sign) alongside
+// their own field, per the Synthea wiki's per-type field list. And/Or take no
+// flat field at all (just `conditions`); At Least/At Most add minimum/maximum
+// alongside `conditions`.
+const CONDITION_FIELDS_BY_TYPE = {
+  'Attribute': ['attribute', 'operator', 'value'],
+  'Gender': ['gender'],
+  'Race': ['race'],
+  'Socioeconomic Status': ['category'],
+  'Age': ['quantity', 'unit', 'operator'],
+  'Date': ['year', 'month', 'operator'],
+  'Symptom': ['symptom', 'operator', 'value'],
+  'Observation': ['referencedAttribute', 'operator', 'value'],
+  'Vital Sign': ['vitalSign', 'operator', 'value'],
+  'Active Condition': ['referencedAttribute'],
+  'Active Medication': ['referencedAttribute'],
+  'Active Allergy': ['referencedAttribute'],
+  'Active CarePlan': ['referencedAttribute'],
+  // Synthea's `within` is a {quantity, unit} object, not free text — reuses
+  // the same quantity/unit fields Age uses (different meaning, same shape;
+  // tools/bpmn2gmf nests them under "within" for PriorState, flat for Age).
+  'PriorState': ['priorStateName', 'since', 'quantity', 'unit'],
+  'True': [],
+  'False': [],
+  'And': [],
+  'Or': [],
+  'At Least': ['minimum'],
+  'At Most': ['maximum']
+};
+
+// The moddle schema allows conditions to nest arbitrarily deep (`conditions`
+// is self-referencing), but the properties panel only offers editing for one
+// level of sub-conditions, up to this many — a documented simplification
+// (see docs/implicit-rules.md). Deeper nesting still round-trips correctly
+// if hand-authored in the XML; the panel just won't build it for you.
+const MAX_NESTED_CONDITIONS = 3;
+
+function getRelevantConditionFields(conditionType) {
+  return CONDITION_FIELDS_BY_TYPE[conditionType] || CONDITION_FIELDS_BY_TYPE['Attribute'];
+}
+
+function isCombinatorConditionType(conditionType) {
+  return CONDITION_COMBINATOR_TYPES.includes(conditionType);
+}
+
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
   'CallSubmodule', 'ConditionOnset', 'ConditionEnd',
@@ -80,10 +139,12 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       if (is(element, 'bpmn:SequenceFlow')) {
         groups.push(createProbabilityGroup(element));
         groups.push(createConditionGroup(element));
+        groups.push(...createNestedConditionGroups(element, getFlowCondition, ensureFlowCondition, 'synthea-condition'));
       }
 
       if (is(element, 'bpmn:ExclusiveGateway') || is(element, 'bpmn:InclusiveGateway')) {
         groups.push(createGuardGroup(element));
+        groups.push(...createNestedConditionGroups(element, getGuardCondition, ensureGuardCondition, 'synthea-guard-condition'));
       }
 
       if (is(element, 'bpmn:TextAnnotation')) {
@@ -130,16 +191,28 @@ function createProbabilityGroup(element) {
 }
 
 function createConditionGroup(element) {
+  const conditionType = getFlowCondition(element)?.get('conditionType');
+  const fields = getRelevantConditionFields(conditionType);
+
+  const entries = [
+    { id: 'synthea-condition-type', element, component: FlowConditionTypeEntry }
+  ];
+
+  fields.forEach((field) => {
+    entries.push({
+      id: `synthea-condition-${field}`,
+      element,
+      component: FLOW_CONDITION_FIELD_ENTRIES[field],
+      isEdited: isTextFieldEntryEdited
+    });
+  });
+
+  entries.push({ id: 'synthea-condition-negate', element, component: FlowConditionNegateEntry });
+
   return {
     id: 'synthea-condition',
     label: 'Condition',
-    entries: [
-      { id: 'synthea-condition-type', element, component: FlowConditionTypeEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-condition-attribute', element, component: FlowConditionAttributeEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-condition-operator', element, component: FlowConditionOperatorEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-condition-value', element, component: FlowConditionValueEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-condition-negate', element, component: FlowConditionNegateEntry }
-    ]
+    entries
   };
 }
 
@@ -157,16 +230,28 @@ function createDelayGroup(element) {
 }
 
 function createGuardGroup(element) {
+  const conditionType = getGuardCondition(element)?.get('conditionType');
+  const fields = getRelevantConditionFields(conditionType);
+
+  const entries = [
+    { id: 'synthea-guard-condition-type', element, component: GuardConditionTypeEntry }
+  ];
+
+  fields.forEach((field) => {
+    entries.push({
+      id: `synthea-guard-condition-${field}`,
+      element,
+      component: GUARD_CONDITION_FIELD_ENTRIES[field],
+      isEdited: isTextFieldEntryEdited
+    });
+  });
+
+  entries.push({ id: 'synthea-guard-condition-negate', element, component: GuardConditionNegateEntry });
+
   return {
     id: 'synthea-guard',
     label: 'Guard',
-    entries: [
-      { id: 'synthea-guard-condition-type', element, component: GuardConditionTypeEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-guard-condition-attribute', element, component: GuardConditionAttributeEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-guard-condition-operator', element, component: GuardConditionOperatorEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-guard-condition-value', element, component: GuardConditionValueEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-guard-condition-negate', element, component: GuardConditionNegateEntry }
-    ]
+    entries
   };
 }
 
@@ -334,7 +419,7 @@ function ensureFlowCondition(element, bpmnFactory, modeling) {
   return condition;
 }
 
-function makeNestedConditionTextEntry(getCondition, ensureCondition, prop, label) {
+function makeNestedConditionTextEntry(getCondition, ensureCondition, prop, label, options = {}) {
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -350,10 +435,37 @@ function makeNestedConditionTextEntry(getCondition, ensureCondition, prop, label
 
     const setValue = (value) => {
       const condition = ensureCondition(element, bpmnFactory, modeling);
-      modeling.updateModdleProperties(element, condition, { [prop]: value });
+      const parsed = options.parse && value !== '' ? options.parse(value) : (value === '' ? undefined : value);
+      modeling.updateModdleProperties(element, condition, { [prop]: parsed });
     };
 
     return TextFieldEntry({ element, id, label: translate(label), getValue, setValue, debounce });
+  };
+}
+
+function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, label, values) {
+  return function Entry(props) {
+    const { element, id } = props;
+    const modeling = useService('modeling');
+    const bpmnFactory = useService('bpmnFactory');
+    const translate = useService('translate');
+
+    const getValue = () => {
+      const condition = getCondition(element);
+      return condition ? condition.get(prop) || '' : '';
+    };
+
+    const setValue = (value) => {
+      const condition = ensureCondition(element, bpmnFactory, modeling);
+      modeling.updateModdleProperties(element, condition, { [prop]: value || undefined });
+    };
+
+    const getOptions = () => [
+      { value: '', label: translate('<none — falls back to inferred signals>') },
+      ...values.map((v) => ({ value: v, label: v }))
+    ];
+
+    return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
   };
 }
 
@@ -378,11 +490,115 @@ function makeNestedConditionCheckboxEntry(getCondition, ensureCondition, prop, l
   };
 }
 
-const FlowConditionTypeEntry = makeNestedConditionTextEntry(getFlowCondition, ensureFlowCondition, 'conditionType', 'Condition type (e.g. Attribute, Age, Gender)');
-const FlowConditionAttributeEntry = makeNestedConditionTextEntry(getFlowCondition, ensureFlowCondition, 'attribute', 'Attribute name');
-const FlowConditionOperatorEntry = makeNestedConditionTextEntry(getFlowCondition, ensureFlowCondition, 'operator', 'Operator (e.g. <=, ==, >)');
-const FlowConditionValueEntry = makeNestedConditionTextEntry(getFlowCondition, ensureFlowCondition, 'value', 'Value');
+// Builds the full set of per-field entry components for a given condition
+// accessor pair (top-level Flow/Guard condition, or a nested slot's
+// accessor from makeNestedConditionAccessor below) — shared so the nested
+// combinator slots don't need their own hand-written field list.
+function buildConditionFieldEntries(getCondition, ensureCondition) {
+  return {
+    attribute: makeNestedConditionTextEntry(getCondition, ensureCondition, 'attribute', 'Attribute name'),
+    operator: makeNestedConditionTextEntry(getCondition, ensureCondition, 'operator', 'Operator (e.g. <=, ==, >)'),
+    value: makeNestedConditionTextEntry(getCondition, ensureCondition, 'value', 'Value'),
+    gender: makeNestedConditionTextEntry(getCondition, ensureCondition, 'gender', 'Gender (M/F)'),
+    race: makeNestedConditionTextEntry(getCondition, ensureCondition, 'race', 'Race'),
+    category: makeNestedConditionTextEntry(getCondition, ensureCondition, 'category', 'Category (High/Middle/Low)'),
+    quantity: makeNestedConditionTextEntry(getCondition, ensureCondition, 'quantity', 'Quantity (Age threshold, or PriorState "within" duration)', { parse: parseFloat }),
+    unit: makeNestedConditionTextEntry(getCondition, ensureCondition, 'unit', 'Unit (e.g. years — Age threshold, or PriorState "within" duration)'),
+    year: makeNestedConditionTextEntry(getCondition, ensureCondition, 'year', 'Year', { parse: parseInt }),
+    month: makeNestedConditionTextEntry(getCondition, ensureCondition, 'month', 'Month', { parse: parseInt }),
+    symptom: makeNestedConditionTextEntry(getCondition, ensureCondition, 'symptom', 'Symptom name'),
+    vitalSign: makeNestedConditionTextEntry(getCondition, ensureCondition, 'vitalSign', 'Vital sign name'),
+    referencedAttribute: makeNestedConditionTextEntry(getCondition, ensureCondition, 'referencedAttribute', 'Referenced attribute (entity to check)'),
+    priorStateName: makeNestedConditionTextEntry(getCondition, ensureCondition, 'priorStateName', 'Prior state name'),
+    since: makeNestedConditionTextEntry(getCondition, ensureCondition, 'since', 'Since (State_Name, optional)'),
+    minimum: makeNestedConditionTextEntry(getCondition, ensureCondition, 'minimum', 'Minimum (how many sub-conditions must hold)', { parse: parseInt }),
+    maximum: makeNestedConditionTextEntry(getCondition, ensureCondition, 'maximum', 'Maximum (how many sub-conditions may hold)', { parse: parseInt })
+  };
+}
+
+// A nested sub-condition's accessor: the Nth entry of the parent condition's
+// `conditions` list. Slots are filled in order — ensuring slot N pads the
+// list up to N with empty placeholder Conditions if earlier slots were
+// skipped, so fill slot 0 before slot 1, etc.
+function makeNestedConditionAccessor(getParentCondition, ensureParentCondition, index) {
+  function getCondition(element) {
+    const parent = getParentCondition(element);
+    const list = parent ? parent.get('conditions') || [] : [];
+    return list[index] || null;
+  }
+
+  function ensureCondition(element, bpmnFactory, modeling) {
+    const parent = ensureParentCondition(element, bpmnFactory, modeling);
+    let list = parent.get('conditions') || [];
+
+    if (list.length <= index) {
+      list = list.slice();
+      while (list.length <= index) {
+        const child = bpmnFactory.create('synthea:Condition', {});
+        child.$parent = parent;
+        list.push(child);
+      }
+      modeling.updateModdleProperties(element, parent, { conditions: list });
+    }
+
+    return parent.get('conditions')[index];
+  }
+
+  return { getCondition, ensureCondition };
+}
+
+function createNestedConditionGroups(element, getRootCondition, ensureRootCondition, idPrefix) {
+  const rootType = getRootCondition(element)?.get('conditionType');
+
+  if (!isCombinatorConditionType(rootType)) {
+    return [];
+  }
+
+  const groups = [];
+
+  for (let index = 0; index < MAX_NESTED_CONDITIONS; index++) {
+    const { getCondition, ensureCondition } = makeNestedConditionAccessor(getRootCondition, ensureRootCondition, index);
+    const fieldEntries = buildConditionFieldEntries(getCondition, ensureCondition);
+    const nestedType = getCondition(element)?.get('conditionType');
+    const fields = getRelevantConditionFields(nestedType);
+
+    const entries = [
+      {
+        id: `${idPrefix}-nested-${index}-type`,
+        element,
+        component: makeNestedConditionSelectEntry(getCondition, ensureCondition, 'conditionType', 'Condition type', CONDITION_TYPE_VALUES)
+      }
+    ];
+
+    fields.forEach((field) => {
+      entries.push({
+        id: `${idPrefix}-nested-${index}-${field}`,
+        element,
+        component: fieldEntries[field],
+        isEdited: isTextFieldEntryEdited
+      });
+    });
+
+    entries.push({
+      id: `${idPrefix}-nested-${index}-negate`,
+      element,
+      component: makeNestedConditionCheckboxEntry(getCondition, ensureCondition, 'negate', 'Negate (Not)')
+    });
+
+    groups.push({
+      id: `${idPrefix}-nested-${index}`,
+      label: `Sub-condition ${index + 1}`,
+      entries
+    });
+  }
+
+  return groups;
+}
+
+const FlowConditionTypeEntry = makeNestedConditionSelectEntry(getFlowCondition, ensureFlowCondition, 'conditionType', 'Condition type', CONDITION_TYPE_VALUES);
 const FlowConditionNegateEntry = makeNestedConditionCheckboxEntry(getFlowCondition, ensureFlowCondition, 'negate', 'Negate (Not)');
+
+const FLOW_CONDITION_FIELD_ENTRIES = buildConditionFieldEntries(getFlowCondition, ensureFlowCondition);
 
 function makeSelecetEntry(type, prop, label, values) {
   return function Entry(props) {
@@ -440,11 +656,10 @@ function ensureGuardCondition(element, bpmnFactory, modeling) {
   return allow;
 }
 
-const GuardConditionTypeEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'conditionType', 'Condition type (e.g. Attribute, Age, Gender)');
-const GuardConditionAttributeEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'attribute', 'Attribute name');
-const GuardConditionOperatorEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'operator', 'Operator (e.g. <=, ==, >)');
-const GuardConditionValueEntry = makeNestedConditionTextEntry(getGuardCondition, ensureGuardCondition, 'value', 'Value');
+const GuardConditionTypeEntry = makeNestedConditionSelectEntry(getGuardCondition, ensureGuardCondition, 'conditionType', 'Condition type', CONDITION_TYPE_VALUES);
 const GuardConditionNegateEntry = makeNestedConditionCheckboxEntry(getGuardCondition, ensureGuardCondition, 'negate', 'Negate (Not)');
+
+const GUARD_CONDITION_FIELD_ENTRIES = buildConditionFieldEntries(getGuardCondition, ensureGuardCondition);
 
 function makeCheckboxEntry(type, prop, label) {
   return function Entry(props) {

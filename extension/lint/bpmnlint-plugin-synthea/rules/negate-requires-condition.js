@@ -15,6 +15,12 @@ const { is } = require('../lib/utils');
  * Section A); this rule only guards against an empty/meaningless negation,
  * it does not — and cannot — validate the Not-equivalence itself, since
  * that's an export-time (tools/bpmn2gmf) concern, not a structural one.
+ *
+ * Checks `conditionType` alone (not `conditionType && operator`): operator
+ * is only meaningful for a handful of condition types (Attribute/Age/Date/
+ * Symptom/Observation/Vital Sign) — Gender/Race/And/Or/True/False/etc.
+ * have nothing to negate on without conditionType, but never carry an
+ * operator at all, so requiring one would misflag every valid one of them.
  */
 module.exports = function() {
 
@@ -24,10 +30,10 @@ module.exports = function() {
       return;
     }
 
-    if (node.negate && !(node.conditionType && node.operator)) {
+    if (node.negate && !node.conditionType) {
       reporter.report(
         nearestReportableId(node),
-        'negate is set on a synthea:Condition but conditionType/operator are empty — negate on an empty condition has nothing to negate.'
+        'negate is set on a synthea:Condition but conditionType is empty — negate on an empty condition has nothing to negate.'
       );
     }
   }

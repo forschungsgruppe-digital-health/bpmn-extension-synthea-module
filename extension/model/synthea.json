@@ -14,12 +14,34 @@
       { "name": "delayValueHigh", "type": "String", "isAttr": true },
       { "name": "delayUnit", "type": "String", "isAttr": true }
     ]},
+    { "name": "ConditionType", "isEnum": true, "literalValues": [
+      {"name": "Attribute"}, {"name": "Gender"}, {"name": "Race"}, {"name": "Socioeconomic Status"},
+      {"name": "Age"}, {"name": "Date"}, {"name": "Symptom"}, {"name": "Observation"}, {"name": "Vital Sign"},
+      {"name": "Active Condition"}, {"name": "Active Medication"}, {"name": "Active Allergy"}, {"name": "Active CarePlan"},
+      {"name": "PriorState"}, {"name": "True"}, {"name": "False"},
+      {"name": "And"}, {"name": "Or"}, {"name": "At Least"}, {"name": "At Most"}
+    ]},
     { "name": "Condition", "superClass": ["Element"], "properties": [
-      { "name": "conditionType", "type": "String", "isAttr": true },
+      { "name": "conditionType", "type": "ConditionType", "isAttr": true },
       { "name": "attribute", "type": "String", "isAttr": true },
       { "name": "operator", "type": "String", "isAttr": true },
       { "name": "value", "type": "String", "isAttr": true },
-      { "name": "negate", "type": "Boolean", "isAttr": true, "default": false }
+      { "name": "negate", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "gender", "type": "String", "isAttr": true },
+      { "name": "race", "type": "String", "isAttr": true },
+      { "name": "category", "type": "String", "isAttr": true },
+      { "name": "quantity", "type": "Float", "isAttr": true },
+      { "name": "unit", "type": "String", "isAttr": true },
+      { "name": "year", "type": "Integer", "isAttr": true },
+      { "name": "month", "type": "Integer", "isAttr": true },
+      { "name": "symptom", "type": "String", "isAttr": true },
+      { "name": "vitalSign", "type": "String", "isAttr": true },
+      { "name": "referencedAttribute", "type": "String", "isAttr": true },
+      { "name": "priorStateName", "type": "String", "isAttr": true },
+      { "name": "since", "type": "String", "isAttr": true },
+      { "name": "minimum", "type": "Integer", "isAttr": true },
+      { "name": "maximum", "type": "Integer", "isAttr": true },
+      { "name": "conditions", "type": "Condition", "isMany": true }
     ]},
     { "name": "GuardConfig", "superClass": ["Element"], "properties": [
       { "name": "allow", "type": "Condition" }

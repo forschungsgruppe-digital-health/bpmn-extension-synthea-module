@@ -111,6 +111,16 @@
       </bpmn:extensionElements>
     </bpmn:exclusiveGateway>
 
+    <!-- guard-allow-requires-condition: And combinator with no conditions to combine -->
+    <bpmn:exclusiveGateway id="Gateway_Guard_EmptyAnd" name="Guard (empty And)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+        <synthea:GuardConfig>
+          <synthea:allow conditionType="And" />
+        </synthea:GuardConfig>
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
     <!-- callsubmodule-requires-submodule-config: stateType="CallSubmodule" with no submodule target -->
     <bpmn:callActivity id="CallActivity_NoSubmodule" name="Call submodule (missing target)">
       <bpmn:extensionElements>
