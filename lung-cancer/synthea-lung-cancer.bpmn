@@ -207,7 +207,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Non-Small Cell Lung Cancer Set Lung Cancer Type = NSCLC</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="Lung Cancer Type" value="NSCLC" />
+        <synthea:setAttributeConfig attribute="lung_cancer_type" value="NSCLC" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02tnxkc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1ka1k56</bpmn2:outgoing>
@@ -216,7 +216,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Small Cell Lung Cancer Set Lung Cancer Type = SCLC</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="Lung Cancer Type" value="SCLC" />
+        <synthea:setAttributeConfig attribute="lung_cancer_type" value="SCLC" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_14hmhmz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0w7qcbe</bpmn2:outgoing>
@@ -557,7 +557,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="NSCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -565,7 +565,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == SCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="SCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="SCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -573,7 +573,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="NSCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -581,7 +581,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == SCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="SCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="SCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -589,7 +589,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="NSCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -597,7 +597,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == SCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="SCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="SCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -605,7 +605,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="NSCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -617,7 +617,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == SCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="SCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="SCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>

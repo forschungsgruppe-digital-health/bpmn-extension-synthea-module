@@ -255,6 +255,9 @@
     <bpmn2:sequenceFlow id="Flow_1iirpbd" name="Gender = F" sourceRef="Gateway_0e7nsaw" targetRef="Gateway_097d5tt">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Gender = F</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Gender" gender="F" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_1ovey1t" name="Gender = M" sourceRef="Gateway_0e7nsaw" targetRef="Gateway_0hid3gc">
@@ -265,6 +268,9 @@
     <bpmn2:sequenceFlow id="Flow_13yzahb" name="pregnant == True" sourceRef="Gateway_097d5tt" targetRef="Gateway_11e1kl7">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">pregnant == True</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Attribute" attribute="pregnant" operator="==" value="true" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0r3lwdr" name="else" sourceRef="Gateway_097d5tt" targetRef="Gateway_0t9k9ce">
@@ -275,11 +281,13 @@
     <bpmn2:sequenceFlow id="Flow_1ney2yb" name="7%" sourceRef="Gateway_0hid3gc" targetRef="Activity_1lxvqqm">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">7%</i18n:translation>
+        <synthea:probabilityConfig probability="0.07" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0d66jrp" name="93%" sourceRef="Gateway_0hid3gc" targetRef="Activity_0pre54w">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">93%</i18n:translation>
+        <synthea:probabilityConfig probability="0.93" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_1mfa232" sourceRef="Activity_0v2ypfd" targetRef="Activity_1p29dw2" />
@@ -306,11 +314,13 @@
     <bpmn2:sequenceFlow id="Flow_1o10yzv" name="10%" sourceRef="Gateway_08lhdlv" targetRef="Activity_0racf1x">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">10%</i18n:translation>
+        <synthea:probabilityConfig probability="0.1" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0oagdnt" name="10%" sourceRef="Gateway_08lhdlv" targetRef="Activity_1m99prq">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">10%</i18n:translation>
+        <synthea:probabilityConfig probability="0.1" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0hektv4" sourceRef="Activity_0racf1x" targetRef="Gateway_1p0ld4s" />
@@ -318,16 +328,21 @@
     <bpmn2:sequenceFlow id="Flow_1m2ndgk" name="10%" sourceRef="Gateway_1p0ld4s" targetRef="Activity_1m99prq">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">10%</i18n:translation>
+        <synthea:probabilityConfig probability="0.1" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_1ds7zvs" name="90%" sourceRef="Gateway_1p0ld4s" targetRef="Event_0nd7btx">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">90%</i18n:translation>
+        <synthea:probabilityConfig probability="0.9" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_1ly2iqa" name="Gender = F" sourceRef="Gateway_0j9hc08" targetRef="Activity_0pblc11">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Gender = F</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Gender" gender="F" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_1co6iv8" name="Gender = M" sourceRef="Gateway_0j9hc08" targetRef="Activity_1igh2cb">
@@ -344,21 +359,25 @@
     <bpmn2:sequenceFlow id="Flow_14lbqcy" name="28%" sourceRef="Gateway_11e1kl7" targetRef="Activity_0v2ypfd">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">28%</i18n:translation>
+        <synthea:probabilityConfig probability="0.28" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_00jy2p5" name="93%" sourceRef="Gateway_0t9k9ce" targetRef="Activity_15f8jor">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">93%</i18n:translation>
+        <synthea:probabilityConfig probability="0.93" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0wjuj6o" name="7%" sourceRef="Gateway_0t9k9ce" targetRef="Activity_0v2ypfd">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">7%</i18n:translation>
+        <synthea:probabilityConfig probability="0.07" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0k3wt2u" name="72%" sourceRef="Gateway_11e1kl7" targetRef="Activity_15f8jor">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">72%</i18n:translation>
+        <synthea:probabilityConfig probability="0.72" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0m0kss6" sourceRef="Activity_18nhi1m" targetRef="Activity_10pb6z3" />
@@ -366,6 +385,7 @@
     <bpmn2:sequenceFlow id="Flow_0wbm6ks" name="80%" sourceRef="Gateway_08lhdlv" targetRef="Event_0nd7btx">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">80%</i18n:translation>
+        <synthea:probabilityConfig probability="0.8" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:textAnnotation id="TextAnnotation_1yquhu1">
