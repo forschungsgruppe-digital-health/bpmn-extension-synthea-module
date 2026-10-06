@@ -24,6 +24,8 @@ const SYMPTOM_TYPE = 'synthea:SymptomConfig';
 const OBSERVATION_TYPE = 'synthea:ObservationConfig';
 const VALUE_TYPE = 'synthea:ValueConfig';
 const SERIES_TYPE = 'synthea:ImagingStudySeries';
+const MEDICATION_TYPE = 'synthea:MedicationConfig';
+const ACTIVITY_TYPE = 'synthea:CarePlanActivity';
 const DISTRIBUTION_TYPE = 'synthea:DistributionConfig';
 const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
@@ -780,6 +782,9 @@ const SeriesInstanceTitleEntry = makeTextEntry(SERIES_TYPE, 'instanceTitle', 'Im
 const SeriesSopClassCodeEntry = makeTextEntry(SERIES_TYPE, 'sopClassCode', 'SOP class code (DICOM)');
 const SeriesSopClassDisplayEntry = makeTextEntry(SERIES_TYPE, 'sopClassDisplay', 'SOP class display text');
 const SeriesMinInstancesEntry = makeTextEntry(SERIES_TYPE, 'minInstances', 'Min. number of instances (optional)', { parse: parseInt });
+const MedicationAdministrationEntry = makeCheckboxEntry(MEDICATION_TYPE, 'administration', 'Administered during the encounter (inpatient), not only prescribed');
+const ActivityCodeEntry = makeTextEntry(ACTIVITY_TYPE, 'code', 'SNOMED code of the activity');
+const ActivityDisplayEntry = makeTextEntry(ACTIVITY_TYPE, 'codeDisplay', 'Display text of the activity');
 const SeriesMaxInstancesEntry = makeTextEntry(SERIES_TYPE, 'maxInstances', 'Max. number of instances (optional)', { parse: parseInt });
 
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
@@ -828,8 +833,20 @@ function createStateDetailGroups(element) {
     });
   }
 
-  if (type === 'Observation' || type === 'Symptom' || type === 'Death') {
+  if (type === 'Observation' || type === 'Symptom' || type === 'Death' || type === 'Procedure') {
     groups.push(createValueGroup(element, type));
+  }
+
+  if (type === 'MedicationOrder') {
+    groups.push({
+      id: 'synthea-medication',
+      label: 'Medication',
+      entries: [{ id: 'synthea-medication-administration', element, component: MedicationAdministrationEntry }]
+    });
+  }
+
+  if (type === 'CarePlanStart') {
+    groups.push(createCarePlanActivityGroup(element));
   }
 
   if (type === 'ImagingStudy') {
@@ -847,8 +864,8 @@ function createStateDetailGroups(element) {
   return groups;
 }
 
-// The value an Observation records, the severity a Symptom gets, or (Death) the
-// time span until the patient dies. EXACT is one number, RANGE a low/high pair.
+// The value an Observation records, the severity a Symptom gets, (Death) the
+// time span until the patient dies, or (Procedure) how long the procedure takes. EXACT is one number, RANGE a low/high pair.
 function createValueGroup(element, type) {
   const shape = getExtension(element, VALUE_TYPE)?.get('valueShape');
   const entries = [
@@ -863,11 +880,12 @@ function createValueGroup(element, type) {
     entries.push({ id: 'synthea-value-unit', element, component: ValueUnitObservationEntry, isEdited: isTextFieldEntryEdited });
     entries.push({ id: 'synthea-value-decimals', element, component: ValueDecimalsEntry, isEdited: isTextFieldEntryEdited });
   }
-  if (type === 'Death') {
+  if (type === 'Death' || type === 'Procedure') {
     entries.push({ id: 'synthea-value-unit', element, component: ValueUnitTimeEntry, isEdited: isTextFieldEntryEdited });
   }
 
-  return { id: 'synthea-value', label: type === 'Death' ? 'Time until death' : 'Value', entries };
+  const label = type === 'Death' ? 'Time until death' : type === 'Procedure' ? 'Duration (optional)' : 'Value';
+  return { id: 'synthea-value', label, entries };
 }
 
 // The single values a lab report (DiagnosticReport) contains. There can be a dozen
@@ -929,6 +947,18 @@ function createDistributionGroup(element) {
     entries.push({ id: `synthea-distribution-${parameter}`, element, component: DISTRIBUTION_PARAMETER_ENTRIES[parameter], isEdited: isTextFieldEntryEdited });
   }
   return { id: 'synthea-distribution', label: 'Distribution', entries };
+}
+
+// One activity of a care plan; further activities can be added in the XML.
+function createCarePlanActivityGroup(element) {
+  return {
+    id: 'synthea-careplan-activity',
+    label: 'Care plan activity',
+    entries: [
+      { id: 'synthea-activity-code', element, component: ActivityCodeEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-activity-display', element, component: ActivityDisplayEntry, isEdited: isTextFieldEntryEdited }
+    ]
+  };
 }
 
 // One series with one kind of image; further series can be added in the XML.

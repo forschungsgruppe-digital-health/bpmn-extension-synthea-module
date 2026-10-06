@@ -288,10 +288,37 @@ const main = (target) => ({
   xml: wrap(start() + call('C', 'call it', target) + end() + flow('f1', 'S', 'C') + flow('f2', 'C', 'E'), 'Main')
 });
 
-test('CallSubmodule resolves against the files of the run (hyphen -> underscore)', async () => {
+test('CallSubmodule resolves against the files of the run (hyphen -> underscore) and names the submodule by path', async () => {
   const { modules, diagnostics } = await convert([main('lung_sub'), sub('lung-sub')]);
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
-  assert.equal(modules.find((m) => m.fileBase === 'main_module').json.states['call it'].submodule, 'lung_sub');
+  // Synthea runs every top-level file as a module of its own; only files in a subdirectory are submodules
+  assert.deepEqual(modules.map((m) => [m.fileBase, m.path]), [['main_module', 'main_module'], ['lung_sub', 'main_module/lung_sub']]);
+  assert.equal(modules.find((m) => m.fileBase === 'main_module').json.states['call it'].submodule, 'main_module/lung_sub');
+});
+
+test('layout: nested calls and a shared submodule go below the first module that reaches them; unrelated files stay top-level', async () => {
+  const caller = (name, ...targets) => ({
+    path: `${name}.bpmn`,
+    xml: wrap(
+      start() + targets.map((t, i) => call(`C${i}`, `call ${t}`, t)).join('') + end() +
+        flow('f0', 'S', targets.length ? 'C0' : 'E') +
+        targets.map((t, i) => flow(`g${i}`, `C${i}`, i + 1 < targets.length ? `C${i + 1}` : 'E')).join(''),
+      name
+    )
+  });
+  const { modules, diagnostics } = await convert([
+    caller('first', 'middle'), caller('second', 'shared'), caller('middle', 'shared'), caller('shared'), caller('alone')
+  ]);
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const paths = Object.fromEntries(modules.map((m) => [m.fileBase, m.path]));
+  assert.deepEqual(paths, {
+    first: 'first', second: 'second', alone: 'alone',
+    middle: 'first/middle',
+    shared: 'first/shared' // reached by first (via middle) before second
+  });
+  const calls = (name) => Object.values(modules.find((m) => m.fileBase === name).json.states).filter((st) => st.type === 'CallSubmodule').map((st) => st.submodule);
+  assert.deepEqual(calls('second'), ['first/shared']);
+  assert.deepEqual(calls('middle'), ['first/shared']);
 });
 
 test('CallSubmodule to an unknown module is an error', async () => {
@@ -520,18 +547,23 @@ test('untagged states after the last tagged one inherit the open encounter until
   assert.ok(!diagnostics.items.some((i) => i.code === 'STATE_OUTSIDE_ENCOUNTER'));
 });
 
-test('a delay shorter than a day stays inside the encounter, a day or longer ends it', async () => {
-  const short = await run(
-    start() + procedure('A', 'a', 'E1') + delay('D', 'wait', 1, 'hours') + procedure('B', 'b', 'E1') + end() +
+test('between two states of one encounter a delay stays inside up to a week; after the last one a day ends it', async () => {
+  const between = (value, unit) => run(
+    start() + procedure('A', 'a', 'E1') + delay('D', 'wait', value, unit) + procedure('B', 'b', 'E1') + end() +
     flow('f1', 'S', 'A') + flow('f2', 'A', 'D') + flow('f3', 'D', 'B') + flow('f4', 'B', 'E')
   );
-  assert.deepEqual(walk(short.module.json.states), ['Initial', 'E1', 'a', 'wait', 'b', 'E1_End', 'Terminal']);
+  // a stay with a daily delay between its tagged states is one encounter (upstream's inpatient stay)
+  assert.deepEqual(walk((await between(1, 'days')).module.json.states), ['Initial', 'E1', 'a', 'wait', 'b', 'E1_End', 'Terminal']);
+  assert.deepEqual(walk((await between(1, 'hours')).module.json.states), ['Initial', 'E1', 'a', 'wait', 'b', 'E1_End', 'Terminal']);
+  // weeks between them are two visits
+  assert.deepEqual(walk((await between(2, 'weeks')).module.json.states), ['Initial', 'E1', 'a', 'E1_End', 'wait', 'E1_2', 'b', 'E1_End_2', 'Terminal']);
 
-  const long = await run(
-    start() + procedure('A', 'a', 'E1') + delay('D', 'wait', 1, 'days') + procedure('B', 'b', 'E1') + end() +
-    flow('f1', 'S', 'A') + flow('f2', 'A', 'D') + flow('f3', 'D', 'B') + flow('f4', 'B', 'E')
+  // after the last tagged state a day already ends the visit
+  const after = await run(
+    start() + procedure('A', 'a', 'E1') + delay('D', 'wait', 1, 'days') + order('M', 'meds', null) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'D') + flow('f3', 'D', 'M') + flow('f4', 'M', 'E')
   );
-  assert.deepEqual(walk(long.module.json.states), ['Initial', 'E1', 'a', 'E1_End', 'wait', 'E1_2', 'b', 'E1_End_2', 'Terminal']);
+  assert.deepEqual(walk(after.module.json.states).slice(0, 5), ['Initial', 'E1', 'a', 'E1_End', 'wait']);
 });
 
 test('two different encounters in a row: the first ends before the second begins', async () => {
@@ -683,6 +715,55 @@ test('a valueConfig that does not add up is an error', async () => {
     const { codes } = await clinical('Observation', coding(LOINC, '1-1', 'x') + xml);
     assert.ok(codes.includes('VALUE_CONFIG_INVALID'), `${name} should be an error`);
   }
+});
+
+// A clinical state inside encounter E1 (Procedure, MedicationOrder and CarePlanStart need one).
+const inEncounter = (type, inner) =>
+  run(start() + task('A', 'clin', stateType(type) + inner + enc('E1')) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'));
+
+test('Procedure: duration comes from valueConfig as {low, high, unit}; an exact value is low = high', async () => {
+  const range = await inEncounter('Procedure', coding(SNOMED, '1-1', 'p') + '<synthea:valueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours"/>');
+  assert.equal(range.diagnostics.errorCount, 0, range.diagnostics.format().join('\n'));
+  assert.deepEqual(range.module.json.states.clin.duration, { low: 0.5, high: 4, unit: 'hours' });
+
+  const exact = await inEncounter('Procedure', coding(SNOMED, '1-1', 'p') + '<synthea:valueConfig valueShape="EXACT" value="30" unit="minutes"/>');
+  assert.deepEqual(exact.module.json.states.clin.duration, { low: 30, high: 30, unit: 'minutes' });
+
+  const none = await inEncounter('Procedure', coding(SNOMED, '1-1', 'p'));
+  assert.ok(!('duration' in none.module.json.states.clin), 'duration is optional');
+
+  const noUnit = await inEncounter('Procedure', coding(SNOMED, '1-1', 'p') + '<synthea:valueConfig valueShape="EXACT" value="30"/>');
+  assert.ok(noUnit.codes.includes('VALUE_CONFIG_INVALID'), 'a duration needs a unit');
+});
+
+test('MedicationOrder: medicationConfig administration becomes administration: true', async () => {
+  const given = await inEncounter('MedicationOrder', coding(RXNORM, '1-1', 'm') + '<synthea:medicationConfig administration="true"/>');
+  assert.equal(given.diagnostics.errorCount, 0, given.diagnostics.format().join('\n'));
+  assert.equal(given.module.json.states.clin.administration, true);
+
+  for (const inner of ['', '<synthea:medicationConfig administration="false"/>']) {
+    const prescribed = await inEncounter('MedicationOrder', coding(RXNORM, '1-1', 'm') + inner);
+    assert.ok(!('administration' in prescribed.module.json.states.clin), 'a prescription has no administration field');
+  }
+});
+
+test('CarePlanStart: carePlanActivity entries become SNOMED activities; an incomplete one is an error', async () => {
+  const activity = (code, display) => `<synthea:carePlanActivity code="${code}" codeDisplay="${display}"/>`;
+  const { module, diagnostics } = await inEncounter(
+    'CarePlanStart',
+    coding(SNOMED, '182964004', 'Terminal care') + activity('133918004', 'Comfort measures') + activity('243072006', 'Cancer education')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(module.json.states.clin.activities, [
+    { system: 'SNOMED-CT', code: '133918004', display: 'Comfort measures' },
+    { system: 'SNOMED-CT', code: '243072006', display: 'Cancer education' }
+  ]);
+
+  const none = await inEncounter('CarePlanStart', coding(SNOMED, '182964004', 'Terminal care'));
+  assert.ok(!('activities' in none.module.json.states.clin));
+
+  const incomplete = await inEncounter('CarePlanStart', coding(SNOMED, '182964004', 'Terminal care') + '<synthea:carePlanActivity code="1"/>');
+  assert.ok(incomplete.codes.includes('ACTIVITY_INCOMPLETE'));
 });
 
 test('Death with a time span schedules the death and the module goes on', async () => {
@@ -922,4 +1003,28 @@ test('SetAttribute: a distribution that does not match its kind, or two ways to 
     const { codes } = await setting(config, extra);
     assert.ok(codes.includes(code), `${name} should be ${code}`);
   }
+});
+
+test('an Attribute condition "== nil" is an error: it compares with the text "nil"', async () => {
+  const eq = await withCondition(attrCond('anemia', '==', 'nil'));
+  assert.ok(eq.codes.includes('CONDITION_INVALID'));
+  const ne = await withCondition(attrCond('anemia', '!=', 'nil'));
+  assert.ok(ne.codes.includes('CONDITION_INVALID'));
+  const ok = await withCondition(attrCond('anemia', 'is nil'));
+  assert.equal(ok.diagnostics.errorCount, 0);
+});
+
+test('probabilities from attributes: a note names the branch that receives the remainder', async () => {
+  const named = (attribute, p) => `<synthea:probabilityConfig probabilityAttribute="${attribute}" probabilityDefault="${p}"/>`;
+  const { module, diagnostics } = await run(
+    start() + gateway('G', 'risk') + task('A', 'event', setAttr('x', '1')) + task('B', 'none', setAttr('x', '2')) + end() +
+    flow('f1', 'S', 'G') + flow('f2', 'G', 'A', named('p_event', '0.1')) + flow('f3', 'G', 'B', named('p_none', '0.9')) +
+    flow('f4', 'A', 'E') + flow('f5', 'B', 'E')
+  );
+  assert.deepEqual(module.json.states.risk.distributed_transition, [
+    { transition: 'event', distribution: { attribute: 'p_event', default: 0.1 } },
+    { transition: 'none', distribution: { attribute: 'p_none', default: 0.9 } }
+  ]);
+  const note = diagnostics.items.find((i) => i.code === 'DISTRIBUTION_REMAINDER');
+  assert.ok(note && note.message.includes('(none)'), 'the last branch gets the remainder');
 });

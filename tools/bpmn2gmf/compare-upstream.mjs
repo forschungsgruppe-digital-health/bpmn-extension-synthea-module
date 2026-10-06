@@ -30,7 +30,7 @@ report('lung_cancer_probabilities_submodule vs lung_cancer_probabilities.json', 
 const together = merge(ours.synthea_lung_cancer, ours.lung_cancer_treatment_submodule, ours.symptom_check_submodule);
 report('main + treatment + symptom-check vs lung_cancer.json', compare(together, upstream('lung_cancer'), { alias: ALIAS }));
 
-// Fields that link states (not compared above): how many states carry each, ours vs upstream.
+// Fields that link states or change the output (not compared above): how many states carry each, ours vs upstream.
 const l = [links(together), links(upstream('lung_cancer'))];
-console.log('\n== linking fields (states carrying them), ours / upstream');
+console.log('\n== linking and output fields (states carrying them), ours / upstream');
 for (const k of Object.keys(l[0])) console.log(`  ${k.padEnd(24)} ${String(l[0][k]).padStart(3)} / ${l[1][k]}`);

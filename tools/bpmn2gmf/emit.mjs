@@ -60,7 +60,8 @@ const endState = (onsetType, pairField) => (node, ctx) => {
 
 // synthea:ValueConfig -> the numbers of an exact value or a low/high range.
 // `where` is how the caller wants the unit: 'state' (Observation: unit sits on
-// the state), 'inside' (Death: unit sits inside exact/range), 'none' (Symptom).
+// the state), 'inside' (Death: unit sits inside exact/range), 'none' (Symptom),
+// 'duration' (Procedure: always {low, high, unit}; an exact value is low = high).
 function readValue(node, ctx, where) {
   const v = first(node.ext, 'synthea:ValueConfig');
   if (!v) return null;
@@ -77,9 +78,11 @@ function readValue(node, ctx, where) {
   if (!range && high !== undefined) {
     return ctx.report('VALUE_CONFIG_INVALID', 'valueHigh only belongs to a RANGE value; set valueShape="RANGE" or remove it.');
   }
-  if (where === 'inside' && !v.unit) {
+  if ((where === 'inside' || where === 'duration') && !v.unit) {
     return ctx.report('VALUE_CONFIG_INVALID', 'This value needs a unit (e.g. years).');
   }
+
+  if (where === 'duration') return { value: { duration: { low, high: range ? high : low, unit: v.unit } } };
 
   const unitInside = where === 'inside' ? { unit: v.unit } : {};
   return {
@@ -229,15 +232,33 @@ const EMITTERS = {
   // ConditionOnset/AllergyOnset waits for the encounter synthesis (phase 3).
   ConditionOnset: onsetEmitter(true),
   AllergyOnset: onsetEmitter(true),
-  MedicationOrder: onsetEmitter(false),
-  CarePlanStart: onsetEmitter(false),
+  // administration: the medication is given during the encounter (inpatient) instead of prescribed.
+  MedicationOrder(node, ctx) {
+    const fields = onsetEmitter(false)(node, ctx);
+    return fields && first(node.ext, 'synthea:MedicationConfig')?.administration ? { ...fields, administration: true } : fields;
+  },
+  // activities: SNOMED codes that describe the care plan (the code system is fixed).
+  CarePlanStart(node, ctx) {
+    const fields = onsetEmitter(false)(node, ctx);
+    if (!fields) return fields;
+    const activities = (node.ext['synthea:CarePlanActivity'] ?? []).map((a) =>
+      a.code && a.codeDisplay
+        ? { system: 'SNOMED-CT', code: a.code, display: a.codeDisplay }
+        : ctx.report('ACTIVITY_INCOMPLETE', `carePlanActivity "${a.code ?? a.codeDisplay ?? ''}" needs both code and codeDisplay.`));
+    if (activities.includes(null)) return null;
+    return activities.length ? { ...fields, activities } : fields;
+  },
 
   Device(node, ctx) {
     const { codes } = ctx.codes();
     return { ...(codes[0] ? { code: codes[0] } : {}), ...assignTo(node) };
   },
 
-  Procedure: (node, ctx) => codesField(node, ctx),
+  // `duration` is optional; Synthea lets it take that much simulated time.
+  Procedure(node, ctx) {
+    const duration = readValue(node, ctx, 'duration');
+    return { ...codesField(node, ctx), ...(duration ? duration.value : {}) };
+  },
 
   Observation(node, ctx) {
     const category = first(node.ext, 'synthea:ObservationConfig')?.category;

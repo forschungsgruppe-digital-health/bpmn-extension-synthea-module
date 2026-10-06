@@ -139,6 +139,13 @@
       { "name": "unit", "type": "String", "isAttr": true },
       { "name": "decimals", "type": "Integer", "isAttr": true }
     ]},
+    { "name": "MedicationConfig", "superClass": ["Element"], "properties": [
+      { "name": "administration", "type": "Boolean", "isAttr": true, "default": false }
+    ]},
+    { "name": "CarePlanActivity", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
+    ]},
     { "name": "ImagingStudySeries", "superClass": ["Element"], "properties": [
       { "name": "bodySiteCode", "type": "String", "isAttr": true },
       { "name": "bodySiteDisplay", "type": "String", "isAttr": true },

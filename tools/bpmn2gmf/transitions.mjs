@@ -46,6 +46,15 @@ export function buildTransition(node, module, diag) {
       }
       return { transition: target(e), distribution };
     });
+    // With probabilities that come from attributes the sum is only known at run time. Synthea
+    // gives whatever is left to the LAST branch, so the order of the flows matters.
+    if (ordered.some((e) => e.probability?.probabilityAttribute)) {
+      diag.note(
+        'DISTRIBUTION_REMAINDER',
+        `Probabilities from attributes: the last branch (${target(ordered[ordered.length - 1])}) receives whatever the others leave, so list the branch whose probability is the attribute's value before it.`,
+        where
+      );
+    }
     return { distributed_transition: distributed };
   }
 

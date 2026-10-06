@@ -26,17 +26,6 @@
       <bpmn2:incoming>Flow_045p3wr</bpmn2:incoming>
       <bpmn2:outgoing>Flow_gw130_to_careplan</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:task id="Activity_CarePlan_SCLC" name="CarePlanStart: SCLC Treatment Plan">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">CarePlanStart: SCLC Treatment Plan</i18n:translation>
-        <synthea:stateTypeConfig stateType="CarePlanStart" />
-        <fhirmap:resourceMapping resourceType="CarePlan" />
-        <term:coding system="http://snomed.info/sct" code="182964004" display="Terminal care (regime/therapy)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_gw130_to_careplan</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_careplan_to_recordcmp</bpmn2:outgoing>
-    </bpmn2:task>
     <bpmn2:task id="Activity_11vsro0" name="Diagnostic Area: Record_CMP">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CMP</i18n:translation>
@@ -62,7 +51,7 @@
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB2_out</bpmn2:incoming>
-      <bpmn2:incoming>Flow_careplan_to_recordcmp</bpmn2:incoming>
+      <bpmn2:incoming>Flow_gw130_to_careplan</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1772ltf</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:task id="Activity_1rbjl3t" name="Diagnostic Area: Record_Urinalysis">
@@ -148,6 +137,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Hearing_Test</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="EXACT" value="30" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="398171003" display="Hearing examination (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -159,6 +149,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Chemotherapy I</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:medicationConfig administration="true" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" display="Cisplatin 50 MG Injection" />
         <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
@@ -187,8 +178,9 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: SCLC Chemotherapy II</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:medicationConfig administration="true" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="Etoposide 100mg Injection" />
+        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="etoposide 100 MG Injection [Etopophos]" />
         <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -199,8 +191,9 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: NSCLC Chemotherapy II</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:medicationConfig administration="true" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100mg Injection" />
+        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100 MG Injection" />
         <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -238,6 +231,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Radiation</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="703423002" display="Combined chemotherapy and radiation therapy (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -251,7 +245,7 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <synthea:observationConfig category="vital-signs" />
         <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="10" unit="{score}" decimals="0" />
-        <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
+        <term:coding system="http://loinc.org" code="72514-3" display="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1niwvy9</bpmn2:incoming>
@@ -340,8 +334,7 @@
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0p8q6xn" sourceRef="Activity_0xuk3ku" targetRef="Gateway_130sh5c" />
-    <bpmn2:sequenceFlow id="Flow_gw130_to_careplan" sourceRef="Gateway_130sh5c" targetRef="Activity_CarePlan_SCLC" />
-    <bpmn2:sequenceFlow id="Flow_careplan_to_recordcmp" sourceRef="Activity_CarePlan_SCLC" targetRef="Activity_11vsro0" />
+    <bpmn2:sequenceFlow id="Flow_gw130_to_careplan" sourceRef="Gateway_130sh5c" targetRef="Activity_11vsro0" />
     <bpmn2:sequenceFlow id="Flow_1772ltf" sourceRef="Activity_11vsro0" targetRef="Activity_1rbjl3t" />
     <bpmn2:sequenceFlow id="Flow_02g4inp" sourceRef="Activity_1rbjl3t" targetRef="Activity_0g6jkau" />
     <bpmn2:sequenceFlow id="Flow_1wu1rz7" sourceRef="Activity_0g6jkau" targetRef="Activity_01m9cy0" />
@@ -452,15 +445,15 @@
     </bpmn2:textAnnotation>
     <bpmn2:textAnnotation id="TextAnnotation_1plfojx">
       <bpmn2:extensionElements>
-        <i18n:translation target="@text" lang="de">RxNorm: 226719 - Etoposide 100mg Injection</i18n:translation>
+        <i18n:translation target="@text" lang="de">RxNorm: 226719 - etoposide 100 MG Injection [Etopophos]</i18n:translation>
       </bpmn2:extensionElements>
-      <bpmn2:text>RxNorm: 226719 - Etoposide 100mg Injection</bpmn2:text>
+      <bpmn2:text>RxNorm: 226719 - etoposide 100 MG Injection [Etopophos]</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:textAnnotation id="TextAnnotation_09aikim">
       <bpmn2:extensionElements>
-        <i18n:translation target="@text" lang="de">RxNorm: 583214 - PACLitaxel 100mg Injection</i18n:translation>
+        <i18n:translation target="@text" lang="de">RxNorm: 583214 - PACLitaxel 100 MG Injection</i18n:translation>
       </bpmn2:extensionElements>
-      <bpmn2:text>RxNorm: 583214 - PACLitaxel 100mg Injection</bpmn2:text>
+      <bpmn2:text>RxNorm: 583214 - PACLitaxel 100 MG Injection</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:textAnnotation id="TextAnnotation_1858nwf">
       <bpmn2:extensionElements>
@@ -480,10 +473,6 @@
       <bpmn2:text>End Encounter: End_Diagnosis_Encounter_IV</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:association id="Association_0lk2kks" associationDirection="None" sourceRef="Flow_045p3wr" targetRef="TextAnnotation_1m96ltu" />
-    <bpmn2:textAnnotation id="TextAnnotation_1s5cihb">
-      <bpmn2:text>SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
-    </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Activity_CarePlan_SCLC" targetRef="TextAnnotation_1s5cihb" />
     <bpmn2:textAnnotation id="TextAnnotation_15dhow8">
       <bpmn2:text>End Encounter: End_SCLC_Treatment_Encounter</bpmn2:text>
     </bpmn2:textAnnotation>
@@ -520,10 +509,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_130sh5c_di" bpmnElement="Gateway_130sh5c" isMarkerVisible="true">
         <dc:Bounds x="9445" y="288" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_CarePlan_SCLC_di" bpmnElement="Activity_CarePlan_SCLC">
-        <dc:Bounds x="9538" y="273" width="100" height="80" />
-        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_11vsro0_di" bpmnElement="Activity_11vsro0">
         <dc:Bounds x="9680" y="273" width="100" height="80" />
@@ -625,10 +610,6 @@
       <bpmndi:BPMNShape id="Gateway_typeB2_di" bpmnElement="Gateway_typeB2" isMarkerVisible="true">
         <dc:Bounds x="13945" y="288" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_047472w_di" bpmnElement="Association_047472w">
-        <di:waypoint x="9588" y="270" />
-        <di:waypoint x="9572" y="179" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0j1dz42_di" bpmnElement="Association_0j1dz42">
         <di:waypoint x="12856" y="273" />
         <di:waypoint x="12862" y="229" />
@@ -704,10 +685,6 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_gw130_to_careplan_di" bpmnElement="Flow_gw130_to_careplan">
         <di:waypoint x="9495" y="313" />
-        <di:waypoint x="9538" y="313" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_careplan_to_recordcmp_di" bpmnElement="Flow_careplan_to_recordcmp">
-        <di:waypoint x="9638" y="313" />
         <di:waypoint x="9680" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1772ltf_di" bpmnElement="Flow_1772ltf">
@@ -908,10 +885,6 @@
         <di:waypoint x="13299" y="106" />
         <di:waypoint x="13343" y="77" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_1s5cihb_di" bpmnElement="TextAnnotation_1s5cihb">
-        <dc:Bounds x="9560" y="107" width="141.27313337587748" height="72" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1axtv0b_di" bpmnElement="TextAnnotation_1axtv0b">
         <dc:Bounds x="12830" y="129" width="135" height="100" />
         <bpmndi:BPMNLabel />

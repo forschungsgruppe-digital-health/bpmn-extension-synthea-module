@@ -139,6 +139,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Peripheral_Blood_Smear</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="EXACT" value="30" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="14768001" display="Peripheral blood smear interpretation (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -153,6 +154,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Review_Of_Systems</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="20" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="415300000" display="Review of systems (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -172,6 +174,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Brief_Examination</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="20" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="162676008" display="Brief general examination (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -210,6 +213,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Transfusion</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="20" valueHigh="60" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="180207008" display="Intravenous blood transfusion of packed cells (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -308,6 +312,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Medication_Reconciliation</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="5" valueHigh="20" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="430193006" display="Medication reconciliation (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />

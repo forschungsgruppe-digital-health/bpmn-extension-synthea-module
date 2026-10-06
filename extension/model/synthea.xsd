@@ -166,6 +166,17 @@
     <xsd:attribute name="decimals" type="xsd:int"/>
   </xsd:complexType>
 
+  <xsd:element name="medicationConfig" type="synthea:tMedicationConfig"/>
+  <xsd:complexType name="tMedicationConfig">
+    <xsd:attribute name="administration" type="xsd:boolean" default="false"/>
+  </xsd:complexType>
+
+  <xsd:element name="carePlanActivity" type="synthea:tCarePlanActivity"/>
+  <xsd:complexType name="tCarePlanActivity">
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+  </xsd:complexType>
+
   <xsd:element name="imagingStudySeries" type="synthea:tImagingStudySeries"/>
   <xsd:complexType name="tImagingStudySeries">
     <xsd:attribute name="bodySiteCode" type="xsd:string"/>

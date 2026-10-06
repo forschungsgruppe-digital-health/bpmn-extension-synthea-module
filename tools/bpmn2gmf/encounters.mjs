@@ -10,10 +10,14 @@
 //         left untagged inherits whatever encounter is open, modeling guide
 //         section 9) until the flow reaches a boundary: a long Delay, Terminal,
 //         Death, CallSubmodule, or a state of another encounter
-// A Delay of one day or more ends the encounter (a visit does not last days);
-// shorter ones stay inside it. This matches upstream: anemia keeps its 1 hour
-// delay inside the encounter and ends it before the 1 day delay, and a
-// treatment loop with delays of weeks gets one encounter per cycle.
+// When a Delay ends the encounter depends on where it is:
+//   between two states of the same encounter (the modeler tagged both sides):
+//     a delay of a week or more ends it, shorter ones are part of the stay
+//   after the last tagged state: a delay of a day or more ends it
+// This reproduces upstream. Its inpatient stay is one encounter with a loop of
+// 1 day delays inside it (the length of stay), and the weeks between two
+// treatment cycles end it; the anemia module keeps a 1 hour delay inside the
+// visit and closes it before the 1 day delay that follows.
 //
 // Encounter     one per (encounter, entered state), on every edge that enters the span
 // EncounterEnd  on every edge that leaves all regions the edge started in;
@@ -25,19 +29,20 @@ import { systemName } from './codes.mjs';
 const BOUNDARY = new Set(['Terminal', 'Death', 'CallSubmodule']);
 
 const DAYS_PER_UNIT = { seconds: 1 / 86400, minutes: 1 / 1440, hours: 1 / 24, days: 1, weeks: 7, months: 30, years: 365 };
-export const LONG_DELAY_DAYS = 1;
+export const TAIL_DELAY_DAYS = 1; // after the last tagged state of an encounter
+export const SPAN_DELAY_DAYS = 7; // between tagged states of the same encounter
 
-// A Delay that ends the encounter: its (upper) duration is at least a day. A
-// duration that cannot be read counts as long, so the encounter is closed.
-function isLongDelay(node) {
+// Is this a Delay of at least `days`? Its (upper) duration counts; one that cannot be
+// read counts as long, so the encounter is closed.
+function delayAtLeast(node, days) {
   if (node.stateType !== 'Delay') return false;
   const d = first(node.ext, 'synthea:DelayConfig');
   const perUnit = DAYS_PER_UNIT[d?.delayUnit];
   const amount = Math.max(Number(d?.delayValue), Number(d?.delayValueHigh) || 0);
-  return !perUnit || Number.isNaN(amount) || amount * perUnit >= LONG_DELAY_DAYS;
+  return !perUnit || Number.isNaN(amount) || amount * perUnit >= days;
 }
 
-const endsEncounter = (node) => BOUNDARY.has(node.stateType) || isLongDelay(node);
+const endsEncounter = (node) => BOUNDARY.has(node.stateType) || delayAtLeast(node, TAIL_DELAY_DAYS);
 
 // States Synthea only processes during an encounter (States wiki).
 const REQUIRES_ENCOUNTER = new Set([
@@ -187,7 +192,7 @@ export function synthesizeEncounters(module, diag) {
 
   const computeRegion = (group) => {
     // another encounter's state, or anything that ends an encounter, cannot lie inside this span
-    const blocked = (n) => (n.group && n.group !== group.id) || endsEncounter(n);
+    const blocked = (n) => (n.group && n.group !== group.id) || BOUNDARY.has(n.stateType) || delayAtLeast(n, SPAN_DELAY_DAYS);
     const members = [...group.members];
     const forward = reach(members, successors, (n) => !blocked(n));
     const backward = reach(members, predecessors, (n) => !blocked(n));

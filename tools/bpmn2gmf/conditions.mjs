@@ -77,6 +77,12 @@ export function conditionToGmf(c, report) {
   let out;
   switch (type) {
     case 'Attribute':
+      // "== nil" compares with the text "nil": it is false for a missing attribute and makes
+      // Synthea throw for one that holds an entity (a diagnosis, a medication). The nil test
+      // has its own operators.
+      if (['==', '!='].includes(c.operator) && ['nil', 'null'].includes(String(c.value).trim())) {
+        report(`Attribute "${c.attribute}" ${c.operator} ${c.value} compares with the text "${c.value}"; use the operator "${c.operator === '==' ? 'is nil' : 'is not nil'}" (no value).`);
+      }
       out = compact({ ...t, attribute: c.attribute, ...operatorAndValue(false) });
       break;
     case 'Gender':

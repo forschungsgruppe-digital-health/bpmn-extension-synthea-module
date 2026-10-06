@@ -163,6 +163,19 @@ every flow's values across the group must sum to 1.0, checked by lint rule
 for a runtime-computed weight read from a patient attribute instead of a
 hardcoded number.
 
+**The order of the flows matters when the weights come from attributes.**
+Synthea gives whatever the other branches leave to the **last** branch. With
+fixed numbers that sums up to 1.0 and the order is irrelevant; with attributes
+the sum is only known at run time. So the branch whose probability *is* the
+attribute (e.g. "lung cancer", `probability_of_lung_cancer`) must come
+**before** the catch-all branch ("no lung cancer"). Put it the other way round
+and the attribute is silently ignored: the first branch takes its default, the
+event branch takes the remainder, and every patient gets the default risk. The
+order is the order of the sequence flows in the file (the converter prints a
+note naming the branch that receives the remainder). Found by running the
+converted lung cancer module in Synthea: it had 13 instead of 1 diagnosis in
+400 patients until the two flows were swapped.
+
 ### 4b. By a structured condition — `Condition` / `ConditionConfig`
 
 **Element:** a sequence flow, wrapped in `synthea:ConditionConfig`.
@@ -173,7 +186,7 @@ panel only shows those, not all 20 types' fields at once:
 
 | `conditionType` | Fields shown | Notes |
 |---|---|---|
-| `Attribute` | `attribute`, `operator`, `value` | The general case — compares a named patient attribute |
+| `Attribute` | `attribute`, `operator`, `value` | The general case — compares a named patient attribute. To test whether it is set at all use the operator `is nil` / `is not nil` **without a value**; `== nil` compares with the *text* "nil" and makes Synthea throw for an attribute that holds a diagnosis or medication (the converter rejects it) |
 | `Gender` | `gender` | |
 | `Race` | `race` | |
 | `Socioeconomic Status` | `category` | |
@@ -339,6 +352,32 @@ A `Symptom` needs its **name** (group "Symptom" — the label of the element is
 not parsed) and a **severity**: group "Value" with `EXACT` or `RANGE` (Synthea
 scores symptoms on a scale; the simulation draws a value from the range).
 
+Synthea keeps **one value per symptom name** and adds the values of all symptoms up: a patient
+goes to the emergency room when the sum exceeds 500 (primary care 300, urgent care 350). Two
+states with the same name therefore overwrite each other instead of adding up. The real
+`symptom_check` module uses this: its states are labelled "Bloody Cough", "Fever" and so on, but
+nine of them have the symptom name `Cough`. To get the same behavior, set the name in the panel
+and leave the label as you want to read it.
+
+### Optional fields that still change the result
+
+Three fields are optional in Synthea, but the real lung cancer module sets them and they
+change what the simulation does or writes:
+
+- **`Procedure` duration** (group "Duration (optional)", the same value fields as above, with a
+  unit): Synthea lets the procedure take this long. Without it, a daily treatment loop with
+  radiation (0.5 to 4 hours) and a hearing test (30 minutes) is shorter than the original:
+  in a test with the same seed the average stay was 5.98 instead of 6.64 days. An exact value
+  becomes `low` = `high`.
+- **`MedicationOrder` administered** (group "Medication", checkbox): the medication is
+  given in the encounter, as chemotherapy is. Without it Synthea writes the order as a
+  prescription for home ("community"); with it, as inpatient with a Medication resource.
+- **`CarePlanStart` activity** (group "Care plan activity"): SNOMED code and display text
+  of an activity of the plan. The panel shows one; add more as repeated
+  `synthea:carePlanActivity` elements in the XML. Only the care plan resource changes,
+  not the simulation.
+
+
 ---
 
 ## 8. Linking a later state back to an earlier one — Assign / Referenced by Attribute
@@ -441,9 +480,14 @@ first tagged state and closes it again where the visit ends:
 - untagged states *after* the last tagged one stay inside it (that is what
   makes the untagged medication states above work) until the flow reaches a
   `Terminal`, a `Death`, a submodule call, a state of another visit, or a
-  **delay of one day or more** — a visit does not last days, so such a delay
-  closes it. Delays shorter than a day stay inside;
-- in a loop, every pass through a long delay starts a new visit.
+  **delay of one day or more** — after the last tagged state a visit does not
+  go on for days, so such a delay closes it;
+- a delay *between* two states of the same visit (you tagged both) is part of
+  the stay if it is shorter than a week: that is how an inpatient stay of
+  several days is modeled (a loop with a 1 day delay inside the visit, as in
+  the upstream treatment cycle). A delay of a week or more between them splits
+  the visit in two;
+- in a loop, every pass through such a long delay starts a new visit.
 
 If a state that Synthea only allows during a visit (medication, procedure,
 observation, diagnostic report, imaging, care plan start, device, supply list)
@@ -499,18 +543,23 @@ it via the BPMN element's own properties, not `synthea:`).
 
 **Group:** "Submodule" → `submodule`, the Synthea module path the call
 activity should invoke once exported (e.g.
-`"lung_cancer_treatment_submodule"`). Use the bare module name, no
-subdirectory prefix — `tools/bpmn2gmf` emits every module, main and
-submodules alike, flat directly under `modules/`. The module name is the
+`"lung_cancer_treatment_submodule"`). Write the bare module name: it is the
 **file name** of the BPMN file with `-` replaced by `_`
 (`lung-cancer-treatment-submodule.bpmn` → `lung_cancer_treatment_submodule`),
-not the process name; the converter checks that every call resolves to a
-file of the same run. Real
-Synthea nests its own submodules under a subdirectory (e.g.
-`"lung_cancer/lung_cancer_probabilities"`), but that's just how its own,
-much larger module library is organized, not an engine requirement — with
-only a handful of submodules, this project doesn't need that extra
-structure.
+not the process name; the converter checks that every call resolves to a file
+of the same run.
+
+**Where the files end up is the converter's job, and it matters.** Synthea
+runs every file directly in its modules directory as a module of its own, for
+every patient, and treats only files in a *subdirectory* as submodules (loaded,
+never run by themselves). So `tools/bpmn2gmf` writes the module nobody calls
+(`synthea_lung_cancer.json`) to the top and the modules it calls into a
+subdirectory named after it (`synthea_lung_cancer/anemia_submodule.json`, …),
+and turns every `submodule` name into that path
+(`"synthea_lung_cancer/anemia_submodule"`) — the layout of Synthea's own
+`lung_cancer/lung_cancer_probabilities`. Copy the whole output directory.
+(Written flat, the submodules would also run on their own and Synthea ran into
+an endless recursion; found by running the converted modules in Synthea.)
 
 ---
 

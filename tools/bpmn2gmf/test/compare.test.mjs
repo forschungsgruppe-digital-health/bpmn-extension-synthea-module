@@ -50,6 +50,18 @@ test('the main pathway has no content difference from upstream that is not liste
   assert.deepEqual(different, []);
 });
 
+test('output fields: every duration, administration and care plan activity of upstream is present', () => {
+  const l = links(together);
+  const up = links(upstreamMain);
+  // the SCLC and NSCLC treatment are modeled once here and twice upstream: radiation, hearing test and the
+  // order of the second chemotherapy exist once less (3 x-ray/CT/MRI + 2 radiation + 2 hearing upstream)
+  assert.equal(l.duration, 5);
+  assert.equal(up.duration, 7);
+  assert.equal(l.administration, 3);
+  assert.equal(up.administration, 4);
+  assert.equal(l.activities, up.activities);
+});
+
 test('linking fields: attributes, cause of death and target encounters match upstream; only reason is left out', () => {
   const l = links(together);
   const up = links(upstreamMain);

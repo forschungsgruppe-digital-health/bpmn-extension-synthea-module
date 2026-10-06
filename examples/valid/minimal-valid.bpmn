@@ -298,6 +298,31 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <bpmn:task id="Procedure_Duration_Good" name="Procedure with duration (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:ValueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="MedicationOrder_Administration_Good" name="Administered medication (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="MedicationOrder" />
+        <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        <synthea:MedicationConfig administration="true" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="CarePlan_Activities_Good" name="Care plan with activities (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="CarePlanStart" />
+        <fhirmap:resourceMapping resourceType="CarePlan" />
+        <synthea:CarePlanActivity code="133918004" codeDisplay="Comfort measures (regime/therapy)" />
+        <synthea:CarePlanActivity code="243072006" codeDisplay="Cancer education (procedure)" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
     <bpmn:task id="DiagnosticReport_Good" name="Lab panel with contained observations (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="DiagnosticReport" />

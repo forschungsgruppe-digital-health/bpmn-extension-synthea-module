@@ -50,10 +50,16 @@
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_04qqbk6</bpmn2:incoming>
     </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="Flow_00o4kfe" name="default_probability_of_lung_cancer = 0.0645" sourceRef="Gateway_0qihhud" targetRef="Activity_0zyiii6">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">default_probability_of_lung_cancer = 0.0645</i18n:translation>
+        <synthea:probabilityConfig probabilityAttribute="probability_of_lung_cancer" probabilityDefault="0.0645" />
+      </bpmn2:extensionElements>
+    </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_04qqbk6" name="default_probability_of_no_lung_cancer = 0.9355" sourceRef="Gateway_0qihhud" targetRef="Event_0blllxp">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">default_probability_of_no_lung_cancer = 0.9355</i18n:translation>
-        <synthea:probabilityConfig probability="0.9355" />
+        <synthea:probabilityConfig probabilityAttribute="probability_of_no_lung_cancer" probabilityDefault="0.9355" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:scriptTask id="Activity_0zyiii6" name="Onset_Lung_Cancer: Set lung_cancer = true">
@@ -65,12 +71,6 @@
       <bpmn2:incoming>Flow_00o4kfe</bpmn2:incoming>
       <bpmn2:outgoing>Flow_03s8klv</bpmn2:outgoing>
     </bpmn2:scriptTask>
-    <bpmn2:sequenceFlow id="Flow_00o4kfe" name="default_probability_of_lung_cancer = 0.0645" sourceRef="Gateway_0qihhud" targetRef="Activity_0zyiii6">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">default_probability_of_lung_cancer = 0.0645</i18n:translation>
-        <synthea:probabilityConfig probability="0.0645" />
-      </bpmn2:extensionElements>
-    </bpmn2:sequenceFlow>
     <bpmn2:scriptTask id="Activity_075kjdy" name="Init_Lung_Cancer_Counter: Set lung_cancer_nondiagnosis_counter = 0">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Init_Lung_Cancer_Counter: Set lung_cancer_nondiagnosis_counter = 0</i18n:translation>
@@ -110,10 +110,16 @@
       <bpmn2:incoming>Flow_17yiro0</bpmn2:incoming>
       <bpmn2:outgoing>Flow_165jfdh</bpmn2:outgoing>
     </bpmn2:scriptTask>
+    <bpmn2:sequenceFlow id="Flow_13y58hr" name="20%" sourceRef="Gateway_18bs6oo" targetRef="Activity_0910q2u">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">20%</i18n:translation>
+        <synthea:probabilityConfig probabilityAttribute="probability_of_lung_cancer_treatment" probabilityDefault="0.2" />
+      </bpmn2:extensionElements>
+    </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_17yiro0" name="80%" sourceRef="Gateway_18bs6oo" targetRef="Activity_15ih3fq">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">80%</i18n:translation>
-        <synthea:probabilityConfig probability="0.8" />
+        <synthea:probabilityConfig probabilityAttribute="probability_of_no_lung_cancer_treatment" probabilityDefault="0.8" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_165jfdh" sourceRef="Activity_15ih3fq" targetRef="Event_1n1dk9c" />
@@ -127,12 +133,6 @@
       <bpmn2:incoming>Flow_13y58hr</bpmn2:incoming>
       <bpmn2:outgoing>Flow_19enx2d</bpmn2:outgoing>
     </bpmn2:callActivity>
-    <bpmn2:sequenceFlow id="Flow_13y58hr" name="20%" sourceRef="Gateway_18bs6oo" targetRef="Activity_0910q2u">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">20%</i18n:translation>
-        <synthea:probabilityConfig probability="0.2" />
-      </bpmn2:extensionElements>
-    </bpmn2:sequenceFlow>
     <bpmn2:task id="Activity_07bpac5" name="ConditionOnset: Suspected Lung Cancer">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">ConditionOnset: Suspected Lung Cancer</i18n:translation>
@@ -151,7 +151,7 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <synthea:observationConfig category="vital-signs" />
         <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
-        <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
+        <term:coding system="http://loinc.org" code="72514-3" display="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0179hmu</bpmn2:incoming>
@@ -161,6 +161,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Chest X-Ray</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="25" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="399208008" display="Plain X-ray of chest (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
@@ -184,6 +185,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Chest CT Scan</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="20" valueHigh="60" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="418891003" display="Computed tomography of chest and abdomen (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -710,7 +712,8 @@
       <bpmn2:incoming>Flow_0v68h31</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1260oh2</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="Flow_1260oh2" sourceRef="Gateway_0t93mpq" targetRef="Activity_MRIBrain" />
+    <bpmn2:sequenceFlow id="Flow_1260oh2" sourceRef="Gateway_0t93mpq" targetRef="Activity_CarePlan_Lung" />
+    <bpmn2:sequenceFlow id="Flow_careplan_to_MRI" sourceRef="Activity_CarePlan_Lung" targetRef="Activity_MRIBrain" />
     <bpmn2:exclusiveGateway id="Gateway_14o5s0b">
       <bpmn2:incoming>Flow_1vkepxs</bpmn2:incoming>
       <bpmn2:incoming>Flow_1v6kn4g</bpmn2:incoming>
@@ -726,7 +729,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">anemia is nil</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="anemia" operator="==" value="nil" />
+          <synthea:condition conditionType="Attribute" attribute="anemia" operator="is nil" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -770,15 +773,30 @@
       <bpmn2:incoming>Flow_TreatmentCycle_End</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="Flow_TreatmentCycle_End" sourceRef="Activity_LungCancerTreatmentCycle" targetRef="Event_TreatmentCycle_End" />
+    <bpmn2:task id="Activity_CarePlan_Lung" name="CarePlanStart: Lung_Cancer_CarePlan">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">CarePlanStart: Lung_Cancer_CarePlan</i18n:translation>
+        <synthea:stateTypeConfig stateType="CarePlanStart" />
+        <synthea:carePlanActivity code="133918004" codeDisplay="Comfort measures (regime/therapy)" />
+        <synthea:carePlanActivity code="408957008" codeDisplay="Chronic pain control management (procedure)" />
+        <synthea:carePlanActivity code="243072006" codeDisplay="Cancer education (procedure)" />
+        <fhirmap:resourceMapping resourceType="CarePlan" />
+        <term:coding system="http://snomed.info/sct" code="182964004" display="Terminal care (regime/therapy)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_1260oh2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_careplan_to_MRI</bpmn2:outgoing>
+    </bpmn2:task>
     <bpmn2:task id="Activity_MRIBrain" name="Procedure: MRI Brain">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: MRI Brain</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:valueConfig valueShape="RANGE" value="30" valueHigh="120" unit="minutes" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="698354004" display="Magnetic resonance imaging for measurement of brain volume (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_1260oh2</bpmn2:incoming>
+      <bpmn2:incoming>Flow_careplan_to_MRI</bpmn2:incoming>
       <bpmn2:outgoing>Flow_MRIBrain_to_Cycle</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:sequenceFlow id="Flow_MRIBrain_to_Cycle" sourceRef="Activity_MRIBrain" targetRef="Activity_LungCancerTreatmentCycle" />
@@ -1208,16 +1226,16 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="5885" y="135" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_LungCancerTreatmentCycle_di" bpmnElement="Activity_LungCancerTreatmentCycle">
-        <dc:Bounds x="8820" y="273" width="100" height="80" />
+        <dc:Bounds x="8960" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_MRIBrain_di" bpmnElement="TextAnnotation_MRIBrain">
-        <dc:Bounds x="8694" y="180" width="200" height="72" />
+        <dc:Bounds x="8834" y="180" width="200" height="72" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_MRIBrain_di" bpmnElement="Association_MRIBrain">
-        <di:waypoint x="8730" y="273" />
-        <di:waypoint x="8730" y="252" />
+        <di:waypoint x="8870" y="273" />
+        <di:waypoint x="8870" y="252" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0hi7d1l_di" bpmnElement="Association_0hi7d1l">
         <di:waypoint x="4708" y="340" />
@@ -1312,7 +1330,7 @@ biopsy of lung (procedure)</bpmn2:text>
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_09jpaas_di" bpmnElement="TextAnnotation_09jpaas">
-        <dc:Bounds x="8750" y="226" width="102.54965698787493" height="57" />
+        <dc:Bounds x="8890" y="226" width="102.54965698787493" height="57" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_06q0fxr_di" bpmnElement="TextAnnotation_06q0fxr">
@@ -1674,13 +1692,21 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="8605" y="313" />
         <di:waypoint x="8680" y="313" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Activity_MRIBrain_di" bpmnElement="Activity_MRIBrain">
+      <bpmndi:BPMNEdge id="Flow_careplan_to_MRI_di" bpmnElement="Flow_careplan_to_MRI">
+        <di:waypoint x="8780" y="313" />
+        <di:waypoint x="8820" y="313" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_CarePlan_Lung_di" bpmnElement="Activity_CarePlan_Lung">
         <dc:Bounds x="8680" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_MRIBrain_di" bpmnElement="Activity_MRIBrain">
+        <dc:Bounds x="8820" y="273" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_MRIBrain_to_Cycle_di" bpmnElement="Flow_MRIBrain_to_Cycle">
-        <di:waypoint x="8780" y="313" />
-        <di:waypoint x="8820" y="313" />
+        <di:waypoint x="8920" y="313" />
+        <di:waypoint x="8960" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_092d7h1_di" bpmnElement="Flow_092d7h1">
         <di:waypoint x="4840" y="180" />
@@ -1740,14 +1766,14 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="7645" y="570" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_TreatmentCycle_End_di" bpmnElement="Event_TreatmentCycle_End">
-        <dc:Bounds x="8962" y="295" width="36" height="36" />
+        <dc:Bounds x="9102" y="295" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8955" y="338" width="50" height="14" />
+          <dc:Bounds x="9095" y="338" width="50" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_TreatmentCycle_End_di" bpmnElement="Flow_TreatmentCycle_End">
-        <di:waypoint x="8920" y="313" />
-        <di:waypoint x="8962" y="313" />
+        <di:waypoint x="9060" y="313" />
+        <di:waypoint x="9102" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1nisonf_di" bpmnElement="Association_1nisonf">
         <di:waypoint x="2255" y="140" />
@@ -1838,12 +1864,12 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="2433" y="166" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0uknex9_di" bpmnElement="Association_0uknex9">
-        <di:waypoint x="8712.5" y="313" />
-        <di:waypoint x="8752" y="283" />
+        <di:waypoint x="8852.5" y="313" />
+        <di:waypoint x="8892" y="283" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1y26obi_di" bpmnElement="Association_1y26obi">
-        <di:waypoint x="8712.5" y="313" />
-        <di:waypoint x="8689" y="283" />
+        <di:waypoint x="8852.5" y="313" />
+        <di:waypoint x="8829" y="283" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1j7l9vz_di" bpmnElement="Association_1j7l9vz">
         <di:waypoint x="3638" y="140" />

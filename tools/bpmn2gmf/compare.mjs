@@ -69,9 +69,11 @@ export function compare(oursStates, upstreamStates, { alias = {} } = {}) {
 // Several of our modules together (a main module plus its submodules) against one upstream module.
 export const merge = (...modules) => Object.assign({}, ...modules.map((m, i) => Object.fromEntries(Object.entries(m).map(([k, v]) => [`${i}:${k}`, v]))));
 
-// Fields that link states to each other or to attributes. Not part of the signatures
-// (names differ legitimately), but worth a look: how many states carry each.
-const LINKS = ['assign_to_attribute', 'referenced_by_attribute', 'value_attribute', 'reason', 'target_encounter'];
+// Fields that link states to each other or to attributes, and optional fields that
+// still change what Synthea does or writes (`duration` takes simulated time,
+// `administration` makes an order inpatient, `activities` fill the care plan). Not part
+// of the signatures (names differ legitimately), but worth a look: how many states carry each.
+const LINKS = ['assign_to_attribute', 'referenced_by_attribute', 'value_attribute', 'reason', 'target_encounter', 'duration', 'administration', 'activities'];
 export function links(states) {
   const out = Object.fromEntries(LINKS.map((k) => [k, 0]));
   for (const state of Object.values(states)) for (const k of LINKS) if (state[k] !== undefined) out[k]++;

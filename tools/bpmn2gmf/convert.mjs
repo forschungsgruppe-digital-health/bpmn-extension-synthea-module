@@ -9,6 +9,7 @@ import { emitState } from './emit.mjs';
 import { verifyModule, verifySubmodules } from './verify.mjs';
 import { missingFields } from './required-fields.mjs';
 import { fuseGateways } from './fuse.mjs';
+import { assignPaths } from './layout.mjs';
 
 // `fileBase` is the module file name without extension, e.g. "anemia_submodule";
 // it is also what CallSubmodule refers to (flat layout).
@@ -58,9 +59,11 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
   }
 
   verifySubmodules(modules, diag);
+  assignPaths(modules);
 
   const results = modules.map((m) => ({
     fileBase: m.fileBase,
+    path: m.path,
     ok: diag.forModule(m.fileBase).every((i) => i.level !== 'error'),
     json: { name: m.name, states: m.states }
   }));

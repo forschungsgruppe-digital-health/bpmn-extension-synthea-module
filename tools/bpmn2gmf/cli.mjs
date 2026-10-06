@@ -4,10 +4,13 @@
 //   --strict  required fields the extension cannot express yet are errors (module is not written)
 //
 // Converts every given .bpmn file (directories are scanned non-recursively) to
-// a Synthea GMF module. Modules with errors are not written. Exit code 1 if
+// a Synthea GMF module. Modules that no other module calls are written to the
+// output directory, the ones they call into a subdirectory named after the caller
+// (Synthea only treats files in a subdirectory as submodules). Modules with errors are not written. Exit code 1 if
 // any error was found.
-import { readFileSync, readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { writeModules } from './write.mjs';
 import { convert } from './convert.mjs';
 
 const args = process.argv.slice(2);
@@ -39,14 +42,9 @@ const { modules, diagnostics } = await convert(
   { strict, fuse }
 );
 
-if (!check) mkdirSync(outDir, { recursive: true });
+if (!check) writeModules(modules, outDir);
 for (const m of modules) {
-  if (!m.ok) {
-    console.log(`SKIP  ${m.fileBase} (errors)`);
-    continue;
-  }
-  if (!check) writeFileSync(join(outDir, `${m.fileBase}.json`), `${JSON.stringify(m.json, null, 2)}\n`);
-  console.log(`${check ? 'OK   ' : 'WROTE'} ${m.fileBase}`);
+  console.log(m.ok ? `${check ? 'OK   ' : 'WROTE'} ${m.path}` : `SKIP  ${m.path} (errors)`);
 }
 for (const line of diagnostics.format()) console.log(line);
 process.exit(diagnostics.errorCount ? 1 : 0);

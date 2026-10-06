@@ -259,6 +259,14 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- careplan-activity-requires-code-and-display: activity with a code but no display -->
+    <bpmn:task id="Task_CarePlanActivityPartial" name="Care plan activity incomplete (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="CarePlanStart" />
+        <synthea:CarePlanActivity code="133918004" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
     <!-- gateway-branches-require-condition-or-probability: two outgoing flows, neither has a
          synthea:conditionConfig or synthea:probabilityConfig -->
     <bpmn:exclusiveGateway id="Gateway_BranchesNoConfig" name="Branches (no condition)" />
