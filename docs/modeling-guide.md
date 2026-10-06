@@ -172,8 +172,8 @@ panel only shows those, not all 20 types' fields at once:
 | `Date` | `year`, `month`, `operator` | Only year/month — Synthea's fuller day/hour/minute date object isn't modeled |
 | `Symptom` | `symptom`, `operator`, `value` | |
 | `Vital Sign` | `vitalSign`, `operator`, `value` | |
-| `Observation` | `referencedAttribute`, `operator`, `value` | References an attribute set by a prior state, not a raw code list |
-| `Active Condition` / `Active Medication` / `Active Allergy` / `Active CarePlan` | `referencedAttribute` | Same — "is the thing referenced by this attribute currently active" |
+| `Observation` | `referencedAttribute` **or** `codeSystem` + `code` + `codeDisplay`, `operator`, `value` | Identifies the observation either by an attribute set by a prior state, or by its code (the usual case for a value measured in a lab panel, e.g. LOINC `20570-8` hematocrit). Use one of the two, never both; with a code, all three code fields are required. The most recent observation with that code is compared, and it must have been recorded before this check |
+| `Active Condition` / `Active Medication` / `Active Allergy` / `Active CarePlan` | `referencedAttribute` **or** `codeSystem` + `code` + `codeDisplay` | Same two ways — "is the thing referenced by this attribute / carrying this code currently active" |
 | `PriorState` | `priorStateName`, `since`, `quantity`, `unit` | `quantity`/`unit` here mean Synthea's `within: {quantity, unit}` — the *same* fields Age uses, different meaning by context |
 | `True` / `False` | none | Constants, mainly for testing |
 

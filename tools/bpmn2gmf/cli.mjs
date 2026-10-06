@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Usage: node tools/bpmn2gmf/cli.mjs <file.bpmn|dir> [...] [--out-dir <dir>] [--check]
+// Usage: node tools/bpmn2gmf/cli.mjs <file.bpmn|dir> [...] [--out-dir <dir>] [--check] [--strict]
+//   --strict  required fields the extension cannot express yet are errors (module is not written)
 //
 // Converts every given .bpmn file (directories are scanned non-recursively) to
 // a Synthea GMF module. Modules with errors are not written. Exit code 1 if
@@ -12,13 +13,15 @@ const args = process.argv.slice(2);
 const inputs = [];
 let outDir = 'out/modules';
 let check = false;
+let strict = false;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--out-dir') outDir = args[++i];
   else if (args[i] === '--check') check = true;
+  else if (args[i] === '--strict') strict = true;
   else inputs.push(args[i]);
 }
 if (!inputs.length) {
-  console.error('usage: bpmn2gmf <file.bpmn|dir> [...] [--out-dir <dir>] [--check]');
+  console.error('usage: bpmn2gmf <file.bpmn|dir> [...] [--out-dir <dir>] [--check] [--strict]');
   process.exit(2);
 }
 
@@ -29,7 +32,8 @@ const files = inputs.flatMap((p) =>
 );
 
 const { modules, diagnostics } = await convert(
-  files.map((path) => ({ path, xml: readFileSync(path, 'utf8') }))
+  files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })),
+  { strict }
 );
 
 if (!check) mkdirSync(outDir, { recursive: true });

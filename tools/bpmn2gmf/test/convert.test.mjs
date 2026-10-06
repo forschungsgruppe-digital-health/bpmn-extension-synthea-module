@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { convert } from '../convert.mjs';
 import {
   wrap, run, start, end, task, gateway, timer, call, flow,
-  stateType, setAttr, prob, cond, attrCond
+  stateType, setAttr, prob, cond, attrCond, coding, SNOMED, LOINC, RXNORM
 } from './helpers.mjs';
 
 test('linear flow: Initial -> SetAttribute -> Terminal', async () => {
@@ -137,6 +137,63 @@ test('conditions: "is not nil" has no value; nested And is recursive', async () 
   });
 });
 
+// ---- conditions identified by a code (Observation / Active *) -------------------
+
+// One gateway whose only conditional branch carries `conditionXml`.
+const withCondition = (conditionXml) =>
+  run(
+    start() + gateway('G', 'g', 'fd') + task('A', 'a', setAttr('x', '1')) + end() +
+    flow('f1', 'S', 'G') + flow('fc', 'G', 'A', cond(conditionXml)) + flow('fd', 'G', 'E') + flow('f3', 'A', 'E')
+  );
+const HCT = 'codeSystem="http://loinc.org" code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation"';
+
+test('Observation condition by code becomes codes: [{system, code, display}]', async () => {
+  const { module, diagnostics } = await withCondition(
+    `<synthea:condition conditionType="Observation" operator="&lt;=" value="28" ${HCT} />`
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(module.json.states.g.conditional_transition[0].condition, {
+    condition_type: 'Observation',
+    codes: [{ system: 'LOINC', code: '20570-8', display: 'Hematocrit [Volume Fraction] of Blood by calculation' }],
+    operator: '<=',
+    value: 28
+  });
+});
+
+test('Observation condition by attribute stays referenced_by_attribute', async () => {
+  const { module } = await withCondition(
+    '<synthea:condition conditionType="Observation" referencedAttribute="hct_test" operator="is not nil" />'
+  );
+  assert.deepEqual(module.json.states.g.conditional_transition[0].condition, {
+    condition_type: 'Observation',
+    referenced_by_attribute: 'hct_test',
+    operator: 'is not nil'
+  });
+});
+
+test('Active Condition by SNOMED code', async () => {
+  const { module } = await withCondition(
+    '<synthea:condition conditionType="Active Condition" codeSystem="http://snomed.info/sct" code="73211009" codeDisplay="Diabetes mellitus" />'
+  );
+  assert.deepEqual(module.json.states.g.conditional_transition[0].condition, {
+    condition_type: 'Active Condition',
+    codes: [{ system: 'SNOMED-CT', code: '73211009', display: 'Diabetes mellitus' }]
+  });
+});
+
+test('a code and an attribute together, a code without display, an unknown system, or neither are errors', async () => {
+  const cases = {
+    both: `<synthea:condition conditionType="Observation" referencedAttribute="x" ${HCT} operator="==" value="1" />`,
+    noDisplay: '<synthea:condition conditionType="Observation" codeSystem="http://loinc.org" code="1-1" operator="==" value="1" />',
+    unknownSystem: '<synthea:condition conditionType="Observation" codeSystem="http://example.org/cs" code="1" codeDisplay="x" operator="==" value="1" />',
+    neither: '<synthea:condition conditionType="Active Medication" />'
+  };
+  for (const [name, xml] of Object.entries(cases)) {
+    const { codes } = await withCondition(xml);
+    assert.ok(codes.includes('CONDITION_INVALID'), `${name} should be an error`);
+  }
+});
+
 test('Guard emits allow', async () => {
   const guard = `${stateType('Guard')}<synthea:guardConfig><synthea:allow conditionType="Gender" gender="M"/></synthea:guardConfig>`;
   const { module, diagnostics } = await run(
@@ -207,9 +264,9 @@ test('an empty label falls back to <stateType>_<id>', async () => {
   assert.ok('SetAttribute_A' in module.json.states);
 });
 
-test('clinical state types are not implemented yet and say so', async () => {
+test('state types that are not supported at all say so', async () => {
   const { codes } = await run(
-    start() + task('A', 'Dx', stateType('ConditionOnset')) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+    start() + task('A', 'sim', stateType('Physiology')) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
   );
   assert.ok(codes.includes('STATE_TYPE_NOT_IMPLEMENTED'));
 });
@@ -260,4 +317,164 @@ test('lung-cancer-probabilities-submodule.bpmn converts to the golden file', asy
     readFileSync(new URL('./golden/lung_cancer_probabilities_submodule.json', import.meta.url), 'utf8')
   );
   assert.deepEqual(modules[0].json, golden);
+});
+
+// ---- clinical states and codes (phase 2) -------------------------------------------
+
+// start -> one clinical task -> end; `inner` is the task's extension content
+const clinical = (type, inner, opts) =>
+  run(start() + task('A', 'clin', stateType(type) + inner) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'), opts);
+
+test('ConditionOnset: term:coding becomes codes (system URI -> Synthea name)', async () => {
+  const { module, diagnostics } = await clinical('ConditionOnset', coding(SNOMED, '271737000', 'Anemia (disorder)'));
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(module.json.states.clin.codes, [{ system: 'SNOMED-CT', code: '271737000', display: 'Anemia (disorder)' }]);
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
+});
+
+test('the real package form term:annotations/annotation/coding reads the same', async () => {
+  const real =
+    '<term:annotations><term:annotation id="a1" text="x">' + coding(SNOMED, '271737000', 'Anemia (disorder)') +
+    '</term:annotation></term:annotations>';
+  const { module } = await clinical('ConditionOnset', real);
+  assert.deepEqual(module.json.states.clin.codes, [{ system: 'SNOMED-CT', code: '271737000', display: 'Anemia (disorder)' }]);
+});
+
+test('only codings in a system the state accepts are used; the others are mentioned', async () => {
+  const { module, diagnostics } = await clinical(
+    'Procedure',
+    coding(SNOMED, '399208008', 'Plain X-ray of chest') + coding(LOINC, '36643-5', 'Chest X-ray') +
+      coding('http://ihe-d.de/CodeSystems/IHEXDStypeCode', 'ERGE', 'Diagnostic imaging results')
+  );
+  assert.deepEqual(module.json.states.clin.codes.map((c) => c.system), ['SNOMED-CT']);
+  assert.ok(diagnostics.items.some((i) => i.code === 'CODING_IGNORED'));
+});
+
+test('a state without a usable code is reported as incomplete, and an error with strict', async () => {
+  const loose = await clinical('Procedure', coding(LOINC, '36643-5', 'Chest X-ray'));
+  assert.ok(loose.codes.includes('REQUIRED_FIELD_MISSING'));
+  assert.equal(loose.diagnostics.errorCount, 0);
+  assert.match(loose.module.json.states.clin.remarks[0], /required field\(s\) missing: codes/);
+
+  const strict = await clinical('Procedure', coding(LOINC, '36643-5', 'Chest X-ray'), { strict: true });
+  assert.equal(strict.module.ok, false);
+});
+
+test('MedicationOrder assigns an attribute, MedicationEnd references it', async () => {
+  const { module, diagnostics } = await run(
+    start() +
+      task('A', 'order', stateType('MedicationOrder') + coding(RXNORM, '1736854', 'Cisplatin 50 MG Injection') +
+        '<synthea:assignToAttributeConfig attribute="chemo_order"/>') +
+      task('B', 'stop', stateType('MedicationEnd') + '<synthea:referencedByAttributeConfig attribute="chemo_order"/>') +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.equal(module.json.states.order.assign_to_attribute, 'chemo_order');
+  assert.equal(module.json.states.stop.referenced_by_attribute, 'chemo_order');
+});
+
+test('an End state without attribute or code is paired with the one start state upstream', async () => {
+  const { module, diagnostics } = await run(
+    start() +
+      task('A', 'dx', stateType('ConditionOnset') + coding(SNOMED, '1', 'Dx')) +
+      task('B', 'end dx', stateType('ConditionEnd')) +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.equal(module.json.states['end dx'].condition_onset, 'dx');
+});
+
+test('in a chain of start states the nearest one is paired', async () => {
+  const { module } = await run(
+    start() +
+      task('A1', 'dx1', stateType('ConditionOnset') + coding(SNOMED, '1', 'Dx')) +
+      task('A2', 'dx2', stateType('ConditionOnset') + coding(SNOMED, '2', 'Dx2')) +
+      task('B', 'end dx', stateType('ConditionEnd')) +
+      end() + flow('f1', 'S', 'A1') + flow('f2', 'A1', 'A2') + flow('f3', 'A2', 'B') + flow('f4', 'B', 'E')
+  );
+  assert.equal(module.json.states['end dx'].condition_onset, 'dx2');
+});
+
+test('an End state is an error when no or several start states are upstream', async () => {
+  const none = await run(
+    start() + task('B', 'end dx', stateType('ConditionEnd')) + end() + flow('f1', 'S', 'B') + flow('f2', 'B', 'E')
+  );
+  assert.ok(none.codes.includes('END_STATE_UNPAIRED'));
+
+  // two start states on parallel branches that merge before the End state
+  const two = await run(
+    start() + gateway('G', 'g', 'f3') +
+      task('A1', 'dx1', stateType('ConditionOnset') + coding(SNOMED, '1', 'Dx')) +
+      task('A2', 'dx2', stateType('ConditionOnset') + coding(SNOMED, '2', 'Dx2')) +
+      task('B', 'end dx', stateType('ConditionEnd')) +
+      end() + flow('f1', 'S', 'G') + flow('f2', 'G', 'A1', prob('0.5')) + flow('f3', 'G', 'A2', prob('0.5')) +
+      flow('f4', 'A1', 'B') + flow('f5', 'A2', 'B') + flow('f6', 'B', 'E')
+  );
+  assert.ok(two.codes.includes('END_STATE_UNPAIRED'));
+});
+
+test('a Death end event continues to the module\'s Terminal state, or gets one', async () => {
+  const dying = '<bpmn2:endEvent id="D" name="Death">' +
+    '<bpmn2:extensionElements>' + stateType('Death') + '</bpmn2:extensionElements></bpmn2:endEvent>';
+  const withTerminal = await run(
+    start() + gateway('G', 'g', 'f3') + dying + end() +
+      flow('f1', 'S', 'G') + flow('f2', 'G', 'D', prob('0.5')) + flow('f3', 'G', 'E', prob('0.5'))
+  );
+  assert.equal(withTerminal.module.json.states.Death.direct_transition, 'Terminal');
+
+  const alone = await run(start() + dying + flow('f1', 'S', 'D'));
+  assert.equal(alone.diagnostics.errorCount, 0, alone.diagnostics.format().join('\n'));
+  assert.deepEqual(alone.module.json.states.Death, { type: 'Death', direct_transition: 'Terminal' });
+  assert.equal(alone.module.json.states.Terminal.type, 'Terminal');
+});
+
+test('Observation, Symptom and DiagnosticReport report the fields the extension cannot carry yet', async () => {
+  const obs = await clinical('Observation', coding(LOINC, '72514-3', 'Pain severity'));
+  assert.match(obs.module.json.states.clin.remarks[0], /category, unit, one of exact \| range/);
+  const sym = await clinical('Symptom', '');
+  assert.match(sym.module.json.states.clin.remarks[0], /symptom, one of exact \| range/);
+  const rep = await clinical('DiagnosticReport', coding(LOINC, '58410-2', 'CBC panel'));
+  assert.match(rep.module.json.states.clin.remarks[0], /observations/);
+});
+
+test('ImagingStudy uses the first code as procedure_code', async () => {
+  const { module } = await clinical('ImagingStudy', coding(SNOMED, '16335031000119103', 'HRCT of chest'));
+  assert.deepEqual(module.json.states.clin.procedure_code, { system: 'SNOMED-CT', code: '16335031000119103', display: 'HRCT of chest' });
+});
+
+test('targetEncounter waits for the encounter synthesis and says so', async () => {
+  const { codes } = await clinical(
+    'ConditionOnset',
+    coding(SNOMED, '1', 'Dx') + '<synthea:encounterReference targetEncounter="E1"/>'
+  );
+  assert.ok(codes.includes('TARGET_ENCOUNTER_NOT_IMPLEMENTED'));
+});
+
+test('the real submodules convert without errors; only gaps the extension cannot express are reported', async () => {
+  const files = [
+    'lung-cancer/anemia-submodule.bpmn',
+    'lung-cancer/lung-cancer-treatment-submodule.bpmn',
+    'lung-cancer/symptom-check-submodule.bpmn',
+    'lung-cancer/lung-cancer-probabilities-submodule.bpmn'
+  ];
+  const { modules, diagnostics } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })));
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.ok(modules.every((m) => m.ok));
+
+  const gaps = {};
+  for (const i of diagnostics.items.filter((x) => x.code === 'REQUIRED_FIELD_MISSING')) {
+    const type = i.message.split(' ')[0];
+    gaps[type] = (gaps[type] ?? 0) + 1;
+  }
+  // docs/bpmn2gmf-concept.md section 5: these are the fields phase 4 adds to the extension
+  assert.deepEqual(gaps, { Symptom: 10, DiagnosticReport: 6, Observation: 4, ImagingStudy: 1 });
+});
+
+test('the main pathway is only blocked by its boundary timer', async () => {
+  const path = 'lung-cancer/synthea-lung-cancer.bpmn';
+  const { diagnostics } = await convert([{ path, xml: readFileSync(path, 'utf8') }]);
+  assert.deepEqual(
+    [...new Set(diagnostics.items.filter((i) => i.level === 'error').map((i) => i.code))].sort(),
+    ['BOUNDARY_EVENT_UNSUPPORTED', 'SUBMODULE_NOT_FOUND'].sort()
+  );
 });

@@ -1,6 +1,6 @@
 # `tools/bpmn2gmf` — Concept
 
-- **Status:** decisions made; phase 1 implemented (see [§8](#8-build-order))
+- **Status:** decisions made; phases 1 and 2 implemented (see [§8](#8-build-order))
 - **Goal:** turn the BPMN pathway models (`synthea:` + `fhirmap:` + `term:`) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).
 
@@ -105,15 +105,20 @@ The IR is the only thing the emitters see. Everything BPMN-specific (event defin
 The start event is always named `Initial` (Synthea requires exactly this name; found while implementing). Every other state: the BPMN `name` **verbatim**. Empty → `<stateType>_<id>`. A duplicate name within one module → append `_<id>`. No prefix stripping (labels like "Symptom: Cough" stay as they are): it is deterministic, needs no heuristics, and Synthea only requires uniqueness per module. The generated names will therefore differ from the hand-written upstream names; the comparison in §7 is keyed on state type and codes, not on names.
 
 ### 4.3 Codes
-`term:coding` → `{ "system", "code", "display" }`. System URIs map to Synthea names:
+Every coding on a node is collected, whatever its form: our flat `<term:coding/>` or the real package's `term:annotations > annotation > coding`; prefix and namespace are ignored. `system` URIs map to Synthea names:
 
 | URI | Synthea `system` |
 |---|---|
 | `http://snomed.info/sct` | `SNOMED-CT` |
 | `http://loinc.org` | `LOINC` |
 | `http://www.nlm.nih.gov/research/umls/rxnorm` | `RxNorm` |
-| NUBC (discharge disposition) | `NUBC` |
-| unknown URI | **error** |
+| NUBC (discharge disposition) | `NUBC` (not needed yet) |
+
+Each state type accepts only some systems (Procedure/ConditionOnset/CarePlanStart/Device/ImagingStudy: SNOMED-CT, MedicationOrder/End: RxNorm, Observation/DiagnosticReport: LOINC, AllergyOnset/End: SNOMED-CT or RxNorm). Codings in other systems on the same element (e.g. the IHE codes in the terminology repo's example) are left out and mentioned as a note (`CODING_IGNORED`), not an error. A state that ends up with no usable code is reported as incomplete (`REQUIRED_FIELD_MISSING`).
+
+**Start/end pairing** (`*End` states): `referencedByAttributeConfig` first, then the state's own code, then the single matching start state upstream on every path (nearest wins in a chain; two start states on parallel branches that merge are ambiguous → error `END_STATE_UNPAIRED`).
+
+**Death** drawn as an end event has no outgoing flow; it continues to the module's `Terminal` state (one is added if there is none).
 
 ### 4.4 Encounter synthesis (ADR-0003)
 Group all nodes by `encounterId`; untagged nodes are not part of any group and simply inherit whatever encounter is open at runtime (decision already recorded in implicit-rules E).
@@ -169,6 +174,7 @@ Comparing our BPMN files with the real `lung_cancer.json` and with the Synthea S
 | `Symptom` | `symptom` name, `exact`/`range`, optional `cause`/`probability` | none (name only in the label) | 10 |
 | `ImagingStudy` | `procedure_code`, `series[]` (body site, modality, instances) | procedure code only | 1 |
 | `Death` | cause via `codes`/`condition_onset`/`referenced_by_attribute`; optional `range`/`exact` | `referencedByAttributeConfig` yes, range no | 1 (main module) |
+| `DiagnosticReport` | `codes`, `observations` (the contained values, e.g. 11 for the CBC panel, each with category/unit/range) | codes only; the six panels in `anemia-submodule` are tasks now, so the contained observations do not exist in the model | 6 |
 | `Procedure` | `codes`; optional `duration`, `reason` | codes only | 14 |
 | `MedicationOrder` | `codes`; optional `reason`, `prescription`, `chronic` | codes, assign yes | 5 |
 | all states | optional `remarks[]` | no | — |
@@ -209,12 +215,12 @@ These are our own checks (a small required-fields table in `verify.mjs`), not a 
 |---|---|---|
 | 0 | Spike (done): moddle loads all five files without warnings | — |
 | 1 | CLI, parse, IR, state-type/name resolution, `Initial`/`Terminal`/`Simple`/`Delay`/`SetAttribute`/`Counter`/`CallSubmodule`, all three transition types, conditions + `Not`, verify | **Implemented** (22 unit tests, `npm run test:bpmn2gmf`). The planned golden file for `lung-cancer-probabilities-submodule.bpmn` is blocked by the *model*: its 3 gateways have no `synthea:conditionConfig` (see §10) |
-| 2 | Codes, `term:` mapping, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | `anemia-submodule.bpmn` converts (with "unmodeled field" notes) |
+| 2 | Codes, `term:` mapping, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
 | 3 | Encounter synthesis + `targetEncounter` | treatment submodule and main module convert |
 | 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | `--strict` passes on all five files |
 | 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | comparison report for `lung_cancer.json` reviewed |
 
-Phases 1–3 do not depend on the remaining open decision (5) (missing fields only produce notes), so work can start immediately after review.
+Phases 1–3 do not depend on the field decisions (missing fields only produce warnings), so they ran ahead of phase 4.
 
 ---
 
@@ -240,9 +246,9 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 
 | Finding | Where | Needed |
 |---|---|---|
-| 12 gateways whose branches had no `synthea:conditionConfig`/`probabilityConfig` (`TRANSITION_AMBIGUOUS`) | `anemia-submodule` (9), `lung-cancer-probabilities-submodule` (3) | **11 fixed** (conditions or probabilities added, taken from the upstream modules). `lung-cancer-probabilities-submodule` now converts and has a golden test; its attribute values and conditions match upstream `lung_cancer_probabilities.json` (only difference: the male branch is the default flow instead of an explicit `Gender == M`). **1 left:** `Hematocrit critical?` in the anemia submodule — see next row. Lint rule SYN-27 (`gateway-branches-require-condition-or-probability`) now warns about such gateways and flags exactly this one |
-| `Hematocrit critical?` needs an `Observation` condition matched by **LOINC `codes`** (20570-8), not by attribute: `(Hematocrit ≤ 28 AND Female) OR (Hematocrit ≤ 27 AND Male)`. `synthea:Condition` only supports `referencedAttribute` for `Observation`/`Active *`; `codes` matching was deliberately left out, and `Observation` states cannot assign to an attribute | `anemia-submodule` | extension change, see Decision 8 |
-| 58 states of types not implemented yet: `Procedure` 14, `ConditionOnset` 12, `Symptom` 10, `Observation` 11 (9 + the two former `VitalSign`), `MedicationOrder` 5, `MedicationEnd` 3, `ImagingStudy`, `Death`, `CarePlanStart` 1 each | all files except probabilities | phases 2–4 |
+| 12 gateways whose branches had no `synthea:conditionConfig`/`probabilityConfig` (`TRANSITION_AMBIGUOUS`) | `anemia-submodule` (9), `lung-cancer-probabilities-submodule` (3) | **all 12 fixed** (conditions or probabilities added, taken from the upstream modules). `lung-cancer-probabilities-submodule` now converts and has a golden test; its attribute values and conditions match upstream `lung_cancer_probabilities.json` (only difference: the male branch is the default flow instead of an explicit `Gender == M`). The last one, `Hematocrit critical?`, needed decision 8 (next row). Lint rule SYN-27 (`gateway-branches-require-condition-or-probability`) now warns about such gateways; none is left in the real files |
+| `Hematocrit critical?` needed an `Observation` condition matched by **LOINC `codes`** (20570-8), not by attribute | `anemia-submodule` | **fixed** (decision 8 implemented): `synthea:Condition` has `codeSystem`/`code`/`codeDisplay`; the gateway is modeled as two branches to the same delay (F: `And[Hct ≤ 28, Female]`, M: `And[Male, Hct ≤ 27]`), and converts to the same conditions as upstream `anemia_sub.json` |
+| After phase 2: **21 `REQUIRED_FIELD_MISSING` warnings**, exactly the gaps of §5: `Symptom` 10 (`symptom`, exact/range), `DiagnosticReport` 6 (`observations`), `Observation` 4 (`category`, `unit`, value), `ImagingStudy` 1 (`series`). `synthea-lung-cancer` still does not convert because of the boundary timer (below) | all files | phase 4 (extension additions) |
 | boundary timer `Survival Time elapsed` (`BOUNDARY_EVENT_UNSUPPORTED`) | `synthea-lung-cancer` | model fix, decision 4 |
 | `Float` in `synthea.json` was not a moddle built-in type (moddle knows `Real`), so numeric attributes (`quantity`, `probability`, `probabilityDefault`, `amount`) loaded as strings | `extension/model/synthea.json` | **fixed**: `Float` → `Real`; `synthea.xsd` regenerated (it was also stale, `xsd:gen:check` had been failing) |
 
@@ -259,4 +265,4 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 | 5 | Encounter `codes` | **Decided** (implementation with phase 4, part of §9): attributes on `EncounterContext`, consistent within an `encounterId` group; a default per `encounterClass` only as a fallback with a warning |
 | 6 | `value` typing | **Decided:** numeric → number, `true`/`false` → boolean, else string; `is nil` emits no value |
 | 7 | Strictness | **Decided:** warnings locally, `--strict` in CI/`validate` after phase 4 |
-| 8 | `codes`-based matching in `Observation`/`Active *` conditions | **Decided** (implementation with phase 4) — needed by the anemia module (first real case, see §10): a code triple on `synthea:Condition` (`codeSystem`, `code`, `codeDisplay`) alongside the existing `referencedAttribute` variant |
+| 8 | `codes`-based matching in `Observation`/`Active *` conditions | **Decided and implemented**: `codeSystem`, `code`, `codeDisplay` on `synthea:Condition` (all three required when a code is used, alternative to `referencedAttribute`); panel fields, converter (`codes: [{system, code, display}]`), tests and guide are done |

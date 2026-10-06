@@ -1,6 +1,7 @@
 // Stage 6: structural checks on the generated modules.
+import { missingFields } from './required-fields.mjs';
 
-export function verifyModule(module, states, diag) {
+export function verifyModule(module, states, diag, { strict = false } = {}) {
   const where = { module: module.fileBase };
   const names = Object.keys(states);
 
@@ -23,6 +24,15 @@ export function verifyModule(module, states, diag) {
       if (!(target in states)) {
         diag.error('TRANSITION_TARGET_MISSING', `Transition target "${target}" does not exist.`, { ...where, element: name });
       }
+    }
+    const missing = missingFields(s);
+    if (missing.length) {
+      diag.add(
+        strict ? 'error' : 'warning',
+        'REQUIRED_FIELD_MISSING',
+        `${s.type} state is missing required field(s) Synthea needs: ${missing.join(', ')}.`,
+        { ...where, element: name }
+      );
     }
     if (s.distributed_transition) {
       const numeric = s.distributed_transition.map((x) => x.distribution).filter((d) => typeof d === 'number');

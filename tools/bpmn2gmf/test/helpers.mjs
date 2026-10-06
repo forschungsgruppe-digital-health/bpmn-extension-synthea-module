@@ -34,8 +34,13 @@ export const cond = (inner) => `<synthea:conditionConfig>${inner}</synthea:condi
 export const attrCond = (attribute, operator, value, extra = '') =>
   `<synthea:condition conditionType="Attribute" attribute="${attribute}" operator="${operator}"${value === undefined ? '' : ` value="${value}"`}${extra}/>`;
 
+export const coding = (system, code, display) => `<term:coding system="${system}" code="${code}" display="${display}"/>`;
+export const SNOMED = 'http://snomed.info/sct';
+export const LOINC = 'http://loinc.org';
+export const RXNORM = 'http://www.nlm.nih.gov/research/umls/rxnorm';
+
 // Converts one diagram; returns the single module result and all diagnostics.
-export async function run(body, { path = 'test.bpmn', name } = {}) {
-  const { modules, diagnostics } = await convert([{ path, xml: wrap(body, name) }]);
+export async function run(body, { path = 'test.bpmn', name, strict = false } = {}) {
+  const { modules, diagnostics } = await convert([{ path, xml: wrap(body, name) }], { strict });
   return { module: modules[0], diagnostics, codes: diagnostics.items.map((i) => i.code) };
 }

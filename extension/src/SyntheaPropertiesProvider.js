@@ -38,6 +38,12 @@ const CONDITION_TYPE_VALUES = [
 // UI-limited) nesting support.
 const CONDITION_COMBINATOR_TYPES = ['And', 'Or', 'At Least', 'At Most'];
 
+// Observation and the Active-* types match their entity either by the name of an
+// attribute (`referencedAttribute`) or by a code (`codeSystem` + `code` +
+// `codeDisplay`, all three required by Synthea whenever a code is used) — one
+// of the two, not both. Code systems the converter knows are listed in
+// CODE_SYSTEM_OPTIONS below.
+//
 // Which Condition fields are meaningful for each conditionType — drives which
 // entries the Condition/Guard groups actually show. operator/value are the
 // Attribute-only pair; other types reuse operator (Age/Date/Symptom/
@@ -53,12 +59,12 @@ const CONDITION_FIELDS_BY_TYPE = {
   'Age': ['quantity', 'unit', 'operator'],
   'Date': ['year', 'month', 'operator'],
   'Symptom': ['symptom', 'operator', 'value'],
-  'Observation': ['referencedAttribute', 'operator', 'value'],
+  'Observation': ['referencedAttribute', 'codeSystem', 'code', 'codeDisplay', 'operator', 'value'],
   'Vital Sign': ['vitalSign', 'operator', 'value'],
-  'Active Condition': ['referencedAttribute'],
-  'Active Medication': ['referencedAttribute'],
-  'Active Allergy': ['referencedAttribute'],
-  'Active CarePlan': ['referencedAttribute'],
+  'Active Condition': ['referencedAttribute', 'codeSystem', 'code', 'codeDisplay'],
+  'Active Medication': ['referencedAttribute', 'codeSystem', 'code', 'codeDisplay'],
+  'Active Allergy': ['referencedAttribute', 'codeSystem', 'code', 'codeDisplay'],
+  'Active CarePlan': ['referencedAttribute', 'codeSystem', 'code', 'codeDisplay'],
   // Synthea's `within` is a {quantity, unit} object, not free text — reuses
   // the same quantity/unit fields Age uses (different meaning, same shape;
   // tools/bpmn2gmf nests them under "within" for PriorState, flat for Age).
@@ -85,6 +91,14 @@ function getRelevantConditionFields(conditionType) {
 function isCombinatorConditionType(conditionType) {
   return CONDITION_COMBINATOR_TYPES.includes(conditionType);
 }
+
+// Systems the code of an Observation/Active-* condition can come from; the value
+// is the same URI term:coding uses, tools/bpmn2gmf maps it to Synthea's name.
+const CODE_SYSTEM_OPTIONS = [
+  { value: 'http://loinc.org', label: 'LOINC' },
+  { value: 'http://snomed.info/sct', label: 'SNOMED CT' },
+  { value: 'http://www.nlm.nih.gov/research/umls/rxnorm', label: 'RxNorm' }
+];
 
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
@@ -467,7 +481,7 @@ function makeNestedConditionTextEntry(getCondition, ensureCondition, prop, label
   };
 }
 
-function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, label, values) {
+function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, label, values, noneLabel = '<none — falls back to inferred signals>') {
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -485,8 +499,8 @@ function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, lab
     };
 
     const getOptions = () => [
-      { value: '', label: translate('<none — falls back to inferred signals>') },
-      ...values.map((v) => ({ value: v, label: v }))
+      { value: '', label: translate(noneLabel) },
+      ...values.map((v) => (typeof v === 'string' ? { value: v, label: v } : v))
     ];
 
     return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
@@ -533,6 +547,9 @@ function buildConditionFieldEntries(getCondition, ensureCondition) {
     symptom: makeNestedConditionTextEntry(getCondition, ensureCondition, 'symptom', 'Symptom name'),
     vitalSign: makeNestedConditionTextEntry(getCondition, ensureCondition, 'vitalSign', 'Vital sign name'),
     referencedAttribute: makeNestedConditionTextEntry(getCondition, ensureCondition, 'referencedAttribute', 'Referenced attribute (entity to check)'),
+    codeSystem: makeNestedConditionSelectEntry(getCondition, ensureCondition, 'codeSystem', 'Code system (alternative to attribute)', CODE_SYSTEM_OPTIONS, '<none>'),
+    code: makeNestedConditionTextEntry(getCondition, ensureCondition, 'code', 'Code (e.g. 20570-8)'),
+    codeDisplay: makeNestedConditionTextEntry(getCondition, ensureCondition, 'codeDisplay', 'Code display text (required with a code)'),
     priorStateName: makeNestedConditionTextEntry(getCondition, ensureCondition, 'priorStateName', 'Prior state name'),
     since: makeNestedConditionTextEntry(getCondition, ensureCondition, 'since', 'Since (State_Name, optional)'),
     minimum: makeNestedConditionTextEntry(getCondition, ensureCondition, 'minimum', 'Minimum (how many sub-conditions must hold)', { parse: parseInt }),

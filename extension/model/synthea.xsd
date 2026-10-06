@@ -42,6 +42,9 @@
     <xsd:attribute name="symptom" type="xsd:string"/>
     <xsd:attribute name="vitalSign" type="xsd:string"/>
     <xsd:attribute name="referencedAttribute" type="xsd:string"/>
+    <xsd:attribute name="codeSystem" type="xsd:string"/>
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
     <xsd:attribute name="priorStateName" type="xsd:string"/>
     <xsd:attribute name="since" type="xsd:string"/>
     <xsd:attribute name="minimum" type="xsd:int"/>

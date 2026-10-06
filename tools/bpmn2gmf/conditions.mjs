@@ -1,4 +1,5 @@
 // synthea:Condition -> GMF condition object.
+import { systemName } from './codes.mjs';
 
 const NUMERIC = /^-?\d+(\.\d+)?$/;
 
@@ -25,6 +26,35 @@ function numeric(raw, field, report) {
   const n = typedValue(raw);
   if (typeof n !== 'number') report(`"${field}" must be a number, got "${raw}".`);
   return n;
+}
+
+// Observation and the Active-* types identify their entity either by the name of
+// an attribute or by a code; Synthea wants exactly one of the two, and a code
+// always as system + code + display (Basics wiki, "Codes").
+function entityReference(c, report) {
+  const hasAttribute = !!c.referencedAttribute;
+  const hasCode = !!(c.codeSystem || c.code || c.codeDisplay);
+
+  if (hasAttribute && hasCode) {
+    report(`${c.conditionType} has both referencedAttribute and a code; use only one.`);
+    return {};
+  }
+  if (hasCode) {
+    if (!c.codeSystem || !c.code || !c.codeDisplay) {
+      report(`${c.conditionType} needs codeSystem, code and codeDisplay together (Synthea requires system, code and display).`);
+      return {};
+    }
+    const system = systemName(c.codeSystem);
+    if (!system) {
+      report(`Unknown code system "${c.codeSystem}" (known: SNOMED CT, LOINC, RxNorm).`);
+      return {};
+    }
+    return { codes: [{ system, code: c.code, display: c.codeDisplay }] };
+  }
+  if (hasAttribute) return { referenced_by_attribute: c.referencedAttribute };
+
+  report(`${c.conditionType} needs either referencedAttribute or a code (codeSystem, code, codeDisplay).`);
+  return {};
 }
 
 // report(message) records an error with the caller's context.
@@ -68,7 +98,7 @@ export function conditionToGmf(c, report) {
       out = compact({ ...t, symptom: c.symptom, ...operatorAndValue(true) });
       break;
     case 'Observation':
-      out = compact({ ...t, referenced_by_attribute: c.referencedAttribute, ...operatorAndValue(true) });
+      out = compact({ ...t, ...entityReference(c, report), ...operatorAndValue(true) });
       break;
     case 'Vital Sign':
       out = compact({ ...t, vital_sign: c.vitalSign, ...operatorAndValue(true) });
@@ -77,7 +107,7 @@ export function conditionToGmf(c, report) {
     case 'Active Medication':
     case 'Active Allergy':
     case 'Active CarePlan':
-      out = { ...t, referenced_by_attribute: c.referencedAttribute };
+      out = { ...t, ...entityReference(c, report) };
       break;
     case 'PriorState':
       out = compact({
