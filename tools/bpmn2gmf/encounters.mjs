@@ -20,6 +20,7 @@
 //               shared per successor, since EncounterEnd ends whichever
 //               encounter is current at runtime
 import { first } from './ir.mjs';
+import { systemName } from './codes.mjs';
 
 const BOUNDARY = new Set(['Terminal', 'Death', 'CallSubmodule']);
 
@@ -58,6 +59,28 @@ const reach = (start, next, allowed) => {
   return seen;
 };
 
+const signature = (g) => ({
+  wellness: g.wellness, encounterClass: g.encounterClass, reason: g.reason,
+  codeSystem: g.codeSystem, code: g.code, codeDisplay: g.codeDisplay
+});
+
+// The code is all-or-nothing and its system must be one the converter knows;
+// codeSystem is turned into Synthea's name here so the emitter can use it as is.
+function checkEncounterCode(group, firstMember, diag, where) {
+  const parts = [group.codeSystem, group.code, group.codeDisplay];
+  if (parts.every((p) => !p)) return;
+  if (parts.some((p) => !p)) {
+    diag.error('ENCOUNTER_CODE_INCOMPLETE', `Encounter "${group.id}" needs encounterCodeSystem, encounterCode and encounterCodeDisplay together.`, where(firstMember));
+    return;
+  }
+  const system = systemName(group.codeSystem);
+  if (!system) {
+    diag.error('ENCOUNTER_CODE_SYSTEM_UNKNOWN', `Unknown code system "${group.codeSystem}" for encounter "${group.id}" (known: SNOMED CT, LOINC, RxNorm).`, where(firstMember));
+    return;
+  }
+  group.codeSystem = system;
+}
+
 export function synthesizeEncounters(module, diag) {
   const nodeOf = (id) => module.nodes.get(id);
   const where = (n) => ({ module: module.fileBase, element: n.id, label: n.label });
@@ -75,18 +98,27 @@ export function synthesizeEncounters(module, diag) {
       continue;
     }
     if (!node.stateType) continue;
-    const attrs = { wellness: !!ctx.wellness, encounterClass: ctx.encounterClass || undefined, reason: ctx.reason || undefined };
+    const attrs = {
+      wellness: !!ctx.wellness,
+      encounterClass: ctx.encounterClass || undefined,
+      reason: ctx.reason || undefined,
+      codeSystem: ctx.encounterCodeSystem || undefined,
+      code: ctx.encounterCode || undefined,
+      codeDisplay: ctx.encounterCodeDisplay || undefined
+    };
     let group = groups.get(ctx.encounterId);
     if (!group) {
       group = { id: ctx.encounterId, ...attrs, members: new Set(), inconsistent: false };
       groups.set(group.id, group);
-    } else if (!group.inconsistent && JSON.stringify(attrs) !== JSON.stringify({ wellness: group.wellness, encounterClass: group.encounterClass, reason: group.reason })) {
+    } else if (!group.inconsistent && JSON.stringify(attrs) !== JSON.stringify(signature(group))) {
       group.inconsistent = true;
-      diag.error('ENCOUNTER_INCONSISTENT', `Members of encounter "${group.id}" disagree on wellness / encounterClass / reason.`, where(node));
+      diag.error('ENCOUNTER_INCONSISTENT', `Members of encounter "${group.id}" disagree on wellness / encounterClass / reason / code.`, where(node));
     }
     group.members.add(node);
     node.group = group.id;
   }
+  for (const group of groups.values()) checkEncounterCode(group, [...group.members][0], diag, where);
+
   if (!groups.size) {
     warnOutside();
     return;

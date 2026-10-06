@@ -108,6 +108,15 @@ before opening the properties panel for the first time.
   `fhirmap:resourceType` to disambiguate it any other way) and attach a
   `term:coding` for the cause-of-death code, or reference a prior
   `ConditionOnset` instead via `ReferencedByAttributeConfig`.
+- **Death at a later point in time:** Synthea's `Death` can also *schedule* the
+  death — the patient dies after a time span while the module goes on (the
+  upstream lung cancer module does this for stage I–IV). Draw it as an
+  ordinary element in the flow (a task or intermediate event, **not** an end
+  event) with `stateType="Death"` and the group **"Time until death"**: value
+  shape `RANGE` (or `EXACT`), the numbers and the **unit of time** (`years`,
+  `months`, …). The flow continues after it. Do not model this with a timer
+  boundary event on a call activity — GMF has no boundary events and the
+  converter rejects them.
 
 ---
 
@@ -251,6 +260,58 @@ elsewhere in this guide, not clinical events.)
 
 ---
 
+### Fields Synthea requires on some clinical states
+
+| State type | Panel group | What goes in |
+|---|---|---|
+| `Observation` | "Observation" + "Value" | **category** (HL7: `vital-signs`, `laboratory`, …) and **value** — `EXACT`, or a `RANGE` (lowest/highest) the simulation draws from — with **unit** (e.g. `{score}`, `mg/dL`) and optional **decimals** |
+| `ImagingStudy` | "Imaging series" | one series: body site (SNOMED code + text), modality (DICOM code, e.g. `CT`, + text), the kind of image (title, DICOM SOP class code + text), optional min/max number of instances. More series can be added in the XML (`synthea:imagingStudySeries`, repeatable) |
+
+The code of the state itself still comes from `term:coding` as before.
+
+#### Lab panels — `DiagnosticReport` with contained observations
+
+A lab **panel** that bundles many single values (blood count, metabolic panel,
+urinalysis) is Synthea's `DiagnosticReport`: one state for the report, with
+its single observations *inside* it. Set `stateType="DiagnosticReport"` and the
+panel's LOINC code (`term:coding`, `fhirmap` `DiagnosticReport`), then list
+every contained value as one repeated element in the XML:
+
+```xml
+<synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood"
+    category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
+```
+
+| Attribute | Meaning |
+|---|---|
+| `code`, `codeDisplay` | the LOINC code of this single value (the system is LOINC by definition) |
+| `category` | HL7 observation category, usually `laboratory` |
+| `unit` | e.g. `g/dL`, `%`, `{nominal}` |
+| **exactly one** of the three below | |
+| `valueShape` + `value` (+ `valueHigh`) | `EXACT`, or `RANGE` — the simulation draws a value between `value` and `valueHigh`; optional `decimals` |
+| `valueCodeSystem`, `valueCode`, `valueCodeDisplay` | a *coded* value instead of a number, e.g. SNOMED "Cloudy urine (finding)" for an urinalysis |
+| `vitalSign` | the name of a Synthea vital sign that supplies the number (e.g. `Glucose`) |
+
+**These values have to be entered by you — they cannot be derived from the
+panel's LOINC code.** LOINC says *which* panel it is (and, in its own
+database, which single tests normally belong to it), but not which tests
+*your* module includes, nor which values a simulated patient should get.
+The ranges are a clinical and simulation decision: e.g. in the anemia module
+the "severe" blood count draws a hematocrit of 20–30 %, the "routine" one 30–35 %,
+and the later hematocrit check (`Observation` condition on LOINC `20570-8`)
+relies on exactly that difference. Take them from the Synthea module you are
+reproducing (that is how the five lung-cancer files were filled — the upstream
+`lung_cancer.json` / `anemia_sub.json`) or from clinical reference ranges
+agreed with a clinician. A report without contained observations is incomplete:
+the converter reports it, and `--strict` refuses to write the module.
+
+The properties panel only *lists* the contained observations (group "Report
+observations", read-only); add, change or remove `synthea:reportObservation`
+elements in the XML. (`DiagnosticReport` itself, `fhirmap` and `term` are
+edited in the panel as usual.)
+
+---
+
 ## 7. `VitalSign` / `Symptom` / `SetAttribute` / `Counter` have no `fhirmap:resourceType`
 
 These four produce no FHIR record, so there's nothing for `fhirmap:` to map.
@@ -258,6 +319,10 @@ Just set `stateType` explicitly on the real element (Task, usually) — don't
 rely on a `TextAnnotation` with a free-text naming convention to carry this
 information; the properties panel doesn't even offer a State type group on
 `TextAnnotation`, and no real file uses that pattern.
+
+A `Symptom` needs its **name** (group "Symptom" — the label of the element is
+not parsed) and a **severity**: group "Value" with `EXACT` or `RANGE` (Synthea
+scores symptoms on a scale; the simulation draws a value from the range).
 
 ---
 
@@ -317,6 +382,12 @@ instead — see [ADR-0003](adr/0003-encounter-context-implicit-scoping.md)).
   `urgentcare`, `inpatient`, or `outpatient`.
 - `reason` (optional) — an attribute name or a reference to a prior
   `ConditionOnset` explaining why the visit happens.
+- **Encounter code** (`encounterCodeSystem`, `encounterCode`,
+  `encounterCodeDisplay`; shown with the class, i.e. for non-wellness visits) —
+  **required by Synthea** for every non-wellness encounter; all three parts
+  together, and the same on every member (lint rule SYN-28). Typical SNOMED
+  CT codes: `185347001` *Encounter for problem (procedure)*, `50849002`
+  *Emergency room admission (procedure)*.
 
 Every member of the same `encounterId` group must agree on `wellness` (lint
 rule `wellness-consistent-within-encounter`) and on `encounterClass` (lint

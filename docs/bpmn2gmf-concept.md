@@ -1,6 +1,6 @@
 # `tools/bpmn2gmf` — Concept
 
-- **Status:** decisions made; phases 1–3 implemented (see [§8](#8-build-order))
+- **Status:** decisions made; phases 1–4 implemented (see [§8](#8-build-order))
 - **Goal:** turn the BPMN pathway models (`synthea:` + `fhirmap:` + `term:`) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).
 
@@ -223,7 +223,7 @@ These are our own checks (a small required-fields table in `verify.mjs`), not a 
 | 1 | CLI, parse, IR, state-type/name resolution, `Initial`/`Terminal`/`Simple`/`Delay`/`SetAttribute`/`Counter`/`CallSubmodule`, all three transition types, conditions + `Not`, verify | **Implemented** (22 unit tests, `npm run test:bpmn2gmf`). The planned golden file for `lung-cancer-probabilities-submodule.bpmn` is blocked by the *model*: its 3 gateways have no `synthea:conditionConfig` (see §10) |
 | 2 | Codes, `term:` mapping, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
 | 3 | Encounter synthesis + `targetEncounter` | **Implemented** (51 tests). Anemia and the treatment submodule get their Encounter/EncounterEnd states; the main module still waits for the boundary-timer remodeling |
-| 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | `--strict` passes on all five files |
+| 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | **Implemented** (61 tests). Encounter code, `SymptomConfig`, `ObservationConfig`, `ValueConfig`, `ImagingStudySeries` and `ReportObservation` (the contained values of a `DiagnosticReport`) are in schema, panel, converter, lint (SYN-28, SYN-29) and guide; the main pathway's boundary timer is replaced by `Death` states with time spans. **All five real files convert and pass `--strict` with no warning**; the nine lab reports (92 contained observations) are identical to upstream |
 | 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | comparison report for `lung_cancer.json` reviewed |
 
 Phases 1–3 do not depend on the field decisions (missing fields only produce warnings), so they ran ahead of phase 4.
@@ -254,8 +254,8 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 |---|---|---|
 | 12 gateways whose branches had no `synthea:conditionConfig`/`probabilityConfig` (`TRANSITION_AMBIGUOUS`) | `anemia-submodule` (9), `lung-cancer-probabilities-submodule` (3) | **all 12 fixed** (conditions or probabilities added, taken from the upstream modules). `lung-cancer-probabilities-submodule` now converts and has a golden test; its attribute values and conditions match upstream `lung_cancer_probabilities.json` (only difference: the male branch is the default flow instead of an explicit `Gender == M`). The last one, `Hematocrit critical?`, needed decision 8 (next row). Lint rule SYN-27 (`gateway-branches-require-condition-or-probability`) now warns about such gateways; none is left in the real files |
 | `Hematocrit critical?` needed an `Observation` condition matched by **LOINC `codes`** (20570-8), not by attribute | `anemia-submodule` | **fixed** (decision 8 implemented): `synthea:Condition` has `codeSystem`/`code`/`codeDisplay`; the gateway is modeled as two branches to the same delay (F: `And[Hct ≤ 28, Female]`, M: `And[Male, Hct ≤ 27]`), and converts to the same conditions as upstream `anemia_sub.json` |
-| After phase 3: **29 `REQUIRED_FIELD_MISSING` warnings**: the 21 of §5 (`Symptom` 10, `DiagnosticReport` 6, `Observation` 4, `ImagingStudy` 1) plus the `codes` of the 9 synthesized `Encounter` states (decision 5, phase 4). `synthea-lung-cancer` still does not convert because of the boundary timer (below) | all files | phase 4 (extension additions) |
-| boundary timer `Survival Time elapsed` (`BOUNDARY_EVENT_UNSUPPORTED`) | `synthea-lung-cancer` | model fix, decision 4 |
+| After phase 4: **no warnings left.** The nine lab reports got their contained observations from upstream (`ReportObservation`); the three `Record_*` panels were retyped from `Observation` to `DiagnosticReport` like upstream | `anemia-submodule`, `lung-cancer-treatment-submodule` | done |
+| boundary timer `Survival Time elapsed` (`BOUNDARY_EVENT_UNSUPPORTED`) | `synthea-lung-cancer` | **fixed** (decision 4): the four `Stage I–IV (Survival Time …)` delays are now `Death` states with a `ValueConfig` time span (same ranges and units as upstream `Stage I`–`Stage IV`), the boundary event and the old `Death` end event are gone, and the treatment call continues to a `Terminal` state. The four `Set lung_cancer_survival_time` states are left in place (nothing reads that attribute any more) |
 | `Float` in `synthea.json` was not a moddle built-in type (moddle knows `Real`), so numeric attributes (`quantity`, `probability`, `probabilityDefault`, `amount`) loaded as strings | `extension/model/synthea.json` | **fixed**: `Float` → `Real`; `synthea.xsd` regenerated (it was also stale, `xsd:gen:check` had been failing) |
 
 ---
@@ -264,11 +264,11 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 
 | # | Topic | Status |
 |---|---|---|
-| 1 | Fields the extension cannot express | **Decided:** field list in §9 is confirmed (required fields verified against the wiki's `(optional)` markers); phases 1–3 run with "unmodeled" notes until phase 4 |
+| 1 | Fields the extension cannot express | **Decided and implemented (phase 4):** field list in §9 is confirmed (required fields verified against the wiki's `(optional)` markers); phases 1–3 run with "unmodeled" notes until phase 4 |
 | 2 | State names | **Decided:** BPMN `name` verbatim, `<stateType>_<id>` fallback, id suffix for duplicates |
 | 3 | `targetEncounter` | **Decided:** value = target group's `encounterId`, resolved by the tool; error if the group yields more than one `Encounter` copy |
 | 4 | Boundary timer `Survival Time elapsed` | **Decided:** the converter rejects boundary events with a clear error; the main pathway is remodeled with `Death` + range before the treatment cycle (needs `ValueConfig` on `Death`, §9) |
-| 5 | Encounter `codes` | **Decided** (implementation with phase 4, part of §9): attributes on `EncounterContext`, consistent within an `encounterId` group; a default per `encounterClass` only as a fallback with a warning |
+| 5 | Encounter `codes` | **Decided and implemented**: attributes on `EncounterContext`, consistent within an `encounterId` group; a default per `encounterClass` only as a fallback with a warning |
 | 6 | `value` typing | **Decided:** numeric → number, `true`/`false` → boolean, else string; `is nil` emits no value |
 | 7 | Strictness | **Decided:** warnings locally, `--strict` in CI/`validate` after phase 4 |
 | 8 | `codes`-based matching in `Observation`/`Active *` conditions | **Decided and implemented**: `codeSystem`, `code`, `codeDisplay` on `synthea:Condition` (all three required when a code is used, alternative to `referencedAttribute`); panel fields, converter (`codes: [{system, code, display}]`), tests and guide are done |

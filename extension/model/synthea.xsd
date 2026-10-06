@@ -80,6 +80,9 @@
     <xsd:attribute name="wellness" type="xsd:boolean" default="false"/>
     <xsd:attribute name="encounterClass" type="xsd:string"/>
     <xsd:attribute name="reason" type="xsd:string"/>
+    <xsd:attribute name="encounterCodeSystem" type="xsd:string"/>
+    <xsd:attribute name="encounterCode" type="xsd:string"/>
+    <xsd:attribute name="encounterCodeDisplay" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="encounterReference" type="synthea:tEncounterReference"/>
@@ -119,6 +122,60 @@
   <xsd:element name="stateTypeConfig" type="synthea:tStateTypeConfig"/>
   <xsd:complexType name="tStateTypeConfig">
     <xsd:attribute name="stateType" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="symptomConfig" type="synthea:tSymptomConfig"/>
+  <xsd:complexType name="tSymptomConfig">
+    <xsd:attribute name="symptom" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="observationCategory" type="synthea:tObservationCategory"/>
+  <xsd:complexType name="tObservationCategory"/>
+
+  <xsd:element name="observationConfig" type="synthea:tObservationConfig"/>
+  <xsd:complexType name="tObservationConfig">
+    <xsd:attribute name="category" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="valueShape" type="synthea:tValueShape"/>
+  <xsd:complexType name="tValueShape"/>
+
+  <xsd:element name="valueConfig" type="synthea:tValueConfig"/>
+  <xsd:complexType name="tValueConfig">
+    <xsd:attribute name="valueShape" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:double"/>
+    <xsd:attribute name="valueHigh" type="xsd:double"/>
+    <xsd:attribute name="unit" type="xsd:string"/>
+    <xsd:attribute name="decimals" type="xsd:int"/>
+  </xsd:complexType>
+
+  <xsd:element name="imagingStudySeries" type="synthea:tImagingStudySeries"/>
+  <xsd:complexType name="tImagingStudySeries">
+    <xsd:attribute name="bodySiteCode" type="xsd:string"/>
+    <xsd:attribute name="bodySiteDisplay" type="xsd:string"/>
+    <xsd:attribute name="modalityCode" type="xsd:string"/>
+    <xsd:attribute name="modalityDisplay" type="xsd:string"/>
+    <xsd:attribute name="instanceTitle" type="xsd:string"/>
+    <xsd:attribute name="sopClassCode" type="xsd:string"/>
+    <xsd:attribute name="sopClassDisplay" type="xsd:string"/>
+    <xsd:attribute name="minInstances" type="xsd:int"/>
+    <xsd:attribute name="maxInstances" type="xsd:int"/>
+  </xsd:complexType>
+
+  <xsd:element name="reportObservation" type="synthea:tReportObservation"/>
+  <xsd:complexType name="tReportObservation">
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+    <xsd:attribute name="category" type="xsd:string"/>
+    <xsd:attribute name="unit" type="xsd:string"/>
+    <xsd:attribute name="valueShape" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:double"/>
+    <xsd:attribute name="valueHigh" type="xsd:double"/>
+    <xsd:attribute name="decimals" type="xsd:int"/>
+    <xsd:attribute name="valueCodeSystem" type="xsd:string"/>
+    <xsd:attribute name="valueCode" type="xsd:string"/>
+    <xsd:attribute name="valueCodeDisplay" type="xsd:string"/>
+    <xsd:attribute name="vitalSign" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="conditionConfig" type="synthea:tConditionConfig"/>

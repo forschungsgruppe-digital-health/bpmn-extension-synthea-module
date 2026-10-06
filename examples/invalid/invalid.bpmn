@@ -244,6 +244,21 @@
       </bpmn:extensionElements>
     </bpmn:endEvent>
 
+    <!-- encounter-code-complete-and-consistent: encounterCode without system and display -->
+    <bpmn:task id="Task_EncounterCodePartial" name="Encounter code incomplete (bad)">
+      <bpmn:extensionElements>
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_CodePartial" wellness="false" encounterClass="inpatient" encounterCode="185347001" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- value-range-requires-high-value: RANGE without valueHigh -->
+    <bpmn:task id="Task_ValueRangeNoHigh" name="Observation range without high (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Observation" />
+        <synthea:ValueConfig valueShape="RANGE" value="4" unit="{score}" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
     <!-- gateway-branches-require-condition-or-probability: two outgoing flows, neither has a
          synthea:conditionConfig or synthea:probabilityConfig -->
     <bpmn:exclusiveGateway id="Gateway_BranchesNoConfig" name="Branches (no condition)" />

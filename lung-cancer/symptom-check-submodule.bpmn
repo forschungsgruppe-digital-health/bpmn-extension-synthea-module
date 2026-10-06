@@ -5,6 +5,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Cough</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Cough" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="100" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0nas7yd</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0wi8jf7</bpmn2:outgoing>
@@ -13,6 +15,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Bloody Cough</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Bloody Cough" />
+        <synthea:valueConfig valueShape="RANGE" value="100" valueHigh="350" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0wi8jf7</bpmn2:incoming>
       <bpmn2:outgoing>Flow_07qpz6c</bpmn2:outgoing>
@@ -21,6 +25,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Shortness of Breath</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Shortness of Breath" />
+        <synthea:valueConfig valueShape="RANGE" value="100" valueHigh="350" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_07qpz6c</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0o223g5</bpmn2:outgoing>
@@ -29,6 +35,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Fever</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Fever" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="250" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0o223g5</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1511r3y</bpmn2:outgoing>
@@ -37,6 +45,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Sweats</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Sweats" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="250" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0nej94m</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02yrran</bpmn2:outgoing>
@@ -45,6 +55,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Decrease in appetite</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Decrease in appetite" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="100" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0915hfo</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0ua3i1k</bpmn2:outgoing>
@@ -53,6 +65,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Head and neck swelling</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Head and neck swelling" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="250" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1511r3y</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0nej94m</bpmn2:outgoing>
@@ -61,6 +75,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Decrease in weight</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Decrease in weight" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="100" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0ua3i1k</bpmn2:incoming>
       <bpmn2:outgoing>Flow_14bux9h</bpmn2:outgoing>
@@ -69,6 +85,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Fatigue</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Fatigue" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="250" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02yrran</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0915hfo</bpmn2:outgoing>
@@ -77,6 +95,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Symptom: Chest Pain</i18n:translation>
         <synthea:stateTypeConfig stateType="Symptom" />
+        <synthea:symptomConfig symptom="Chest Pain" />
+        <synthea:valueConfig valueShape="RANGE" value="50" valueHigh="250" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_14bux9h</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1h17e1u</bpmn2:outgoing>

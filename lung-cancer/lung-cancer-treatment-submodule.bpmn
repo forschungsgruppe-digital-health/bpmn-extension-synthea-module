@@ -13,7 +13,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="698354004" display="Magnetic resonance imaging for measurement of brain volume (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
       <bpmn2:outgoing>Flow_126huj4</bpmn2:outgoing>
@@ -50,10 +50,26 @@
     <bpmn2:task id="Activity_11vsro0" name="Diagnostic Area: Record_CMP">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CMP</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
-        <fhirmap:resourceMapping resourceType="Observation" />
-        <term:coding system="http://loinc.org" code="24323-8" display="Comprehensive metabolic 2000 panel Serum or Plasma" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        <term:coding system="http://loinc.org" code="24323-8" display="Comprehensive metabolic 2000 panel - Serum or Plasma" />
+        <synthea:reportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />
+        <synthea:reportObservation code="6299-2" codeDisplay="Urea nitrogen [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Urea Nitrogen" />
+        <synthea:reportObservation code="38483-4" codeDisplay="Creatinine [Mass/volume] in Blood" category="laboratory" unit="mg/dL" valueShape="RANGE" value="2.5" valueHigh="3.5" />
+        <synthea:reportObservation code="49765-1" codeDisplay="Calcium [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Calcium" />
+        <synthea:reportObservation code="2947-0" codeDisplay="Sodium [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Sodium" />
+        <synthea:reportObservation code="6298-4" codeDisplay="Potassium [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Potassium" />
+        <synthea:reportObservation code="2069-3" codeDisplay="Chloride [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Chloride" />
+        <synthea:reportObservation code="20565-8" codeDisplay="Carbon dioxide, total [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Carbon Dioxide" />
+        <synthea:reportObservation code="33914-3" codeDisplay="Glomerular filtration rate [Volume Rate/Area] in Serum or Plasma by Creatinine-based formula (MDRD)/1.73 sq M" category="laboratory" unit="mL/min" valueShape="RANGE" value="4" valueHigh="29" />
+        <synthea:reportObservation code="2885-2" codeDisplay="Protein [Mass/volume] in Serum or Plasma" category="laboratory" unit="g/dL" valueShape="RANGE" value="6" valueHigh="8" />
+        <synthea:reportObservation code="1751-7" codeDisplay="Albumin [Mass/volume] in Serum or Plasma" category="laboratory" unit="g/dL" valueShape="RANGE" value="3.5" valueHigh="5.5" />
+        <synthea:reportObservation code="10834-0" codeDisplay="Globulin [Mass/volume] in Serum by calculation" category="laboratory" unit="g/L" valueShape="RANGE" value="2" valueHigh="3.5" />
+        <synthea:reportObservation code="1975-2" codeDisplay="Bilirubin.total [Mass/volume] in Serum or Plasma" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0.1" valueHigh="1.2" />
+        <synthea:reportObservation code="6768-6" codeDisplay="Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="20" valueHigh="140" />
+        <synthea:reportObservation code="1742-6" codeDisplay="Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="20" valueHigh="60" />
+        <synthea:reportObservation code="1920-8" codeDisplay="Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="6" valueHigh="40" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB2_out</bpmn2:incoming>
       <bpmn2:incoming>Flow_careplan_to_recordcmp</bpmn2:incoming>
@@ -62,10 +78,27 @@
     <bpmn2:task id="Activity_1rbjl3t" name="Diagnostic Area: Record_Urinalysis">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_Urinalysis</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
-        <fhirmap:resourceMapping resourceType="Observation" />
-        <term:coding system="http://loinc.org" code="24357-6" display="Urinalysis macro (dipstick) panel Urine" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        <term:coding system="http://loinc.org" code="24357-6" display="Urinalysis macro (dipstick) panel - Urine" />
+        <synthea:reportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
+        <synthea:reportObservation code="34533-0" codeDisplay="Odor of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167248002" valueCodeDisplay="Urine smell ammoniacal (finding)" />
+        <synthea:reportObservation code="32167-9" codeDisplay="Clarity of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="300828005" valueCodeDisplay="Translucent (qualifier value)" />
+        <synthea:reportObservation code="5778-6" codeDisplay="Color of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="371254008" valueCodeDisplay="Brown color (qualifier value)" />
+        <synthea:reportObservation code="5792-7" codeDisplay="Glucose [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0.5" valueHigh="2.5" />
+        <synthea:reportObservation code="25428-4" codeDisplay="Glucose [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167265006" valueCodeDisplay="Urine glucose test = ++ (finding)" />
+        <synthea:reportObservation code="20505-4" codeDisplay="Bilirubin.total [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0.2" valueHigh="1.5" />
+        <synthea:reportObservation code="5770-3" codeDisplay="Bilirubin.total [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="275778006" valueCodeDisplay="Finding of bilirubin in urine (finding)" />
+        <synthea:reportObservation code="5797-6" codeDisplay="Ketones [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0" valueHigh="20" />
+        <synthea:reportObservation code="2514-8" codeDisplay="Ketones [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167291007" valueCodeDisplay="Urine ketone test = +++ (finding)" />
+        <synthea:reportObservation code="5811-5" codeDisplay="Specific gravity of Urine by Test strip" category="laboratory" unit="{nominal}" valueShape="RANGE" value="1.001" valueHigh="1.039" />
+        <synthea:reportObservation code="5803-2" codeDisplay="pH of Urine by Test strip" category="laboratory" unit="pH" valueShape="RANGE" value="5" valueHigh="7" />
+        <synthea:reportObservation code="5804-0" codeDisplay="Protein [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="250" valueHigh="450" />
+        <synthea:reportObservation code="20454-5" codeDisplay="Protein [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167277001" valueCodeDisplay="Urine protein test = +++ (finding)" />
+        <synthea:reportObservation code="5802-4" codeDisplay="Nitrite [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="314138001" valueCodeDisplay="Nitrite not detected in urine (finding)" />
+        <synthea:reportObservation code="5794-3" codeDisplay="Hemoglobin [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167297006" valueCodeDisplay="Blood not detected in urine (finding)" />
+        <synthea:reportObservation code="5799-2" codeDisplay="Leukocyte esterase [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="394717006" valueCodeDisplay="Urine leukocytes not detected (finding)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1772ltf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02g4inp</bpmn2:outgoing>
@@ -73,10 +106,21 @@
     <bpmn2:task id="Activity_0g6jkau" name="Diagnostic Area: Record_CBC_Panel">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CBC_Panel</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
-        <fhirmap:resourceMapping resourceType="Observation" />
-        <term:coding system="http://loinc.org" code="58410-2" display="CBC panel Blood by Automated count" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+        <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="0.5" valueHigh="5" />
+        <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="12" valueHigh="17.5" />
+        <synthea:reportObservation code="4544-3" codeDisplay="Hematocrit [Volume Fraction] of Blood by Automated count" category="laboratory" unit="%" valueShape="RANGE" value="35" valueHigh="50" />
+        <synthea:reportObservation code="787-2" codeDisplay="MCV [Entitic mean volume] in Red Blood Cells by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="80" valueHigh="95" />
+        <synthea:reportObservation code="785-6" codeDisplay="MCH [Entitic mass] by Automated count" category="laboratory" unit="pg" valueShape="RANGE" value="27" valueHigh="33" />
+        <synthea:reportObservation code="786-4" codeDisplay="MCHC [Entitic Mass/volume] in Red Blood Cells by Automated count" category="laboratory" unit="g/dL" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:reportObservation code="788-0" codeDisplay="Erythrocyte [DistWidth] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="39" valueHigh="46" />
+        <synthea:reportObservation code="777-3" codeDisplay="Platelets [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="150" valueHigh="450" />
+        <synthea:reportObservation code="32207-3" codeDisplay="Platelet distribution width [Entitic volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9" valueHigh="17" />
+        <synthea:reportObservation code="32623-1" codeDisplay="Platelet [Entitic mean volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9.4" valueHigh="12.3" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02g4inp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1wu1rz7</bpmn2:outgoing>
@@ -115,7 +159,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="398171003" display="Hearing examination (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0vqvpbj</bpmn2:incoming>
       <bpmn2:outgoing>Flow_07eksao</bpmn2:outgoing>
@@ -127,7 +171,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" display="Cisplatin 50 MG Injection" />
         <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_07eksao</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0azdu8w</bpmn2:outgoing>
@@ -138,7 +182,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="chemotherapy_i_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0azdu8w</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1bb2p19</bpmn2:outgoing>
@@ -155,7 +199,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="Etoposide 100mg Injection" />
         <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_sclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_04aexph</bpmn2:outgoing>
@@ -167,7 +211,7 @@
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100mg Injection" />
         <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_nsclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0a9d9nz</bpmn2:outgoing>
@@ -178,7 +222,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="sclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_04aexph</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1fvxegi</bpmn2:outgoing>
@@ -189,7 +233,7 @@
         <synthea:stateTypeConfig stateType="MedicationEnd" />
         <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0a9d9nz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeA2_nsclc</bpmn2:outgoing>
@@ -205,7 +249,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="703423002" display="Combined chemotherapy and radiation therapy (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA2_out</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1niwvy9</bpmn2:outgoing>
@@ -214,8 +258,10 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
+        <synthea:observationConfig category="vital-signs" />
+        <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="10" unit="{score}" decimals="0" />
         <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1niwvy9</bpmn2:incoming>
       <bpmn2:outgoing>Flow_002ms2k</bpmn2:outgoing>
@@ -229,9 +275,10 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Imaging: Chest_CT</i18n:translation>
         <synthea:stateTypeConfig stateType="ImagingStudy" />
+        <synthea:imagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
         <fhirmap:resourceMapping resourceType="ImagingStudy" />
         <term:coding system="http://snomed.info/sct" code="16335031000119103" display="High resolution computed tomography of chest without contrast (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qje2av</bpmn2:incoming>
       <bpmn2:outgoing>Flow_01o3k8p</bpmn2:outgoing>

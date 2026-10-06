@@ -19,7 +19,9 @@ module.exports = {
         'synthea/referenced-by-attribute-matches-assign': 'warn',
         'synthea/encounter-class-consistent-within-encounter': 'warn',
         'synthea/attribute-name-lower-snake-case': 'warn',
-        'synthea/gateway-branches-require-condition-or-probability': 'warn'
+        'synthea/gateway-branches-require-condition-or-probability': 'warn',
+        'synthea/encounter-code-complete-and-consistent': 'warn',
+        'synthea/value-range-requires-high-value': 'warn'
       }
     }
   },
@@ -41,6 +43,8 @@ module.exports = {
     'referenced-by-attribute-matches-assign': './rules/referenced-by-attribute-matches-assign',
     'encounter-class-consistent-within-encounter': './rules/encounter-class-consistent-within-encounter',
     'attribute-name-lower-snake-case': './rules/attribute-name-lower-snake-case',
-    'gateway-branches-require-condition-or-probability': './rules/gateway-branches-require-condition-or-probability'
+    'gateway-branches-require-condition-or-probability': './rules/gateway-branches-require-condition-or-probability',
+    'encounter-code-complete-and-consistent': './rules/encounter-code-complete-and-consistent',
+    'value-range-requires-high-value': './rules/value-range-requires-high-value'
   }
 };

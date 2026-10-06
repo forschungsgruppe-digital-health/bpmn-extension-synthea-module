@@ -1,7 +1,7 @@
 // Stage 5: IR node -> GMF state object (without transition).
 import { first } from './ir.mjs';
 import { conditionToGmf, typedValue, num } from './conditions.mjs';
-import { codesForState } from './codes.mjs';
+import { codesForState, systemName } from './codes.mjs';
 
 const compact = (obj) => Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
@@ -57,6 +57,80 @@ const endState = (onsetType, pairField) => (node, ctx) => {
       : `${starts.length} ${onsetType} states found upstream, so the pairing is ambiguous. Set synthea:referencedByAttributeConfig or give the state a code.`
   );
 };
+
+// synthea:ValueConfig -> the numbers of an exact value or a low/high range.
+// `where` is how the caller wants the unit: 'state' (Observation: unit sits on
+// the state), 'inside' (Death: unit sits inside exact/range), 'none' (Symptom).
+function readValue(node, ctx, where) {
+  const v = first(node.ext, 'synthea:ValueConfig');
+  if (!v) return null;
+
+  const low = num(v.value);
+  const high = num(v.valueHigh);
+  if (low === undefined || Number.isNaN(low)) {
+    return ctx.report('VALUE_CONFIG_INVALID', 'valueConfig needs a numeric value.');
+  }
+  const range = v.valueShape === 'RANGE';
+  if (range && (high === undefined || Number.isNaN(high) || high < low)) {
+    return ctx.report('VALUE_CONFIG_INVALID', 'A RANGE value needs a numeric valueHigh that is not below the low value.');
+  }
+  if (!range && high !== undefined) {
+    return ctx.report('VALUE_CONFIG_INVALID', 'valueHigh only belongs to a RANGE value; set valueShape="RANGE" or remove it.');
+  }
+  if (where === 'inside' && !v.unit) {
+    return ctx.report('VALUE_CONFIG_INVALID', 'This value needs a unit (e.g. years).');
+  }
+
+  const unitInside = where === 'inside' ? { unit: v.unit } : {};
+  return {
+    unit: where === 'state' ? v.unit : undefined,
+    value: range
+      ? { range: compact({ low, high, ...unitInside, decimals: where === 'state' ? v.decimals : undefined }) }
+      : { exact: { quantity: low, ...unitInside } }
+  };
+}
+
+// One synthea:ReportObservation -> an entry of a DiagnosticReport's `observations`:
+// a LOINC-coded observation with category and unit and exactly one way to get its
+// value: an exact number / a range, a coded value (e.g. "cloudy urine"), or the
+// name of a vital sign. The numbers are a modeling decision, not derivable from
+// the LOINC code (modeling guide).
+function reportObservation(o, ctx, index) {
+  const at = `reportObservation ${index + 1}${o.codeDisplay ? ` (${o.codeDisplay})` : ''}`;
+  if (!o.code || !o.codeDisplay || !o.category || !o.unit) {
+    return ctx.report('REPORT_OBSERVATION_INCOMPLETE', `${at} needs code, codeDisplay, category and unit.`);
+  }
+  const numeric = o.value !== undefined;
+  const coded = !!(o.valueCodeSystem || o.valueCode || o.valueCodeDisplay);
+  const vital = !!o.vitalSign;
+  if ([numeric, coded, vital].filter(Boolean).length !== 1) {
+    return ctx.report('REPORT_OBSERVATION_VALUE', `${at} needs exactly one of: a value (exact or range), a coded value, or a vitalSign.`);
+  }
+
+  const out = { category: o.category, ...(vital ? { vital_sign: o.vitalSign } : {}), codes: [{ system: 'LOINC', code: o.code, display: o.codeDisplay }], unit: o.unit };
+  if (numeric) {
+    const low = num(o.value);
+    const high = num(o.valueHigh);
+    if (Number.isNaN(low)) return ctx.report('REPORT_OBSERVATION_VALUE', `${at}: value must be a number.`);
+    if (o.valueShape === 'RANGE') {
+      if (high === undefined || Number.isNaN(high) || high < low) {
+        return ctx.report('REPORT_OBSERVATION_VALUE', `${at}: a RANGE needs a numeric valueHigh that is not below value.`);
+      }
+      out.range = compact({ low, high, decimals: o.decimals });
+    } else {
+      if (high !== undefined) return ctx.report('REPORT_OBSERVATION_VALUE', `${at}: valueHigh only belongs to a RANGE.`);
+      out.exact = { quantity: low };
+    }
+  }
+  if (coded) {
+    const system = systemName(o.valueCodeSystem);
+    if (!o.valueCodeSystem || !o.valueCode || !o.valueCodeDisplay || !system) {
+      return ctx.report('REPORT_OBSERVATION_VALUE', `${at}: a coded value needs a known valueCodeSystem, valueCode and valueCodeDisplay.`);
+    }
+    out.value_code = { system, code: o.valueCode, display: o.valueCodeDisplay };
+  }
+  return out;
+}
 
 // ---- emitters: (node, ctx) -> fields, or ctx.report(...) for an error ---------
 
@@ -118,26 +192,51 @@ const EMITTERS = {
   },
 
   Procedure: (node, ctx) => codesField(node, ctx),
-  Observation: (node, ctx) => codesField(node, ctx),
+
+  Observation(node, ctx) {
+    const category = first(node.ext, 'synthea:ObservationConfig')?.category;
+    const value = readValue(node, ctx, 'state');
+    return compact({
+      category,
+      unit: value?.unit,
+      ...codesField(node, ctx),
+      ...(value ? value.value : {})
+    });
+  },
   MultiObservation: (node, ctx) => codesField(node, ctx),
-  DiagnosticReport: (node, ctx) => codesField(node, ctx),
+  DiagnosticReport(node, ctx) {
+    const observations = (node.ext['synthea:ReportObservation'] ?? []).map((o, i) => reportObservation(o, ctx, i));
+    if (observations.includes(null)) return null;
+    return { ...codesField(node, ctx), ...(observations.length ? { observations } : {}) };
+  },
 
   ImagingStudy(node, ctx) {
     const { codes } = ctx.codes();
-    return codes[0] ? { procedure_code: codes[0] } : {};
+    const series = (node.ext['synthea:ImagingStudySeries'] ?? []).map((s) => imagingSeries(s, ctx));
+    if (series.includes(null)) return null;
+    return { ...(codes[0] ? { procedure_code: codes[0] } : {}), ...(series.length ? { series } : {}) };
   },
 
   // Synthesized by encounters.mjs from synthea:encounterContext, never drawn.
-  // (codes follow with the extension additions, phase 4; verify reports them.)
+  // `codes` come from the group's encounterCode* attributes (a missing one is reported by verify).
   Encounter(node) {
     const g = node.synthetic.group;
-    return compact({ ...(g.wellness ? { wellness: true } : { encounter_class: g.encounterClass }), reason: g.reason });
+    return compact({
+      ...(g.wellness ? { wellness: true } : { encounter_class: g.encounterClass }),
+      reason: g.reason,
+      codes: g.code ? [{ system: g.codeSystem, code: g.code, display: g.codeDisplay }] : undefined
+    });
   },
   EncounterEnd: () => ({}),
 
+  Symptom(node, ctx) {
+    const name = first(node.ext, 'synthea:SymptomConfig')?.symptom;
+    const value = readValue(node, ctx, 'none');
+    return { ...(name ? { symptom: name } : {}), ...(value ? value.value : {}) };
+  },
+
   // Nothing in the extension carries these yet (see docs/bpmn2gmf-concept.md §5);
   // the missing required fields are reported by verify.
-  Symptom: () => ({}),
   VitalSign: () => ({}),
   SupplyList: () => ({}),
 
@@ -148,16 +247,35 @@ const EMITTERS = {
   DeviceEnd: endState('Device', 'device'),
 
   // The cause of death is optional in Synthea: attribute, else code, else none.
+  // A time span (valueConfig) schedules the death in the future; the module goes on.
   Death(node, ctx) {
     const referenced = first(node.ext, 'synthea:ReferencedByAttributeConfig')?.attribute;
-    if (referenced) return { referenced_by_attribute: referenced };
-    return codesField(node, ctx);
+    const value = readValue(node, ctx, 'inside');
+    const cause = referenced ? { referenced_by_attribute: referenced } : codesField(node, ctx);
+    return { ...cause, ...(value ? value.value : {}) };
   }
 };
 
 // `target_encounter` (ConditionOnset/AllergyOnset only): the modeler writes the
 // encounterId of the group; here it becomes the name of that group's Encounter
 // state. Only well-defined when the group has exactly one (decision 3).
+// One synthea:ImagingStudySeries -> a GMF series (body site SNOMED, modality
+// DICOM-DCM, one kind of image with its DICOM SOP class).
+function imagingSeries(s, ctx) {
+  const needed = ['bodySiteCode', 'bodySiteDisplay', 'modalityCode', 'modalityDisplay', 'instanceTitle', 'sopClassCode', 'sopClassDisplay'];
+  const missing = needed.filter((f) => !s[f]);
+  if (missing.length) {
+    return ctx.report('SERIES_INCOMPLETE', `imagingStudySeries is missing: ${missing.join(', ')}.`);
+  }
+  return compact({
+    body_site: { system: 'SNOMED-CT', code: s.bodySiteCode, display: s.bodySiteDisplay },
+    modality: { system: 'DICOM-DCM', code: s.modalityCode, display: s.modalityDisplay },
+    min_number_instances: s.minInstances,
+    max_number_instances: s.maxInstances,
+    instances: [{ title: s.instanceTitle, sop_class: { system: 'DICOM-SOP', code: s.sopClassCode, display: s.sopClassDisplay } }]
+  });
+}
+
 function onsetEmitter(allowsTarget) {
   return (node, ctx) => {
     const fields = { ...codesField(node, ctx), ...assignTo(node) };

@@ -147,8 +147,10 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
         <synthea:stateTypeConfig stateType="Observation" />
+        <synthea:observationConfig category="vital-signs" />
+        <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
         <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0179hmu</bpmn2:incoming>
       <bpmn2:outgoing>Flow_01tcpcf</bpmn2:outgoing>
@@ -159,7 +161,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="399208008" display="Plain X-ray of chest (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_01tcpcf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0yuj6ia</bpmn2:outgoing>
@@ -181,7 +183,8 @@
         <i18n:translation lang="de">Procedure: Chest CT Scan</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" encounterClass="outpatient" />
+        <term:coding system="http://snomed.info/sct" code="418891003" display="Computed tomography of chest and abdomen (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0b7k95z</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0y33dne</bpmn2:outgoing>
@@ -254,7 +257,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="167995008" display="Sputum microscopy (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_12hxynv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jljd1p</bpmn2:outgoing>
@@ -265,7 +268,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="91602002" display="Thoracentesis (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qe74a4</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0fei3qc</bpmn2:outgoing>
@@ -276,7 +279,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="432231006" display="Fine needle aspiration biopsy of lung (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_089g81c</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1qw95h4</bpmn2:outgoing>
@@ -287,7 +290,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="85765000" display="Fiberoptic bronchoscopy (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0xltu63</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jhzgwo</bpmn2:outgoing>
@@ -621,46 +624,42 @@
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:intermediateCatchEvent id="Event_1jrrxax" name="Stage I (Survival Time: 2-6 years)">
+    <bpmn2:intermediateThrowEvent id="Event_1jrrxax" name="Stage I (Survival Time: 2-6 years)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stage I (Survival Time: 2-6 years)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Delay" />
-        <synthea:delayConfig delayShape="RANGE" delayValue="2" delayValueHigh="6" delayUnit="years" />
+        <synthea:stateTypeConfig stateType="Death" />
+        <synthea:valueConfig valueShape="RANGE" value="2" valueHigh="6" unit="years" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0n3qqyo</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jrrxax_SetSurvivalI</bpmn2:outgoing>
-      <bpmn2:timerEventDefinition id="TimerEventDefinition_1jhoml1" />
-    </bpmn2:intermediateCatchEvent>
-    <bpmn2:intermediateCatchEvent id="Event_1fde72t" name="Stage II (Survival Time: 16-28 months)">
+    </bpmn2:intermediateThrowEvent>
+    <bpmn2:intermediateThrowEvent id="Event_1fde72t" name="Stage II (Survival Time: 16-28 months)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stage II (Survival Time: 16-28 months)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Delay" />
-        <synthea:delayConfig delayShape="RANGE" delayValue="16" delayValueHigh="28" delayUnit="months" />
+        <synthea:stateTypeConfig stateType="Death" />
+        <synthea:valueConfig valueShape="RANGE" value="16" valueHigh="28" unit="months" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_06yt4kg</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1fde72t_SetSurvivalII</bpmn2:outgoing>
-      <bpmn2:timerEventDefinition id="TimerEventDefinition_0zcrhfw" />
-    </bpmn2:intermediateCatchEvent>
-    <bpmn2:intermediateCatchEvent id="Event_1f3gqqv" name="Stage III (Survival Time: 9-18 months)">
+    </bpmn2:intermediateThrowEvent>
+    <bpmn2:intermediateThrowEvent id="Event_1f3gqqv" name="Stage III (Survival Time: 9-18 months)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stage III (Survival Time: 9-18 months)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Delay" />
-        <synthea:delayConfig delayShape="RANGE" delayValue="9" delayValueHigh="18" delayUnit="months" />
+        <synthea:stateTypeConfig stateType="Death" />
+        <synthea:valueConfig valueShape="RANGE" value="9" valueHigh="18" unit="months" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1euvzab</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1f3gqqv_SetSurvivalIII</bpmn2:outgoing>
-      <bpmn2:timerEventDefinition id="TimerEventDefinition_0iat5f9" />
-    </bpmn2:intermediateCatchEvent>
-    <bpmn2:intermediateCatchEvent id="Event_1jfcv2y" name="Stage IV (Survival Time: 6-10 months)">
+    </bpmn2:intermediateThrowEvent>
+    <bpmn2:intermediateThrowEvent id="Event_1jfcv2y" name="Stage IV (Survival Time: 6-10 months)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stage IV (Survival Time: 6-10 months)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Delay" />
-        <synthea:delayConfig delayShape="RANGE" delayValue="6" delayValueHigh="10" delayUnit="months" />
+        <synthea:stateTypeConfig stateType="Death" />
+        <synthea:valueConfig valueShape="RANGE" value="6" valueHigh="10" unit="months" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1rua19d</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1jfcv2y_SetSurvivalIV</bpmn2:outgoing>
-      <bpmn2:timerEventDefinition id="TimerEventDefinition_0u3htee" />
-    </bpmn2:intermediateCatchEvent>
+    </bpmn2:intermediateThrowEvent>
     <bpmn2:sequenceFlow id="Flow_1vkepxs" sourceRef="Activity_1jeg2gt" targetRef="Gateway_14o5s0b" />
     <bpmn2:exclusiveGateway id="Gateway_0bp5mqd">
       <bpmn2:incoming>Flow_0jljd1p</bpmn2:incoming>
@@ -716,13 +715,6 @@
         <synthea:probabilityConfig probability="0.77" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:endEvent id="Event_0y5ongf" name="Death">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Death</i18n:translation>
-        <synthea:stateTypeConfig stateType="Death" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_ToDeath</bpmn2:incoming>
-    </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="Flow_08nnzyn" name="23%" sourceRef="Gateway_0fqthje" targetRef="Gateway_1nqy9eu">
       <bpmn2:extensionElements>
         <synthea:probabilityConfig probability="0.23" />
@@ -738,6 +730,7 @@
         <synthea:submoduleConfig submodule="lung_cancer_treatment_submodule" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1260oh2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_TreatmentCycle_End</bpmn2:outgoing>
     </bpmn2:callActivity>
     <bpmn2:scriptTask id="Activity_SetSurvivalTimeStageI" name="Set lung_cancer_survival_time = 2-6 years">
       <bpmn2:extensionElements>
@@ -783,14 +776,14 @@
     </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="Flow_1jfcv2y_SetSurvivalIV" sourceRef="Event_1jfcv2y" targetRef="Activity_SetSurvivalTimeStageIV" />
     <bpmn2:sequenceFlow id="Flow_SetSurvivalIV_194erkw" sourceRef="Activity_SetSurvivalTimeStageIV" targetRef="Gateway_194erkw" />
-    <bpmn2:boundaryEvent id="Event_TreatmentCycleTimeout" name="Survival Time elapsed" attachedToRef="Activity_LungCancerTreatmentCycle">
+    <bpmn2:endEvent id="Event_TreatmentCycle_End" name="Terminal">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">Survival Time elapsed</i18n:translation>
+        <i18n:translation lang="de">Terminal</i18n:translation>
+        <synthea:stateTypeConfig stateType="Terminal" />
       </bpmn2:extensionElements>
-      <bpmn2:outgoing>Flow_ToDeath</bpmn2:outgoing>
-      <bpmn2:timerEventDefinition />
-    </bpmn2:boundaryEvent>
-    <bpmn2:sequenceFlow id="Flow_ToDeath" sourceRef="Event_TreatmentCycleTimeout" targetRef="Event_0y5ongf" />
+      <bpmn2:incoming>Flow_TreatmentCycle_End</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="Flow_TreatmentCycle_End" sourceRef="Activity_LungCancerTreatmentCycle" targetRef="Event_TreatmentCycle_End" />
     <bpmn2:textAnnotation id="TextAnnotation_1h8ai1n">
       <bpmn2:extensionElements>
         <i18n:translation target="@text" lang="de">SNOMED-CT: 162573006
@@ -1229,12 +1222,6 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="7420" y="530" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0y5ongf_di" bpmnElement="Event_0y5ongf">
-        <dc:Bounds x="8852" y="572" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="8855" y="615" width="30" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_0hi7d1l_di" bpmnElement="Association_0hi7d1l">
         <di:waypoint x="4708" y="340" />
         <di:waypoint x="4724" y="374" />
@@ -1338,12 +1325,6 @@ biopsy of lung (procedure)</bpmn2:text>
       <bpmndi:BPMNShape id="TextAnnotation_1eqwjjf_di" bpmnElement="TextAnnotation_1eqwjjf">
         <dc:Bounds x="3630" y="23" width="150" height="86" />
         <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_TreatmentCycleTimeout_di" bpmnElement="Event_TreatmentCycleTimeout">
-        <dc:Bounds x="8852" y="335" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="8876" y="382" width="67" height="27" />
-        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_0qd5uyu_di" bpmnElement="Flow_0qd5uyu">
         <di:waypoint x="248" y="180" />
@@ -1769,9 +1750,15 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="7520" y="570" />
         <di:waypoint x="7645" y="570" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_ToDeath_di" bpmnElement="Flow_ToDeath">
-        <di:waypoint x="8870" y="371" />
-        <di:waypoint x="8870" y="572" />
+      <bpmndi:BPMNShape id="Event_TreatmentCycle_End_di" bpmnElement="Event_TreatmentCycle_End">
+        <dc:Bounds x="8962" y="295" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="8955" y="338" width="50" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_TreatmentCycle_End_di" bpmnElement="Flow_TreatmentCycle_End">
+        <di:waypoint x="8920" y="313" />
+        <di:waypoint x="8962" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1nisonf_di" bpmnElement="Association_1nisonf">
         <di:waypoint x="2255" y="140" />

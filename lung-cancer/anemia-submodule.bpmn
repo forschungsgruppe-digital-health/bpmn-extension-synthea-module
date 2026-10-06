@@ -50,7 +50,18 @@
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
         <fhirmap:resourceMapping resourceType="DiagnosticReport" />
         <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="7" valueHigh="10.9" />
+        <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="21" valueHigh="32.9" />
+        <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
+        <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
+        <synthea:reportObservation code="787-2" codeDisplay="MCV [Entitic mean volume] in Red Blood Cells by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="80" valueHigh="95" />
+        <synthea:reportObservation code="785-6" codeDisplay="MCH [Entitic mass] by Automated count" category="laboratory" unit="pg" valueShape="RANGE" value="27" valueHigh="33" />
+        <synthea:reportObservation code="786-4" codeDisplay="MCHC [Entitic Mass/volume] in Red Blood Cells by Automated count" category="laboratory" unit="g/dL" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:reportObservation code="788-0" codeDisplay="Erythrocyte [DistWidth] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="39" valueHigh="46" />
+        <synthea:reportObservation code="777-3" codeDisplay="Platelets [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="150" valueHigh="450" />
+        <synthea:reportObservation code="32207-3" codeDisplay="Platelet distribution width [Entitic volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9" valueHigh="17" />
+        <synthea:reportObservation code="32623-1" codeDisplay="Platelet [Entitic mean volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9.4" valueHigh="12.3" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_14lbqcy</bpmn2:incoming>
       <bpmn2:incoming>Flow_0wjuj6o</bpmn2:incoming>
@@ -62,7 +73,18 @@
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
         <fhirmap:resourceMapping resourceType="DiagnosticReport" />
         <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="11" valueHigh="11.9" />
+        <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
+        <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
+        <synthea:reportObservation code="787-2" codeDisplay="MCV [Entitic mean volume] in Red Blood Cells by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="80" valueHigh="95" />
+        <synthea:reportObservation code="785-6" codeDisplay="MCH [Entitic mass] by Automated count" category="laboratory" unit="pg" valueShape="RANGE" value="27" valueHigh="33" />
+        <synthea:reportObservation code="786-4" codeDisplay="MCHC [Entitic Mass/volume] in Red Blood Cells by Automated count" category="laboratory" unit="g/dL" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:reportObservation code="788-0" codeDisplay="Erythrocyte [DistWidth] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="39" valueHigh="46" />
+        <synthea:reportObservation code="777-3" codeDisplay="Platelets [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="150" valueHigh="450" />
+        <synthea:reportObservation code="32207-3" codeDisplay="Platelet distribution width [Entitic volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9" valueHigh="17" />
+        <synthea:reportObservation code="32623-1" codeDisplay="Platelet [Entitic mean volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9.4" valueHigh="12.3" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_00jy2p5</bpmn2:incoming>
       <bpmn2:incoming>Flow_0k3wt2u</bpmn2:incoming>
@@ -74,7 +96,18 @@
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
         <fhirmap:resourceMapping resourceType="DiagnosticReport" />
         <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="6.7" valueHigh="10" />
+        <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="20" valueHigh="30" />
+        <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
+        <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
+        <synthea:reportObservation code="787-2" codeDisplay="MCV [Entitic mean volume] in Red Blood Cells by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="80" valueHigh="95" />
+        <synthea:reportObservation code="785-6" codeDisplay="MCH [Entitic mass] by Automated count" category="laboratory" unit="pg" valueShape="RANGE" value="27" valueHigh="33" />
+        <synthea:reportObservation code="786-4" codeDisplay="MCHC [Entitic Mass/volume] in Red Blood Cells by Automated count" category="laboratory" unit="g/dL" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:reportObservation code="788-0" codeDisplay="Erythrocyte [DistWidth] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="39" valueHigh="46" />
+        <synthea:reportObservation code="777-3" codeDisplay="Platelets [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="150" valueHigh="450" />
+        <synthea:reportObservation code="32207-3" codeDisplay="Platelet distribution width [Entitic volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9" valueHigh="17" />
+        <synthea:reportObservation code="32623-1" codeDisplay="Platelet [Entitic mean volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9.4" valueHigh="12.3" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ney2yb</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0ism7fl</bpmn2:outgoing>
@@ -85,7 +118,18 @@
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
         <fhirmap:resourceMapping resourceType="DiagnosticReport" />
         <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
+        <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="30.1" valueHigh="35" />
+        <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
+        <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
+        <synthea:reportObservation code="787-2" codeDisplay="MCV [Entitic mean volume] in Red Blood Cells by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="80" valueHigh="95" />
+        <synthea:reportObservation code="785-6" codeDisplay="MCH [Entitic mass] by Automated count" category="laboratory" unit="pg" valueShape="RANGE" value="27" valueHigh="33" />
+        <synthea:reportObservation code="786-4" codeDisplay="MCHC [Entitic Mass/volume] in Red Blood Cells by Automated count" category="laboratory" unit="g/dL" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:reportObservation code="788-0" codeDisplay="Erythrocyte [DistWidth] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="39" valueHigh="46" />
+        <synthea:reportObservation code="777-3" codeDisplay="Platelets [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="150" valueHigh="450" />
+        <synthea:reportObservation code="32207-3" codeDisplay="Platelet distribution width [Entitic volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9" valueHigh="17" />
+        <synthea:reportObservation code="32623-1" codeDisplay="Platelet [Entitic mean volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9.4" valueHigh="12.3" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0d66jrp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jv67ia</bpmn2:outgoing>
@@ -96,7 +140,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="14768001" display="Peripheral blood smear interpretation (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1mfa232</bpmn2:incoming>
       <bpmn2:incoming>Flow_0ningp2</bpmn2:incoming>
@@ -110,7 +154,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="415300000" display="Review of systems (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0lu5fq8</bpmn2:incoming>
       <bpmn2:outgoing>Flow_19k5r5d</bpmn2:outgoing>
@@ -129,7 +173,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="162676008" display="Brief general examination (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0m0kss6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_00pq6jn</bpmn2:outgoing>
@@ -167,7 +211,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="180207008" display="Intravenous blood transfusion of packed cells (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0598yo2</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02kkd88</bpmn2:outgoing>
@@ -225,7 +269,9 @@
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
         <fhirmap:resourceMapping resourceType="DiagnosticReport" />
         <term:coding system="http://loinc.org" code="24360-0" display="Hemoglobin and Hematocrit panel - Blood" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="11" valueHigh="11.9" />
+        <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ly2iqa</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1s5liut</bpmn2:outgoing>
@@ -236,7 +282,9 @@
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
         <fhirmap:resourceMapping resourceType="DiagnosticReport" />
         <term:coding system="http://loinc.org" code="24360-0" display="Hemoglobin and Hematocrit panel - Blood" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
+        <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="30.1" valueHigh="35" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1co6iv8</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1dsdxrh</bpmn2:outgoing>
@@ -261,7 +309,7 @@
         <synthea:stateTypeConfig stateType="Procedure" />
         <fhirmap:resourceMapping resourceType="Procedure" />
         <term:coding system="http://snomed.info/sct" code="430193006" display="Medication reconciliation (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0x52yk3</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0m0kss6</bpmn2:outgoing>

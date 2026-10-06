@@ -1,6 +1,7 @@
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import {
   TextFieldEntry,
+  TextAreaEntry,
   isTextFieldEntryEdited,
   CheckboxEntry,
   SelectEntry
@@ -19,12 +20,19 @@ const SUBMODULE_TYPE = 'synthea:SubmoduleConfig';
 const ENCOUNTER_CONTEXT_TYPE = 'synthea:EncounterContext';
 const ENCOUNTER_REFERENCE_TYPE = 'synthea:EncounterReference';
 const COUNTER_TYPE = 'synthea:CounterConfig';
+const SYMPTOM_TYPE = 'synthea:SymptomConfig';
+const OBSERVATION_TYPE = 'synthea:ObservationConfig';
+const VALUE_TYPE = 'synthea:ValueConfig';
+const SERIES_TYPE = 'synthea:ImagingStudySeries';
 const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
 const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
 
 const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE'];
 const COUNTER_ACTION_VALUES = ['increment', 'decrement'];
+// HL7 observation categories (the list the Synthea wiki points to)
+const OBSERVATION_CATEGORY_VALUES = ['vital-signs', 'laboratory', 'procedure', 'imaging', 'survey', 'exam', 'therapy', 'social-history'];
+
 const ENCOUNTER_CLASS_VALUES = ['wellness', 'ambulatory', 'emergency', 'urgentcare', 'inpatient', 'outpatient'];
 
 const CONDITION_TYPE_VALUES = [
@@ -118,6 +126,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createStateTypeGroup(element));
         groups.push(createEncounterContextGroup(element));
         groups.push(createReferencedByAttributeGroup(element));
+        groups.push(...createStateDetailGroups(element));
       }
 
       if (is(element, 'bpmn:Task')) {
@@ -127,6 +136,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createSetAttributeGroup(element));
         groups.push(createAssignToAttributeGroup(element));
         groups.push(createReferencedByAttributeGroup(element));
+        groups.push(...createStateDetailGroups(element));
 
         if (isConditionOrAllergyOnset(element)) {
           groups.push(createEncounterReferenceGroup(element));
@@ -144,6 +154,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createEncounterContextGroup(element));
         groups.push(createAssignToAttributeGroup(element));
         groups.push(createReferencedByAttributeGroup(element));
+        groups.push(...createStateDetailGroups(element));
 
         if (isConditionOrAllergyOnset(element)) {
           groups.push(createEncounterReferenceGroup(element));
@@ -306,6 +317,11 @@ function createEncounterContextGroup(element) {
   // showing a field with nothing to do.
   if (!wellness) {
     entries.push({ id: 'synthea-encounter-context-class', element, component: EncounterClassEntry });
+    // Synthea requires a code for every non-wellness encounter; all three parts
+    // go together and must be the same on every member of the group.
+    entries.push({ id: 'synthea-encounter-context-code-system', element, component: EncounterCodeSystemEntry });
+    entries.push({ id: 'synthea-encounter-context-code', element, component: EncounterCodeEntry, isEdited: isTextFieldEntryEdited });
+    entries.push({ id: 'synthea-encounter-context-code-display', element, component: EncounterCodeDisplayEntry, isEdited: isTextFieldEntryEdited });
   }
 
   entries.push({ id: 'synthea-encounter-context-reason', element, component: EncounterReasonEntry, isEdited: isTextFieldEntryEdited });
@@ -667,7 +683,7 @@ function makeSelecetEntry(type, prop, label, values) {
 
     const getOptions = () => [
       { value: '', label: translate('<none>') },
-      ...values.map((v) => ({ value: v, label: v }))
+      ...values.map((v) => (typeof v === 'string' ? { value: v, label: v } : v))
     ];
 
     return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
@@ -732,6 +748,29 @@ const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Re
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
 const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
+const EncounterCodeSystemEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeSystem', 'Encounter code system (e.g. SNOMED CT)', CODE_SYSTEM_OPTIONS);
+const EncounterCodeEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCode', 'Encounter code (e.g. 185347001)');
+const EncounterCodeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeDisplay', 'Encounter code display text');
+
+const SymptomNameEntry = makeTextEntry(SYMPTOM_TYPE, 'symptom', 'Symptom name (e.g. Cough)');
+const ObservationCategoryEntry = makeSelecetEntry(OBSERVATION_TYPE, 'category', 'Observation category', OBSERVATION_CATEGORY_VALUES);
+const ValueShapeEntry = makeSelecetEntry(VALUE_TYPE, 'valueShape', 'Value: exact or range', ['EXACT', 'RANGE']);
+const ValueEntry = makeTextEntry(VALUE_TYPE, 'value', 'Value (EXACT) / lowest value (RANGE)', { parse: parseFloat });
+const ValueHighEntry = makeTextEntry(VALUE_TYPE, 'valueHigh', 'Highest value (RANGE only)', { parse: parseFloat });
+const ValueDecimalsEntry = makeTextEntry(VALUE_TYPE, 'decimals', 'Decimals (optional)', { parse: parseInt });
+const ValueUnitObservationEntry = makeTextEntry(VALUE_TYPE, 'unit', 'Unit (e.g. {score}, mg/dL)');
+const ValueUnitTimeEntry = makeTextEntry(VALUE_TYPE, 'unit', 'Unit of time (years, months, weeks, days, …)');
+
+const SeriesBodySiteCodeEntry = makeTextEntry(SERIES_TYPE, 'bodySiteCode', 'Body site code (SNOMED CT)');
+const SeriesBodySiteDisplayEntry = makeTextEntry(SERIES_TYPE, 'bodySiteDisplay', 'Body site display text');
+const SeriesModalityCodeEntry = makeTextEntry(SERIES_TYPE, 'modalityCode', 'Modality code (DICOM, e.g. CT)');
+const SeriesModalityDisplayEntry = makeTextEntry(SERIES_TYPE, 'modalityDisplay', 'Modality display text');
+const SeriesInstanceTitleEntry = makeTextEntry(SERIES_TYPE, 'instanceTitle', 'Image title');
+const SeriesSopClassCodeEntry = makeTextEntry(SERIES_TYPE, 'sopClassCode', 'SOP class code (DICOM)');
+const SeriesSopClassDisplayEntry = makeTextEntry(SERIES_TYPE, 'sopClassDisplay', 'SOP class display text');
+const SeriesMinInstancesEntry = makeTextEntry(SERIES_TYPE, 'minInstances', 'Min. number of instances (optional)', { parse: parseInt });
+const SeriesMaxInstancesEntry = makeTextEntry(SERIES_TYPE, 'maxInstances', 'Max. number of instances (optional)', { parse: parseInt });
+
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
 const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name');
 const SetAttributeValueEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'value', 'Value to assign (numeric, boolean, or string)');
@@ -739,6 +778,134 @@ const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribut
 const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute');
 
 // --- moddle helpers --------------------------------------------------------
+
+const stateTypeOf = (element) => getExtension(element, STATE_TYPE)?.get('stateType');
+
+// Groups for the fields only some state types have (Synthea requires them for
+// Symptom, Observation, ImagingStudy; Death may carry a time span).
+function createStateDetailGroups(element) {
+  const type = stateTypeOf(element);
+  const groups = [];
+
+  if (type === 'Symptom') {
+    groups.push({
+      id: 'synthea-symptom',
+      label: 'Symptom',
+      entries: [{ id: 'synthea-symptom-name', element, component: SymptomNameEntry, isEdited: isTextFieldEntryEdited }]
+    });
+  }
+
+  if (type === 'Observation') {
+    groups.push({
+      id: 'synthea-observation',
+      label: 'Observation',
+      entries: [{ id: 'synthea-observation-category', element, component: ObservationCategoryEntry }]
+    });
+  }
+
+  if (type === 'Observation' || type === 'Symptom' || type === 'Death') {
+    groups.push(createValueGroup(element, type));
+  }
+
+  if (type === 'ImagingStudy') {
+    groups.push(createImagingSeriesGroup(element));
+  }
+
+  if (type === 'DiagnosticReport') {
+    groups.push(createReportObservationsGroup(element));
+  }
+
+  return groups;
+}
+
+// The value an Observation records, the severity a Symptom gets, or (Death) the
+// time span until the patient dies. EXACT is one number, RANGE a low/high pair.
+function createValueGroup(element, type) {
+  const shape = getExtension(element, VALUE_TYPE)?.get('valueShape');
+  const entries = [
+    { id: 'synthea-value-shape', element, component: ValueShapeEntry },
+    { id: 'synthea-value-value', element, component: ValueEntry, isEdited: isTextFieldEntryEdited }
+  ];
+
+  if (shape === 'RANGE') {
+    entries.push({ id: 'synthea-value-high', element, component: ValueHighEntry, isEdited: isTextFieldEntryEdited });
+  }
+  if (type === 'Observation') {
+    entries.push({ id: 'synthea-value-unit', element, component: ValueUnitObservationEntry, isEdited: isTextFieldEntryEdited });
+    entries.push({ id: 'synthea-value-decimals', element, component: ValueDecimalsEntry, isEdited: isTextFieldEntryEdited });
+  }
+  if (type === 'Death') {
+    entries.push({ id: 'synthea-value-unit', element, component: ValueUnitTimeEntry, isEdited: isTextFieldEntryEdited });
+  }
+
+  return { id: 'synthea-value', label: type === 'Death' ? 'Time until death' : 'Value', entries };
+}
+
+// The single values a lab report (DiagnosticReport) contains. There can be a dozen
+// or more, each with code, category, unit and a value, so the panel only lists
+// them; they are maintained as repeated synthea:reportObservation elements in the
+// XML (modeling guide, section 6). The values are a modeling decision and cannot
+// be derived from the LOINC code of the panel.
+function reportObservationSummary(element) {
+  const values = getBusinessObject(element).extensionElements?.values ?? [];
+  return values
+    .filter((v) => v.$type === 'synthea:ReportObservation')
+    .map((o) => {
+      const value = o.valueCode
+        ? o.valueCodeDisplay
+        : o.vitalSign
+          ? `vital sign "${o.vitalSign}"`
+          : o.valueShape === 'RANGE' ? `${o.value}–${o.valueHigh}` : o.value;
+      return `${o.code} ${o.codeDisplay ?? ''} | ${o.unit ?? ''} | ${value ?? ''}`;
+    });
+}
+
+function ReportObservationsEntry(props) {
+  const { element, id } = props;
+  const translate = useService('translate');
+  const debounce = useService('debounceInput');
+
+  const lines = reportObservationSummary(element);
+
+  return TextAreaEntry({
+    element,
+    id,
+    label: translate(`Contained observations (${lines.length}) — read-only, edit synthea:reportObservation in the XML`),
+    getValue: () => lines.join('\n'),
+    setValue: () => {},
+    debounce,
+    rows: Math.min(Math.max(lines.length, 3), 12),
+    disabled: true
+  });
+}
+
+function createReportObservationsGroup(element) {
+  return {
+    id: 'synthea-report-observations',
+    label: 'Report observations',
+    entries: [{ id: 'synthea-report-observations-list', element, component: ReportObservationsEntry }]
+  };
+}
+
+// One series with one kind of image; further series can be added in the XML.
+function createImagingSeriesGroup(element) {
+  const edited = isTextFieldEntryEdited;
+  return {
+    id: 'synthea-imaging-series',
+    label: 'Imaging series',
+    entries: [
+      { id: 'synthea-series-body-site-code', element, component: SeriesBodySiteCodeEntry, isEdited: edited },
+      { id: 'synthea-series-body-site-display', element, component: SeriesBodySiteDisplayEntry, isEdited: edited },
+      { id: 'synthea-series-modality-code', element, component: SeriesModalityCodeEntry, isEdited: edited },
+      { id: 'synthea-series-modality-display', element, component: SeriesModalityDisplayEntry, isEdited: edited },
+      { id: 'synthea-series-instance-title', element, component: SeriesInstanceTitleEntry, isEdited: edited },
+      { id: 'synthea-series-sop-class-code', element, component: SeriesSopClassCodeEntry, isEdited: edited },
+      { id: 'synthea-series-sop-class-display', element, component: SeriesSopClassDisplayEntry, isEdited: edited },
+      { id: 'synthea-series-min', element, component: SeriesMinInstancesEntry, isEdited: edited },
+      { id: 'synthea-series-max', element, component: SeriesMaxInstancesEntry, isEdited: edited }
+    ]
+  };
+}
 
 function isConditionOrAllergyOnset(element) {
   const config = getExtension(element, STATE_TYPE);

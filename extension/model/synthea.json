@@ -65,7 +65,10 @@
       { "name": "encounterId", "type": "String", "isAttr": true },
       { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false },
       { "name": "encounterClass", "type": "EncounterClass", "isAttr": true },
-      { "name": "reason", "type": "String", "isAttr": true }
+      { "name": "reason", "type": "String", "isAttr": true },
+      { "name": "encounterCodeSystem", "type": "String", "isAttr": true },
+      { "name": "encounterCode", "type": "String", "isAttr": true },
+      { "name": "encounterCodeDisplay", "type": "String", "isAttr": true }
     ]},
     { "name": "EncounterReference", "superClass": ["Element"], "properties": [
       { "name": "targetEncounter", "type": "String", "isAttr": true }
@@ -100,6 +103,51 @@
     ]},
     { "name": "StateTypeConfig", "superClass": ["Element"], "properties": [
       { "name": "stateType", "type": "StateType", "isAttr": true }
+    ]},
+    { "name": "SymptomConfig", "superClass": ["Element"], "properties": [
+      { "name": "symptom", "type": "String", "isAttr": true }
+    ]},
+    { "name": "ObservationCategory", "isEnum": true, "literalValues": [
+      {"name": "vital-signs"}, {"name": "laboratory"}, {"name": "procedure"}, {"name": "imaging"},
+      {"name": "survey"}, {"name": "exam"}, {"name": "therapy"}, {"name": "social-history"}
+    ]},
+    { "name": "ObservationConfig", "superClass": ["Element"], "properties": [
+      { "name": "category", "type": "ObservationCategory", "isAttr": true }
+    ]},
+    { "name": "ValueShape", "isEnum": true, "literalValues": [
+      {"name": "EXACT"}, {"name": "RANGE"}
+    ]},
+    { "name": "ValueConfig", "superClass": ["Element"], "properties": [
+      { "name": "valueShape", "type": "ValueShape", "isAttr": true },
+      { "name": "value", "type": "Real", "isAttr": true },
+      { "name": "valueHigh", "type": "Real", "isAttr": true },
+      { "name": "unit", "type": "String", "isAttr": true },
+      { "name": "decimals", "type": "Integer", "isAttr": true }
+    ]},
+    { "name": "ImagingStudySeries", "superClass": ["Element"], "properties": [
+      { "name": "bodySiteCode", "type": "String", "isAttr": true },
+      { "name": "bodySiteDisplay", "type": "String", "isAttr": true },
+      { "name": "modalityCode", "type": "String", "isAttr": true },
+      { "name": "modalityDisplay", "type": "String", "isAttr": true },
+      { "name": "instanceTitle", "type": "String", "isAttr": true },
+      { "name": "sopClassCode", "type": "String", "isAttr": true },
+      { "name": "sopClassDisplay", "type": "String", "isAttr": true },
+      { "name": "minInstances", "type": "Integer", "isAttr": true },
+      { "name": "maxInstances", "type": "Integer", "isAttr": true }
+    ]},
+    { "name": "ReportObservation", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true },
+      { "name": "category", "type": "ObservationCategory", "isAttr": true },
+      { "name": "unit", "type": "String", "isAttr": true },
+      { "name": "valueShape", "type": "ValueShape", "isAttr": true },
+      { "name": "value", "type": "Real", "isAttr": true },
+      { "name": "valueHigh", "type": "Real", "isAttr": true },
+      { "name": "decimals", "type": "Integer", "isAttr": true },
+      { "name": "valueCodeSystem", "type": "String", "isAttr": true },
+      { "name": "valueCode", "type": "String", "isAttr": true },
+      { "name": "valueCodeDisplay", "type": "String", "isAttr": true },
+      { "name": "vitalSign", "type": "String", "isAttr": true }
     ]},
     { "name": "ConditionConfig", "superClass": ["Element"], "properties": [
       { "name": "condition", "type": "Condition" }

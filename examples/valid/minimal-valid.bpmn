@@ -271,5 +271,49 @@
       </bpmn:extensionElements>
     </bpmn:endEvent>
 
+    <!-- symptom-config / observation-config / value-config / imaging-study-series / encounter code: a complete example of each -->
+    <bpmn:task id="Symptom_Good" name="Symptom (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Symptom" />
+        <synthea:SymptomConfig symptom="Cough" />
+        <synthea:ValueConfig valueShape="RANGE" value="50" valueHigh="100" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="Observation_Good" name="Observation (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Observation" />
+        <fhirmap:resourceMapping resourceType="Observation" />
+        <synthea:ObservationConfig category="vital-signs" />
+        <synthea:ValueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_CodeGood" wellness="false" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="Imaging_Good" name="Imaging study with series (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ImagingStudy" />
+        <fhirmap:resourceMapping resourceType="ImagingStudy" />
+        <synthea:ImagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="DiagnosticReport_Good" name="Lab panel with contained observations (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="DiagnosticReport" />
+        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        <synthea:ReportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
+        <synthea:ReportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
+        <synthea:ReportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:intermediateThrowEvent id="Death_TimeSpanGood" name="Death with a time span (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Death" />
+        <synthea:ValueConfig valueShape="RANGE" value="2" valueHigh="6" unit="years" />
+      </bpmn:extensionElements>
+    </bpmn:intermediateThrowEvent>
+
   </bpmn:process>
 </bpmn:definitions>

@@ -443,34 +443,51 @@ test('ImagingStudy uses the first code as procedure_code', async () => {
   assert.deepEqual(module.json.states.clin.procedure_code, { system: 'SNOMED-CT', code: '16335031000119103', display: 'HRCT of chest' });
 });
 
-test('the real submodules convert without errors; only gaps the extension cannot express are reported', async () => {
+test('all five real pathway files convert completely, even with --strict', async () => {
   const files = [
+    'lung-cancer/synthea-lung-cancer.bpmn',
     'lung-cancer/anemia-submodule.bpmn',
     'lung-cancer/lung-cancer-treatment-submodule.bpmn',
     'lung-cancer/symptom-check-submodule.bpmn',
     'lung-cancer/lung-cancer-probabilities-submodule.bpmn'
   ];
-  const { modules, diagnostics } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })));
+  const { modules, diagnostics } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
   assert.ok(modules.every((m) => m.ok));
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
 
-  const gaps = {};
-  for (const i of diagnostics.items.filter((x) => x.code === 'REQUIRED_FIELD_MISSING')) {
-    const type = i.message.split(' ')[0];
-    gaps[type] = (gaps[type] ?? 0) + 1;
-  }
-  // docs/bpmn2gmf-concept.md section 5: these are the fields phase 4 adds to the extension
-  // plus the codes of the synthesized Encounter states (decision 5, phase 4)
-  assert.deepEqual(gaps, { Symptom: 10, DiagnosticReport: 6, Observation: 4, ImagingStudy: 1, Encounter: 9 });
+  // nothing carries a remark about missing fields
+  const remarked = modules.flatMap((m) => Object.values(m.json.states)).filter((st) => st.remarks);
+  assert.equal(remarked.length, 0);
+
+  // the Death states of the main pathway match upstream lung_cancer.json (Stage I-IV)
+  const deaths = Object.values(modules.find((m) => m.fileBase === 'synthea_lung_cancer').json.states).filter((st) => st.type === 'Death');
+  assert.deepEqual(deaths.map((d) => d.range), [
+    { low: 2, high: 6, unit: 'years' }, { low: 16, high: 28, unit: 'months' },
+    { low: 9, high: 18, unit: 'months' }, { low: 6, high: 10, unit: 'months' }
+  ]);
+
+  // the lab reports carry their contained observations (92 in total: 48 in anemia, 44 in treatment)
+  const reports = modules.flatMap((m) => Object.values(m.json.states)).filter((st) => st.type === 'DiagnosticReport');
+  assert.equal(reports.length, 9);
+  assert.equal(reports.reduce((n, r) => n + r.observations.length, 0), 92);
 });
 
-test('the main pathway is only blocked by its boundary timer', async () => {
-  const path = 'lung-cancer/synthea-lung-cancer.bpmn';
-  const { diagnostics } = await convert([{ path, xml: readFileSync(path, 'utf8') }]);
-  assert.deepEqual(
-    [...new Set(diagnostics.items.filter((i) => i.level === 'error').map((i) => i.code))].sort(),
-    ['BOUNDARY_EVENT_UNSUPPORTED', 'SUBMODULE_NOT_FOUND'].sort()
-  );
+test('--strict does not write a module that is incomplete', async () => {
+  const incomplete = { path: 'p.bpmn', xml: wrap(
+    start() + task('A', 'x', stateType('Procedure') + coding(LOINC, '1-1', 'wrong system') + enc('E1')) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'E')) };
+  const complete = { path: 'q.bpmn', xml: wrap(start() + end() + flow('f1', 'S', 'E')) };
+  const { modules } = await convert([incomplete, complete], { strict: true });
+  assert.deepEqual(modules.map((m) => [m.fileBase, m.ok]), [['p', false], ['q', true]]);
+});
+
+test('symptom-check-submodule.bpmn converts to the golden file', async () => {
+  const path = 'lung-cancer/symptom-check-submodule.bpmn';
+  const { modules, diagnostics } = await convert([{ path, xml: readFileSync(path, 'utf8') }], { strict: true });
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const golden = JSON.parse(readFileSync(new URL('./golden/symptom_check_submodule.json', import.meta.url), 'utf8'));
+  assert.deepEqual(modules[0].json, golden);
 });
 
 // ---- encounter synthesis (phase 3) -----------------------------------------------------
@@ -597,4 +614,154 @@ test('a state that needs an encounter but lies in none is reported', async () =>
     start() + order('M', 'meds', null) + end() + flow('f1', 'S', 'M') + flow('f2', 'M', 'E')
   );
   assert.ok(codes.includes('STATE_OUTSIDE_ENCOUNTER'));
+});
+
+// ---- fields added in phase 4 --------------------------------------------------------------
+
+const noRemark = (state) => assert.ok(!state.remarks, `unexpected remark: ${state.remarks}`);
+
+test('Symptom: name from symptomConfig, severity from valueConfig (range or exact)', async () => {
+  const range = await clinical('Symptom', '<synthea:symptomConfig symptom="Cough"/><synthea:valueConfig valueShape="RANGE" value="50" valueHigh="100"/>');
+  assert.equal(range.diagnostics.errorCount, 0, range.diagnostics.format().join('\n'));
+  assert.deepEqual(range.module.json.states.clin, { type: 'Symptom', symptom: 'Cough', range: { low: 50, high: 100 }, direct_transition: 'Terminal' });
+  noRemark(range.module.json.states.clin);
+
+  const exact = await clinical('Symptom', '<synthea:symptomConfig symptom="Cough"/><synthea:valueConfig valueShape="EXACT" value="27"/>');
+  assert.deepEqual(exact.module.json.states.clin.exact, { quantity: 27 });
+});
+
+test('Observation: category, unit and value; decimals only for a range', async () => {
+  const { module, diagnostics } = await clinical(
+    'Observation',
+    coding(LOINC, '72514-3', 'Pain severity') + '<synthea:observationConfig category="vital-signs"/>' +
+      '<synthea:valueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0"/>'
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const s = module.json.states.clin;
+  assert.equal(s.category, 'vital-signs');
+  assert.equal(s.unit, '{score}');
+  assert.deepEqual(s.range, { low: 4, high: 8, decimals: 0 });
+  assert.deepEqual(s.codes[0].code, '72514-3');
+  noRemark(s);
+});
+
+test('a valueConfig that does not add up is an error', async () => {
+  const cases = {
+    rangeWithoutHigh: '<synthea:valueConfig valueShape="RANGE" value="4"/>',
+    highBelowLow: '<synthea:valueConfig valueShape="RANGE" value="9" valueHigh="4"/>',
+    exactWithHigh: '<synthea:valueConfig valueShape="EXACT" value="4" valueHigh="8"/>',
+    notANumber: '<synthea:valueConfig valueShape="EXACT" value="abc"/>'
+  };
+  for (const [name, xml] of Object.entries(cases)) {
+    const { codes } = await clinical('Observation', coding(LOINC, '1-1', 'x') + xml);
+    assert.ok(codes.includes('VALUE_CONFIG_INVALID'), `${name} should be an error`);
+  }
+});
+
+test('Death with a time span schedules the death and the module goes on', async () => {
+  const dying = '<bpmn2:intermediateThrowEvent id="D" name="Stage I">' +
+    '<bpmn2:extensionElements>' + stateType('Death') +
+    '<synthea:valueConfig valueShape="RANGE" value="2" valueHigh="6" unit="years"/>' +
+    '</bpmn2:extensionElements></bpmn2:intermediateThrowEvent>';
+  const { module, diagnostics } = await run(
+    start() + dying + task('A', 'next', setAttr('x', '1')) + end() +
+    flow('f1', 'S', 'D') + flow('f2', 'D', 'A') + flow('f3', 'A', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(module.json.states['Stage I'], { type: 'Death', range: { low: 2, high: 6, unit: 'years' }, direct_transition: 'next' });
+
+  const noUnit = await run(
+    start() + dying.replace(' unit="years"', '') + end() + flow('f1', 'S', 'D') + flow('f2', 'D', 'E')
+  );
+  assert.ok(noUnit.codes.includes('VALUE_CONFIG_INVALID'));
+});
+
+test('ImagingStudy: the series comes from imagingStudySeries; an incomplete one is an error', async () => {
+  const full =
+    '<synthea:imagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" ' +
+    'modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" ' +
+    'sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500"/>';
+  const ok = await clinical('ImagingStudy', coding(SNOMED, '16335031000119103', 'HRCT of chest') + full);
+  assert.equal(ok.diagnostics.errorCount, 0, ok.diagnostics.format().join('\n'));
+  assert.deepEqual(ok.module.json.states.clin.series, [{
+    body_site: { system: 'SNOMED-CT', code: '51185008', display: 'Thoracic structure (body structure)' },
+    modality: { system: 'DICOM-DCM', code: 'CT', display: 'Computed Tomography' },
+    min_number_instances: 300,
+    max_number_instances: 500,
+    instances: [{ title: 'CT Image Storage', sop_class: { system: 'DICOM-SOP', code: '1.2.840.10008.5.1.4.1.1.2', display: 'CT Image Storage' } }]
+  }]);
+  noRemark(ok.module.json.states.clin);
+
+  const partial = await clinical('ImagingStudy', coding(SNOMED, '1', 'x') + '<synthea:imagingStudySeries bodySiteCode="1"/>');
+  assert.ok(partial.codes.includes('SERIES_INCOMPLETE'));
+});
+
+test('an encounter code comes from the group and completes the Encounter state', async () => {
+  const code = 'encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)"';
+  const { module, diagnostics } = await run(
+    start() + procedure('A', 'a', 'E1', code) + procedure('B', 'b', 'E1', code) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(module.json.states.E1.codes, [{ system: 'SNOMED-CT', code: '185347001', display: 'Encounter for problem (procedure)' }]);
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
+});
+
+test('encounter codes must be complete, known and the same on every member', async () => {
+  const half = await run(
+    start() + procedure('A', 'a', 'E1', 'encounterCode="1"') + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.ok(half.codes.includes('ENCOUNTER_CODE_INCOMPLETE'));
+
+  const unknown = await run(
+    start() + procedure('A', 'a', 'E1', 'encounterCodeSystem="http://example.org/x" encounterCode="1" encounterCodeDisplay="x"') +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.ok(unknown.codes.includes('ENCOUNTER_CODE_SYSTEM_UNKNOWN'));
+
+  const mixed = (c) => `encounterCodeSystem="http://snomed.info/sct" encounterCode="${c}" encounterCodeDisplay="x"`;
+  const differ = await run(
+    start() + procedure('A', 'a', 'E1', mixed('1')) + procedure('B', 'b', 'E1', mixed('2')) + end() +
+      flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E')
+  );
+  assert.ok(differ.codes.includes('ENCOUNTER_INCONSISTENT'));
+});
+
+// ---- DiagnosticReport with contained observations ----------------------------------------
+
+const reportObs = (extra) =>
+  `<synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" ${extra}/>`;
+
+test('DiagnosticReport: contained observations as range, coded value and vital sign', async () => {
+  const { module, diagnostics } = await clinical(
+    'DiagnosticReport',
+    coding(LOINC, '58410-2', 'CBC panel') +
+      reportObs('valueShape="RANGE" value="10" valueHigh="11.9"') +
+      '<synthea:reportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)"/>' +
+      '<synthea:reportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose"/>'
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const s = module.json.states.clin;
+  assert.equal(s.observations.length, 3);
+  assert.deepEqual(s.observations[0], {
+    category: 'laboratory', codes: [{ system: 'LOINC', code: '718-7', display: 'Hemoglobin [Mass/volume] in Blood' }],
+    unit: 'g/dL', range: { low: 10, high: 11.9 }
+  });
+  assert.deepEqual(s.observations[1].value_code, { system: 'SNOMED-CT', code: '7766007', display: 'Cloudy urine (finding)' });
+  assert.equal(s.observations[2].vital_sign, 'Glucose');
+  noRemark(s);
+});
+
+test('a contained observation needs code, category, unit and exactly one kind of value', async () => {
+  const cases = {
+    noUnit: '<synthea:reportObservation code="1" codeDisplay="x" category="laboratory" value="1"/>',
+    noValue: '<synthea:reportObservation code="1" codeDisplay="x" category="laboratory" unit="u"/>',
+    twoValues: reportObs('value="1" vitalSign="Glucose"'),
+    rangeWithoutHigh: reportObs('valueShape="RANGE" value="1"'),
+    badCodedSystem: reportObs('valueCodeSystem="http://example.org" valueCode="1" valueCodeDisplay="x"')
+  };
+  for (const [name, xml] of Object.entries(cases)) {
+    const { codes } = await clinical('DiagnosticReport', coding(LOINC, '58410-2', 'CBC panel') + xml);
+    assert.ok(codes.includes('REPORT_OBSERVATION_INCOMPLETE') || codes.includes('REPORT_OBSERVATION_VALUE'), `${name} should be an error`);
+  }
 });
