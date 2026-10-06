@@ -146,7 +146,7 @@
     <bpmn2:task id="Activity_16ao22e" name="Measurement: Pain_Vital">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
-        <synthea:stateTypeConfig stateType="VitalSign" />
+        <synthea:stateTypeConfig stateType="Observation" />
         <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" />
       </bpmn2:extensionElements>

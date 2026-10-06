@@ -30,7 +30,7 @@
       { "name": "gender", "type": "String", "isAttr": true },
       { "name": "race", "type": "String", "isAttr": true },
       { "name": "category", "type": "String", "isAttr": true },
-      { "name": "quantity", "type": "Float", "isAttr": true },
+      { "name": "quantity", "type": "Real", "isAttr": true },
       { "name": "unit", "type": "String", "isAttr": true },
       { "name": "year", "type": "Integer", "isAttr": true },
       { "name": "month", "type": "Integer", "isAttr": true },
@@ -50,9 +50,9 @@
       { "name": "submodule", "type": "String", "isAttr": true }
     ]},
     { "name": "ProbabilityConfig", "superClass": ["Element"], "properties": [
-      { "name": "probability", "type": "Float", "isAttr": true },
+      { "name": "probability", "type": "Real", "isAttr": true },
       { "name": "probabilityAttribute", "type": "String", "isAttr": true },
-      { "name": "probabilityDefault", "type": "Float", "isAttr": true }
+      { "name": "probabilityDefault", "type": "Real", "isAttr": true }
     ]},
     { "name": "EncounterClass", "isEnum": true, "literalValues": [
       {"name": "wellness"}, {"name": "ambulatory"}, {"name": "emergency"}, {"name": "urgentcare"}, {"name": "inpatient"}, {"name": "outpatient"}
@@ -73,7 +73,7 @@
     { "name": "CounterConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true },
       { "name": "action", "type": "CounterAction", "isAttr": true },
-      { "name": "amount", "type": "Float", "isAttr": true }
+      { "name": "amount", "type": "Real", "isAttr": true }
     ]},
     { "name": "SetAttributeConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true },

@@ -100,7 +100,9 @@ before opening the properties panel for the first time.
 
 ## 2. Start and end
 
-- **Start event** → `Initial`. Nothing to configure — unambiguous.
+- **Start event** → `Initial`. Nothing to configure — unambiguous. The generated
+  state is always named `Initial` whatever the event's label says (Synthea
+  requires that exact name), and a module needs exactly one start event.
 - **End event** → defaults to `Terminal`. For a death outcome, set
   `synthea:StateTypeConfig.stateType="Death"` explicitly (it has no
   `fhirmap:resourceType` to disambiguate it any other way) and attach a
@@ -132,6 +134,14 @@ syntax (Gaussian/exponential sampling) is deliberately out of scope, since
 ## 4. Branching
 
 Three different mechanisms, pick based on what actually decides the branch:
+
+**Every branch of an exclusive gateway needs one of 4a/4b.** A flow name such
+as "Gender = F" or "28%" is only a label — the converter reads
+`synthea:conditionConfig` (4b) or `synthea:probabilityConfig` (4a), never the
+text. At most one outgoing flow may omit both (the BPMN default flow, or the
+branch that receives the probability remainder). Lint rule SYN-27
+(`gateway-branches-require-condition-or-probability`) warns about gateways
+that break this.
 
 ### 4a. By fixed or dynamic probability — `ProbabilityConfig`
 
@@ -369,8 +379,12 @@ it via the BPMN element's own properties, not `synthea:`).
 **Group:** "Submodule" → `submodule`, the Synthea module path the call
 activity should invoke once exported (e.g.
 `"lung_cancer_treatment_submodule"`). Use the bare module name, no
-subdirectory prefix — `tools/bpmn2gmf` (not yet built) will emit every
-module, main and submodules alike, flat directly under `modules/`. Real
+subdirectory prefix — `tools/bpmn2gmf` emits every module, main and
+submodules alike, flat directly under `modules/`. The module name is the
+**file name** of the BPMN file with `-` replaced by `_`
+(`lung-cancer-treatment-submodule.bpmn` → `lung_cancer_treatment_submodule`),
+not the process name; the converter checks that every call resolves to a
+file of the same run. Real
 Synthea nests its own submodules under a subdirectory (e.g.
 `"lung_cancer/lung_cancer_probabilities"`), but that's just how its own,
 much larger module library is organized, not an engine requirement — with

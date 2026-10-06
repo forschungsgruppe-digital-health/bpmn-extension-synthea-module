@@ -11,25 +11,41 @@
   <xsd:element name="delayShape" type="synthea:tDelayShape"/>
   <xsd:complexType name="tDelayShape"/>
 
-  <xsd:element name="delayDistributionKind" type="synthea:tDelayDistributionKind"/>
-  <xsd:complexType name="tDelayDistributionKind"/>
-
   <xsd:element name="delayConfig" type="synthea:tDelayConfig"/>
   <xsd:complexType name="tDelayConfig">
     <xsd:attribute name="delayShape" type="xsd:string"/>
     <xsd:attribute name="delayValue" type="xsd:string"/>
     <xsd:attribute name="delayValueHigh" type="xsd:string"/>
     <xsd:attribute name="delayUnit" type="xsd:string"/>
-    <xsd:attribute name="distributionKind" type="xsd:string"/>
   </xsd:complexType>
+
+  <xsd:element name="conditionType" type="synthea:tConditionType"/>
+  <xsd:complexType name="tConditionType"/>
 
   <xsd:element name="condition" type="synthea:tCondition"/>
   <xsd:complexType name="tCondition">
+    <xsd:sequence>
+      <xsd:element ref="synthea:condition" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
     <xsd:attribute name="conditionType" type="xsd:string"/>
     <xsd:attribute name="attribute" type="xsd:string"/>
     <xsd:attribute name="operator" type="xsd:string"/>
     <xsd:attribute name="value" type="xsd:string"/>
     <xsd:attribute name="negate" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="gender" type="xsd:string"/>
+    <xsd:attribute name="race" type="xsd:string"/>
+    <xsd:attribute name="category" type="xsd:string"/>
+    <xsd:attribute name="quantity" type="xsd:double"/>
+    <xsd:attribute name="unit" type="xsd:string"/>
+    <xsd:attribute name="year" type="xsd:int"/>
+    <xsd:attribute name="month" type="xsd:int"/>
+    <xsd:attribute name="symptom" type="xsd:string"/>
+    <xsd:attribute name="vitalSign" type="xsd:string"/>
+    <xsd:attribute name="referencedAttribute" type="xsd:string"/>
+    <xsd:attribute name="priorStateName" type="xsd:string"/>
+    <xsd:attribute name="since" type="xsd:string"/>
+    <xsd:attribute name="minimum" type="xsd:int"/>
+    <xsd:attribute name="maximum" type="xsd:int"/>
   </xsd:complexType>
 
   <xsd:element name="guardConfig" type="synthea:tGuardConfig"/>
@@ -46,16 +62,20 @@
 
   <xsd:element name="probabilityConfig" type="synthea:tProbabilityConfig"/>
   <xsd:complexType name="tProbabilityConfig">
-    <xsd:attribute name="probability" type="xsd:string"/>
+    <xsd:attribute name="probability" type="xsd:double"/>
     <xsd:attribute name="probabilityAttribute" type="xsd:string"/>
-    <xsd:attribute name="probabilityDefault" type="xsd:string"/>
+    <xsd:attribute name="probabilityDefault" type="xsd:double"/>
   </xsd:complexType>
+
+  <xsd:element name="encounterClass" type="synthea:tEncounterClass"/>
+  <xsd:complexType name="tEncounterClass"/>
 
   <xsd:element name="encounterContext" type="synthea:tEncounterContext"/>
   <xsd:complexType name="tEncounterContext">
     <xsd:attribute name="requiresEncounterContext" type="xsd:boolean" default="false"/>
     <xsd:attribute name="encounterId" type="xsd:string"/>
     <xsd:attribute name="wellness" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="encounterClass" type="xsd:string"/>
     <xsd:attribute name="reason" type="xsd:string"/>
   </xsd:complexType>
 
@@ -71,12 +91,13 @@
   <xsd:complexType name="tCounterConfig">
     <xsd:attribute name="attribute" type="xsd:string"/>
     <xsd:attribute name="action" type="xsd:string"/>
-    <xsd:attribute name="amount" type="xsd:string"/>
+    <xsd:attribute name="amount" type="xsd:double"/>
   </xsd:complexType>
 
   <xsd:element name="setAttributeConfig" type="synthea:tSetAttributeConfig"/>
   <xsd:complexType name="tSetAttributeConfig">
     <xsd:attribute name="attribute" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="assignToAttributeConfig" type="synthea:tAssignToAttributeConfig"/>

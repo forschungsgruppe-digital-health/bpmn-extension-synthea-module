@@ -244,5 +244,11 @@
       </bpmn:extensionElements>
     </bpmn:endEvent>
 
+    <!-- gateway-branches-require-condition-or-probability: two outgoing flows, neither has a
+         synthea:conditionConfig or synthea:probabilityConfig -->
+    <bpmn:exclusiveGateway id="Gateway_BranchesNoConfig" name="Branches (no condition)" />
+    <bpmn:sequenceFlow id="Flow_BranchNoConfig_A" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_Counter_NoConfig" />
+    <bpmn:sequenceFlow id="Flow_BranchNoConfig_B" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_SetAttribute_NoConfig" />
+
   </bpmn:process>
 </bpmn:definitions>

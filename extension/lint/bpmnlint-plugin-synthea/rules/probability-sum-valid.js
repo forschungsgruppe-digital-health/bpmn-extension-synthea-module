@@ -41,10 +41,8 @@ module.exports = function() {
         return;
       }
 
-      // bpmn-moddle does not coerce custom-extension "Float" attributes to
-      // Number — they come back as strings straight from the XML, so this
-      // must parse explicitly or `sum +=` silently does string
-      // concatenation instead of addition.
+      // `probability` is a Real in the schema, so moddle reads it as a number;
+      // parseFloat keeps this tolerant of string values from older descriptors.
       if (raw === undefined || raw === null || raw === '') {
         unfixedCount += 1;
       } else {

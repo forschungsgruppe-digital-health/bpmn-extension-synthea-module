@@ -1,0 +1,122 @@
+// Stage 2: moddle tree -> intermediate representation (IR).
+//
+// The IR only contains what the emitters need. Everything BPMN-specific that
+// does not matter for GMF (diagram interchange, annotations, associations,
+// i18n, BPMN4CP, data objects) is dropped here.
+
+const IGNORED_FLOW_ELEMENTS = new Set([
+  'bpmn:DataObject',
+  'bpmn:DataObjectReference',
+  'bpmn:DataStoreReference'
+]);
+
+export function extensionsOf(element) {
+  const out = {};
+  for (const value of element.extensionElements?.values ?? []) {
+    (out[value.$type] ??= []).push(value);
+  }
+  return out;
+}
+
+export const first = (ext, type) => ext[type]?.[0];
+
+function kindOf(el) {
+  switch (el.$type) {
+    case 'bpmn:StartEvent': return 'start';
+    case 'bpmn:EndEvent': return 'end';
+    case 'bpmn:ExclusiveGateway': return 'gateway';
+    case 'bpmn:CallActivity': return 'call';
+    case 'bpmn:IntermediateCatchEvent':
+    case 'bpmn:IntermediateThrowEvent': return 'event';
+    default: return el.$instanceOf('bpmn:Task') ? 'task' : null;
+  }
+}
+
+export function buildModule(process, fileBase, diag) {
+  const module = {
+    fileBase,
+    name: process.name || process.id,
+    processId: process.id,
+    nodes: new Map(),
+    edges: []
+  };
+  const where = (el) => ({ module: fileBase, element: el.id, label: el.name });
+  const flows = [];
+  const skipped = new Set(); // ids of elements already reported as unsupported
+
+  for (const el of process.flowElements ?? []) {
+    if (el.$type === 'bpmn:SequenceFlow') {
+      flows.push(el);
+      continue;
+    }
+    if (IGNORED_FLOW_ELEMENTS.has(el.$type)) continue;
+
+    if (el.$type === 'bpmn:BoundaryEvent') {
+      diag.error(
+        'BOUNDARY_EVENT_UNSUPPORTED',
+        'GMF has no boundary events. Remodel this as a state in the normal flow (e.g. Death with a range before the attached activity).',
+        where(el)
+      );
+      skipped.add(el.id);
+      continue;
+    }
+
+    const kind = kindOf(el);
+    if (!kind) {
+      diag.error('UNSUPPORTED_ELEMENT', `BPMN element ${el.$type} cannot be converted.`, where(el));
+      skipped.add(el.id);
+      continue;
+    }
+
+    module.nodes.set(el.id, {
+      id: el.id,
+      kind,
+      bpmnType: el.$type,
+      label: el.name ?? '',
+      ext: extensionsOf(el),
+      hasTimer: (el.eventDefinitions ?? []).some((d) => d.$type === 'bpmn:TimerEventDefinition'),
+      defaultFlow: el.default?.id ?? null,
+      incoming: [],
+      outgoing: []
+    });
+  }
+
+  for (const flow of flows) {
+    const ext = extensionsOf(flow);
+    const from = flow.sourceRef?.id;
+    const to = flow.targetRef?.id;
+    if (skipped.has(from) || skipped.has(to)) continue; // already reported with the element
+    if (!module.nodes.has(from) || !module.nodes.has(to)) {
+      diag.error(
+        'FLOW_ENDPOINT_UNKNOWN',
+        'Sequence flow connects an element that is not part of the converted flow.',
+        where(flow)
+      );
+      continue;
+    }
+    const edge = {
+      id: flow.id,
+      label: flow.name ?? '',
+      from,
+      to,
+      isDefault: module.nodes.get(from).defaultFlow === flow.id,
+      condition: first(ext, 'synthea:ConditionConfig')?.condition ?? null,
+      probability: first(ext, 'synthea:ProbabilityConfig') ?? null
+    };
+    module.edges.push(edge);
+    module.nodes.get(from).outgoing.push(edge);
+    module.nodes.get(to).incoming.push(edge);
+  }
+
+  return module;
+}
+
+export function buildModules(definitions, fileBase, diag) {
+  const processes = (definitions.rootElements ?? []).filter((e) => e.$type === 'bpmn:Process');
+  if (processes.length === 0) {
+    diag.error('NO_PROCESS', 'The file contains no process.', { module: fileBase });
+  }
+  return processes.map((p, i) =>
+    buildModule(p, processes.length > 1 ? `${fileBase}_${i + 1}` : fileBase, diag)
+  );
+}

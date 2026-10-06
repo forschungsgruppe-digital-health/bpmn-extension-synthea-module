@@ -24,7 +24,9 @@
     "xsd:ext": "node tools/validate-xsd-ext.mjs",
     "conventions": "node tools/check-package-conventions.mjs",
     "check:attributes": "node tools/check-attribute-usage.mjs",
-    "validate": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run conventions",
+    "bpmn2gmf": "node tools/bpmn2gmf/cli.mjs",
+    "test:bpmn2gmf": "node --test \"tools/bpmn2gmf/test/*.test.mjs\"",
+    "validate": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run conventions && npm run test:bpmn2gmf",
     "demo": "npm --prefix demo run dev",
     "demo:build": "npm --prefix demo run build"
   },

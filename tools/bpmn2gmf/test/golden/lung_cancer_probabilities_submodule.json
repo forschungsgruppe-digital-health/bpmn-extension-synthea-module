@@ -1,0 +1,121 @@
+{
+  "name": "Lung Cancer Probabilities",
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Patient gender?"
+    },
+    "Patient gender?": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Gender",
+            "gender": "F"
+          },
+          "transition": "Type of smoker/ nonsmoker"
+        },
+        {
+          "transition": "Type of smoker/ nonsmoker_Gateway_08b83gc"
+        }
+      ]
+    },
+    "Type of smoker/ nonsmoker": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "smoker",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "Female_Smoker: probability_of_lung_cancer = 0.185"
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "quit smoking age",
+            "operator": "is not nil"
+          },
+          "transition": "Female_Quit: probability_of_lung_cancer = 0.026"
+        },
+        {
+          "transition": "Female_Nonsmoker: probability_of_lung_cancer = 0.004"
+        }
+      ]
+    },
+    "Type of smoker/ nonsmoker_Gateway_08b83gc": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "smoker",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "Male_Smoker: probability_of_lung_cancer = 0.244"
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "quit smoking age",
+            "operator": "is not nil"
+          },
+          "transition": "Male_Quit: probability_of_lung_cancer = 0.055"
+        },
+        {
+          "transition": "Male_Nonsmoker: probability_of_lung_cancer = 0.002"
+        }
+      ]
+    },
+    "Female_Smoker: probability_of_lung_cancer = 0.185": {
+      "type": "SetAttribute",
+      "attribute": "probability_of_lung_cancer",
+      "value": 0.185,
+      "direct_transition": "Simple_Gateway_0d3ebq6"
+    },
+    "Female_Quit: probability_of_lung_cancer = 0.026": {
+      "type": "SetAttribute",
+      "attribute": "probability_of_lung_cancer",
+      "value": 0.026,
+      "direct_transition": "Simple_Gateway_0d3ebq6"
+    },
+    "Female_Nonsmoker: probability_of_lung_cancer = 0.004": {
+      "type": "SetAttribute",
+      "attribute": "probability_of_lung_cancer",
+      "value": 0.004,
+      "direct_transition": "Simple_Gateway_0d3ebq6"
+    },
+    "Male_Smoker: probability_of_lung_cancer = 0.244": {
+      "type": "SetAttribute",
+      "attribute": "probability_of_lung_cancer",
+      "value": 0.244,
+      "direct_transition": "Simple_Gateway_0aqx170"
+    },
+    "Male_Quit: probability_of_lung_cancer = 0.055": {
+      "type": "SetAttribute",
+      "attribute": "probability_of_lung_cancer",
+      "value": 0.055,
+      "direct_transition": "Simple_Gateway_0aqx170"
+    },
+    "Male_Nonsmoker: probability_of_lung_cancer = 0.002": {
+      "type": "SetAttribute",
+      "attribute": "probability_of_lung_cancer",
+      "value": 0.002,
+      "direct_transition": "Simple_Gateway_0aqx170"
+    },
+    "Terminal": {
+      "type": "Terminal"
+    },
+    "Simple_Gateway_0d3ebq6": {
+      "type": "Simple",
+      "direct_transition": "Terminal"
+    },
+    "Simple_Gateway_0aqx170": {
+      "type": "Simple",
+      "direct_transition": "Terminal"
+    }
+  }
+}
