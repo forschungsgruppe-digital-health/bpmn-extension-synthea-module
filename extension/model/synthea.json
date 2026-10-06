@@ -83,7 +83,22 @@
     ]},
     { "name": "SetAttributeConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true },
-      { "name": "value", "type": "String", "isAttr": true }
+      { "name": "value", "type": "String", "isAttr": true },
+      { "name": "valueAttribute", "type": "String", "isAttr": true }
+    ]},
+    { "name": "DistributionKind", "isEnum": true, "literalValues": [
+      {"name": "EXACT"}, {"name": "UNIFORM"}, {"name": "GAUSSIAN"}, {"name": "EXPONENTIAL"}
+    ]},
+    { "name": "DistributionConfig", "superClass": ["Element"], "properties": [
+      { "name": "kind", "type": "DistributionKind", "isAttr": true },
+      { "name": "round", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "value", "type": "Real", "isAttr": true },
+      { "name": "mean", "type": "Real", "isAttr": true },
+      { "name": "standardDeviation", "type": "Real", "isAttr": true },
+      { "name": "min", "type": "Real", "isAttr": true },
+      { "name": "max", "type": "Real", "isAttr": true },
+      { "name": "low", "type": "Real", "isAttr": true },
+      { "name": "high", "type": "Real", "isAttr": true }
     ]},
     { "name": "AssignToAttributeConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true }

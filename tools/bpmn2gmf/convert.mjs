@@ -8,13 +8,14 @@ import { buildTransition } from './transitions.mjs';
 import { emitState } from './emit.mjs';
 import { verifyModule, verifySubmodules } from './verify.mjs';
 import { missingFields } from './required-fields.mjs';
+import { fuseGateways } from './fuse.mjs';
 
 // `fileBase` is the module file name without extension, e.g. "anemia_submodule";
 // it is also what CallSubmodule refers to (flat layout).
 export const fileBaseFor = (path) =>
   path.split('/').pop().replace(/\.bpmn$/i, '').replace(/-/g, '_');
 
-export async function convert(inputs, { strict = false } = {}) {
+export async function convert(inputs, { strict = false, fuse = false } = {}) {
   const diag = new Diagnostics();
   const modules = [];
 
@@ -41,6 +42,11 @@ export async function convert(inputs, { strict = false } = {}) {
         states[node.stateName] = { ...state, ...transition };
       }
       terminateDeaths(module, states, diag);
+      if (fuse) {
+        const gateways = [...module.nodes.values()].filter((n) => n.kind === 'gateway' && n.stateType === 'Simple').map((n) => n.stateName);
+        const removed = fuseGateways(states, gateways);
+        if (removed) diag.note('GATEWAYS_FUSED', `${removed} gateway state(s) merged into their neighbours.`, { module: module.fileBase });
+      }
       // Structural checks are meaningless on a partial module (cascading noise).
       if (diag.forModule(module.fileBase).every((i) => i.level !== 'error')) {
         verifyModule(module, states, diag, { strict });

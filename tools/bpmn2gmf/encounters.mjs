@@ -45,6 +45,47 @@ const REQUIRES_ENCOUNTER = new Set([
   'SupplyList', 'Observation', 'MultiObservation', 'DiagnosticReport'
 ]);
 
+// States that take no time and record nothing: an encounter may be opened before
+// them without changing what happens (gateways, plain Simple/SetAttribute/Counter).
+const NEUTRAL = new Set(['Simple', 'SetAttribute', 'Counter']);
+const isNeutral = (n) => n.kind !== 'synthetic' && NEUTRAL.has(n.stateType);
+
+// Immediate dominators (Cooper-Harvey-Kennedy): idom.get(n) is the node every path
+// from `entry` to n passes through last before n.
+function dominators(entry, successors, predecessors) {
+  const order = [];
+  const seen = new Set();
+  (function visit(n) {
+    seen.add(n);
+    for (const s of successors(n)) if (!seen.has(s)) visit(s);
+    order.push(n);
+  })(entry);
+  order.reverse();
+  const index = new Map(order.map((n, i) => [n, i]));
+  const idom = new Map([[entry, entry]]);
+  const intersect = (a, b) => {
+    while (a !== b) {
+      while (index.get(a) > index.get(b)) a = idom.get(a);
+      while (index.get(b) > index.get(a)) b = idom.get(b);
+    }
+    return a;
+  };
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const n of order.slice(1)) {
+      const preds = predecessors(n).filter((p) => idom.has(p));
+      if (!preds.length) continue;
+      const next = preds.slice(1).reduce((acc, p) => intersect(p, acc), preds[0]);
+      if (idom.get(n) !== next) {
+        idom.set(n, next);
+        changed = true;
+      }
+    }
+  }
+  return idom;
+}
+
 const reach = (start, next, allowed) => {
   const seen = new Set(start);
   const queue = [...start];
@@ -144,7 +185,7 @@ export function synthesizeEncounters(module, diag) {
   const successors = (n) => n.outgoing.map((e) => nodeOf(e.to)).filter(Boolean);
   const predecessors = (n) => n.incoming.map((e) => nodeOf(e.from)).filter(Boolean);
 
-  for (const group of groups.values()) {
+  const computeRegion = (group) => {
     // another encounter's state, or anything that ends an encounter, cannot lie inside this span
     const blocked = (n) => (n.group && n.group !== group.id) || endsEncounter(n);
     const members = [...group.members];
@@ -166,7 +207,61 @@ export function synthesizeEncounters(module, diag) {
       }
     }
     group.region = new Set([...group.span, ...group.tail]);
+  };
+
+  for (const group of groups.values()) computeRegion(group);
+
+  // ---- 2b. fewer Encounter copies ------------------------------------------------------------
+  // A group entered at several different states (lab panels behind a chain of
+  // gateways) would get one Encounter per entered state. If one node dominates
+  // all entered states and everything between it and them is neutral and leads
+  // only into the group, the encounter is opened there instead: that node
+  // becomes a (virtual) member, so the gateways in front of the panels run inside
+  // the encounter and a single Encounter state remains.
+  const entry = [...module.nodes.values()].find((n) => n.stateType === 'Initial');
+  if (entry) {
+    const idom = dominators(entry, successors, predecessors);
+    const ancestors = (n) => {
+      const out = new Set();
+      for (let x = n; x && !out.has(x); x = idom.get(x)) out.add(x);
+      return out;
+    };
+    const commonDominator = (nodes) =>
+      nodes.slice(1).reduce((acc, n) => {
+        const up = ancestors(acc);
+        let x = n;
+        while (x && !up.has(x)) x = idom.get(x) === x ? null : idom.get(x);
+        return x;
+      }, nodes[0]);
+
+    let hoisted = false;
+    for (const group of groups.values()) {
+      const entered = [...group.span].filter((n) => idom.has(n) && predecessors(n).some((p) => !group.span.has(p)));
+      if (entered.length < 2) continue;
+      const anchor = commonDominator(entered);
+      if (!anchor || group.span.has(anchor) || anchor.group || !isNeutral(anchor)) continue;
+
+      // everything between the anchor and the group must be neutral and lead only into the group
+      const funnel = new Set([anchor]);
+      const queue = [anchor];
+      let ok = true;
+      while (ok && queue.length) {
+        for (const next of successors(queue.shift())) {
+          if (group.span.has(next) || funnel.has(next)) continue;
+          if (next.group || !isNeutral(next)) { ok = false; break; }
+          funnel.add(next);
+          queue.push(next);
+        }
+      }
+      if (!ok) continue;
+
+      anchor.group = group.id;
+      group.members.add(anchor);
+      hoisted = true;
+    }
+    if (hoisted) for (const group of groups.values()) computeRegion(group);
   }
+
 
   const spansOf = (n) => [...groups.values()].filter((g) => g.span.has(n));
 

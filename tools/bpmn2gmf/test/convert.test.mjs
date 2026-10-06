@@ -577,7 +577,7 @@ test('members that disagree on class, and a missing encounterId, are errors', as
   assert.ok(noId.codes.includes('ENCOUNTER_ID_MISSING'));
 });
 
-test('branches into the same encounter get one Encounter per entered state and share the EncounterEnd', async () => {
+test('a gateway in front of a group is entered inside the encounter: one Encounter state for all branches', async () => {
   const { module, diagnostics } = await run(
     start() + gateway('G', 'g', 'f3') + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E1') + end() +
       flow('f1', 'S', 'G') + flow('f2', 'G', 'A', prob('0.5')) + flow('f3', 'G', 'B', prob('0.5')) +
@@ -585,10 +585,28 @@ test('branches into the same encounter get one Encounter per entered state and s
   );
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
   const states = Object.entries(module.json.states);
-  assert.equal(states.filter(([, v]) => v.type === 'Encounter').length, 2);
+  assert.equal(states.filter(([, v]) => v.type === 'Encounter').length, 1);
   assert.equal(states.filter(([, v]) => v.type === 'EncounterEnd').length, 1);
+  assert.deepEqual(module.json.states.Initial.direct_transition, 'E1');
+  assert.deepEqual(module.json.states.E1.direct_transition, 'g');
   assert.deepEqual(module.json.states.a.direct_transition, 'E1_End');
   assert.deepEqual(module.json.states.b.direct_transition, 'E1_End');
+});
+
+// A delay between the gateway and one branch keeps the encounter from being opened
+// in front of the gateway: it would then include the wait.
+const splitByDelay = (extra = '') =>
+  start() + gateway('G', 'g', 'f3') + delay('D', 'wait', 1, 'hours') + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E1') + end() +
+    extra + flow('f1', 'S', 'G') + flow('f2', 'G', 'D', prob('0.5')) + flow('f3', 'G', 'B', prob('0.5')) + flow('f6', 'D', 'A') +
+    flow('f4', 'A', 'E') + flow('f5', 'B', 'E');
+
+test('branches that cannot share an Encounter get one per entered state and still share the EncounterEnd', async () => {
+  const { module, diagnostics } = await run(splitByDelay());
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const states = Object.entries(module.json.states);
+  assert.equal(states.filter(([, v]) => v.type === 'Encounter').length, 2);
+  assert.equal(states.filter(([, v]) => v.type === 'EncounterEnd').length, 1);
+  assert.equal(module.json.states[module.json.states.wait.direct_transition].type, 'Encounter', 'the wait runs before the encounter');
 });
 
 test('target_encounter names the Encounter state of the group, when there is exactly one', async () => {
@@ -601,9 +619,18 @@ test('target_encounter names the Encounter state of the group, when there is exa
   const unknown = await run(start() + dx('nope') + end() + flow('f1', 'S', 'X') + flow('f2', 'X', 'E'));
   assert.ok(unknown.codes.includes('TARGET_ENCOUNTER_UNKNOWN'));
 
-  const twice = await run(
+  // with a gateway in front, the group has one Encounter state and the reference works ...
+  const shared = await run(
     start() + gateway('G', 'g', 'f3') + dx('E1') + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E1') + end() +
       flow('f0', 'S', 'X') + flow('f1', 'X', 'G') + flow('f2', 'G', 'A', prob('0.5')) + flow('f3', 'G', 'B', prob('0.5')) +
+      flow('f4', 'A', 'E') + flow('f5', 'B', 'E')
+  );
+  assert.equal(shared.module.json.states.dx.target_encounter, 'E1');
+
+  // ... but not when the group is entered at two places that cannot share one
+  const twice = await run(
+    start() + dx('E1') + gateway('G', 'g', 'f3') + delay('D', 'wait', 1, 'hours') + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E1') + end() +
+      flow('f0', 'S', 'X') + flow('f1', 'X', 'G') + flow('f2', 'G', 'D', prob('0.5')) + flow('f3', 'G', 'B', prob('0.5')) + flow('f6', 'D', 'A') +
       flow('f4', 'A', 'E') + flow('f5', 'B', 'E')
   );
   assert.ok(twice.codes.includes('TARGET_ENCOUNTER_AMBIGUOUS'));
@@ -763,5 +790,136 @@ test('a contained observation needs code, category, unit and exactly one kind of
   for (const [name, xml] of Object.entries(cases)) {
     const { codes } = await clinical('DiagnosticReport', coding(LOINC, '58410-2', 'CBC panel') + xml);
     assert.ok(codes.includes('REPORT_OBSERVATION_INCOMPLETE') || codes.includes('REPORT_OBSERVATION_VALUE'), `${name} should be an error`);
+  }
+});
+
+// ---- gateway fusion (phase 5) ---------------------------------------------------------------
+
+const fused = (body) => run(body, { fuse: true });
+
+test('--fuse-gateways: a branching gateway moves onto its single predecessor', async () => {
+  const body =
+    start() + task('A', 'a', setAttr('x', '1')) + gateway('G', 'g?', 'fd') + task('B', 'b', setAttr('x', '2')) + task('C', 'c', setAttr('x', '3')) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'G') + flow('fc', 'G', 'B', cond(attrCond('x', '==', '1'))) + flow('fd', 'G', 'C') +
+    flow('f5', 'B', 'E') + flow('f6', 'C', 'E');
+  const plain = await run(body);
+  assert.ok('g?' in plain.module.json.states);
+
+  const { module, diagnostics } = await fused(body);
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.ok(!('g?' in module.json.states));
+  assert.deepEqual(module.json.states.a.conditional_transition, [
+    { condition: { condition_type: 'Attribute', attribute: 'x', operator: '==', value: 1 }, transition: 'b' },
+    { transition: 'c' }
+  ]);
+  assert.ok(!('direct_transition' in module.json.states.a));
+});
+
+test('--fuse-gateways: a join (pass-through gateway) is removed and its predecessors continue to its target', async () => {
+  const { module } = await fused(
+    start() + gateway('G', 'split', 'f4') + task('B', 'b', setAttr('x', '2')) + task('C', 'c', setAttr('x', '3')) +
+      gateway('J', 'join') + task('X', 'x', setAttr('y', '1')) + end() +
+      flow('f1', 'S', 'G') + flow('f3', 'G', 'B', prob('0.5')) + flow('f4', 'G', 'C', prob('0.5')) +
+      flow('f5', 'B', 'J') + flow('f6', 'C', 'J') + flow('f7', 'J', 'X') + flow('f8', 'X', 'E')
+  );
+  const s = module.json.states;
+  assert.ok(!('join' in s));
+  assert.equal(s.b.direct_transition, 'x');
+  assert.equal(s.c.direct_transition, 'x');
+});
+
+test('--fuse-gateways: a gateway with several predecessors, one a PriorState refers to, or drawn as a Simple task stays', async () => {
+  // two predecessors
+  const two = await fused(
+    start() + gateway('G0', 'g0', 'fx') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('x', '2')) + gateway('G', 'g?', 'fd') +
+      task('C', 'c', setAttr('x', '3')) + task('D', 'd', setAttr('x', '4')) + end() +
+      flow('f1', 'S', 'G0') + flow('fa', 'G0', 'A', prob('0.5')) + flow('fx', 'G0', 'B', prob('0.5')) +
+      flow('f2', 'A', 'G') + flow('f3', 'B', 'G') + flow('fc', 'G', 'C', cond(attrCond('x', '==', '1'))) + flow('fd', 'G', 'D') +
+      flow('f6', 'C', 'E') + flow('f7', 'D', 'E')
+  );
+  assert.ok('g?' in two.module.json.states, 'g? has two predecessors');
+
+  // a PriorState condition names the gateway
+  const prior = await fused(
+    start() + task('A', 'a', setAttr('x', '1')) + gateway('G', 'g?', 'fd') + task('B', 'b', setAttr('x', '2')) + gateway('H', 'h?', 'fh') +
+      task('C', 'c', setAttr('x', '3')) + task('D', 'd', setAttr('x', '4')) + end() +
+      flow('f1', 'S', 'A') + flow('f2', 'A', 'G') +
+      flow('fc', 'G', 'B', cond(attrCond('x', '==', '1'))) + flow('fd', 'G', 'H') +
+      flow('f3', 'B', 'E') +
+      flow('fh1', 'H', 'C', cond('<synthea:condition conditionType="PriorState" priorStateName="g?"/>')) + flow('fh', 'H', 'D') +
+      flow('f6', 'C', 'E') + flow('f7', 'D', 'E')
+  );
+  assert.ok('g?' in prior.module.json.states, 'g? is named by a PriorState condition');
+
+  // a Simple state the modeler drew is theirs
+  const drawn = await fused(
+    start() + task('A', 'named step', stateType('Simple')) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.ok('named step' in drawn.module.json.states);
+});
+
+test('--fuse-gateways keeps every non-gateway state and what each one leads to', async () => {
+  const files = [
+    'lung-cancer/synthea-lung-cancer.bpmn', 'lung-cancer/anemia-submodule.bpmn', 'lung-cancer/lung-cancer-treatment-submodule.bpmn',
+    'lung-cancer/symptom-check-submodule.bpmn', 'lung-cancer/lung-cancer-probabilities-submodule.bpmn'
+  ];
+  const inputs = files.map((path) => ({ path, xml: readFileSync(path, 'utf8') }));
+  const a = await convert(inputs, { strict: true });
+  const b = await convert(inputs, { strict: true, fuse: true });
+  assert.equal(b.diagnostics.errorCount, 0, b.diagnostics.format().join('\n'));
+
+  const targets = (s) => [s.direct_transition, ...(s.distributed_transition ?? []).map((t) => t.transition), ...(s.conditional_transition ?? []).map((t) => t.transition)].filter(Boolean);
+  const body = (s) => { const { direct_transition, distributed_transition, conditional_transition, ...rest } = s; return rest; };
+
+  for (const [i, before] of a.modules.entries()) {
+    const after = b.modules[i].json.states;
+    const original = before.json.states;
+    const gateways = new Set(Object.keys(original).filter((n) => !(n in after)));
+    // everything that was not removed is still there, unchanged apart from its transition
+    for (const [name, state] of Object.entries(after)) assert.deepEqual(body(state), body(original[name]), `${before.fileBase}: ${name}`);
+    // the states a state can lead to, looking through removed gateways, are the same
+    const through = (name, seen = new Set()) => targets(original[name]).flatMap((t) => {
+      if (!gateways.has(t)) return [t];
+      if (seen.has(t)) return [];
+      seen.add(t);
+      return through(t, seen);
+    });
+    for (const name of Object.keys(after)) {
+      assert.deepEqual([...new Set(targets(after[name]))].sort(), [...new Set(through(name))].sort(), `${before.fileBase}: ${name}`);
+    }
+  }
+});
+
+// ---- SetAttribute from a distribution or another attribute -------------------------------------
+
+const setting = (config, extra = '') =>
+  run(start() + task('A', 'set', stateType('SetAttribute') + config + extra) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'));
+
+test('SetAttribute from a distribution (kind, round, parameters)', async () => {
+  const { module, diagnostics } = await setting('<synthea:setAttributeConfig attribute="los"/>', '<synthea:distributionConfig kind="EXPONENTIAL" round="true" mean="3"/>');
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(module.json.states.set.distribution, { kind: 'EXPONENTIAL', round: true, parameters: { mean: 3 } });
+  assert.ok(!('value' in module.json.states.set));
+
+  const gaussian = await setting('<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig kind="GAUSSIAN" mean="10" standardDeviation="2" min="5"/>');
+  assert.deepEqual(gaussian.module.json.states.set.distribution, { kind: 'GAUSSIAN', parameters: { mean: 10, standardDeviation: 2, min: 5 } });
+});
+
+test('SetAttribute copies the value of another attribute', async () => {
+  const { module } = await setting('<synthea:setAttributeConfig attribute="hospice_reason" valueAttribute="lung_cancer_diagnosis"/>');
+  assert.deepEqual(module.json.states.set, { type: 'SetAttribute', attribute: 'hospice_reason', value_attribute: 'lung_cancer_diagnosis', direct_transition: 'Terminal' });
+});
+
+test('SetAttribute: a distribution that does not match its kind, or two ways to set the value, are errors', async () => {
+  const cases = {
+    missingMean: ['<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig kind="EXPONENTIAL"/>', 'DISTRIBUTION_INVALID'],
+    strayParameter: ['<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig kind="EXACT" value="1" mean="2"/>', 'DISTRIBUTION_INVALID'],
+    noKind: ['<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig mean="2"/>', 'DISTRIBUTION_INVALID'],
+    valueAndDistribution: ['<synthea:setAttributeConfig attribute="x" value="3"/>', '<synthea:distributionConfig kind="EXACT" value="1"/>', 'SET_ATTRIBUTE_VALUE'],
+    valueAndCopy: ['<synthea:setAttributeConfig attribute="x" value="3" valueAttribute="y"/>', '', 'SET_ATTRIBUTE_VALUE']
+  };
+  for (const [name, [config, extra, code]] of Object.entries(cases)) {
+    const { codes } = await setting(config, extra);
+    assert.ok(codes.includes(code), `${name} should be ${code}`);
   }
 });

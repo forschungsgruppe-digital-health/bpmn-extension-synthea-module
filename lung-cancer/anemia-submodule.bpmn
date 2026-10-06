@@ -16,6 +16,7 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="271737000" display="Anemia (disorder)" />
+        <synthea:assignToAttributeConfig attribute="anemia" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0yr1p8q</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0m9llqd</bpmn2:outgoing>

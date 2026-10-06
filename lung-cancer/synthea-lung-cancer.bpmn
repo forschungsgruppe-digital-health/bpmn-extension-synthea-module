@@ -75,7 +75,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Init_Lung_Cancer_Counter: Set lung_cancer_nondiagnosis_counter = 0</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_non_diagnosis_counter" value="0" />
+        <synthea:setAttributeConfig attribute="lung_cancer_nondiagnosis_counter" value="0" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_03s8klv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0yftkmm</bpmn2:outgoing>
@@ -105,7 +105,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Increment_Counter: increment value of lung_cancer_nondiagnosis by 1</i18n:translation>
         <synthea:stateTypeConfig stateType="Counter" />
-        <synthea:counterConfig attribute="lung_cancer_non_diagnosis_counter" action="increment" amount="1" />
+        <synthea:counterConfig attribute="lung_cancer_nondiagnosis_counter" action="increment" amount="1" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_17yiro0</bpmn2:incoming>
       <bpmn2:outgoing>Flow_165jfdh</bpmn2:outgoing>
@@ -139,6 +139,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="162573006" display="Suspected lung cancer (situation)" />
+        <synthea:assignToAttributeConfig attribute="suspected_lung_cancer" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_I" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_19enx2d</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0179hmu</bpmn2:outgoing>
@@ -230,6 +232,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="254637007" display="Non-small cell lung cancer (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_diagnosis" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_III" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1ka1k56</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1v6kn4g</bpmn2:outgoing>
@@ -240,6 +244,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="254632001" display="Small cell carcinoma of lung (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_diagnosis" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_III" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0w7qcbe</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1vkepxs</bpmn2:outgoing>
@@ -334,11 +340,11 @@
       <bpmn2:outgoing>Flow_1x5iac6</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0dqfmqh</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:scriptTask id="Activity_1t5alaz" name="Hospice Reason Set hospice_reason = [Lung Cancer]">
+    <bpmn2:scriptTask id="Activity_1t5alaz" name="Hospice Reason Set hospice_reason = [lung_cancer_diagnosis]">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">Hospice Reason Set hospice_reason = [Lung Cancer]</i18n:translation>
+        <i18n:translation lang="de">Hospice Reason Set hospice_reason = [lung_cancer_diagnosis]</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="hospice_reason" value="Lung Cancer" />
+        <synthea:setAttributeConfig attribute="hospice_reason" valueAttribute="lung_cancer_diagnosis" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0p5pfn9</bpmn2:incoming>
       <bpmn2:outgoing>Flow_05c2s62</bpmn2:outgoing>
@@ -415,27 +421,27 @@
     <bpmn2:sequenceFlow id="Flow_1t8fdo3" sourceRef="Event_0qdxgjk" targetRef="Gateway_1uozeaa" />
     <bpmn2:sequenceFlow id="Flow_0p5pfn9" sourceRef="Activity_0zs1urs" targetRef="Activity_1t5alaz" />
     <bpmn2:sequenceFlow id="Flow_05c2s62" sourceRef="Activity_1t5alaz" targetRef="Event_0qdxgjk" />
-    <bpmn2:sequenceFlow id="Flow_0n3qqyo" name="lung_cancer_non_diagnosis_counter &#60;= 36" sourceRef="Gateway_1uozeaa" targetRef="Event_1jrrxax">
+    <bpmn2:sequenceFlow id="Flow_0n3qqyo" name="lung_cancer_nondiagnosis_counter &#60;= 36" sourceRef="Gateway_1uozeaa" targetRef="Event_1jrrxax">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">lung_cancer_non_diagnosis_counter &lt;= 36</i18n:translation>
+        <i18n:translation lang="de">lung_cancer_nondiagnosis_counter &lt;= 36</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_non_diagnosis_counter" operator="&#60;=" value="36" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_nondiagnosis_counter" operator="&#60;=" value="36" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_06yt4kg" name="lung_cancer_non_diagnosis_counter &#60;= 72" sourceRef="Gateway_1uozeaa" targetRef="Event_1fde72t">
+    <bpmn2:sequenceFlow id="Flow_06yt4kg" name="lung_cancer_nondiagnosis_counter &#60;= 72" sourceRef="Gateway_1uozeaa" targetRef="Event_1fde72t">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">lung_cancer_non_diagnosis_counter &lt;= 72</i18n:translation>
+        <i18n:translation lang="de">lung_cancer_nondiagnosis_counter &lt;= 72</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_non_diagnosis_counter" operator="&#60;=" value="72" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_nondiagnosis_counter" operator="&#60;=" value="72" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_1euvzab" name="lung_cancer_non_diagnosis_counter &#60;= 108" sourceRef="Gateway_1uozeaa" targetRef="Event_1f3gqqv">
+    <bpmn2:sequenceFlow id="Flow_1euvzab" name="lung_cancer_nondiagnosis_counter &#60;= 108" sourceRef="Gateway_1uozeaa" targetRef="Event_1f3gqqv">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">lung_cancer_non_diagnosis_counter &lt;= 108</i18n:translation>
+        <i18n:translation lang="de">lung_cancer_nondiagnosis_counter &lt;= 108</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_non_diagnosis_counter" operator="&#60;=" value="108" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_nondiagnosis_counter" operator="&#60;=" value="108" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -448,7 +454,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Survival</i18n:translation>
       </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_SetSurvivalI_07j08mi</bpmn2:incoming>
+      <bpmn2:incoming>Flow_1jrrxax_07j08mi</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1i8q7mi</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1inpm6t</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
@@ -456,7 +462,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Survival</i18n:translation>
       </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_SetSurvivalII_04i7102</bpmn2:incoming>
+      <bpmn2:incoming>Flow_1fde72t_04i7102</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0lw2jfp</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_02a5pgf</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
@@ -464,7 +470,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de" />
       </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_SetSurvivalIII_06fku0u</bpmn2:incoming>
+      <bpmn2:incoming>Flow_1f3gqqv_06fku0u</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1hv4tpx</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0yraog6</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
@@ -472,7 +478,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Survival</i18n:translation>
       </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_SetSurvivalIV_194erkw</bpmn2:incoming>
+      <bpmn2:incoming>Flow_1jfcv2y_194erkw</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0zp0b6p</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1c3az9j</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
@@ -482,6 +488,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="67811000119102" display="Primary small cell malignant neoplasm of lung, TNM stage 1 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1inpm6t</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0jx5cpp</bpmn2:outgoing>
@@ -492,6 +500,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="424132000" display="Non-small cell carcinoma of lung, TNM stage 1 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1i8q7mi</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1g0illq</bpmn2:outgoing>
@@ -502,6 +512,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="67821000119109" display="Primary small cell malignant neoplasm of lung, TNM stage 2 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0lw2jfp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_12sguin</bpmn2:outgoing>
@@ -512,6 +524,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="425048006" display="Non-small cell carcinoma of lung, TNM stage 2 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02a5pgf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0v68h31</bpmn2:outgoing>
@@ -522,6 +536,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="67831000119107" display="Primary small cell malignant neoplasm of lung, TNM stage 3 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1hv4tpx</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1fjnwa2</bpmn2:outgoing>
@@ -532,6 +548,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="422968005" display="Non-small cell carcinoma of lung, TNM stage 3 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0yraog6</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0w2eggb</bpmn2:outgoing>
@@ -542,6 +560,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="67841000119103" display="Primary small cell malignant neoplasm of lung, TNM stage 4 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0zp0b6p</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0lbpxt4</bpmn2:outgoing>
@@ -552,6 +572,8 @@
         <synthea:stateTypeConfig stateType="ConditionOnset" />
         <fhirmap:resourceMapping resourceType="Condition" />
         <term:coding system="http://snomed.info/sct" code="423121009" display="Non-small cell carcinoma of lung, TNM stage 4 (disorder)" />
+        <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
+        <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1c3az9j</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0wwqo9f</bpmn2:outgoing>
@@ -629,36 +651,40 @@
         <i18n:translation lang="de">Stage I (Survival Time: 2-6 years)</i18n:translation>
         <synthea:stateTypeConfig stateType="Death" />
         <synthea:valueConfig valueShape="RANGE" value="2" valueHigh="6" unit="years" />
+        <synthea:referencedByAttributeConfig attribute="lung_cancer_diagnosis" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0n3qqyo</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_1jrrxax_SetSurvivalI</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_1jrrxax_07j08mi</bpmn2:outgoing>
     </bpmn2:intermediateThrowEvent>
     <bpmn2:intermediateThrowEvent id="Event_1fde72t" name="Stage II (Survival Time: 16-28 months)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stage II (Survival Time: 16-28 months)</i18n:translation>
         <synthea:stateTypeConfig stateType="Death" />
         <synthea:valueConfig valueShape="RANGE" value="16" valueHigh="28" unit="months" />
+        <synthea:referencedByAttributeConfig attribute="lung_cancer_diagnosis" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_06yt4kg</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_1fde72t_SetSurvivalII</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_1fde72t_04i7102</bpmn2:outgoing>
     </bpmn2:intermediateThrowEvent>
     <bpmn2:intermediateThrowEvent id="Event_1f3gqqv" name="Stage III (Survival Time: 9-18 months)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stage III (Survival Time: 9-18 months)</i18n:translation>
         <synthea:stateTypeConfig stateType="Death" />
         <synthea:valueConfig valueShape="RANGE" value="9" valueHigh="18" unit="months" />
+        <synthea:referencedByAttributeConfig attribute="lung_cancer_diagnosis" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1euvzab</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_1f3gqqv_SetSurvivalIII</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_1f3gqqv_06fku0u</bpmn2:outgoing>
     </bpmn2:intermediateThrowEvent>
     <bpmn2:intermediateThrowEvent id="Event_1jfcv2y" name="Stage IV (Survival Time: 6-10 months)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Stage IV (Survival Time: 6-10 months)</i18n:translation>
         <synthea:stateTypeConfig stateType="Death" />
         <synthea:valueConfig valueShape="RANGE" value="6" valueHigh="10" unit="months" />
+        <synthea:referencedByAttributeConfig attribute="lung_cancer_diagnosis" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1rua19d</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_1jfcv2y_SetSurvivalIV</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_1jfcv2y_194erkw</bpmn2:outgoing>
     </bpmn2:intermediateThrowEvent>
     <bpmn2:sequenceFlow id="Flow_1vkepxs" sourceRef="Activity_1jeg2gt" targetRef="Gateway_14o5s0b" />
     <bpmn2:exclusiveGateway id="Gateway_0bp5mqd">
@@ -684,7 +710,7 @@
       <bpmn2:incoming>Flow_0v68h31</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1260oh2</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="Flow_1260oh2" sourceRef="Gateway_0t93mpq" targetRef="Activity_LungCancerTreatmentCycle" />
+    <bpmn2:sequenceFlow id="Flow_1260oh2" sourceRef="Gateway_0t93mpq" targetRef="Activity_MRIBrain" />
     <bpmn2:exclusiveGateway id="Gateway_14o5s0b">
       <bpmn2:incoming>Flow_1vkepxs</bpmn2:incoming>
       <bpmn2:incoming>Flow_1v6kn4g</bpmn2:incoming>
@@ -729,53 +755,13 @@
         <synthea:stateTypeConfig stateType="CallSubmodule" />
         <synthea:submoduleConfig submodule="lung_cancer_treatment_submodule" />
       </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_1260oh2</bpmn2:incoming>
+      <bpmn2:incoming>Flow_MRIBrain_to_Cycle</bpmn2:incoming>
       <bpmn2:outgoing>Flow_TreatmentCycle_End</bpmn2:outgoing>
     </bpmn2:callActivity>
-    <bpmn2:scriptTask id="Activity_SetSurvivalTimeStageI" name="Set lung_cancer_survival_time = 2-6 years">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Set lung_cancer_survival_time = 2-6 years</i18n:translation>
-        <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="2-6 years" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_1jrrxax_SetSurvivalI</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_SetSurvivalI_07j08mi</bpmn2:outgoing>
-    </bpmn2:scriptTask>
-    <bpmn2:sequenceFlow id="Flow_1jrrxax_SetSurvivalI" sourceRef="Event_1jrrxax" targetRef="Activity_SetSurvivalTimeStageI" />
-    <bpmn2:sequenceFlow id="Flow_SetSurvivalI_07j08mi" sourceRef="Activity_SetSurvivalTimeStageI" targetRef="Gateway_07j08mi" />
-    <bpmn2:scriptTask id="Activity_SetSurvivalTimeStageII" name="Set lung_cancer_survival_time = 16-28 months">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Set lung_cancer_survival_time = 16-28 months</i18n:translation>
-        <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="16-28 months" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_1fde72t_SetSurvivalII</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_SetSurvivalII_04i7102</bpmn2:outgoing>
-    </bpmn2:scriptTask>
-    <bpmn2:sequenceFlow id="Flow_1fde72t_SetSurvivalII" sourceRef="Event_1fde72t" targetRef="Activity_SetSurvivalTimeStageII" />
-    <bpmn2:sequenceFlow id="Flow_SetSurvivalII_04i7102" sourceRef="Activity_SetSurvivalTimeStageII" targetRef="Gateway_04i7102" />
-    <bpmn2:scriptTask id="Activity_SetSurvivalTimeStageIII" name="Set lung_cancer_survival_time = 9-18 months">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Set lung_cancer_survival_time = 9-18 months</i18n:translation>
-        <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="9-18 months" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_1f3gqqv_SetSurvivalIII</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_SetSurvivalIII_06fku0u</bpmn2:outgoing>
-    </bpmn2:scriptTask>
-    <bpmn2:sequenceFlow id="Flow_1f3gqqv_SetSurvivalIII" sourceRef="Event_1f3gqqv" targetRef="Activity_SetSurvivalTimeStageIII" />
-    <bpmn2:sequenceFlow id="Flow_SetSurvivalIII_06fku0u" sourceRef="Activity_SetSurvivalTimeStageIII" targetRef="Gateway_06fku0u" />
-    <bpmn2:scriptTask id="Activity_SetSurvivalTimeStageIV" name="Set lung_cancer_survival_time = 6-10 months">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Set lung_cancer_survival_time = 6-10 months</i18n:translation>
-        <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_survival_time" value="6-10 months" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_1jfcv2y_SetSurvivalIV</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_SetSurvivalIV_194erkw</bpmn2:outgoing>
-    </bpmn2:scriptTask>
-    <bpmn2:sequenceFlow id="Flow_1jfcv2y_SetSurvivalIV" sourceRef="Event_1jfcv2y" targetRef="Activity_SetSurvivalTimeStageIV" />
-    <bpmn2:sequenceFlow id="Flow_SetSurvivalIV_194erkw" sourceRef="Activity_SetSurvivalTimeStageIV" targetRef="Gateway_194erkw" />
+    <bpmn2:sequenceFlow id="Flow_1jrrxax_07j08mi" sourceRef="Event_1jrrxax" targetRef="Gateway_07j08mi" />
+    <bpmn2:sequenceFlow id="Flow_1fde72t_04i7102" sourceRef="Event_1fde72t" targetRef="Gateway_04i7102" />
+    <bpmn2:sequenceFlow id="Flow_1f3gqqv_06fku0u" sourceRef="Event_1f3gqqv" targetRef="Gateway_06fku0u" />
+    <bpmn2:sequenceFlow id="Flow_1jfcv2y_194erkw" sourceRef="Event_1jfcv2y" targetRef="Gateway_194erkw" />
     <bpmn2:endEvent id="Event_TreatmentCycle_End" name="Terminal">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Terminal</i18n:translation>
@@ -784,6 +770,18 @@
       <bpmn2:incoming>Flow_TreatmentCycle_End</bpmn2:incoming>
     </bpmn2:endEvent>
     <bpmn2:sequenceFlow id="Flow_TreatmentCycle_End" sourceRef="Activity_LungCancerTreatmentCycle" targetRef="Event_TreatmentCycle_End" />
+    <bpmn2:task id="Activity_MRIBrain" name="Procedure: MRI Brain">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Procedure: MRI Brain</i18n:translation>
+        <synthea:stateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMapping resourceType="Procedure" />
+        <term:coding system="http://snomed.info/sct" code="698354004" display="Magnetic resonance imaging for measurement of brain volume (procedure)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_1260oh2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_MRIBrain_to_Cycle</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:sequenceFlow id="Flow_MRIBrain_to_Cycle" sourceRef="Activity_MRIBrain" targetRef="Activity_LungCancerTreatmentCycle" />
     <bpmn2:textAnnotation id="TextAnnotation_1h8ai1n">
       <bpmn2:extensionElements>
         <i18n:translation target="@text" lang="de">SNOMED-CT: 162573006
@@ -792,6 +790,13 @@
       <bpmn2:text>SNOMED-CT: 162573006
 - Suspected lung cancer (situation)</bpmn2:text>
     </bpmn2:textAnnotation>
+    <bpmn2:textAnnotation id="TextAnnotation_MRIBrain">
+      <bpmn2:extensionElements>
+        <i18n:translation target="@text" lang="de">SNOMED-CT: 698354004 - Magnetic resonance imaging for measurement of brain volume (procedure)</i18n:translation>
+      </bpmn2:extensionElements>
+      <bpmn2:text>SNOMED-CT: 698354004 - Magnetic resonance imaging for measurement of brain volume (procedure)</bpmn2:text>
+    </bpmn2:textAnnotation>
+    <bpmn2:association id="Association_MRIBrain" associationDirection="None" sourceRef="Activity_MRIBrain" targetRef="TextAnnotation_MRIBrain" />
     <bpmn2:association id="Association_1nisonf" associationDirection="None" sourceRef="Activity_07bpac5" targetRef="TextAnnotation_1h8ai1n" />
     <bpmn2:textAnnotation id="TextAnnotation_0h7z40g">
       <bpmn2:extensionElements>
@@ -1206,22 +1211,14 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="8820" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_SetSurvivalTimeStageI_di" bpmnElement="Activity_SetSurvivalTimeStageI">
-        <dc:Bounds x="7420" y="0" width="100" height="80" />
+      <bpmndi:BPMNShape id="TextAnnotation_MRIBrain_di" bpmnElement="TextAnnotation_MRIBrain">
+        <dc:Bounds x="8694" y="180" width="200" height="72" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_SetSurvivalTimeStageII_di" bpmnElement="Activity_SetSurvivalTimeStageII">
-        <dc:Bounds x="7420" y="160" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_SetSurvivalTimeStageIII_di" bpmnElement="Activity_SetSurvivalTimeStageIII">
-        <dc:Bounds x="7420" y="340" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_SetSurvivalTimeStageIV_di" bpmnElement="Activity_SetSurvivalTimeStageIV">
-        <dc:Bounds x="7420" y="530" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_MRIBrain_di" bpmnElement="Association_MRIBrain">
+        <di:waypoint x="8730" y="273" />
+        <di:waypoint x="8730" y="252" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0hi7d1l_di" bpmnElement="Association_0hi7d1l">
         <di:waypoint x="4708" y="340" />
         <di:waypoint x="4724" y="374" />
@@ -1675,6 +1672,14 @@ biopsy of lung (procedure)</bpmn2:text>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1260oh2_di" bpmnElement="Flow_1260oh2">
         <di:waypoint x="8605" y="313" />
+        <di:waypoint x="8680" y="313" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_MRIBrain_di" bpmnElement="Activity_MRIBrain">
+        <dc:Bounds x="8680" y="273" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_MRIBrain_to_Cycle_di" bpmnElement="Flow_MRIBrain_to_Cycle">
+        <di:waypoint x="8780" y="313" />
         <di:waypoint x="8820" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_092d7h1_di" bpmnElement="Flow_092d7h1">
@@ -1718,36 +1723,20 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="6310" y="290" />
         <di:waypoint x="6415" y="290" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1jrrxax_SetSurvivalI_di" bpmnElement="Flow_1jrrxax_SetSurvivalI">
+      <bpmndi:BPMNEdge id="Flow_1jrrxax_07j08mi_di" bpmnElement="Flow_1jrrxax_07j08mi">
         <di:waypoint x="7288" y="40" />
-        <di:waypoint x="7420" y="40" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_SetSurvivalI_07j08mi_di" bpmnElement="Flow_SetSurvivalI_07j08mi">
-        <di:waypoint x="7520" y="40" />
         <di:waypoint x="7645" y="40" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1fde72t_SetSurvivalII_di" bpmnElement="Flow_1fde72t_SetSurvivalII">
+      <bpmndi:BPMNEdge id="Flow_1fde72t_04i7102_di" bpmnElement="Flow_1fde72t_04i7102">
         <di:waypoint x="7288" y="200" />
-        <di:waypoint x="7420" y="200" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_SetSurvivalII_04i7102_di" bpmnElement="Flow_SetSurvivalII_04i7102">
-        <di:waypoint x="7520" y="200" />
         <di:waypoint x="7645" y="200" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1f3gqqv_SetSurvivalIII_di" bpmnElement="Flow_1f3gqqv_SetSurvivalIII">
+      <bpmndi:BPMNEdge id="Flow_1f3gqqv_06fku0u_di" bpmnElement="Flow_1f3gqqv_06fku0u">
         <di:waypoint x="7288" y="380" />
-        <di:waypoint x="7420" y="380" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_SetSurvivalIII_06fku0u_di" bpmnElement="Flow_SetSurvivalIII_06fku0u">
-        <di:waypoint x="7520" y="380" />
         <di:waypoint x="7645" y="380" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1jfcv2y_SetSurvivalIV_di" bpmnElement="Flow_1jfcv2y_SetSurvivalIV">
+      <bpmndi:BPMNEdge id="Flow_1jfcv2y_194erkw_di" bpmnElement="Flow_1jfcv2y_194erkw">
         <di:waypoint x="7288" y="570" />
-        <di:waypoint x="7420" y="570" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_SetSurvivalIV_194erkw_di" bpmnElement="Flow_SetSurvivalIV_194erkw">
-        <di:waypoint x="7520" y="570" />
         <di:waypoint x="7645" y="570" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_TreatmentCycle_End_di" bpmnElement="Event_TreatmentCycle_End">

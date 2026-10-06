@@ -61,7 +61,7 @@ export function walk(states) {
 }
 
 // Converts one diagram; returns the single module result and all diagnostics.
-export async function run(body, { path = 'test.bpmn', name, strict = false } = {}) {
-  const { modules, diagnostics } = await convert([{ path, xml: wrap(body, name) }], { strict });
+export async function run(body, { path = 'test.bpmn', name, strict = false, fuse = false } = {}) {
+  const { modules, diagnostics } = await convert([{ path, xml: wrap(body, name) }], { strict, fuse });
   return { module: modules[0], diagnostics, codes: diagnostics.items.map((i) => i.code) };
 }

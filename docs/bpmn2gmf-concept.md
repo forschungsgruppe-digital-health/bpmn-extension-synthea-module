@@ -1,6 +1,6 @@
 # `tools/bpmn2gmf` — Concept
 
-- **Status:** decisions made; phases 1–4 implemented (see [§8](#8-build-order))
+- **Status:** all phases implemented; decisions made (see [§8](#8-build-order))
 - **Goal:** turn the BPMN pathway models (`synthea:` + `fhirmap:` + `term:`) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).
 
@@ -136,7 +136,7 @@ Implemented in `tools/bpmn2gmf/encounters.mjs`, between state resolution and emi
 
 **Checks:** members that disagree on wellness/class/reason (`ENCOUNTER_INCONSISTENT`), a state with `requiresEncounterContext` but no `encounterId` (`ENCOUNTER_ID_MISSING`), a span node between several encounters (`ENCOUNTER_SPANS_OVERLAP`), and — as a warning — every state Synthea only processes during an encounter (MedicationOrder, Procedure, Observation, DiagnosticReport, ImagingStudy, CarePlanStart, Device, SupplyList, MultiObservation) that is in no region (`STATE_OUTSIDE_ENCOUNTER`).
 
-**Known limitation:** when a group is entered at several different states (e.g. four lab panels behind a chain of gateways) every entered state gets its own `Encounter` copy: valid, but upstream has a single one before the first gateway. Hoisting the `Encounter` to the common dominator would remove the copies (and make `targetEncounter` usable for such groups); it is an optimization for phase 5.
+**Fewer Encounter copies:** a group entered at several states (e.g. four lab panels behind a chain of gateways) would get one `Encounter` per entered state. If one node (the common *dominator* of the entered states) is neutral — a gateway, `Simple`, `SetAttribute` or `Counter` — and everything between it and the group is neutral and leads only into the group, the encounter is opened there instead: that node becomes a virtual member and one `Encounter` remains (anemia: 6 → 2, as upstream). A wait between the gateway and a branch (any other state type) prevents it, since the wait would then run inside the encounter; the group keeps one `Encounter` per entered state and `targetEncounter` is ambiguous for it.
 
 ### 4.5 Transitions (Table C)
 Derived from the *outgoing edges* of every emitted state:
@@ -150,7 +150,7 @@ Derived from the *outgoing edges* of every emitted state:
 | none | no transition (only legal on `Terminal`/`Death`-terminal states) |
 | mixed kinds on one node | **error** |
 
-**Gateways:** in the MVP every exclusive gateway becomes its own `Simple` (or `Guard`) state carrying the transition. That is always correct (implicit-rules Section D) and keeps the converter free of rewriting logic. A later, optional pass (`--fuse-gateways`) can move a gateway's transition onto the preceding state when that state has no other outgoing edge, which removes most `Simple` states and brings the output close to hand-written modules (the real `lung_cancer.json` has only 4 `Simple` states, our models have 37 gateways). It is an output-size/readability optimization, not a correctness requirement.
+**Gateways:** by default every exclusive gateway becomes its own `Simple` (or `Guard`) state carrying the transition — always correct (implicit-rules Section D). `--fuse-gateways` removes the ones that only exist for the diagram: a join (pass-through) is bypassed, and a branching gateway entered from exactly one state through a direct transition moves onto that state. Kept: gateways with several predecessors (they would lose a branch), gateways a `PriorState` condition names, and `Simple` states the modeler drew. Over the five real files this takes the output from 168 to 142 states (`Simple` 39 → 13); a test checks that every other state and what it can lead to stay the same. Chained gateways would need `complex_transition` and are left alone.
 
 ### 4.6 Conditions
 `synthea:condition` → GMF condition object:
@@ -224,7 +224,7 @@ These are our own checks (a small required-fields table in `verify.mjs`), not a 
 | 2 | Codes, `term:` mapping, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
 | 3 | Encounter synthesis + `targetEncounter` | **Implemented** (51 tests). Anemia and the treatment submodule get their Encounter/EncounterEnd states; the main module still waits for the boundary-timer remodeling |
 | 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | **Implemented** (61 tests). Encounter code, `SymptomConfig`, `ObservationConfig`, `ValueConfig`, `ImagingStudySeries` and `ReportObservation` (the contained values of a `DiagnosticReport`) are in schema, panel, converter, lint (SYN-28, SYN-29) and guide; the main pathway's boundary timer is replaced by `Death` states with time spans. **All five real files convert and pass `--strict` with no warning**; the nine lab reports (92 contained observations) are identical to upstream |
-| 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | comparison report for `lung_cancer.json` reviewed |
+| 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | **Implemented** (70 tests): `--fuse-gateways`, fewer `Encounter` copies, `npm run compare:upstream` with the three upstream modules kept in `tools/bpmn2gmf/test/upstream/` (Apache-2.0, see NOTICE.md), and `npm run validate` / the CI workflow now also run `xsd:gen:check`, `xsd:ext`, the converter tests and `convert:check` (all five real files, `--strict`). Not done: loading the generated JSON in a real Synthea (see §11) |
 
 Phases 1–3 do not depend on the field decisions (missing fields only produce warnings), so they ran ahead of phase 4.
 
@@ -257,6 +257,44 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 | After phase 4: **no warnings left.** The nine lab reports got their contained observations from upstream (`ReportObservation`); the three `Record_*` panels were retyped from `Observation` to `DiagnosticReport` like upstream | `anemia-submodule`, `lung-cancer-treatment-submodule` | done |
 | boundary timer `Survival Time elapsed` (`BOUNDARY_EVENT_UNSUPPORTED`) | `synthea-lung-cancer` | **fixed** (decision 4): the four `Stage I–IV (Survival Time …)` delays are now `Death` states with a `ValueConfig` time span (same ranges and units as upstream `Stage I`–`Stage IV`), the boundary event and the old `Death` end event are gone, and the treatment call continues to a `Terminal` state. The four `Set lung_cancer_survival_time` states are left in place (nothing reads that attribute any more) |
 | `Float` in `synthea.json` was not a moddle built-in type (moddle knows `Real`), so numeric attributes (`quantity`, `probability`, `probabilityDefault`, `amount`) loaded as strings | `extension/model/synthea.json` | **fixed**: `Float` → `Real`; `synthea.xsd` regenerated (it was also stale, `xsd:gen:check` had been failing) |
+
+---
+
+## 11. Comparison with upstream (phase 5)
+
+`npm run compare:upstream` converts the five real files and compares them with the hand-written Synthea modules by *content* (`compare.mjs`): every state with clinical meaning is reduced to a signature — type, codes and the values that matter (ranges, units, observation lists, encounter class and code) — and the signatures are compared as multisets. Names, `Simple`/`EncounterEnd` states and the exact transition structure are left out on purpose.
+
+| Our module | Upstream | Result |
+|---|---|---|
+| `anemia_submodule` | `anemia_sub.json` | **same content** — all 18 states incl. the six lab reports with their 48 observations, the two encounters with class and code |
+| `lung_cancer_probabilities_submodule` | `lung_cancer_probabilities.json` | **same content** |
+| main + treatment + symptom-check | `lung_cancer.json` | **nothing clinical exists only on our side** (encounters, procedures, diagnoses, symptoms, the four `Death` states with their cause, lab values, length of stay, hospice reason); upstream has second copies of the SCLC/NSCLC treatment |
+
+Differences from upstream in the main pathway. Four were found by the first comparison and are **resolved**; the converter and extension grew for them:
+
+| What | Before | Now |
+|---|---|---|
+| `lung_cancer_los` | `SetAttribute` = 3 (every patient the same) | `DistributionConfig` EXPONENTIAL, mean 3, rounded — as upstream |
+| `hospice_reason` | the text "Lung Cancer" | copies the attribute `lung_cancer_diagnosis` (`valueAttribute`); that attribute is assigned by the two `Diagnosis: NSCLC/SCLC` states, upstream's "Lung Cancer" |
+| cause of death | none | the four `Death` states refer to `lung_cancer_diagnosis` (`referencedByAttributeConfig`), as upstream |
+| counter attribute | `lung_cancer_non_diagnosis_counter` | `lung_cancer_nondiagnosis_counter`, spelled as upstream |
+| `lung_cancer_survival_time` | four left-over `SetAttribute` states | removed; the stage `Death` events lead straight to the gateways |
+
+The test now pins that **no clinical content exists only on our side**. What exists only upstream are the second copies of the SCLC/NSCLC treatment (we model it once, with gateways: `Record_CMP_2`, a second `Delay`, the second chest CT, …), which is a modeling choice and not a gap.
+
+**Linking fields** (they are not part of the signatures, because attribute names differ legitimately; counted per state, ours / upstream, main + treatment + symptom-check against `lung_cancer.json`):
+
+| Field | Ours / upstream | |
+|---|---|---|
+| `target_encounter` | 11 / 11 | every diagnosis names the visit where it is recorded. Without it a `ConditionOnset` outside an encounter is "onset but never discovered" and never reaches the record — this was a real gap, not a cosmetic one |
+| `assign_to_attribute` | 14 / 15 | the suspected diagnosis (`suspected_lung_cancer`), the diagnosis (`lung_cancer_diagnosis`), the eight staged diagnoses (`lung_cancer_condition`) and the medication orders; the anemia onset assigns `anemia`, the attribute the main pathway tests (`anemia == nil`) — before, that test was always true. The one missing is the NSCLC copy of a medication order |
+| `referenced_by_attribute` | 7 / 8 | four `Death` states + three `MedicationEnd`; the same NSCLC copy is missing |
+| `value_attribute` | 1 / 1 | |
+| `reason` | 0 / 20 | **left out on purpose**: optional, and it only names the condition behind a procedure, prescription, care plan or encounter in the output (FHIR "reason"); it changes no simulation outcome |
+
+`target_encounter` has to point at an encounter *in the same module*, which moved `Procedure: MRI Brain` with its encounter `Diagnosis_Encounter_IV` from the start of the treatment submodule to the main pathway (right before the call), as upstream orders it. The treatment submodule's care plan start now belongs to `SCLC_Treatment_Encounter` (before, it ran inside the MRI visit).
+
+**Not verified:** that Synthea itself loads and runs the generated modules. Everything above is checked against the documentation (States/Logic/Transitions wiki) and the upstream JSON, not against the engine. A smoke test needs the Synthea release jar and Java; it is the natural next step if the output is to be relied on.
 
 ---
 

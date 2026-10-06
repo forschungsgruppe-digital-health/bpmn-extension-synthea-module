@@ -24,6 +24,7 @@ const SYMPTOM_TYPE = 'synthea:SymptomConfig';
 const OBSERVATION_TYPE = 'synthea:ObservationConfig';
 const VALUE_TYPE = 'synthea:ValueConfig';
 const SERIES_TYPE = 'synthea:ImagingStudySeries';
+const DISTRIBUTION_TYPE = 'synthea:DistributionConfig';
 const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
 const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
@@ -31,6 +32,15 @@ const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
 const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE'];
 const COUNTER_ACTION_VALUES = ['increment', 'decrement'];
 // HL7 observation categories (the list the Synthea wiki points to)
+// Distributions of a SetAttribute and the parameters each needs (States wiki, Delay "distribution")
+const DISTRIBUTION_KINDS = ['EXACT', 'UNIFORM', 'GAUSSIAN', 'EXPONENTIAL'];
+const DISTRIBUTION_PARAMETERS_BY_KIND = {
+  EXACT: ['value'],
+  UNIFORM: ['low', 'high'],
+  GAUSSIAN: ['mean', 'standardDeviation', 'min', 'max'],
+  EXPONENTIAL: ['mean']
+};
+
 const OBSERVATION_CATEGORY_VALUES = ['vital-signs', 'laboratory', 'procedure', 'imaging', 'survey', 'exam', 'therapy', 'social-history'];
 
 const ENCOUNTER_CLASS_VALUES = ['wellness', 'ambulatory', 'emergency', 'urgentcare', 'inpatient', 'outpatient'];
@@ -361,7 +371,8 @@ function createSetAttributeGroup(element) {
     label: 'Set Attribute',
     entries: [
       { id: 'synthea-set-attribute-value', element, component: SetAttributeEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-set-attribute-assigned-value', element, component: SetAttributeValueEntry, isEdited: isTextFieldEntryEdited }
+      { id: 'synthea-set-attribute-assigned-value', element, component: SetAttributeValueEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-set-attribute-value-attribute', element, component: SetAttributeValueAttributeEntry, isEdited: isTextFieldEntryEdited }
     ]
   };
 }
@@ -774,6 +785,20 @@ const SeriesMaxInstancesEntry = makeTextEntry(SERIES_TYPE, 'maxInstances', 'Max.
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
 const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name');
 const SetAttributeValueEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'value', 'Value to assign (numeric, boolean, or string)');
+const SetAttributeValueAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'valueAttribute', 'Or: copy the value of this attribute');
+
+const DistributionKindEntry = makeSelecetEntry(DISTRIBUTION_TYPE, 'kind', 'Or: draw from a distribution', DISTRIBUTION_KINDS);
+const DistributionRoundEntry = makeCheckboxEntry(DISTRIBUTION_TYPE, 'round', 'Round to a whole number');
+const distributionParameter = (prop, label) => makeTextEntry(DISTRIBUTION_TYPE, prop, label, { parse: parseFloat });
+const DISTRIBUTION_PARAMETER_ENTRIES = {
+  value: distributionParameter('value', 'Value'),
+  mean: distributionParameter('mean', 'Mean'),
+  standardDeviation: distributionParameter('standardDeviation', 'Standard deviation'),
+  min: distributionParameter('min', 'Minimum (optional)'),
+  max: distributionParameter('max', 'Maximum (optional)'),
+  low: distributionParameter('low', 'Lowest value'),
+  high: distributionParameter('high', 'Highest value')
+};
 const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribute', 'Assign result to attribute');
 const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute');
 
@@ -809,6 +834,10 @@ function createStateDetailGroups(element) {
 
   if (type === 'ImagingStudy') {
     groups.push(createImagingSeriesGroup(element));
+  }
+
+  if (type === 'SetAttribute') {
+    groups.push(createDistributionGroup(element));
   }
 
   if (type === 'DiagnosticReport') {
@@ -885,6 +914,21 @@ function createReportObservationsGroup(element) {
     label: 'Report observations',
     entries: [{ id: 'synthea-report-observations-list', element, component: ReportObservationsEntry }]
   };
+}
+
+// Alternative to a fixed value for a SetAttribute: a value drawn from a distribution
+// (the upstream lung cancer module draws the length of stay from an exponential one).
+// Only the parameters of the chosen kind are shown.
+function createDistributionGroup(element) {
+  const kind = getExtension(element, DISTRIBUTION_TYPE)?.get('kind');
+  const entries = [
+    { id: 'synthea-distribution-kind', element, component: DistributionKindEntry },
+    { id: 'synthea-distribution-round', element, component: DistributionRoundEntry }
+  ];
+  for (const parameter of DISTRIBUTION_PARAMETERS_BY_KIND[kind] ?? []) {
+    entries.push({ id: `synthea-distribution-${parameter}`, element, component: DISTRIBUTION_PARAMETER_ENTRIES[parameter], isEdited: isTextFieldEntryEdited });
+  }
+  return { id: 'synthea-distribution', label: 'Distribution', entries };
 }
 
 // One series with one kind of image; further series can be added in the XML.

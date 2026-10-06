@@ -132,6 +132,35 @@ function reportObservation(o, ctx, index) {
   return out;
 }
 
+// synthea:DistributionConfig -> {kind, round?, parameters}. Which parameters each
+// kind needs follows the States wiki (Delay, "distribution"): EXACT value;
+// UNIFORM low+high; GAUSSIAN mean+standardDeviation (optional min/max);
+// EXPONENTIAL mean.
+const DISTRIBUTION_PARAMETERS = {
+  EXACT: { need: ['value'], optional: [] },
+  UNIFORM: { need: ['low', 'high'], optional: [] },
+  GAUSSIAN: { need: ['mean', 'standardDeviation'], optional: ['min', 'max'] },
+  EXPONENTIAL: { need: ['mean'], optional: [] }
+};
+
+function distributionToGmf(d, ctx) {
+  const spec = DISTRIBUTION_PARAMETERS[d.kind];
+  if (!spec) return ctx.report('DISTRIBUTION_INVALID', 'distributionConfig needs a kind: EXACT, UNIFORM, GAUSSIAN or EXPONENTIAL.');
+  const parameters = {};
+  for (const name of [...spec.need, ...spec.optional]) {
+    const v = num(d[name]);
+    if (v === undefined) {
+      if (spec.need.includes(name)) return ctx.report('DISTRIBUTION_INVALID', `A ${d.kind} distribution needs ${spec.need.join(' + ')} (missing ${name}).`);
+      continue;
+    }
+    if (Number.isNaN(v)) return ctx.report('DISTRIBUTION_INVALID', `distributionConfig ${name} must be a number.`);
+    parameters[name] = v;
+  }
+  const stray = ['value', 'mean', 'standardDeviation', 'min', 'max', 'low', 'high'].filter((n) => d[n] !== undefined && !(n in parameters));
+  if (stray.length) return ctx.report('DISTRIBUTION_INVALID', `A ${d.kind} distribution does not use: ${stray.join(', ')}.`);
+  return { kind: d.kind, ...(d.round ? { round: true } : {}), parameters };
+}
+
 // ---- emitters: (node, ctx) -> fields, or ctx.report(...) for an error ---------
 
 const EMITTERS = {
@@ -161,10 +190,27 @@ const EMITTERS = {
     return { exact: { quantity, unit: d.delayUnit } };
   },
 
+  // What the attribute is set to: a fixed value, a copy of another attribute's value,
+  // or a value drawn from a distribution; none of the three sets it to null.
+  // (Wiki table lists value/valueCode/range/expression/seriesData; the upstream lung
+  // cancer module also uses value_attribute and distribution on SetAttribute.)
   SetAttribute(node, ctx) {
     const c = first(node.ext, 'synthea:SetAttributeConfig');
     if (!c?.attribute) return ctx.report('SET_ATTRIBUTE_MISSING', 'SetAttribute needs synthea:setAttributeConfig with an attribute.');
-    return compact({ attribute: c.attribute, value: typedValue(c.value) });
+    const d = first(node.ext, 'synthea:DistributionConfig');
+    const given = [c.value !== undefined, !!c.valueAttribute, !!d].filter(Boolean).length;
+    if (given > 1) {
+      return ctx.report('SET_ATTRIBUTE_VALUE', 'SetAttribute takes only one of: a value, a valueAttribute, a distribution.');
+    }
+    if (d) {
+      const distribution = distributionToGmf(d, ctx);
+      return distribution ? { attribute: c.attribute, distribution } : null;
+    }
+    return compact({
+      attribute: c.attribute,
+      value: typedValue(c.value),
+      value_attribute: c.valueAttribute || undefined
+    });
   },
 
   Counter(node, ctx) {

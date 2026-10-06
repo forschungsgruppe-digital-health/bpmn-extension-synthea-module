@@ -221,8 +221,23 @@ fallback when nothing else matches.
 ## 5. Changing the simulated patient
 
 **`SetAttributeConfig`** (Task, `stateType="SetAttribute"`) → group "Set
-Attribute": `attribute` + `value` (numeric, boolean, or string — the plain
-Synthea case; `valueCode`/`range`/`expression` aren't modeled).
+Attribute": `attribute` plus **one** of three ways to give it a value:
+- `value` — a fixed numeric, boolean or string value (the plain Synthea case);
+- **copy the value of this attribute** (`valueAttribute`) — e.g. a hospice
+  reason that always is the patient's lung cancer diagnosis, whatever
+  `ConditionOnset` stored it (the attribute must have been assigned by an
+  earlier state, see section 8);
+- group **"Distribution"** — a value drawn per patient: `EXACT` (value),
+  `UNIFORM` (lowest/highest), `GAUSSIAN` (mean, standard deviation, optional
+  min/max) or `EXPONENTIAL` (mean), optionally rounded to a whole number. The
+  upstream lung cancer module draws the length of stay this way (exponential,
+  mean 3, rounded) — a fixed `3` would give every patient the same stay.
+
+Using more than one of the three is an error; none sets the attribute to
+`null`. (Synthea's `valueCode`/`range`/`expression` aren't modeled. The
+States wiki lists neither `distribution` nor `value_attribute` for
+`SetAttribute`; both are used by the upstream module and follow the
+`distribution` format the wiki documents for `Delay`.)
 
 **`CounterConfig`** (Task, `stateType="Counter"`) → group "Counter":
 `attribute`, `action` (`increment`/`decrement`), `amount` (defaults to 1 if
@@ -448,11 +463,31 @@ diagnosed and charted* (at a later encounter) — e.g. a disease process
 begins now, but isn't recorded until a scheduled follow-up confirms it.
 
 Set `targetEncounter` to the `encounterId` of the encounter group (§9) this
-diagnosis should attach to. (This convention — `encounterId` as the value —
-is this project's best-effort answer to a real open question: Synthea itself
-expects a literal synthesized-state name here, which `tools/bpmn2gmf` will
-need to resolve from the `encounterId` once it exists; see `implicit-rules.md`
-Section E.)
+diagnosis should attach to; `tools/bpmn2gmf` replaces it by the name of that
+group's generated `Encounter` state (`target_encounter`).
+
+**Why it matters — a diagnosis without it can be lost.** A `ConditionOnset`
+only appears in the patient's record if it happens *during* an encounter, or
+if an encounter names it as its `target_encounter`. An onset that happens
+between visits and has no target is "onset but never discovered": the condition
+exists in the simulation but never shows up in the record. So every diagnosis
+that is drawn *outside* a visit should point at the visit where it is found
+(in the lung cancer pathway: the suspected cancer at the first emergency visit,
+the confirmed type at the biopsy visit, each staged diagnosis at the visit
+before treatment starts).
+
+**The encounter must be in the same module** as the diagnosis: Synthea
+looks for the target among the states this module has already processed.
+`tools/bpmn2gmf` reports a `targetEncounter` that is not the `encounterId` of
+a group in the same file (`TARGET_ENCOUNTER_UNKNOWN`), and one whose group is
+entered at several places that cannot share one `Encounter` state
+(`TARGET_ENCOUNTER_AMBIGUOUS`). That is why `Procedure: MRI Brain` — the state
+of the visit the staged diagnoses point at — sits in the main pathway, right
+before the treatment submodule is called, and not at the start of the
+submodule.
+
+Combine it with the *assign to attribute* of §8 when later states or logic
+need to refer to the diagnosis (the hospice reason and the cause of death do).
 
 ---
 

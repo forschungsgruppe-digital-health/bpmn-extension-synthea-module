@@ -43,4 +43,4 @@ into a release PR and publishes on merge. See `CONTRIBUTING.md`.
 - XSD core: `npm run xsd`
 - Extension XSD (optional, structure-only): generate `npm run xsd:gen`, drift-guard `npm run xsd:gen:check`, validate `npm run xsd:ext`
 - Conventions: `npm run conventions`
-- BPMN → Synthea converter tests: `npm run test:bpmn2gmf`; run it: `npm run bpmn2gmf -- lung-cancer --check` (see `docs/bpmn2gmf-concept.md`)
+- BPMN → Synthea converter (`docs/bpmn2gmf-concept.md`): tests `npm run test:bpmn2gmf`; convert the real pathways (must pass, strict) `npm run convert:check`; write the modules `npm run bpmn2gmf -- lung-cancer --out-dir out/modules` (`--fuse-gateways` for fewer Simple states, `--strict` to refuse incomplete modules); compare with the hand-written upstream modules `npm run compare:upstream`

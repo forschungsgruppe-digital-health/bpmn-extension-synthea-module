@@ -47,3 +47,9 @@ jobs:
 
       - name: Package conventions
         run: npm run conventions
+
+      - name: BPMN to Synthea converter tests
+        run: npm run test:bpmn2gmf
+
+      - name: Real pathways convert completely (strict)
+        run: npm run convert:check
