@@ -349,6 +349,21 @@ See `implicit-rules.md` Section E for the full explanation of why (real
 Synthea doesn't have this problem; our static tagging approach trades that
 flexibility away).
 
+**How far does a visit reach?** `tools/bpmn2gmf` opens the encounter before the
+first tagged state and closes it again where the visit ends:
+- every state on a path *between* two tagged states is inside the visit;
+- untagged states *after* the last tagged one stay inside it (that is what
+  makes the untagged medication states above work) until the flow reaches a
+  `Terminal`, a `Death`, a submodule call, a state of another visit, or a
+  **delay of one day or more** — a visit does not last days, so such a delay
+  closes it. Delays shorter than a day stay inside;
+- in a loop, every pass through a long delay starts a new visit.
+
+If a state that Synthea only allows during a visit (medication, procedure,
+observation, diagnostic report, imaging, care plan start, device, supply list)
+ends up outside every visit, the converter warns (`STATE_OUTSIDE_ENCOUNTER`):
+tag it, or move it behind a tagged state.
+
 ---
 
 ## 10. Deferring a diagnosis to a future visit — `EncounterReference`

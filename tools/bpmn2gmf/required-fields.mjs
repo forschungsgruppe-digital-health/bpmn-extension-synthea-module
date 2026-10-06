@@ -4,7 +4,8 @@
 // missing field is reported, not guessed.
 //
 // Deliberately partial: states the project does not use yet (AllergyOnset's
-// reaction details, Physiology, Encounter) are added when they are modeled.
+// reaction details, Physiology) are added when they are modeled. Encounter is
+// handled in missingFields (it depends on `wellness`).
 export const REQUIRED_FIELDS = {
   Guard: ['allow'],
   Delay: [['exact', 'range']],
@@ -39,7 +40,11 @@ const present = (state, field) => {
 // Returns descriptions of what is missing, e.g. ["category", "one of exact | range"].
 export function missingFields(state) {
   const missing = [];
-  for (const need of REQUIRED_FIELDS[state.type] ?? []) {
+  // A wellness encounter is scheduled by Synthea itself and needs no class or code.
+  const required = state.type === 'Encounter'
+    ? (state.wellness ? [] : ['encounter_class', 'codes'])
+    : REQUIRED_FIELDS[state.type] ?? [];
+  for (const need of required) {
     if (Array.isArray(need)) {
       if (!need.some((f) => present(state, f))) missing.push(`one of ${need.join(' | ')}`);
     } else if (!present(state, need)) {

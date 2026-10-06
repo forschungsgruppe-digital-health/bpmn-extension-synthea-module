@@ -39,6 +39,27 @@ export const SNOMED = 'http://snomed.info/sct';
 export const LOINC = 'http://loinc.org';
 export const RXNORM = 'http://www.nlm.nih.gov/research/umls/rxnorm';
 
+// A clinical task that belongs to encounter `encId` (or to none).
+export const enc = (id, extra = '') =>
+  `<synthea:encounterContext requiresEncounterContext="true" encounterId="${id}" encounterClass="ambulatory" ${extra}/>`;
+export const procedure = (id, name, encId, encExtra = '') =>
+  task(id, name, stateType('Procedure') + coding(SNOMED, `code-${id}`, name) + (encId ? enc(encId, encExtra) : ''));
+export const order = (id, name, encId) =>
+  task(id, name, stateType('MedicationOrder') + coding(RXNORM, `rx-${id}`, name) + (encId ? enc(encId) : ''));
+export const delay = (id, name, value, unit) =>
+  timer(id, name, `<synthea:delayConfig delayShape="EXACT" delayValue="${value}" delayUnit="${unit}"/>`);
+
+// The state names visited from Initial, following direct transitions only.
+export function walk(states) {
+  const out = [];
+  let name = 'Initial';
+  while (name && states[name] && !out.includes(name)) {
+    out.push(name);
+    name = states[name].direct_transition;
+  }
+  return out;
+}
+
 // Converts one diagram; returns the single module result and all diagnostics.
 export async function run(body, { path = 'test.bpmn', name, strict = false } = {}) {
   const { modules, diagnostics } = await convert([{ path, xml: wrap(body, name) }], { strict });

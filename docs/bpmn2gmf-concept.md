@@ -1,6 +1,6 @@
 # `tools/bpmn2gmf` — Concept
 
-- **Status:** decisions made; phases 1 and 2 implemented (see [§8](#8-build-order))
+- **Status:** decisions made; phases 1–3 implemented (see [§8](#8-build-order))
 - **Goal:** turn the BPMN pathway models (`synthea:` + `fhirmap:` + `term:`) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).
 
@@ -121,16 +121,22 @@ Each state type accepts only some systems (Procedure/ConditionOnset/CarePlanStar
 **Death** drawn as an end event has no outgoing flow; it continues to the module's `Terminal` state (one is added if there is none).
 
 ### 4.4 Encounter synthesis (ADR-0003)
-Group all nodes by `encounterId`; untagged nodes are not part of any group and simply inherit whatever encounter is open at runtime (decision already recorded in implicit-rules E).
+Implemented in `tools/bpmn2gmf/encounters.mjs`, between state resolution and emission. The Encounter/EncounterEnd states are spliced into the IR flow, so transitions (conditions, probabilities) stay on the original edges.
 
-For each group:
-- **Entry edges** = edges from outside the group into a member. Insert one `Encounter` state on each (state name = `encounterId`, with a numeric suffix if there is more than one copy).
-- **Exit edges** = edges from a member to a non-member. Insert one `EncounterEnd` state on each.
-- `wellness` → `"wellness": true`; otherwise `encounter_class`, `reason`, `codes` (see Decision 1 — `codes` is not modeled yet).
-- **Validation:** every path that enters the group must leave it through an exit edge without leaving and re-entering. Re-entry means two separate encounters sharing one id → **error** (the modeler should use two ids). Loops inside a group are fine.
-- `synthea:encounterReference.targetEncounter` is resolved to the `Encounter` state name of that group. Only well-defined when the group has exactly one `Encounter` copy; otherwise **error** (see Decision 3).
+**Which part of the flow belongs to an encounter** (its *region*), per `encounterId` group:
+- **span:** the tagged states plus every node on a path between two of them. Another encounter's states and anything that ends an encounter (below) cannot lie inside a span.
+- **tail:** after the span, untagged states keep the encounter open — a state left untagged inherits whatever encounter is open (guide §9, upstream `anemia_sub.json`) — until the flow reaches a boundary.
+- **boundaries:** `Terminal`, `Death`, `CallSubmodule`, a state of another encounter, and a **Delay of one day or more**. Shorter delays stay inside. The one-day limit is a rule of this tool, chosen because it reproduces upstream: the anemia module keeps its 1 hour delay inside the encounter and ends it before the 1 day delay, and a treatment loop with delays of weeks gets one encounter per cycle instead of one that stays open for months.
 
-Copying per entry/exit edge is semantically safe (each path still gets a matching Encounter/EncounterEnd pair) and avoids forcing modelers to restructure their diagrams around a single-entry rule.
+**What is inserted:**
+- `Encounter` on every edge that enters a span, one per (encounter, entered state), named `encounterId` (suffix `_2`, `_3` … for further copies). `wellness` → `"wellness": true`, otherwise `encounter_class`; `reason` is passed through; `codes` stay missing until phase 4 (reported).
+- `EncounterEnd` on every edge that leaves all regions the edge started in, shared per successor (EncounterEnd ends whichever encounter is current at runtime, so one state can serve two groups with a common tail). Named `<encounterId>_End`.
+- Leaving one encounter straight into another gives `EncounterEnd → Encounter`.
+- `synthea:encounterReference.targetEncounter` → `target_encounter` = the name of the group's `Encounter` state; an error if the group has none (`TARGET_ENCOUNTER_UNKNOWN`) or several (`TARGET_ENCOUNTER_AMBIGUOUS`).
+
+**Checks:** members that disagree on wellness/class/reason (`ENCOUNTER_INCONSISTENT`), a state with `requiresEncounterContext` but no `encounterId` (`ENCOUNTER_ID_MISSING`), a span node between several encounters (`ENCOUNTER_SPANS_OVERLAP`), and — as a warning — every state Synthea only processes during an encounter (MedicationOrder, Procedure, Observation, DiagnosticReport, ImagingStudy, CarePlanStart, Device, SupplyList, MultiObservation) that is in no region (`STATE_OUTSIDE_ENCOUNTER`).
+
+**Known limitation:** when a group is entered at several different states (e.g. four lab panels behind a chain of gateways) every entered state gets its own `Encounter` copy: valid, but upstream has a single one before the first gateway. Hoisting the `Encounter` to the common dominator would remove the copies (and make `targetEncounter` usable for such groups); it is an optimization for phase 5.
 
 ### 4.5 Transitions (Table C)
 Derived from the *outgoing edges* of every emitted state:
@@ -216,7 +222,7 @@ These are our own checks (a small required-fields table in `verify.mjs`), not a 
 | 0 | Spike (done): moddle loads all five files without warnings | — |
 | 1 | CLI, parse, IR, state-type/name resolution, `Initial`/`Terminal`/`Simple`/`Delay`/`SetAttribute`/`Counter`/`CallSubmodule`, all three transition types, conditions + `Not`, verify | **Implemented** (22 unit tests, `npm run test:bpmn2gmf`). The planned golden file for `lung-cancer-probabilities-submodule.bpmn` is blocked by the *model*: its 3 gateways have no `synthea:conditionConfig` (see §10) |
 | 2 | Codes, `term:` mapping, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
-| 3 | Encounter synthesis + `targetEncounter` | treatment submodule and main module convert |
+| 3 | Encounter synthesis + `targetEncounter` | **Implemented** (51 tests). Anemia and the treatment submodule get their Encounter/EncounterEnd states; the main module still waits for the boundary-timer remodeling |
 | 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | `--strict` passes on all five files |
 | 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | comparison report for `lung_cancer.json` reviewed |
 
@@ -248,7 +254,7 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 |---|---|---|
 | 12 gateways whose branches had no `synthea:conditionConfig`/`probabilityConfig` (`TRANSITION_AMBIGUOUS`) | `anemia-submodule` (9), `lung-cancer-probabilities-submodule` (3) | **all 12 fixed** (conditions or probabilities added, taken from the upstream modules). `lung-cancer-probabilities-submodule` now converts and has a golden test; its attribute values and conditions match upstream `lung_cancer_probabilities.json` (only difference: the male branch is the default flow instead of an explicit `Gender == M`). The last one, `Hematocrit critical?`, needed decision 8 (next row). Lint rule SYN-27 (`gateway-branches-require-condition-or-probability`) now warns about such gateways; none is left in the real files |
 | `Hematocrit critical?` needed an `Observation` condition matched by **LOINC `codes`** (20570-8), not by attribute | `anemia-submodule` | **fixed** (decision 8 implemented): `synthea:Condition` has `codeSystem`/`code`/`codeDisplay`; the gateway is modeled as two branches to the same delay (F: `And[Hct ≤ 28, Female]`, M: `And[Male, Hct ≤ 27]`), and converts to the same conditions as upstream `anemia_sub.json` |
-| After phase 2: **21 `REQUIRED_FIELD_MISSING` warnings**, exactly the gaps of §5: `Symptom` 10 (`symptom`, exact/range), `DiagnosticReport` 6 (`observations`), `Observation` 4 (`category`, `unit`, value), `ImagingStudy` 1 (`series`). `synthea-lung-cancer` still does not convert because of the boundary timer (below) | all files | phase 4 (extension additions) |
+| After phase 3: **29 `REQUIRED_FIELD_MISSING` warnings**: the 21 of §5 (`Symptom` 10, `DiagnosticReport` 6, `Observation` 4, `ImagingStudy` 1) plus the `codes` of the 9 synthesized `Encounter` states (decision 5, phase 4). `synthea-lung-cancer` still does not convert because of the boundary timer (below) | all files | phase 4 (extension additions) |
 | boundary timer `Survival Time elapsed` (`BOUNDARY_EVENT_UNSUPPORTED`) | `synthea-lung-cancer` | model fix, decision 4 |
 | `Float` in `synthea.json` was not a moddle built-in type (moddle knows `Real`), so numeric attributes (`quantity`, `probability`, `probabilityDefault`, `amount`) loaded as strings | `extension/model/synthea.json` | **fixed**: `Float` → `Real`; `synthea.xsd` regenerated (it was also stale, `xsd:gen:check` had been failing) |
 

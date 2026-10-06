@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { convert } from '../convert.mjs';
 import {
   wrap, run, start, end, task, gateway, timer, call, flow,
-  stateType, setAttr, prob, cond, attrCond, coding, SNOMED, LOINC, RXNORM
+  stateType, setAttr, prob, cond, attrCond, coding, SNOMED, LOINC, RXNORM,
+  enc, procedure, order, delay, walk
 } from './helpers.mjs';
 
 test('linear flow: Initial -> SetAttribute -> Terminal', async () => {
@@ -442,14 +443,6 @@ test('ImagingStudy uses the first code as procedure_code', async () => {
   assert.deepEqual(module.json.states.clin.procedure_code, { system: 'SNOMED-CT', code: '16335031000119103', display: 'HRCT of chest' });
 });
 
-test('targetEncounter waits for the encounter synthesis and says so', async () => {
-  const { codes } = await clinical(
-    'ConditionOnset',
-    coding(SNOMED, '1', 'Dx') + '<synthea:encounterReference targetEncounter="E1"/>'
-  );
-  assert.ok(codes.includes('TARGET_ENCOUNTER_NOT_IMPLEMENTED'));
-});
-
 test('the real submodules convert without errors; only gaps the extension cannot express are reported', async () => {
   const files = [
     'lung-cancer/anemia-submodule.bpmn',
@@ -467,7 +460,8 @@ test('the real submodules convert without errors; only gaps the extension cannot
     gaps[type] = (gaps[type] ?? 0) + 1;
   }
   // docs/bpmn2gmf-concept.md section 5: these are the fields phase 4 adds to the extension
-  assert.deepEqual(gaps, { Symptom: 10, DiagnosticReport: 6, Observation: 4, ImagingStudy: 1 });
+  // plus the codes of the synthesized Encounter states (decision 5, phase 4)
+  assert.deepEqual(gaps, { Symptom: 10, DiagnosticReport: 6, Observation: 4, ImagingStudy: 1, Encounter: 9 });
 });
 
 test('the main pathway is only blocked by its boundary timer', async () => {
@@ -477,4 +471,130 @@ test('the main pathway is only blocked by its boundary timer', async () => {
     [...new Set(diagnostics.items.filter((i) => i.level === 'error').map((i) => i.code))].sort(),
     ['BOUNDARY_EVENT_UNSUPPORTED', 'SUBMODULE_NOT_FOUND'].sort()
   );
+});
+
+// ---- encounter synthesis (phase 3) -----------------------------------------------------
+
+test('a group of consecutive states gets an Encounter before and an EncounterEnd after', async () => {
+  const { module, diagnostics } = await run(
+    start() + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E1') + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(walk(module.json.states), ['Initial', 'E1', 'a', 'b', 'E1_End', 'Terminal']);
+  assert.deepEqual(module.json.states.E1, { type: 'Encounter', encounter_class: 'ambulatory', direct_transition: 'a', remarks: module.json.states.E1.remarks });
+  assert.equal(module.json.states.E1_End.type, 'EncounterEnd');
+});
+
+test('an untagged state between two tagged ones stays inside the encounter', async () => {
+  const { module } = await run(
+    start() + procedure('A', 'a', 'E1') + task('X', 'x', setAttr('n', '1')) + procedure('B', 'b', 'E1') + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'X') + flow('f3', 'X', 'B') + flow('f4', 'B', 'E')
+  );
+  assert.deepEqual(walk(module.json.states), ['Initial', 'E1', 'a', 'x', 'b', 'E1_End', 'Terminal']);
+});
+
+test('untagged states after the last tagged one inherit the open encounter until the flow ends', async () => {
+  const { module, diagnostics } = await run(
+    start() + procedure('A', 'a', 'E1') + order('M', 'meds', null) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'M') + flow('f3', 'M', 'E')
+  );
+  assert.deepEqual(walk(module.json.states), ['Initial', 'E1', 'a', 'meds', 'E1_End', 'Terminal']);
+  assert.ok(!diagnostics.items.some((i) => i.code === 'STATE_OUTSIDE_ENCOUNTER'));
+});
+
+test('a delay shorter than a day stays inside the encounter, a day or longer ends it', async () => {
+  const short = await run(
+    start() + procedure('A', 'a', 'E1') + delay('D', 'wait', 1, 'hours') + procedure('B', 'b', 'E1') + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'D') + flow('f3', 'D', 'B') + flow('f4', 'B', 'E')
+  );
+  assert.deepEqual(walk(short.module.json.states), ['Initial', 'E1', 'a', 'wait', 'b', 'E1_End', 'Terminal']);
+
+  const long = await run(
+    start() + procedure('A', 'a', 'E1') + delay('D', 'wait', 1, 'days') + procedure('B', 'b', 'E1') + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'D') + flow('f3', 'D', 'B') + flow('f4', 'B', 'E')
+  );
+  assert.deepEqual(walk(long.module.json.states), ['Initial', 'E1', 'a', 'E1_End', 'wait', 'E1_2', 'b', 'E1_End_2', 'Terminal']);
+});
+
+test('two different encounters in a row: the first ends before the second begins', async () => {
+  const { module } = await run(
+    start() + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E2') + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E')
+  );
+  assert.deepEqual(walk(module.json.states), ['Initial', 'E1', 'a', 'E1_End', 'E2', 'b', 'E2_End', 'Terminal']);
+});
+
+test('a wellness encounter is marked wellness and needs no class or code', async () => {
+  const { module, diagnostics } = await run(
+    start() + task('A', 'a', stateType('Procedure') + coding(SNOMED, '1', 'p') +
+      '<synthea:encounterContext requiresEncounterContext="true" encounterId="W" wellness="true"/>') +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.equal(module.json.states.W.wellness, true);
+  assert.ok(!('encounter_class' in module.json.states.W));
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING' && i.element === 'W'));
+});
+
+test('a non-wellness encounter takes class and reason from its group and reports the missing code', async () => {
+  const { module, codes } = await run(
+    start() + procedure('A', 'a', 'E1', 'reason="Suspected Lung Cancer"') + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.equal(module.json.states.E1.reason, 'Suspected Lung Cancer');
+  assert.match(module.json.states.E1.remarks[0], /codes/);
+  assert.ok(codes.includes('REQUIRED_FIELD_MISSING'));
+});
+
+test('members that disagree on class, and a missing encounterId, are errors', async () => {
+  const split = await run(
+    start() + procedure('A', 'a', 'E1') +
+      task('B', 'b', stateType('Procedure') + coding(SNOMED, '2', 'p') + '<synthea:encounterContext requiresEncounterContext="true" encounterId="E1" encounterClass="inpatient"/>') +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E')
+  );
+  assert.ok(split.codes.includes('ENCOUNTER_INCONSISTENT'));
+
+  const noId = await run(
+    start() + task('A', 'a', stateType('Procedure') + coding(SNOMED, '1', 'p') + '<synthea:encounterContext requiresEncounterContext="true"/>') +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.ok(noId.codes.includes('ENCOUNTER_ID_MISSING'));
+});
+
+test('branches into the same encounter get one Encounter per entered state and share the EncounterEnd', async () => {
+  const { module, diagnostics } = await run(
+    start() + gateway('G', 'g', 'f3') + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E1') + end() +
+      flow('f1', 'S', 'G') + flow('f2', 'G', 'A', prob('0.5')) + flow('f3', 'G', 'B', prob('0.5')) +
+      flow('f4', 'A', 'E') + flow('f5', 'B', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const states = Object.entries(module.json.states);
+  assert.equal(states.filter(([, v]) => v.type === 'Encounter').length, 2);
+  assert.equal(states.filter(([, v]) => v.type === 'EncounterEnd').length, 1);
+  assert.deepEqual(module.json.states.a.direct_transition, 'E1_End');
+  assert.deepEqual(module.json.states.b.direct_transition, 'E1_End');
+});
+
+test('target_encounter names the Encounter state of the group, when there is exactly one', async () => {
+  const dx = (target) => task('X', 'dx', stateType('ConditionOnset') + coding(SNOMED, '1', 'Dx') + `<synthea:encounterReference targetEncounter="${target}"/>`);
+  const ok = await run(
+    start() + dx('E1') + procedure('A', 'a', 'E1') + end() + flow('f1', 'S', 'X') + flow('f2', 'X', 'A') + flow('f3', 'A', 'E')
+  );
+  assert.equal(ok.module.json.states.dx.target_encounter, 'E1');
+
+  const unknown = await run(start() + dx('nope') + end() + flow('f1', 'S', 'X') + flow('f2', 'X', 'E'));
+  assert.ok(unknown.codes.includes('TARGET_ENCOUNTER_UNKNOWN'));
+
+  const twice = await run(
+    start() + gateway('G', 'g', 'f3') + dx('E1') + procedure('A', 'a', 'E1') + procedure('B', 'b', 'E1') + end() +
+      flow('f0', 'S', 'X') + flow('f1', 'X', 'G') + flow('f2', 'G', 'A', prob('0.5')) + flow('f3', 'G', 'B', prob('0.5')) +
+      flow('f4', 'A', 'E') + flow('f5', 'B', 'E')
+  );
+  assert.ok(twice.codes.includes('TARGET_ENCOUNTER_AMBIGUOUS'));
+});
+
+test('a state that needs an encounter but lies in none is reported', async () => {
+  const { codes } = await run(
+    start() + order('M', 'meds', null) + end() + flow('f1', 'S', 'M') + flow('f2', 'M', 'E')
+  );
+  assert.ok(codes.includes('STATE_OUTSIDE_ENCOUNTER'));
 });

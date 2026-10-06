@@ -107,10 +107,10 @@ const EMITTERS = {
 
   // Start states: code + optional assign_to_attribute. target_encounter on
   // ConditionOnset/AllergyOnset waits for the encounter synthesis (phase 3).
-  ConditionOnset: onsetEmitter(),
-  AllergyOnset: onsetEmitter(),
-  MedicationOrder: onsetEmitter(),
-  CarePlanStart: onsetEmitter(),
+  ConditionOnset: onsetEmitter(true),
+  AllergyOnset: onsetEmitter(true),
+  MedicationOrder: onsetEmitter(false),
+  CarePlanStart: onsetEmitter(false),
 
   Device(node, ctx) {
     const { codes } = ctx.codes();
@@ -126,6 +126,14 @@ const EMITTERS = {
     const { codes } = ctx.codes();
     return codes[0] ? { procedure_code: codes[0] } : {};
   },
+
+  // Synthesized by encounters.mjs from synthea:encounterContext, never drawn.
+  // (codes follow with the extension additions, phase 4; verify reports them.)
+  Encounter(node) {
+    const g = node.synthetic.group;
+    return compact({ ...(g.wellness ? { wellness: true } : { encounter_class: g.encounterClass }), reason: g.reason });
+  },
+  EncounterEnd: () => ({}),
 
   // Nothing in the extension carries these yet (see docs/bpmn2gmf-concept.md §5);
   // the missing required fields are reported by verify.
@@ -147,15 +155,28 @@ const EMITTERS = {
   }
 };
 
-function onsetEmitter() {
+// `target_encounter` (ConditionOnset/AllergyOnset only): the modeler writes the
+// encounterId of the group; here it becomes the name of that group's Encounter
+// state. Only well-defined when the group has exactly one (decision 3).
+function onsetEmitter(allowsTarget) {
   return (node, ctx) => {
-    if (first(node.ext, 'synthea:EncounterReference')?.targetEncounter) {
+    const fields = { ...codesField(node, ctx), ...assignTo(node) };
+    const target = first(node.ext, 'synthea:EncounterReference')?.targetEncounter;
+    if (!target) return fields;
+    if (!allowsTarget) {
+      return ctx.report('TARGET_ENCOUNTER_UNSUPPORTED', `${node.stateType} has no target_encounter in Synthea; remove synthea:encounterReference.`);
+    }
+    const states = ctx.module.encounters?.get(target) ?? [];
+    if (states.length === 0) {
+      return ctx.report('TARGET_ENCOUNTER_UNKNOWN', `targetEncounter "${target}" is not the encounterId of any group in this module.`);
+    }
+    if (states.length > 1) {
       return ctx.report(
-        'TARGET_ENCOUNTER_NOT_IMPLEMENTED',
-        'targetEncounter is resolved together with the encounter synthesis (phase 3).'
+        'TARGET_ENCOUNTER_AMBIGUOUS',
+        `Encounter "${target}" is entered at ${states.length} places (${states.join(', ')}), so targetEncounter cannot name one state.`
       );
     }
-    return { ...codesField(node, ctx), ...assignTo(node) };
+    return { ...fields, target_encounter: states[0] };
   };
 }
 

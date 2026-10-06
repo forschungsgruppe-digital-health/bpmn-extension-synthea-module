@@ -3,11 +3,11 @@ import { Diagnostics } from './diagnostics.mjs';
 import { parseBpmn } from './parse.mjs';
 import { buildModules } from './ir.mjs';
 import { resolveStates } from './resolve.mjs';
+import { synthesizeEncounters } from './encounters.mjs';
 import { buildTransition } from './transitions.mjs';
 import { emitState } from './emit.mjs';
 import { verifyModule, verifySubmodules } from './verify.mjs';
 import { missingFields } from './required-fields.mjs';
-import { first } from './ir.mjs';
 
 // `fileBase` is the module file name without extension, e.g. "anemia_submodule";
 // it is also what CallSubmodule refers to (flat layout).
@@ -31,6 +31,7 @@ export async function convert(inputs, { strict = false } = {}) {
 
     for (const module of buildModules(parsed.definitions, fileBase, diag)) {
       resolveStates(module, diag);
+      synthesizeEncounters(module, diag);
       const states = {};
       for (const node of module.nodes.values()) {
         if (!node.stateName) continue;
@@ -40,13 +41,6 @@ export async function convert(inputs, { strict = false } = {}) {
         states[node.stateName] = { ...state, ...transition };
       }
       terminateDeaths(module, states, diag);
-      if (module.nodes.size && [...module.nodes.values()].some(usesEncounterContext)) {
-        diag.note(
-          'ENCOUNTER_SYNTHESIS_PENDING',
-          'Encounter / EncounterEnd states are not generated yet (phase 3): states tagged with synthea:encounterContext are emitted without their encounter.',
-          { module: module.fileBase }
-        );
-      }
       // Structural checks are meaningless on a partial module (cascading noise).
       if (diag.forModule(module.fileBase).every((i) => i.level !== 'error')) {
         verifyModule(module, states, diag, { strict });
@@ -66,11 +60,6 @@ export async function convert(inputs, { strict = false } = {}) {
   }));
   return { modules: results, diagnostics: diag };
 }
-
-const usesEncounterContext = (node) => {
-  const ctx = first(node.ext, 'synthea:EncounterContext');
-  return !!ctx && (ctx.requiresEncounterContext || !!ctx.encounterId);
-};
 
 // A Death state drawn as an end event has no outgoing flow, but Synthea wants it
 // to continue to a Terminal state ("typically", States wiki): reuse the module's
