@@ -157,6 +157,9 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <synthea:observationConfig category="vital-signs" />
         <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Observation" />
+        </fhirmap:resourceMappings>
         <term:annotations>
           <term:annotation id="term-ann-2" text="Pain severity - 0-10 verbal numeric rating [Score] - Reported">
             <term:coding system="http://loinc.org" code="72514-3" display="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
