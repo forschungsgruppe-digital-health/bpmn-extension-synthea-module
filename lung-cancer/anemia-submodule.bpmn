@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:cp="http://www.helict.de/bpmn4cp" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:term="https://forschungsgruppe-digital-health.github.io/schema/term/1.0" xmlns:fhirmap="https://forschungsgruppe-digital-health.github.io/schema/fhirmap/1.0" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:cp="http://www.helict.de/bpmn4cp" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:term="https://clinical-bpmn.org/terminology/v1" xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
   <bpmn2:process id="Process_AnemiaSubmodule" name="Anemia Submodule" isExecutable="false">
     <bpmn2:extensionElements>
       <cp:bibliographyItem id="BibliographyItem_35a4g50" refLabel="1" />
@@ -14,8 +14,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: Anemia</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMapping resourceType="Condition" />
-        <term:coding system="http://snomed.info/sct" code="271737000" display="Anemia (disorder)" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Condition" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-1" text="Anemia (disorder)">
+            <term:coding system="http://snomed.info/sct" code="271737000" display="Anemia (disorder)" />
+          </term:annotation>
+        </term:annotations>
         <synthea:assignToAttributeConfig attribute="anemia" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0yr1p8q</bpmn2:incoming>
@@ -49,8 +55,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Severe</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-2" text="CBC panel - Blood by Automated count">
+            <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+          </term:annotation>
+        </term:annotations>
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="7" valueHigh="10.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="21" valueHigh="32.9" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -72,8 +84,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-3" text="CBC panel - Blood by Automated count">
+            <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+          </term:annotation>
+        </term:annotations>
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="11" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="33" valueHigh="36" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -95,8 +113,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Severe</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-4" text="CBC panel - Blood by Automated count">
+            <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+          </term:annotation>
+        </term:annotations>
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="6.7" valueHigh="10" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="20" valueHigh="30" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -117,8 +141,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-5" text="CBC panel - Blood by Automated count">
+            <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
+          </term:annotation>
+        </term:annotations>
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="30.1" valueHigh="35" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -140,8 +170,14 @@
         <i18n:translation lang="de">Procedure: Peripheral_Blood_Smear</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="EXACT" value="30" unit="minutes" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="14768001" display="Peripheral blood smear interpretation (procedure)" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Procedure" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-6" text="Peripheral blood smear interpretation (procedure)">
+            <term:coding system="http://snomed.info/sct" code="14768001" display="Peripheral blood smear interpretation (procedure)" />
+          </term:annotation>
+        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1mfa232</bpmn2:incoming>
@@ -155,8 +191,14 @@
         <i18n:translation lang="de">Procedure: Review_Of_Systems</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="20" unit="minutes" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="415300000" display="Review of systems (procedure)" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Procedure" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-7" text="Review of systems (procedure)">
+            <term:coding system="http://snomed.info/sct" code="415300000" display="Review of systems (procedure)" />
+          </term:annotation>
+        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0lu5fq8</bpmn2:incoming>
@@ -175,8 +217,14 @@
         <i18n:translation lang="de">Procedure: Brief_Examination</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="20" unit="minutes" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="162676008" display="Brief general examination (procedure)" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Procedure" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-8" text="Brief general examination (procedure)">
+            <term:coding system="http://snomed.info/sct" code="162676008" display="Brief general examination (procedure)" />
+          </term:annotation>
+        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0m0kss6</bpmn2:incoming>
@@ -214,8 +262,14 @@
         <i18n:translation lang="de">Procedure: Transfusion</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="20" valueHigh="60" unit="minutes" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="180207008" display="Intravenous blood transfusion of packed cells (procedure)" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Procedure" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-9" text="Intravenous blood transfusion of packed cells (procedure)">
+            <term:coding system="http://snomed.info/sct" code="180207008" display="Intravenous blood transfusion of packed cells (procedure)" />
+          </term:annotation>
+        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0598yo2</bpmn2:incoming>
@@ -231,8 +285,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Iron_Supplement</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="310325" display="ferrous sulfate 325 MG Oral Tablet" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-10" text="ferrous sulfate 325 MG Oral Tablet">
+            <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="310325" display="ferrous sulfate 325 MG Oral Tablet" />
+          </term:annotation>
+        </term:annotations>
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1o10yzv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0hektv4</bpmn2:outgoing>
@@ -241,8 +301,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Vitamin B12 Booster</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="2001499" display="Vitamin B12 5 MG/ML Injectable Solution" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="MedicationRequest" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-11" text="Vitamin B12 5 MG/ML Injectable Solution">
+            <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="2001499" display="Vitamin B12 5 MG/ML Injectable Solution" />
+          </term:annotation>
+        </term:annotations>
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0oagdnt</bpmn2:incoming>
       <bpmn2:incoming>Flow_1m2ndgk</bpmn2:incoming>
@@ -272,8 +338,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_F_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        <term:coding system="http://loinc.org" code="24360-0" display="Hemoglobin and Hematocrit panel - Blood" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-12" text="Hemoglobin and Hematocrit panel - Blood">
+            <term:coding system="http://loinc.org" code="24360-0" display="Hemoglobin and Hematocrit panel - Blood" />
+          </term:annotation>
+        </term:annotations>
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="11" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="33" valueHigh="36" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -285,8 +357,14 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_M_Routine</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        <term:coding system="http://loinc.org" code="24360-0" display="Hemoglobin and Hematocrit panel - Blood" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-13" text="Hemoglobin and Hematocrit panel - Blood">
+            <term:coding system="http://loinc.org" code="24360-0" display="Hemoglobin and Hematocrit panel - Blood" />
+          </term:annotation>
+        </term:annotations>
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="30.1" valueHigh="35" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -313,8 +391,14 @@
         <i18n:translation lang="de">Procedure: Medication_Reconciliation</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="5" valueHigh="20" unit="minutes" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="430193006" display="Medication reconciliation (procedure)" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Procedure" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-14" text="Medication reconciliation (procedure)">
+            <term:coding system="http://snomed.info/sct" code="430193006" display="Medication reconciliation (procedure)" />
+          </term:annotation>
+        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0x52yk3</bpmn2:incoming>

@@ -274,13 +274,18 @@ other 9 — `Initial`/`Terminal`/`Simple`/`Guard`/`Delay`/`SetAttribute`/
 elsewhere in this guide, not clinical events.)
 
 **Add, where applicable:**
-- `fhirmap:resourceMapping resourceType="..."` — the FHIR resource this
-  state produces (e.g. `MedicationRequest` for `MedicationOrder`,
-  `Procedure` for `Procedure`). Checked for consistency against `stateType`
-  by lint rule `state-type-fhirmap-consistent`.
-- `term:coding system="..." code="..." display="..."` — the actual clinical
-  code (SNOMED for most conditions/procedures, RxNorm for medications,
-  LOINC for observations).
+- `fhirmap:resourceMappings` with a `fhirmap:resourceMapping resourceType="..."`
+  inside — the FHIR resource this state produces (e.g. `MedicationRequest` for
+  `MedicationOrder`, `Procedure` for `Procedure`). Checked for consistency
+  against `stateType` by lint rule `state-type-fhirmap-consistent`.
+- `term:annotations` with a `term:annotation` and a `term:coding system="..."
+  code="..." display="..."` inside — the actual clinical code (SNOMED for most
+  conditions/procedures, RxNorm for medications, LOINC for observations).
+  The panels of the two packages (`fhir-mapping`, `medical-terminology`) write
+  exactly this form; the namespaces are `https://clinical-bpmn.org/fhir-mapping/v1`
+  and `https://clinical-bpmn.org/terminology/v1`. The older flat form
+  (`<fhirmap:resourceMapping/>` and `<term:coding/>` directly in
+  `extensionElements`) is still read by the lint rules and the converter.
 - For `ConditionOnset`/`AllergyOnset` specifically: "Assign to Attribute" if
   a later state needs to reference this exact instance (see §8), and
   "Encounter Reference" (`targetEncounter`) if the diagnosis should only be

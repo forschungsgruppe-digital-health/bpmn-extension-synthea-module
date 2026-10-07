@@ -105,7 +105,7 @@ The IR is the only thing the emitters see. Everything BPMN-specific (event defin
 The start event is always named `Initial` (Synthea requires exactly this name; found while implementing). Every other state: the BPMN `name` **verbatim**. Empty → `<stateType>_<id>`. A duplicate name within one module → append `_<id>`. No prefix stripping (labels like "Symptom: Cough" stay as they are): it is deterministic, needs no heuristics, and Synthea only requires uniqueness per module. The generated names will therefore differ from the hand-written upstream names; the comparison in §7 is keyed on state type and codes, not on names.
 
 ### 4.3 Codes
-Every coding on a node is collected, whatever its form: our flat `<term:coding/>` or the real package's `term:annotations > annotation > coding`; prefix and namespace are ignored. `system` URIs map to Synthea names:
+Every coding on a node is collected, whatever its form: a flat `<term:coding/>` or the real package's `term:annotations > annotation > coding`; prefix and namespace are ignored. The five lung-cancer models now use the real form of both packages (`fhirmap:resourceMappings > resourceMapping`, `term:annotations > annotation > coding`, namespaces `clinical-bpmn.org/fhir-mapping/v1` and `…/terminology/v1`): they load typed with the descriptors of `bpmn-js-clinical-semantics` and `bpmn-extension-medical-terminology` without a warning, and the generated GMF JSON is identical to the one from the flat form. `system` URIs map to Synthea names:
 
 | URI | Synthea `system` |
 |---|---|

@@ -48,13 +48,40 @@ function getFhirmapResourceType(node) {
   }
 
   const values = extensionElements.values || [];
-  const mapping = values.find((v) => v.$type === 'fhirmap:resourceMapping');
+  const mapping = findResourceMapping(values);
 
   if (!mapping) {
     return null;
   }
 
   return mapping.resourceType || (mapping.$attrs && mapping.$attrs.resourceType) || null;
+}
+
+/**
+ * The fhirmap:resourceMapping of an extensionElements list, in either form:
+ *   <fhirmap:resourceMapping .../>                                  (flat, used by the fixtures)
+ *   <fhirmap:resourceMappings><fhirmap:resourceMapping .../>…       (the fhir-mapping package's form)
+ * Matched by local name, since fhirmap: is not registered here (generic elements
+ * keep their children in $children).
+ */
+function findResourceMapping(values) {
+  const localName = (el) => String((el && el.$type) || '').split(':').pop();
+
+  for (const v of values) {
+    if (localName(v) === 'resourceMapping') {
+      return v;
+    }
+
+    if (localName(v) === 'resourceMappings') {
+      const child = (v.$children || v.mappings || []).find((c) => localName(c) === 'resourceMapping');
+
+      if (child) {
+        return child;
+      }
+    }
+  }
+
+  return null;
 }
 
 module.exports = {

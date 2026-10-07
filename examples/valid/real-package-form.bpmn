@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- fhirmap: and term: in the form the real packages use (bpmn-js-clinical-semantics /
+     fhir-mapping, bpmn-extension-medical-terminology): resourceMappings > resourceMapping and
+     annotations > annotation > coding, with their own namespaces. The lint rules and the
+     converter read this form the same way as the flat one in minimal-valid.bpmn. -->
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
+                   xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1"
+                   xmlns:term="https://clinical-bpmn.org/terminology/v1"
+                   id="Definitions_real_form" targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="Process_RealForm" isExecutable="false">
+
+    <bpmn:task id="Procedure_RealForm" name="Procedure with fhirmap and term in the real package form">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+        <fhirmap:resourceMappings>
+          <fhirmap:resourceMapping resourceType="Procedure" />
+        </fhirmap:resourceMappings>
+        <term:annotations>
+          <term:annotation id="term-ann-1" text="Hearing examination (procedure)">
+            <term:coding system="http://snomed.info/sct" code="398171003" display="Hearing examination (procedure)" />
+          </term:annotation>
+        </term:annotations>
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+  </bpmn:process>
+</bpmn:definitions>
