@@ -540,6 +540,10 @@
       <bpmn2:text>End Encounter: End_Diagnosis_Encounter_IV</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:association id="Association_0lk2kks" associationDirection="None" sourceRef="Flow_045p3wr" targetRef="TextAnnotation_1m96ltu" />
+    <bpmn2:textAnnotation id="TextAnnotation_1s5cihb">
+      <bpmn2:text>SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
+    </bpmn2:textAnnotation>
+    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Activity_11vsro0" targetRef="TextAnnotation_1s5cihb" />
     <bpmn2:textAnnotation id="TextAnnotation_15dhow8">
       <bpmn2:text>End Encounter: End_SCLC_Treatment_Encounter</bpmn2:text>
     </bpmn2:textAnnotation>
@@ -951,6 +955,14 @@
       <bpmndi:BPMNEdge id="Association_1scgzan_di" bpmnElement="Association_1scgzan">
         <di:waypoint x="13299" y="106" />
         <di:waypoint x="13343" y="77" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_1s5cihb_di" bpmnElement="TextAnnotation_1s5cihb">
+        <dc:Bounds x="9560" y="107" width="141.27313337587748" height="72" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_047472w_di" bpmnElement="Association_047472w">
+        <di:waypoint x="9700" y="273" />
+        <di:waypoint x="9690" y="179" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="TextAnnotation_1axtv0b_di" bpmnElement="TextAnnotation_1axtv0b">
         <dc:Bounds x="12830" y="129" width="135" height="100" />

@@ -1347,16 +1347,16 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="5885" y="135" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_LungCancerTreatmentCycle_di" bpmnElement="Activity_LungCancerTreatmentCycle">
-        <dc:Bounds x="8960" y="273" width="100" height="80" />
+        <dc:Bounds x="9100" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_MRIBrain_di" bpmnElement="TextAnnotation_MRIBrain">
-        <dc:Bounds x="8834" y="180" width="200" height="72" />
+        <dc:Bounds x="8974" y="180" width="200" height="72" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_MRIBrain_di" bpmnElement="Association_MRIBrain">
-        <di:waypoint x="8870" y="273" />
-        <di:waypoint x="8870" y="252" />
+        <di:waypoint x="9010" y="273" />
+        <di:waypoint x="9010" y="252" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0hi7d1l_di" bpmnElement="Association_0hi7d1l">
         <di:waypoint x="4708" y="340" />
@@ -1451,7 +1451,7 @@ biopsy of lung (procedure)</bpmn2:text>
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_09jpaas_di" bpmnElement="TextAnnotation_09jpaas">
-        <dc:Bounds x="8890" y="226" width="102.54965698787493" height="57" />
+        <dc:Bounds x="8750" y="226" width="102.54965698787493" height="57" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_06q0fxr_di" bpmnElement="TextAnnotation_06q0fxr">
@@ -1811,23 +1811,23 @@ biopsy of lung (procedure)</bpmn2:text>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1260oh2_di" bpmnElement="Flow_1260oh2">
         <di:waypoint x="8605" y="313" />
-        <di:waypoint x="8680" y="313" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_careplan_to_MRI_di" bpmnElement="Flow_careplan_to_MRI">
-        <di:waypoint x="8780" y="313" />
         <di:waypoint x="8820" y="313" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_careplan_to_MRI_di" bpmnElement="Flow_careplan_to_MRI">
+        <di:waypoint x="8920" y="313" />
+        <di:waypoint x="8960" y="313" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Activity_CarePlan_Lung_di" bpmnElement="Activity_CarePlan_Lung">
-        <dc:Bounds x="8680" y="273" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_MRIBrain_di" bpmnElement="Activity_MRIBrain">
         <dc:Bounds x="8820" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_MRIBrain_di" bpmnElement="Activity_MRIBrain">
+        <dc:Bounds x="8960" y="273" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_MRIBrain_to_Cycle_di" bpmnElement="Flow_MRIBrain_to_Cycle">
-        <di:waypoint x="8920" y="313" />
-        <di:waypoint x="8960" y="313" />
+        <di:waypoint x="9060" y="313" />
+        <di:waypoint x="9100" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_092d7h1_di" bpmnElement="Flow_092d7h1">
         <di:waypoint x="4840" y="180" />
@@ -1887,14 +1887,14 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="7645" y="570" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_TreatmentCycle_End_di" bpmnElement="Event_TreatmentCycle_End">
-        <dc:Bounds x="9102" y="295" width="36" height="36" />
+        <dc:Bounds x="9242" y="295" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9095" y="338" width="50" height="14" />
+          <dc:Bounds x="9235" y="338" width="50" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_TreatmentCycle_End_di" bpmnElement="Flow_TreatmentCycle_End">
-        <di:waypoint x="9060" y="313" />
-        <di:waypoint x="9102" y="313" />
+        <di:waypoint x="9200" y="313" />
+        <di:waypoint x="9242" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1nisonf_di" bpmnElement="Association_1nisonf">
         <di:waypoint x="2255" y="140" />
@@ -1985,12 +1985,12 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="2433" y="166" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0uknex9_di" bpmnElement="Association_0uknex9">
-        <di:waypoint x="8852.5" y="313" />
-        <di:waypoint x="8892" y="283" />
+        <di:waypoint x="8712.5" y="313" />
+        <di:waypoint x="8752" y="283" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1y26obi_di" bpmnElement="Association_1y26obi">
-        <di:waypoint x="8852.5" y="313" />
-        <di:waypoint x="8829" y="283" />
+        <di:waypoint x="8712.5" y="313" />
+        <di:waypoint x="8689" y="283" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1j7l9vz_di" bpmnElement="Association_1j7l9vz">
         <di:waypoint x="3638" y="140" />
