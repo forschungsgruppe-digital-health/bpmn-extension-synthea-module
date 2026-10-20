@@ -26,6 +26,7 @@ function kindOf(el) {
     case 'bpmn:EndEvent': return 'end';
     case 'bpmn:ExclusiveGateway': return 'gateway';
     case 'bpmn:CallActivity': return 'call';
+    case 'bpmn:SubProcess': return 'subprocess';
     case 'bpmn:IntermediateCatchEvent':
     case 'bpmn:IntermediateThrowEvent': return 'event';
     default: return el.$instanceOf('bpmn:Task') ? 'task' : null;
@@ -61,7 +62,7 @@ export function buildModule(process, fileBase, diag) {
       continue;
     }
 
-    const kind = kindOf(el);
+    const kind = el.triggeredByEvent ? null : kindOf(el); // an event sub-process has no GMF equivalent
     if (!kind) {
       diag.error('UNSUPPORTED_ELEMENT', `BPMN element ${el.$type} cannot be converted.`, where(el));
       skipped.add(el.id);
@@ -79,6 +80,16 @@ export function buildModule(process, fileBase, diag) {
       incoming: [],
       outgoing: []
     });
+
+    // An embedded sub-process is one state (a report or a multi-observation). What it contains
+    // is not converted: the contained observations belong in synthea:reportObservation.
+    if (kind === 'subprocess' && (el.flowElements ?? []).length) {
+      diag.note(
+        'SUBPROCESS_CONTENT_IGNORED',
+        `The ${el.flowElements.length} element(s) inside this sub-process are not converted; it becomes a single state. Put contained observations in synthea:reportObservation.`,
+        where(el)
+      );
+    }
   }
 
   for (const flow of flows) {

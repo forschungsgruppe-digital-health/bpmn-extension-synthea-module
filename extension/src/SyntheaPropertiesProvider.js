@@ -128,6 +128,17 @@ const CODE_SYSTEM_OPTIONS = [
   { value: 'http://www.nlm.nih.gov/research/umls/rxnorm', label: 'RxNorm' }
 ];
 
+// The state types the converter accepts per kind of element (tools/bpmn2gmf/resolve.mjs,
+// ALLOWED_BY_KIND). Tasks and other events accept every state type.
+function stateTypeValuesFor(element) {
+  if (is(element, 'bpmn:StartEvent')) return ['Initial'];
+  if (is(element, 'bpmn:EndEvent')) return ['Terminal', 'Death'];
+  if (is(element, 'bpmn:ExclusiveGateway')) return ['Simple', 'Guard'];
+  if (is(element, 'bpmn:CallActivity')) return ['CallSubmodule'];
+  if (is(element, 'bpmn:SubProcess')) return ['DiagnosticReport', 'MultiObservation', 'CallSubmodule'];
+  return STATE_TYPE_VALUES;
+}
+
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
   'CallSubmodule', 'ConditionOnset', 'ConditionEnd',
@@ -142,6 +153,10 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
   this.getGroups = function (element) {
     return function (groups) {
       const firstOwn = groups.length;
+
+      if (is(element, 'bpmn:StartEvent')) {
+        groups.push(createStateTypeGroup(element));
+      }
 
       if (is(element, 'bpmn:EndEvent')) {
         groups.push(createStateTypeGroup(element));
@@ -177,6 +192,13 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createEncounterContextGroup(element));
+        if (is(element, 'bpmn:SubProcess')) {
+          groups.push(...createStateDetailGroups(element));
+
+          if (stateTypeOf(element) === 'CallSubmodule') {
+            groups.push(createSubmoduleGroup(element));
+          }
+        }
       }
 
       if (is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent')) {
@@ -202,15 +224,10 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(...createNestedConditionGroups(element, getFlowCondition, ensureFlowCondition, 'synthea-condition'));
       }
 
-      if (is(element, 'bpmn:ExclusiveGateway') || is(element, 'bpmn:InclusiveGateway')) {
+      if (is(element, 'bpmn:ExclusiveGateway')) {
+        groups.push(createStateTypeGroup(element));
         groups.push(createGuardGroup(element));
         groups.push(...createNestedConditionGroups(element, getGuardCondition, ensureGuardCondition, 'synthea-guard-condition'));
-      }
-
-      if (is(element, 'bpmn:TextAnnotation')) {
-        groups.push(createEncounterContextGroup(element));
-        groups.push(createAssignToAttributeGroup(element));
-        groups.push(createReferencedByAttributeGroup(element));
       }
 
       if (is(element, 'bpmn:CallActivity')) {
@@ -235,6 +252,20 @@ SyntheaMiniPropertiesProvider.$inject = ['propertiesPanel', 'injector'];
 
 // --- groups ------------------------------------------------------------
 
+// The panel marks the group as edited when a section has a value: a text, a ticked box or a
+// chosen option. It hands over the first input of the section, from which the whole section is read.
+function isSectionEdited(input) {
+  const section = input && input.closest('.bio-properties-panel-collapsible-entry');
+
+  if (!section) {
+    return false;
+  }
+
+  return [...section.querySelectorAll('input, select, textarea')].some(
+    (field) => (field.type === 'checkbox' ? field.checked : !!field.value)
+  );
+}
+
 // One group "Synthea" holding every synthea: group as a collapsible section of its own.
 // The first section starts open.
 function createSyntheaGroup(sections) {
@@ -247,7 +278,8 @@ function createSyntheaGroup(sections) {
       component: CollapsibleEntry,
       label: section.label,
       open: index === 0,
-      entries: section.entries
+      entries: section.entries,
+      isEdited: isSectionEdited
     }))
   };
 }
@@ -255,7 +287,7 @@ function createSyntheaGroup(sections) {
 function createStateTypeGroup(element) {
   return {
     id: 'synthea-state-type',
-    label: 'State type',
+    label: 'State Type',
     entries: [
       { id: 'synthea-state-type-value', element, component: StateTypeEntry }
     ]
@@ -498,12 +530,18 @@ function StateTypeEntry(props) {
     modeling.updateModdleProperties(element, config, { stateType: value });
   };
 
-  const getOptions = () => [
-    { value: '', label: translate('<none — falls back to inferred signals>') },
-    ...STATE_TYPE_VALUES.map((v) => ({ value: v, label: v }))
-  ];
+  const getOptions = () => {
+    const values = stateTypeValuesFor(element);
+    const current = getValue();
 
-  return SelectEntry({ element, id, label: translate('Synthea state type'), getValue, setValue, getOptions });
+    // a value that is already set stays selectable, even if the converter would reject it
+    return [
+      { value: '', label: translate('<none — falls back to inferred signals>') },
+      ...(current && !values.includes(current) ? [current] : []).concat(values).map((v) => ({ value: v, label: v }))
+    ];
+  };
+
+  return SelectEntry({ element, id, label: translate('State Type'), getValue, setValue, getOptions });
 }
 
 // --- Probability entries --------------------------------------------------

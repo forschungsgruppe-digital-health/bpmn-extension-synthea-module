@@ -1,14 +1,7 @@
 # `tools/bpmn2gmf` — Concept
 
-> **Update 2026-10-11:** `fhirmap:` and `term:` are no longer part of this repository
-> (models, lint, tests). They live as separate extensions. Where this document says that
-> `fhirmap:resourceType` or `term:coding` disambiguates or supplies something, read it as
-> a description of those separate extensions: in this repository the state type comes from
-> an explicit `synthea:stateTypeConfig`, and the clinical codes are not in the models
-> (see `lung-cancer/README.md`). The converter still accepts `term:coding` as input.
-
 - **Status:** all phases implemented; decisions made (see [§8](#8-build-order))
-- **Goal:** turn the BPMN pathway models (`synthea:` + `fhirmap:` + `term:`) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
+- **Goal:** turn the BPMN pathway models (`synthea:`, with clinical codes optionally from a separate `term:` extension) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).
 
 This document fixes the architecture, the build order, and — most importantly — the points where the extension currently does **not** carry enough information to produce a valid GMF module. Those need a decision before the tool can be called complete (see [Decisions needed](#decisions-needed)).
@@ -21,7 +14,7 @@ Inventory of the five `lung-cancer/*.bpmn` files:
 
 | Construct | Count | Consequence |
 |---|---|---|
-| `synthea:stateTypeConfig` | 103 | explicit state type on every state-bearing node → inference from `fhirmap:` is only a fallback |
+| `synthea:stateTypeConfig` | 103 | explicit state type on every state-bearing node (the converter never used `fhirmap:`) |
 | `task` / `scriptTask` | 65 / 15 | `scriptTask` (used for SetAttribute/Counter) is treated exactly like `task` |
 | `exclusiveGateway` | 37 | each becomes a `Simple` (or `Guard`) state in the MVP, see §4.5 |
 | `intermediateCatchEvent` (timer) | 14 | → `Delay`; the number comes from `synthea:delayConfig`, never from `timeDuration`/`timeDate` text |
@@ -29,14 +22,14 @@ Inventory of the five `lung-cancer/*.bpmn` files:
 | `synthea:encounterContext` | 32 | encounter synthesis is on the critical path |
 | `synthea:condition` | 17 | conditions incl. nesting/`negate` |
 | `synthea:probabilityConfig` | 18 | `distributed_transition` |
-| `term:coding` | 29 | codes; systems are URIs and must be mapped to Synthea system names |
+| `term:coding` | 29 | codes (a separate extension, since removed from the models); systems are URIs and must be mapped to Synthea system names |
 | `textAnnotation` / `association` | 60 / 60 | documentation only → ignored |
 | `boundaryEvent` (timer) | **1** | **no GMF equivalent** — see Decision 4 |
 | i18n, `cp:` (BPMN4CP), DI shapes/edges | many | ignored |
 
-The counts are those of the first analysis (2026-10-05) and are kept as the reasoning behind the design. Since then: `term:coding` is 44 (the anemia module got its 14 codes), `fhirmap:resourceMapping` is 47, and the `boundaryEvent` is gone (replaced by four `Death` states, Decision 4). The other counts changed with the added states and fields, but they only served to size the work.
+The counts are those of the first analysis (2026-10-05) and are kept as the reasoning behind the design. Since then: `term:coding` was 44 and `fhirmap:resourceMapping` 47 until both were removed from the models (2026-10-11), and the `boundaryEvent` is gone (replaced by four `Death` states, Decision 4). The other counts changed with the added states and fields, but they only served to size the work.
 
-Spike result: all five files load via `bpmn-moddle` with the existing `synthea.json` descriptor and **zero warnings**; `term:coding` and `fhirmap:resourceMapping` arrive as generic elements whose attributes are plain properties (`system`, `code`, `display`, `resourceType`). No extra descriptors and no new dependencies are needed to read the models.
+Spike result: all five files load via `bpmn-moddle` with the existing `synthea.json` descriptor and **zero warnings**; foreign elements such as `term:coding` arrive as generic elements whose attributes are plain properties (`system`, `code`, `display`). No extra descriptors and no new dependencies are needed to read the models.
 
 For reference, the real Synthea `lung_cancer.json` has 99 states (e.g. 6× `Encounter`/`EncounterEnd`, 11× `ConditionOnset`, 11× `Procedure`, 10× `Symptom`, 9× `SetAttribute`), 80 direct / 9 conditional / 9 distributed transitions, and `"gmf_version": 1`.
 
@@ -107,14 +100,14 @@ The IR is the only thing the emitters see. Everything BPMN-specific (event defin
 
 ### 4.1 State type resolution
 1. `synthea:stateTypeConfig` wins if present.
-2. Otherwise infer per [implicit-rules Table B](implicit-rules.md): start event → `Initial`, end event → `Terminal`, timer catch event → `Delay`, call activity → `CallSubmodule`, exclusive gateway + `guardConfig` → `Guard`, other exclusive gateway → `Simple`, task/sub-process → via `fhirmap:resourceType`.
-3. Still ambiguous (e.g. a task with no `stateType` and no `fhirmap`) → **error** with element id and label. No guessing.
+2. Otherwise infer per [implicit-rules Table B](implicit-rules.md): start event → `Initial`, end event → `Terminal`, timer catch event → `Delay`, call activity → `CallSubmodule`, exclusive gateway + `guardConfig` → `Guard`, other exclusive gateway → `Simple`, task/sub-process/other event → only via the explicit `stateType` (sub-process: `DiagnosticReport`, `MultiObservation` or `CallSubmodule`).
+3. Still ambiguous (e.g. a task with no `stateType`) → **error** with element id and label. No guessing.
 
 ### 4.2 State names
 The start event is always named `Initial` (Synthea requires exactly this name; found while implementing). Every other state: the BPMN `name` **verbatim**. Empty → `<stateType>_<id>`. A duplicate name within one module → append `_<id>`. No prefix stripping (labels like "Symptom: Cough" stay as they are): it is deterministic, needs no heuristics, and Synthea only requires uniqueness per module. The generated names will therefore differ from the hand-written upstream names; the comparison in §7 is keyed on state type and codes, not on names.
 
 ### 4.3 Codes
-Every coding on a node is collected, whatever its form: a flat `<term:coding/>` or the real package's `term:annotations > annotation > coding`; prefix and namespace are ignored. The five lung-cancer models now use the real form of both packages (`fhirmap:resourceMappings > resourceMapping`, `term:annotations > annotation > coding`, namespaces `clinical-bpmn.org/fhir-mapping/v1` and `…/terminology/v1`): they load typed with the descriptors of `bpmn-js-clinical-semantics` and `bpmn-extension-medical-terminology` without a warning, and the generated GMF JSON is identical to the one from the flat form. `system` URIs map to Synthea names:
+Codes are optional input from the separate terminology extension: every coding on a node is collected, whatever its form (a flat `<term:coding/>` or `term:annotations > annotation > coding`); prefix and namespace are ignored. The five lung-cancer models in this repository carry no codings any more (2026-10-11), so their states lack `codes` until a decision on where codes live (see `lung-cancer/README.md`). `system` URIs map to Synthea names:
 
 | URI | Synthea `system` |
 |---|---|
@@ -179,7 +172,7 @@ Names are emitted as written. The SYN-26 lint rule (lower_snake_case) already wa
 
 ## 5. Where the extension does not carry enough data (the real gap)
 
-Comparing our BPMN files with the real `lung_cancer.json` and with the Synthea States wiki shows that several states have **required** GMF fields that no `synthea:`/`term:`/`fhirmap:` element can express today. The graph, transitions, conditions and codes are covered; the *values* of some states are not.
+Comparing our BPMN files with the real `lung_cancer.json` and with the Synthea States wiki shows that several states have **required** GMF fields that no `synthea:` element can express today. The graph, transitions, conditions and codes are covered; the *values* of some states are not.
 
 | GMF state | Required / needed by Synthea | Modeled today? | Seen in our files |
 |---|---|---|---|
@@ -194,7 +187,7 @@ Comparing our BPMN files with the real `lung_cancer.json` and with the Synthea S
 | `MedicationOrder` | `codes`; optional `reason`, `prescription`, `chronic` | codes, assign yes | 5 |
 | all states | optional `remarks[]` | no | — |
 
-**Finding (fixed) — our two `Pain_Vital` states were modeled as the wrong type.** Both carry a LOINC code, but GMF `VitalSign` has no `codes` (it only *sets* a value and is not recorded in the chart). In the real `lung_cancer.json` all three `Pain_Vital*` states are `Observation` (`category: vital-signs`, `unit: {score}`, `range` 4–8). The fix was a model correction (`stateType="VitalSign"` → `Observation`, done in both files; `fhirmap` is not part of this extension and was left alone), not an extension change — so **no `VitalSign` fields are needed** for the current pathways.
+**Finding (fixed) — our two `Pain_Vital` states were modeled as the wrong type.** Both carry a LOINC code, but GMF `VitalSign` has no `codes` (it only *sets* a value and is not recorded in the chart). In the real `lung_cancer.json` all three `Pain_Vital*` states are `Observation` (`category: vital-signs`, `unit: {score}`, `range` 4–8). The fix was a model correction (`stateType="VitalSign"` → `Observation`, done in both files; `fhirmap:` was never part of this extension), not an extension change — so **no `VitalSign` fields are needed** for the current pathways.
 
 Until a decision is made the converter must not silently produce invalid JSON. The proposed default behavior is described in Decision 1.
 

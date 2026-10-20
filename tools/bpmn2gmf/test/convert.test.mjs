@@ -1008,6 +1008,59 @@ test('--fuse-gateways: a probability gateway with a second predecessor stays a s
   assert.ok(!('complex_transition' in module.json.states.a));
 });
 
+// ---- sub-process as one state ------------------------------------------------------------
+
+// start -> sub-process (with `inner` flow elements inside) -> end
+const subProcess = (type, ext, inner = '') =>
+  run(
+    start() +
+      `<bpmn2:subProcess id="A" name="clin"><bpmn2:extensionElements>${type ? stateType(type) : ''}${ext}</bpmn2:extensionElements>${inner}</bpmn2:subProcess>` +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+
+test('an embedded sub-process is accepted as a DiagnosticReport state with its contained observations', async () => {
+  const { module, diagnostics } = await subProcess(
+    'DiagnosticReport',
+    coding(LOINC, '58410-2', 'CBC panel') + reportObs('valueShape="RANGE" value="10" valueHigh="11.9"')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const s = module.json.states.clin;
+  assert.equal(s.type, 'DiagnosticReport');
+  assert.equal(s.observations.length, 1);
+  assert.equal(s.direct_transition, 'Terminal');
+  assert.equal(module.json.states.Initial.direct_transition, 'clin');
+});
+
+test('a sub-process can also call a submodule (how drafts and the mihub models use it)', async () => {
+  const { module, diagnostics } = await subProcess('CallSubmodule', '<synthea:submoduleConfig submodule="anemia_submodule"/>');
+  assert.ok(!diagnostics.items.some((i) => i.code === 'STATE_TYPE_MISMATCH' || i.code === 'SUBMODULE_MISSING'), diagnostics.format().join('\n'));
+  assert.equal(module.json.states.clin.type, 'CallSubmodule');
+  assert.equal(module.json.states.clin.submodule, 'anemia_submodule');
+});
+
+test('a sub-process needs an explicit state type of DiagnosticReport, MultiObservation or CallSubmodule', async () => {
+  const none = await subProcess(null, '');
+  assert.ok(none.codes.includes('STATE_TYPE_REQUIRED'));
+  const wrong = await subProcess('Procedure', coding(SNOMED, '399208008', 'Plain X-ray of chest (procedure)'));
+  assert.ok(wrong.codes.includes('STATE_TYPE_MISMATCH'));
+  assert.match(wrong.diagnostics.format().join('\n'), /DiagnosticReport, MultiObservation, CallSubmodule/);
+});
+
+test('an event sub-process is not accepted', async () => {
+  const { codes } = await run(
+    start() + '<bpmn2:subProcess id="A" name="ev" triggeredByEvent="true"><bpmn2:extensionElements><synthea:stateTypeConfig stateType="DiagnosticReport"/></bpmn2:extensionElements></bpmn2:subProcess>' + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.ok(codes.includes('UNSUPPORTED_ELEMENT'));
+});
+
+test('the elements inside a sub-process are not converted, and the converter says so', async () => {
+  const inner = '<bpmn2:task id="In1" name="inside"/><bpmn2:task id="In2" name="inside too"/>';
+  const { module, diagnostics, codes } = await subProcess('DiagnosticReport', coding(LOINC, '58410-2', 'CBC panel') + reportObs('value="1"'), inner);
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.ok(codes.includes('SUBPROCESS_CONTENT_IGNORED'));
+  assert.ok(!('inside' in module.json.states));
+});
+
 // ---- SetAttribute from a distribution or another attribute -------------------------------------
 
 const setting = (config, extra = '') =>

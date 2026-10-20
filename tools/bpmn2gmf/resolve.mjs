@@ -11,7 +11,8 @@ const ALLOWED_BY_KIND = {
   start: new Set(['Initial']),
   end: new Set(['Terminal', 'Death']),
   gateway: new Set(['Simple', 'Guard']),
-  call: new Set(['CallSubmodule'])
+  call: new Set(['CallSubmodule']),
+  subprocess: new Set(['DiagnosticReport', 'MultiObservation', 'CallSubmodule'])
 };
 
 function infer(node) {

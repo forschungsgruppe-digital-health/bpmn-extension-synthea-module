@@ -1,12 +1,5 @@
 # Modeling Guide — building a pathway with `synthea:`
 
-> **Update 2026-10-11:** `fhirmap:` and `term:` are no longer part of this repository
-> (models, lint, tests). They live as separate extensions. Where this document says that
-> `fhirmap:resourceType` or `term:coding` disambiguates or supplies something, read it as
-> a description of those separate extensions: in this repository the state type comes from
-> an explicit `synthea:stateTypeConfig`, and the clinical codes are not in the models
-> (see `lung-cancer/README.md`). The converter still accepts `term:coding` as input.
-
 A practical, task-oriented guide for actually modeling a BPMN patient pathway
 with this extension — not a conceptual introduction (see
 [`synthea.md`](synthea.md) for that) and not the exhaustive technical mapping
@@ -58,8 +51,7 @@ them. Collapse every pool down to what happens *to* the patient. Example:
 a diagram with separate "GP" and "Radiology" pools — "GP orders X-ray" →
 message flow → "Radiology receives order" → "Radiology performs X-ray" →
 message flow back → "GP reviews result" — becomes a single state:
-`Procedure: Chest X-Ray` (`stateType="Procedure"`, `term:coding` for the
-SNOMED code). For every message flow between two non-patient pools, ask
+`Procedure: Chest X-Ray` (`stateType="Procedure"`). For every message flow between two non-patient pools, ask
 "what does the *outcome* of this mean for the patient" and model only that
 outcome as one state — not the handoff itself.
 
@@ -84,11 +76,18 @@ placeholder linking out to a separate diagram (e.g. via an external
 with `SubmoduleConfig` pointing at that separate pathway (see §11) — it
 already matches the intent, just the wrong BPMN element type.
 
+*Update 2026-10-12:* the converter now accepts an embedded sub-process as **one state** of
+type `DiagnosticReport` (or `MultiObservation`) with its measurements in
+`synthea:reportObservation`, or as a **submodule call** (`stateType="CallSubmodule"` with
+`synthea:submoduleConfig`, how drafts and the mihub models use it). Give it that `stateType`. The elements drawn inside are not
+converted (note `SUBPROCESS_CONTENT_IGNORED`). A sub-process with ordinary sequential
+content still has to be flattened as described above.
+
 **4. Drop data objects, message flows, and organization-specific
 extensions.** `dataObject`/`dataObjectReference` elements, quality
 indicators (e.g. BPMN4CP), and similar artifacts have no Synthea
-equivalent. If a data object just restates something another state's
-`term:coding` already captures (e.g. a "lab report" object next to the task
+equivalent. If a data object just restates something another state
+already captures (e.g. a "lab report" object next to the task
 that actually performs the lab test), it's redundant — remove it. If it
 represents something no state currently produces (e.g. a standalone
 administrative document), decide per case: does it gate any real branching
@@ -111,10 +110,10 @@ before opening the properties panel for the first time.
   state is always named `Initial` whatever the event's label says (Synthea
   requires that exact name), and a module needs exactly one start event.
 - **End event** → defaults to `Terminal`. For a death outcome, set
-  `synthea:StateTypeConfig.stateType="Death"` explicitly (it has no
-  `fhirmap:resourceType` to disambiguate it any other way) and attach a
-  `term:coding` for the cause-of-death code, or reference a prior
-  `ConditionOnset` instead via `ReferencedByAttributeConfig`.
+  `synthea:StateTypeConfig.stateType="Death"` explicitly, and
+  reference the prior `ConditionOnset` that caused it via
+  `ReferencedByAttributeConfig` (a code for the cause of death is optional in
+  Synthea and is not part of `synthea:`).
 - **Death at a later point in time:** Synthea's `Death` can also *schedule* the
   death — the patient dies after a time span while the module goes on (the
   upstream lung cancer module does this for stage I–IV). Draw it as an
@@ -274,25 +273,18 @@ Neither produces a FHIR record — they're pure simulation bookkeeping.
 choices are equally correct, the real lung-cancer pathway actually uses Task
 for all of these). Which of the 19 clinical `stateType` values applies
 (`Procedure`, `Observation`, `MedicationOrder`, `ImagingStudy`, `CarePlanStart`,
-`Device`, `SupplyList`, …) is set explicitly via "State type" — don't rely on
+`Device`, `SupplyList`, …) is set explicitly via "State Type" — don't rely on
 inferring it from the element's name. (The full enum has 28 values; the
 other 9 — `Initial`/`Terminal`/`Simple`/`Guard`/`Delay`/`SetAttribute`/
 `Counter`/`CallSubmodule`/`Physiology` — are control states covered
 elsewhere in this guide, not clinical events.)
 
 **Add, where applicable:**
-- `fhirmap:resourceMappings` with a `fhirmap:resourceMapping resourceType="..."`
-  inside — the FHIR resource this state produces (e.g. `MedicationRequest` for
-  `MedicationOrder`, `Procedure` for `Procedure`). Checked for consistency
-  against `stateType` by lint rule `state-type-fhirmap-consistent`.
-- `term:annotations` with a `term:annotation` and a `term:coding system="..."
-  code="..." display="..."` inside — the actual clinical code (SNOMED for most
-  conditions/procedures, RxNorm for medications, LOINC for observations).
-  The panels of the two packages (`fhir-mapping`, `medical-terminology`) write
-  exactly this form; the namespaces are `https://clinical-bpmn.org/fhir-mapping/v1`
-  and `https://clinical-bpmn.org/terminology/v1`. The older flat form
-  (`<fhirmap:resourceMapping/>` and `<term:coding/>` directly in
-  `extensionElements`) is still read by the lint rules and the converter.
+- The clinical **code** of the state (SNOMED for most conditions/procedures,
+  RxNorm for medications, LOINC for observations) is not part of `synthea:`.
+  The converter reads a `term:coding` from the separate terminology extension
+  if the diagram carries one; without it the state has no `codes` and Synthea
+  cannot run the module (see `lung-cancer/README.md`).
 - For `ConditionOnset`/`AllergyOnset` specifically: "Assign to Attribute" if
   a later state needs to reference this exact instance (see §8), and
   "Encounter Reference" (`targetEncounter`) if the diagnosis should only be
@@ -307,14 +299,14 @@ elsewhere in this guide, not clinical events.)
 | `Observation` | "Observation" + "Value" | **category** (HL7: `vital-signs`, `laboratory`, …) and **value** — `EXACT`, or a `RANGE` (lowest/highest) the simulation draws from — with **unit** (e.g. `{score}`, `mg/dL`) and optional **decimals** |
 | `ImagingStudy` | "Imaging series" | one series: body site (SNOMED code + text), modality (DICOM code, e.g. `CT`, + text), the kind of image (title, DICOM SOP class code + text), optional min/max number of instances. More series can be added in the XML (`synthea:imagingStudySeries`, repeatable) |
 
-The code of the state itself still comes from `term:coding` as before.
+The code of the state itself is not part of `synthea:` (see above).
 
 #### Lab panels — `DiagnosticReport` with contained observations
 
 A lab **panel** that bundles many single values (blood count, metabolic panel,
 urinalysis) is Synthea's `DiagnosticReport`: one state for the report, with
 its single observations *inside* it. Set `stateType="DiagnosticReport"` and the
-panel's LOINC code (`term:coding`, `fhirmap` `DiagnosticReport`), then list
+panel's LOINC code (if the diagram carries codes), then list
 every contained value as one repeated element in the XML:
 
 ```xml
@@ -347,18 +339,16 @@ the converter reports it, and `--strict` refuses to write the module.
 
 The properties panel only *lists* the contained observations (group "Report
 observations", read-only); add, change or remove `synthea:reportObservation`
-elements in the XML. (`DiagnosticReport` itself, `fhirmap` and `term` are
-edited in the panel as usual.)
+elements in the XML. (The state type of the `DiagnosticReport` itself is set in
+the panel as usual.)
 
 ---
 
-## 7. `VitalSign` / `Symptom` / `SetAttribute` / `Counter` have no `fhirmap:resourceType`
+## 7. `VitalSign` / `Symptom` / `SetAttribute` / `Counter` produce no FHIR record
 
-These four produce no FHIR record, so there's nothing for `fhirmap:` to map.
-Just set `stateType` explicitly on the real element (Task, usually) — don't
-rely on a `TextAnnotation` with a free-text naming convention to carry this
-information; the properties panel doesn't even offer a State type group on
-`TextAnnotation`, and no real file uses that pattern.
+These four produce no FHIR record. Set `stateType` explicitly on the real
+element (Task, usually) — a `TextAnnotation` cannot carry it: the converter
+ignores text annotations and the properties panel offers no groups on them.
 
 A `Symptom` needs its **name** (group "Symptom" — the label of the element is
 not parsed) and a **severity**: group "Value" with `EXACT` or `RANGE` (Synthea
