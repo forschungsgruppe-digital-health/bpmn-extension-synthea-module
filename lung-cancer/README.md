@@ -46,22 +46,15 @@ and the result of the runs (equal stay length, medication category, care plan
 activities, symptom behavior; what is left over) are in section 12 of the
 concept.
 
-## Clinical codes and FHIR resource types (removed for now)
+## Clinical codes
 
-The models used to carry `fhirmap:` (which FHIR resource a state produces) and `term:`
-(its code). Both are separate extensions and were taken out of this repository's models
-(2026-10-11). What that means:
+The models used to carry `fhirmap:` (which FHIR resource a state produces) and `term:` (its code) from two separate extensions. Both were taken out of this repository's models. The codes stayed:
 
-- **State types** are not affected: every state-bearing element carries an explicit
-  `synthea:stateTypeConfig`, the converter never used `fhirmap:` to decide.
-- **Codes are gone.** Procedures, diagnoses, medications, observations, diagnostic reports,
-  the care plan and the imaging study have no `codes` any more, so the converted modules
-  lack a field Synthea requires and are **not complete**. The converter reports each one
-  as `REQUIRED_FIELD_MISSING` (44 across the five files) and, with `--strict`, as an error.
-  That is why `npm run convert:check` runs without `--strict` for now.
-- The converter still reads `term:coding` if an input carries it (`codes.mjs`), so models
-  with codes from the separate `term:` extension convert as before.
-- The Encounter codes are part of `synthea:encounterContext` and are still there.
+- The 44 clinical codes (SNOMED CT, LOINC, RxNorm) sit on the element's `synthea:stateTypeConfig` as `codeSystem`, `code` and `codeDisplay`. The converter writes them into `codes`; the properties panel has a "Code" section for the state types that carry one.
+- The state types never depended on `fhirmap:`: every state-bearing element has an explicit `synthea:stateTypeConfig` (or an inferable element kind).
+- The Encounter codes are part of `synthea:encounterContext`.
+- `npm run convert:check` runs with `--strict` and passes; the comparison with the upstream module includes the codes.
+- The converter still reads `term:coding` if a diagram from the separate extension carries one.
 
 ## BPMN conformance class (SYN-1)
 

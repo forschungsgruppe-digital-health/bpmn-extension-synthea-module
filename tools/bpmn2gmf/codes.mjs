@@ -1,4 +1,4 @@
-// Code system URIs (as used by term:coding and synthea:Condition.codeSystem)
+// Code system URIs (as used by synthea:stateTypeConfig codeSystem, synthea:Condition.codeSystem and term:coding)
 // -> the names Synthea's GMF expects in `codes`.
 const SYSTEMS = {
   'http://snomed.info/sct': 'SNOMED-CT',
@@ -31,11 +31,15 @@ export const SYSTEMS_BY_STATE_TYPE = {
 const localName = (el) => (el.$type ?? '').split(':').pop().toLowerCase();
 
 // Collects every coding on a node, whatever form it comes in:
-//   <term:coding .../>                                        (our flat form)
-//   <term:annotations><term:annotation><term:coding/>…        (the real package's form)
+//   <synthea:stateTypeConfig codeSystem= code= codeDisplay= />   (the form the models use)
+//   <term:coding .../>                                           (optional input from the separate term: extension)
+//   <term:annotations><term:annotation><term:coding/>…           (that extension's own form)
 // The namespace prefix is ignored, and so is whether a descriptor was registered
 // (generic elements keep children in $children, typed ones in values/codings).
 function collect(el, out) {
+  if (el.$type === 'synthea:StateTypeConfig' && el.code) {
+    out.push({ uri: el.codeSystem, code: el.code, display: el.codeDisplay });
+  }
   if (localName(el) === 'coding' && (el.system || el.code)) {
     out.push({ uri: el.system, code: el.code, display: el.display });
   }

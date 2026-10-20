@@ -13,24 +13,24 @@ const FILES = [
   'symptom-check-submodule', 'lung-cancer-probabilities-submodule'
 ].map((f) => `lung-cancer/${f}.bpmn`);
 
-const { modules } = await convert(FILES.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: false });
+const { modules } = await convert(FILES.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
 const ours = Object.fromEntries(modules.map((m) => [m.fileBase, m.json.states]));
 const upstream = (f) => JSON.parse(readFileSync(new URL(`./upstream/${f}.json`, import.meta.url), 'utf8')).states;
 
 test('anemia_submodule has the same content as upstream anemia_sub.json', () => {
-  const c = compare(ours.anemia_submodule, upstream('anemia_sub'), { ignoreCodes: true });
+  const c = compare(ours.anemia_submodule, upstream('anemia_sub'));
   assert.deepEqual({ onlyOurs: c.onlyOurs, onlyUpstream: c.onlyUpstream }, { onlyOurs: [], onlyUpstream: [] });
 });
 
 test('lung_cancer_probabilities_submodule has the same content as upstream', () => {
-  const c = compare(ours.lung_cancer_probabilities_submodule, upstream('lung_cancer_probabilities'), { ignoreCodes: true });
+  const c = compare(ours.lung_cancer_probabilities_submodule, upstream('lung_cancer_probabilities'));
   assert.ok(c.same, [...c.onlyOurs, ...c.onlyUpstream].join('\n'));
 });
 
 // Our main pathway and its two submodules together against the one big upstream module.
 const together = merge(ours.synthea_lung_cancer, ours.lung_cancer_treatment_submodule, ours.symptom_check_submodule);
 const upstreamMain = upstream('lung_cancer');
-const distinct = (states, alias) => new Set(signatures(states, alias, { ignoreCodes: true }));
+const distinct = (states, alias) => new Set(signatures(states, alias));
 
 test('everything clinical in the main pathway exists upstream (encounters, procedures, diagnoses, symptoms, deaths, lab values)', () => {
   const clinical = (sig) => /^(Encounter|Procedure|ConditionOnset|Symptom|Death|Observation|DiagnosticReport|CarePlanStart|MedicationOrder|MedicationEnd)\b/.test(sig);

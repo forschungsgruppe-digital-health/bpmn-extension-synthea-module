@@ -13,7 +13,7 @@
     <bpmn2:task id="Activity_088ilt7" name="Diagnosis: Anemia">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: Anemia</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="271737000" codeDisplay="Anemia (disorder)" />
         <synthea:assignToAttributeConfig attribute="anemia" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0yr1p8q</bpmn2:incoming>
@@ -46,7 +46,7 @@
     <bpmn2:task id="Activity_0v2ypfd" name="Diagnostic Area: CBC_Panel_F_Severe">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Severe</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="58410-2" codeDisplay="CBC panel - Blood by Automated count" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="7" valueHigh="10.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="21" valueHigh="32.9" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -67,7 +67,7 @@
     <bpmn2:task id="Activity_15f8jor" name="Diagnostic Area: CBC_Panel_F_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_F_Routine</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="58410-2" codeDisplay="CBC panel - Blood by Automated count" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="11" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="33" valueHigh="36" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -88,7 +88,7 @@
     <bpmn2:task id="Activity_1lxvqqm" name="Diagnostic Area: CBC_Panel_M_Severe">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Severe</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="58410-2" codeDisplay="CBC panel - Blood by Automated count" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="6.7" valueHigh="10" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="20" valueHigh="30" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -108,7 +108,7 @@
     <bpmn2:task id="Activity_0pre54w" name="Diagnostic Area: CBC_Panel_M_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: CBC_Panel_M_Routine</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="58410-2" codeDisplay="CBC panel - Blood by Automated count" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="30.1" valueHigh="35" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="3.5" valueHigh="10.5" />
@@ -128,7 +128,7 @@
     <bpmn2:task id="Activity_1p29dw2" name="Procedure: Peripheral_Blood_Smear">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Peripheral_Blood_Smear</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="14768001" codeDisplay="Peripheral blood smear interpretation (procedure)" />
         <synthea:valueConfig valueShape="EXACT" value="30" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -141,7 +141,7 @@
     <bpmn2:task id="Activity_1tigvib" name="Procedure: Review_Of_Systems">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Review_Of_Systems</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="415300000" codeDisplay="Review of systems (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="20" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -159,7 +159,7 @@
     <bpmn2:task id="Activity_10pb6z3" name="Procedure: Brief_Examination">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Brief_Examination</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="162676008" codeDisplay="Brief general examination (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="20" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -196,7 +196,7 @@
     <bpmn2:task id="Activity_03w5xy1" name="Procedure: Transfusion">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Transfusion</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="180207008" codeDisplay="Intravenous blood transfusion of packed cells (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="20" valueHigh="60" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -212,7 +212,7 @@
     <bpmn2:task id="Activity_0racf1x" name="Medication Prescription: Iron_Supplement">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Iron_Supplement</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="310325" codeDisplay="ferrous sulfate 325 MG Oral Tablet" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1o10yzv</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0hektv4</bpmn2:outgoing>
@@ -220,7 +220,7 @@
     <bpmn2:task id="Activity_1m99prq" name="Medication Prescription: Vitamin B12 Booster">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Vitamin B12 Booster</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="2001499" codeDisplay="Vitamin B12 5 MG/ML Injectable Solution" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0oagdnt</bpmn2:incoming>
       <bpmn2:incoming>Flow_1m2ndgk</bpmn2:incoming>
@@ -249,7 +249,7 @@
     <bpmn2:task id="Activity_0pblc11" name="Diagnostic Area: Blood_Panel_F_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_F_Routine</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="24360-0" codeDisplay="Hemoglobin and Hematocrit panel - Blood" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="11" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="33" valueHigh="36" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -260,7 +260,7 @@
     <bpmn2:task id="Activity_1igh2cb" name="Diagnostic Area: Blood_Panel_M_Routine">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Blood_Panel_M_Routine</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="24360-0" codeDisplay="Hemoglobin and Hematocrit panel - Blood" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
         <synthea:reportObservation code="20570-8" codeDisplay="Hematocrit [Volume Fraction] of Blood by calculation" category="laboratory" unit="%" valueShape="RANGE" value="30.1" valueHigh="35" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Consult_Referral_to_Experts_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -285,7 +285,7 @@
     <bpmn2:task id="Activity_18nhi1m" name="Procedure: Medication_Reconciliation">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Medication_Reconciliation</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="430193006" codeDisplay="Medication reconciliation (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="5" valueHigh="20" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Anemia_Encounter" wellness="false" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>

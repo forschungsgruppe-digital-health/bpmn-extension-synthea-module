@@ -76,7 +76,7 @@ placeholder linking out to a separate diagram (e.g. via an external
 with `SubmoduleConfig` pointing at that separate pathway (see §11) — it
 already matches the intent, just the wrong BPMN element type.
 
-*Update 2026-10-12:* the converter now accepts an embedded sub-process as **one state** of
+*Embedded sub-process:* the converter accepts an embedded sub-process as **one state** of
 type `DiagnosticReport` (or `MultiObservation`) with its measurements in
 `synthea:reportObservation`, or as a **submodule call** (`stateType="CallSubmodule"` with
 `synthea:submoduleConfig`, how drafts and the mihub models use it). Give it that `stateType`. The elements drawn inside are not
@@ -281,10 +281,12 @@ elsewhere in this guide, not clinical events.)
 
 **Add, where applicable:**
 - The clinical **code** of the state (SNOMED for most conditions/procedures,
-  RxNorm for medications, LOINC for observations) is not part of `synthea:`.
-  The converter reads a `term:coding` from the separate terminology extension
-  if the diagram carries one; without it the state has no `codes` and Synthea
-  cannot run the module (see `lung-cancer/README.md`).
+  RxNorm for medications, LOINC for observations): group "Code", right below
+  "State Type" — system, code and display text. They are the attributes
+  `codeSystem`, `code` and `codeDisplay` of `synthea:stateTypeConfig`. Synthea
+  needs the code (a `ConditionOnset` without one stops the simulation). One code
+  per state; the converter accepts a `term:coding` from the separate terminology
+  extension as an alternative input.
 - For `ConditionOnset`/`AllergyOnset` specifically: "Assign to Attribute" if
   a later state needs to reference this exact instance (see §8), and
   "Encounter Reference" (`targetEncounter`) if the diagnosis should only be
@@ -299,14 +301,14 @@ elsewhere in this guide, not clinical events.)
 | `Observation` | "Observation" + "Value" | **category** (HL7: `vital-signs`, `laboratory`, …) and **value** — `EXACT`, or a `RANGE` (lowest/highest) the simulation draws from — with **unit** (e.g. `{score}`, `mg/dL`) and optional **decimals** |
 | `ImagingStudy` | "Imaging series" | one series: body site (SNOMED code + text), modality (DICOM code, e.g. `CT`, + text), the kind of image (title, DICOM SOP class code + text), optional min/max number of instances. More series can be added in the XML (`synthea:imagingStudySeries`, repeatable) |
 
-The code of the state itself is not part of `synthea:` (see above).
+The code of the state itself is the "Code" group (see above).
 
 #### Lab panels — `DiagnosticReport` with contained observations
 
 A lab **panel** that bundles many single values (blood count, metabolic panel,
 urinalysis) is Synthea's `DiagnosticReport`: one state for the report, with
 its single observations *inside* it. Set `stateType="DiagnosticReport"` and the
-panel's LOINC code (if the diagram carries codes), then list
+panel's LOINC code (group "Code"), then list
 every contained value as one repeated element in the XML:
 
 ```xml

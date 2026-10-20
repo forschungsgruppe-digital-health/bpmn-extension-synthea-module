@@ -1,7 +1,7 @@
 # `tools/bpmn2gmf` — Concept
 
 - **Status:** all phases implemented; decisions made (see [§8](#8-build-order))
-- **Goal:** turn the BPMN pathway models (`synthea:`, with clinical codes optionally from a separate `term:` extension) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
+- **Goal:** turn the BPMN pathway models (`synthea:`; the clinical codes are attributes of its state type) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).
 
 This document fixes the architecture, the build order, and — most importantly — the points where the extension currently does **not** carry enough information to produce a valid GMF module. Those need a decision before the tool can be called complete (see [Decisions needed](#decisions-needed)).
@@ -22,12 +22,12 @@ Inventory of the five `lung-cancer/*.bpmn` files:
 | `synthea:encounterContext` | 32 | encounter synthesis is on the critical path |
 | `synthea:condition` | 17 | conditions incl. nesting/`negate` |
 | `synthea:probabilityConfig` | 18 | `distributed_transition` |
-| `term:coding` | 29 | codes (a separate extension, since removed from the models); systems are URIs and must be mapped to Synthea system names |
+| `term:coding` | 29 | codes; systems are URIs and must be mapped to Synthea system names. The codes sit on `synthea:stateTypeConfig` instead |
 | `textAnnotation` / `association` | 60 / 60 | documentation only → ignored |
 | `boundaryEvent` (timer) | **1** | **no GMF equivalent** — see Decision 4 |
 | i18n, `cp:` (BPMN4CP), DI shapes/edges | many | ignored |
 
-The counts are those of the first analysis (2026-10-05) and are kept as the reasoning behind the design. Since then: `term:coding` was 44 and `fhirmap:resourceMapping` 47 until both were removed from the models (2026-10-11), and the `boundaryEvent` is gone (replaced by four `Death` states, Decision 4). The other counts changed with the added states and fields, but they only served to size the work.
+The counts are those of the first analysis and are kept as the reasoning behind the design. The models have changed since: `term:coding` was 44 and `fhirmap:resourceMapping` 47 until both were removed from the models (the 44 codes moved onto `synthea:stateTypeConfig`), and the `boundaryEvent` is gone (replaced by four `Death` states, Decision 4). The other counts changed with the added states and fields, but they only served to size the work.
 
 Spike result: all five files load via `bpmn-moddle` with the existing `synthea.json` descriptor and **zero warnings**; foreign elements such as `term:coding` arrive as generic elements whose attributes are plain properties (`system`, `code`, `display`). No extra descriptors and no new dependencies are needed to read the models.
 
@@ -107,7 +107,7 @@ The IR is the only thing the emitters see. Everything BPMN-specific (event defin
 The start event is always named `Initial` (Synthea requires exactly this name; found while implementing). Every other state: the BPMN `name` **verbatim**. Empty → `<stateType>_<id>`. A duplicate name within one module → append `_<id>`. No prefix stripping (labels like "Symptom: Cough" stay as they are): it is deterministic, needs no heuristics, and Synthea only requires uniqueness per module. The generated names will therefore differ from the hand-written upstream names; the comparison in §7 is keyed on state type and codes, not on names.
 
 ### 4.3 Codes
-Codes are optional input from the separate terminology extension: every coding on a node is collected, whatever its form (a flat `<term:coding/>` or `term:annotations > annotation > coding`); prefix and namespace are ignored. The five lung-cancer models in this repository carry no codings any more (2026-10-11), so their states lack `codes` until a decision on where codes live (see `lung-cancer/README.md`). `system` URIs map to Synthea names:
+Codes sit on the element's `synthea:stateTypeConfig` (`codeSystem`, `code`, `codeDisplay`, one per state). As optional input every `term:coding` from the separate terminology extension is collected as well, whatever its form (a flat `<term:coding/>` or `term:annotations > annotation > coding`; prefix and namespace are ignored). `system` URIs map to Synthea names:
 
 | URI | Synthea `system` |
 |---|---|

@@ -21,7 +21,8 @@ module.exports = {
         'synthea/gateway-branches-require-condition-or-probability': 'warn',
         'synthea/encounter-code-complete-and-consistent': 'warn',
         'synthea/value-range-requires-high-value': 'warn',
-        'synthea/careplan-activity-requires-code-and-display': 'warn'
+        'synthea/careplan-activity-requires-code-and-display': 'warn',
+        'synthea/state-code-complete': 'warn'
       }
     }
   },
@@ -45,6 +46,7 @@ module.exports = {
     'gateway-branches-require-condition-or-probability': './rules/gateway-branches-require-condition-or-probability',
     'encounter-code-complete-and-consistent': './rules/encounter-code-complete-and-consistent',
     'value-range-requires-high-value': './rules/value-range-requires-high-value',
-    'careplan-activity-requires-code-and-display': './rules/careplan-activity-requires-code-and-display'
+    'careplan-activity-requires-code-and-display': './rules/careplan-activity-requires-code-and-display',
+    'state-code-complete': './rules/state-code-complete'
   }
 };

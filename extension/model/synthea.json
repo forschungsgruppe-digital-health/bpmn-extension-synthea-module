@@ -117,7 +117,10 @@
       { "name": "Death" }, { "name": "Physiology" }
     ]},
     { "name": "StateTypeConfig", "superClass": ["Element"], "properties": [
-      { "name": "stateType", "type": "StateType", "isAttr": true }
+      { "name": "stateType", "type": "StateType", "isAttr": true },
+      { "name": "codeSystem", "type": "String", "isAttr": true },
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
     ]},
     { "name": "SymptomConfig", "superClass": ["Element"], "properties": [
       { "name": "symptom", "type": "String", "isAttr": true }

@@ -19,9 +19,10 @@
       <bpmn:outgoing>Flow_P2</bpmn:outgoing>
     </bpmn:task>
 
+    <!-- state-code-complete: a code with system, code and display text, in a system the state type accepts -->
     <bpmn:task id="Task_A" name="A">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Procedure" />
+        <synthea:StateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="399208008" codeDisplay="Plain X-ray of chest (procedure)" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_P1</bpmn:incoming>
       <bpmn:outgoing>Flow_A_Out</bpmn:outgoing>

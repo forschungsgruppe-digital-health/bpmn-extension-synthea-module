@@ -360,6 +360,27 @@ test('ConditionOnset: term:coding becomes codes (system URI -> Synthea name)', a
   assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
 });
 
+test('codes on the stateTypeConfig become codes, with the system URI mapped to the Synthea name', async () => {
+  const { module, diagnostics } = await run(
+    start() +
+      task('A', 'clin', '<synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="399208008" codeDisplay="Plain X-ray of chest (procedure)"/>') +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(module.json.states.clin.codes, [{ system: 'SNOMED-CT', code: '399208008', display: 'Plain X-ray of chest (procedure)' }]);
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
+});
+
+test('a code system the state type does not accept is left out and reported', async () => {
+  const { module, codes } = await run(
+    start() +
+      task('A', 'clin', '<synthea:stateTypeConfig stateType="Procedure" codeSystem="http://loinc.org" code="1234-5" codeDisplay="x"/>') +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  );
+  assert.ok(!module.json.states.clin.codes);
+  assert.ok(codes.includes('REQUIRED_FIELD_MISSING'));
+});
+
 test('the real package form term:annotations/annotation/coding reads the same', async () => {
   const real =
     '<term:annotations><term:annotation id="a1" text="x">' + coding(SNOMED, '271737000', 'Anemia (disorder)') +
@@ -470,9 +491,7 @@ test('ImagingStudy uses the first code as procedure_code', async () => {
   assert.deepEqual(module.json.states.clin.procedure_code, { system: 'SNOMED-CT', code: '16335031000119103', display: 'HRCT of chest' });
 });
 
-// The pathway files carry no clinical codes any more (term: is a separate extension), so
-// `--strict` cannot pass: every state that needs `codes` reports it. Everything else converts.
-test('all five real pathway files convert without errors; the only gap is the missing codes', async () => {
+test('all five real pathway files convert completely, even with --strict', async () => {
   const files = [
     'lung-cancer/synthea-lung-cancer.bpmn',
     'lung-cancer/anemia-submodule.bpmn',
@@ -480,15 +499,14 @@ test('all five real pathway files convert without errors; the only gap is the mi
     'lung-cancer/symptom-check-submodule.bpmn',
     'lung-cancer/lung-cancer-probabilities-submodule.bpmn'
   ];
-  const { modules, diagnostics } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: false });
+  const { modules, diagnostics } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
   assert.ok(modules.every((m) => m.ok));
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
 
-  // the only required-field gaps are the codes (`codes`, or `procedure_code` of an ImagingStudy);
-  // the Encounter codes live in synthea: and are complete
-  const gaps = diagnostics.items.filter((i) => i.code === 'REQUIRED_FIELD_MISSING');
-  assert.ok(gaps.length > 0);
-  assert.ok(gaps.every((i) => /needs: (codes|procedure_code)\./.test(i.message)), gaps.map((g) => g.message).join('\n'));
+  // nothing carries a remark about missing fields
+  const remarked = modules.flatMap((m) => Object.values(m.json.states)).filter((st) => st.remarks);
+  assert.equal(remarked.length, 0);
 
   // the Death states of the main pathway match upstream lung_cancer.json (Stage I-IV)
   const deaths = Object.values(modules.find((m) => m.fileBase === 'synthea_lung_cancer').json.states).filter((st) => st.type === 'Death');
@@ -948,8 +966,8 @@ test('--fuse-gateways keeps every non-gateway state and what each one leads to',
     'lung-cancer/symptom-check-submodule.bpmn', 'lung-cancer/lung-cancer-probabilities-submodule.bpmn'
   ];
   const inputs = files.map((path) => ({ path, xml: readFileSync(path, 'utf8') }));
-  const a = await convert(inputs, { strict: false });
-  const b = await convert(inputs, { strict: false, fuse: true });
+  const a = await convert(inputs, { strict: true });
+  const b = await convert(inputs, { strict: true, fuse: true });
   assert.equal(b.diagnostics.errorCount, 0, b.diagnostics.format().join('\n'));
 
   const targets = (s) => [s.direct_transition, ...(s.distributed_transition ?? []).map((t) => t.transition), ...(s.conditional_transition ?? []).map((t) => t.transition), ...(s.complex_transition ?? []).flatMap((t) => (t.distributions ?? [t]).map((d) => d.transition))].filter(Boolean);

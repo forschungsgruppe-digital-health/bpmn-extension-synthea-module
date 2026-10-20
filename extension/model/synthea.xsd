@@ -139,6 +139,9 @@
   <xsd:element name="stateTypeConfig" type="synthea:tStateTypeConfig"/>
   <xsd:complexType name="tStateTypeConfig">
     <xsd:attribute name="stateType" type="xsd:string"/>
+    <xsd:attribute name="codeSystem" type="xsd:string"/>
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="symptomConfig" type="synthea:tSymptomConfig"/>

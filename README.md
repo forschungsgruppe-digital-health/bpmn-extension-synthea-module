@@ -56,7 +56,7 @@ Veröffentlichung liegt bei den Autor:innen.
 |---|---|---|
 | **Moddle descriptor** | `extension/model/synthea.json` | The 21 `synthea:` types (and 8 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
 | **Properties panel** | `extension/src/` | One group "Synthea" in the bpmn-js properties panel, one collapsible section per type, showing only what fits the chosen State Type and what the converter accepts. |
-| **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 20 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. |
+| **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 21 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. |
 | **Converter** | `tools/bpmn2gmf/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
 | **Example pathway** | `lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
 | **Demo** | `demo/` | A bpmn-js modeler with the extension, for trying it by hand. Not published. |

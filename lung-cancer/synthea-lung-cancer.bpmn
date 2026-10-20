@@ -136,7 +136,7 @@
     <bpmn2:task id="Activity_07bpac5" name="ConditionOnset: Suspected Lung Cancer">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">ConditionOnset: Suspected Lung Cancer</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="162573006" codeDisplay="Suspected lung cancer (situation)" />
         <synthea:assignToAttributeConfig attribute="suspected_lung_cancer" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_I" />
       </bpmn2:extensionElements>
@@ -146,7 +146,7 @@
     <bpmn2:task id="Activity_16ao22e" name="Measurement: Pain_Vital">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
+        <synthea:stateTypeConfig stateType="Observation" codeSystem="http://loinc.org" code="72514-3" codeDisplay="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
         <synthea:observationConfig category="vital-signs" />
         <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
@@ -157,7 +157,7 @@
     <bpmn2:task id="Activity_0c1wieb" name="Procedure: Chest X-Ray">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Chest X-Ray</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="399208008" codeDisplay="Plain X-ray of chest (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="25" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn2:extensionElements>
@@ -179,7 +179,7 @@
     <bpmn2:task id="Activity_09sgw64" name="Procedure: Chest CT Scan">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Chest CT Scan</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="418891003" codeDisplay="Computed tomography of chest and abdomen (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="20" valueHigh="60" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -224,7 +224,7 @@
     <bpmn2:task id="Activity_0635bzj" name="Diagnosis: NSCLC">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="254637007" codeDisplay="Non-small cell lung cancer (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_diagnosis" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_III" />
       </bpmn2:extensionElements>
@@ -234,7 +234,7 @@
     <bpmn2:task id="Activity_1jeg2gt" name="Diagnosis: SCLC">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="254632001" codeDisplay="Small cell carcinoma of lung (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_diagnosis" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_III" />
       </bpmn2:extensionElements>
@@ -251,7 +251,7 @@
     <bpmn2:task id="Activity_0sogsbw" name="Procedure: Sputum Cytology (Phlegm)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Sputum Cytology (Phlegm)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="167995008" codeDisplay="Sputum microscopy (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_12hxynv</bpmn2:incoming>
@@ -260,7 +260,7 @@
     <bpmn2:task id="Activity_1f1l903" name="Procedure: Thoracentesis (Fluid)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Thoracentesis (Fluid)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="91602002" codeDisplay="Thoracentesis (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qe74a4</bpmn2:incoming>
@@ -269,7 +269,7 @@
     <bpmn2:task id="Activity_0j8mqtr" name="Procedure: Needle Biopsy (Cells)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Needle Biopsy (Cells)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="432231006" codeDisplay="Fine needle aspiration biopsy of lung (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_089g81c</bpmn2:incoming>
@@ -278,7 +278,7 @@
     <bpmn2:task id="Activity_0ekwe33" name="Procedure: Bronchoscopy (Tube)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Bronchoscopy (Tube)</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="85765000" codeDisplay="Fiberoptic bronchoscopy (procedure)" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0xltu63</bpmn2:incoming>
@@ -468,7 +468,7 @@
     <bpmn2:task id="Activity_0ttj8dz" name="Diagnosis: SCLC I">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC I</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="67811000119102" codeDisplay="Primary small cell malignant neoplasm of lung, TNM stage 1 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -478,7 +478,7 @@
     <bpmn2:task id="Activity_0icv8wf" name="Diagnosis: NSCLC I">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC I</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="424132000" codeDisplay="Non-small cell carcinoma of lung, TNM stage 1 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -488,7 +488,7 @@
     <bpmn2:task id="Activity_1vbbewj" name="Diagnosis: SCLC II">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC II</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="67821000119109" codeDisplay="Primary small cell malignant neoplasm of lung, TNM stage 2 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -498,7 +498,7 @@
     <bpmn2:task id="Activity_0hmnan5" name="Diagnosis: NSCLC II">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC II</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="425048006" codeDisplay="Non-small cell carcinoma of lung, TNM stage 2 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -508,7 +508,7 @@
     <bpmn2:task id="Activity_1rrsgkg" name="Diagnosis: SCLC III">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC III</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="67831000119107" codeDisplay="Primary small cell malignant neoplasm of lung, TNM stage 3 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -518,7 +518,7 @@
     <bpmn2:task id="Activity_1jv64d0" name="Diagnosis: NSCLC III">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC III</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="422968005" codeDisplay="Non-small cell carcinoma of lung, TNM stage 3 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -528,7 +528,7 @@
     <bpmn2:task id="Activity_1hn012p" name="Diagnosis: SCLC IV">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC IV</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="67841000119103" codeDisplay="Primary small cell malignant neoplasm of lung, TNM stage 4 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -538,7 +538,7 @@
     <bpmn2:task id="Activity_01lw1we" name="Diagnosis: NSCLC IV">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC IV</i18n:translation>
-        <synthea:stateTypeConfig stateType="ConditionOnset" />
+        <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="423121009" codeDisplay="Non-small cell carcinoma of lung, TNM stage 4 (disorder)" />
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -741,7 +741,7 @@
     <bpmn2:task id="Activity_CarePlan_Lung" name="CarePlanStart: Lung_Cancer_CarePlan">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">CarePlanStart: Lung_Cancer_CarePlan</i18n:translation>
-        <synthea:stateTypeConfig stateType="CarePlanStart" />
+        <synthea:stateTypeConfig stateType="CarePlanStart" codeSystem="http://snomed.info/sct" code="182964004" codeDisplay="Terminal care (regime/therapy)" />
         <synthea:carePlanActivity code="133918004" codeDisplay="Comfort measures (regime/therapy)" />
         <synthea:carePlanActivity code="408957008" codeDisplay="Chronic pain control management (procedure)" />
         <synthea:carePlanActivity code="243072006" codeDisplay="Cancer education (procedure)" />
@@ -753,7 +753,7 @@
     <bpmn2:task id="Activity_MRIBrain" name="Procedure: MRI Brain">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: MRI Brain</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="698354004" codeDisplay="Magnetic resonance imaging for measurement of brain volume (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="30" valueHigh="120" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>

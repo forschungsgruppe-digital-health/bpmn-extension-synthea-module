@@ -29,7 +29,7 @@
     <bpmn2:task id="Activity_11vsro0" name="Diagnostic Area: Record_CMP">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CMP</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="24323-8" codeDisplay="Comprehensive metabolic 2000 panel - Serum or Plasma" />
         <synthea:reportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />
         <synthea:reportObservation code="6299-2" codeDisplay="Urea nitrogen [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Urea Nitrogen" />
         <synthea:reportObservation code="38483-4" codeDisplay="Creatinine [Mass/volume] in Blood" category="laboratory" unit="mg/dL" valueShape="RANGE" value="2.5" valueHigh="3.5" />
@@ -55,7 +55,7 @@
     <bpmn2:task id="Activity_1rbjl3t" name="Diagnostic Area: Record_Urinalysis">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_Urinalysis</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="24357-6" codeDisplay="Urinalysis macro (dipstick) panel - Urine" />
         <synthea:reportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
         <synthea:reportObservation code="34533-0" codeDisplay="Odor of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167248002" valueCodeDisplay="Urine smell ammoniacal (finding)" />
         <synthea:reportObservation code="32167-9" codeDisplay="Clarity of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="300828005" valueCodeDisplay="Translucent (qualifier value)" />
@@ -81,7 +81,7 @@
     <bpmn2:task id="Activity_0g6jkau" name="Diagnostic Area: Record_CBC_Panel">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CBC_Panel</i18n:translation>
-        <synthea:stateTypeConfig stateType="DiagnosticReport" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="58410-2" codeDisplay="CBC panel - Blood by Automated count" />
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="0.5" valueHigh="5" />
         <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="12" valueHigh="17.5" />
@@ -130,7 +130,7 @@
     <bpmn2:task id="Activity_0rdcvio" name="Procedure: Hearing_Test">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Hearing_Test</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="398171003" codeDisplay="Hearing examination (procedure)" />
         <synthea:valueConfig valueShape="EXACT" value="30" unit="minutes" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -140,7 +140,7 @@
     <bpmn2:task id="Activity_1j8wfnd" name="Medication Prescription: Chemotherapy I">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Chemotherapy I</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" codeDisplay="Cisplatin 50 MG Injection" />
         <synthea:medicationConfig administration="true" />
         <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -166,7 +166,7 @@
     <bpmn2:task id="Activity_1wt86vs" name="Medication Prescription: SCLC Chemotherapy II">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: SCLC Chemotherapy II</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" codeDisplay="etoposide 100 MG Injection [Etopophos]" />
         <synthea:medicationConfig administration="true" />
         <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -177,7 +177,7 @@
     <bpmn2:task id="Activity_11qamf8" name="Medication Prescription: NSCLC Chemotherapy II">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: NSCLC Chemotherapy II</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" codeDisplay="PACLitaxel 100 MG Injection" />
         <synthea:medicationConfig administration="true" />
         <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -213,7 +213,7 @@
     <bpmn2:task id="Activity_04ktum8" name="Procedure: Radiation">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Radiation</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="703423002" codeDisplay="Combined chemotherapy and radiation therapy (procedure)" />
         <synthea:valueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -223,7 +223,7 @@
     <bpmn2:task id="Activity_1q2bpvc" name="Measurement: Pain_Vital">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
+        <synthea:stateTypeConfig stateType="Observation" codeSystem="http://loinc.org" code="72514-3" codeDisplay="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
         <synthea:observationConfig category="vital-signs" />
         <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="10" unit="{score}" decimals="0" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
@@ -239,7 +239,7 @@
     <bpmn2:task id="Activity_1yh177y" name="Imaging: Chest_CT">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Imaging: Chest_CT</i18n:translation>
-        <synthea:stateTypeConfig stateType="ImagingStudy" />
+        <synthea:stateTypeConfig stateType="ImagingStudy" codeSystem="http://snomed.info/sct" code="16335031000119103" codeDisplay="High resolution computed tomography of chest without contrast (procedure)" />
         <synthea:imagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>

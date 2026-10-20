@@ -155,11 +155,11 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       const firstOwn = groups.length;
 
       if (is(element, 'bpmn:StartEvent')) {
-        groups.push(createStateTypeGroup(element));
+        groups.push(...createStateTypeGroups(element));
       }
 
       if (is(element, 'bpmn:EndEvent')) {
-        groups.push(createStateTypeGroup(element));
+        groups.push(...createStateTypeGroups(element));
         groups.push(createEncounterContextGroup(element));
         if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
           groups.push(createReferencedByAttributeGroup(element));
@@ -168,7 +168,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       }
 
       if (is(element, 'bpmn:Task')) {
-        groups.push(createStateTypeGroup(element));
+        groups.push(...createStateTypeGroups(element));
         groups.push(createEncounterContextGroup(element));
         if (appliesTo(element, COUNTER_STATE_TYPES, COUNTER_TYPE)) {
           groups.push(createCounterGroup(element));
@@ -190,7 +190,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       }
 
       if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
-        groups.push(createStateTypeGroup(element));
+        groups.push(...createStateTypeGroups(element));
         groups.push(createEncounterContextGroup(element));
         if (is(element, 'bpmn:SubProcess')) {
           groups.push(...createStateDetailGroups(element));
@@ -202,7 +202,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       }
 
       if (is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent')) {
-        groups.push(createStateTypeGroup(element));
+        groups.push(...createStateTypeGroups(element));
         groups.push(createDelayGroup(element));
         groups.push(createEncounterContextGroup(element));
         if (appliesTo(element, ASSIGN_STATE_TYPES, ASSIGN_TO_ATTRIBUTE_TYPE)) {
@@ -225,7 +225,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       }
 
       if (is(element, 'bpmn:ExclusiveGateway')) {
-        groups.push(createStateTypeGroup(element));
+        groups.push(...createStateTypeGroups(element));
         groups.push(createGuardGroup(element));
         groups.push(...createNestedConditionGroups(element, getGuardCondition, ensureGuardCondition, 'synthea-guard-condition'));
       }
@@ -281,6 +281,38 @@ function createSyntheaGroup(sections) {
       entries: section.entries,
       isEdited: isSectionEdited
     }))
+  };
+}
+
+// The state types that carry a clinical code (the same list as tools/bpmn2gmf/codes.mjs).
+const CODED_STATE_TYPES = [
+  'ConditionOnset', 'ConditionEnd', 'AllergyOnset', 'AllergyEnd', 'MedicationOrder', 'MedicationEnd',
+  'CarePlanStart', 'CarePlanEnd', 'Procedure', 'ImagingStudy', 'Device', 'DeviceEnd',
+  'Observation', 'MultiObservation', 'DiagnosticReport', 'Death'
+];
+
+// State Type, followed by Code for the state types that carry one. A code that is already
+// set is shown whatever the state type.
+function createStateTypeGroups(element) {
+  const groups = [createStateTypeGroup(element)];
+  const config = getExtension(element, STATE_TYPE);
+
+  if (CODED_STATE_TYPES.includes(stateTypeOf(element)) || (config && config.get('code'))) {
+    groups.push(createCodeGroup(element));
+  }
+
+  return groups;
+}
+
+function createCodeGroup(element) {
+  return {
+    id: 'synthea-code',
+    label: 'Code',
+    entries: [
+      { id: 'synthea-code-system', element, component: CodeSystemEntry },
+      { id: 'synthea-code-value', element, component: CodeValueEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-code-display', element, component: CodeDisplayEntry, isEdited: isTextFieldEntryEdited }
+    ]
   };
 }
 
@@ -846,6 +878,9 @@ const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Re
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
 const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
+const CodeSystemEntry = makeSelecetEntry(STATE_TYPE, 'codeSystem', 'Code system', CODE_SYSTEM_OPTIONS);
+const CodeValueEntry = makeTextEntry(STATE_TYPE, 'code', 'Code');
+const CodeDisplayEntry = makeTextEntry(STATE_TYPE, 'codeDisplay', 'Display text');
 const EncounterCodeSystemEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeSystem', 'Encounter code system (e.g. SNOMED CT)', CODE_SYSTEM_OPTIONS);
 const EncounterCodeEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCode', 'Encounter code (e.g. 185347001)');
 const EncounterCodeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeDisplay', 'Encounter code display text');
@@ -938,7 +973,8 @@ function createStateDetailGroups(element) {
     groups.push(createImagingSeriesGroup(element));
   }
 
-  if (type === 'SetAttribute') {
+  // The distribution is an alternative to the value of a Set Attribute, which only a task offers.
+  if (type === 'SetAttribute' && is(element, 'bpmn:Task')) {
     groups.push(createDistributionGroup(element));
   }
 

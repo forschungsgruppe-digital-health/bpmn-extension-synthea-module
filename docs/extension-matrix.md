@@ -4,7 +4,7 @@ A matrix of the 21 `synthea:` types (plus the nested `Condition`) against the BP
 elements they can sit on. It answers two questions: **where does the properties panel
 offer a type**, and **where does the converter (`tools/bpmn2gmf`) actually read it**.
 
-`fhirmap:` and `term:` are not part of this matrix (they were removed from this repository and live as separate extensions).
+`fhirmap:` and `term:` are not part of this matrix (they were removed from this repository and live as separate extensions). The clinical code of a state is part of `StateTypeConfig` (`codeSystem`, `code`, `codeDisplay`); the panel shows it as the section "Code" for the state types that carry one.
 
 **Legend**
 
@@ -28,7 +28,7 @@ of one group "Synthea"; a mark in the matrix means that section appears. "Conver
 | `ProbabilityConfig` | — | — | — | — | — | — | — | P K | — | — |
 | `ConditionConfig` (+ nested `Condition`) | — | — | — | — | — | — | — | P K | — | — |
 | `GuardConfig` (`allow` is a `Condition`) | — | — | — | — | — | — | P K ¹ | — | — | — |
-| `DelayConfig` | — | — | — | P K ² | — | — | — | — | — | — |
+| `DelayConfig` | — | — | — | P K ² ⁵ | — | — | — | — | — | — |
 | `SubmoduleConfig` | — | — | — | — | P K | P K ⁴ | — | — | — | `CallSubmodule` |
 | `EncounterContext` | — | P K | P K | P K | P K | P K | — | — | — | — |
 | `EncounterReference` | — | — | P K | P K | — | — | — | — | — | `ConditionOnset`, `AllergyOnset` |
@@ -37,13 +37,13 @@ of one group "Synthea"; a mark in the matrix means that section appears. "Conver
 | `DistributionConfig` | — | — | P K | — | — | — | — | — | — | `SetAttribute` |
 | `AssignToAttributeConfig` | — | — | P K | P K | — | — | — | — | — | `ConditionOnset`, `AllergyOnset`, `MedicationOrder`, `CarePlanStart`, `Device` |
 | `ReferencedByAttributeConfig` | — | P K | P K | P K | — | — | — | — | — | `ConditionEnd`, `AllergyEnd`, `MedicationEnd`, `CarePlanEnd`, `DeviceEnd`, `Death` |
-| `SymptomConfig` | — | P | P K | P K | — | — | — | — | — | `Symptom` |
-| `ObservationConfig` | — | P | P K | P K | — | — | — | — | — | `Observation` |
+| `SymptomConfig` | — | — | P K | P K | — | — | — | — | — | `Symptom` |
+| `ObservationConfig` | — | — | P K | P K | — | — | — | — | — | `Observation` |
 | `ValueConfig` | — | P K ³ | P K | P K | — | — | — | — | — | `Observation`, `Symptom`, `Death`, `Procedure` |
-| `MedicationConfig` | — | P | P K | P K | — | — | — | — | — | `MedicationOrder` |
-| `CarePlanActivity` | — | P | P K | P K | — | — | — | — | — | `CarePlanStart` |
-| `ImagingStudySeries` | — | P | P K | P K | — | — | — | — | — | `ImagingStudy` |
-| `ReportObservation` | — | P | P K | P K | — | P K | — | — | — | `DiagnosticReport` |
+| `MedicationConfig` | — | — | P K | P K | — | — | — | — | — | `MedicationOrder` |
+| `CarePlanActivity` | — | — | P K | P K | — | — | — | — | — | `CarePlanStart` |
+| `ImagingStudySeries` | — | — | P K | P K | — | — | — | — | — | `ImagingStudy` |
+| `ReportObservation` | — | — | P K | P K | — | P K | — | — | — | `DiagnosticReport` |
 
 Footnotes
 
@@ -52,9 +52,13 @@ Footnotes
 3. On an end event only for `Death` (an end event can only be `Terminal` or `Death`).
 4. A sub-process is one state of type `DiagnosticReport`, `MultiObservation` or `CallSubmodule` (the last when a sub-process stands for a separate module, as in the draft and the mihub models); the panel offers only these three. What the sub-process contains is not converted (note `SUBPROCESS_CONTENT_IGNORED`): contained observations belong in `ReportObservation`.
 
-The detail types (`Symptom` … `ReportObservation`) are offered on end events by the panel only
-once a state type is chosen; the converter allows just `Terminal` and `Death` there, so they
-have no effect on an end event (hence **P**).
+5. The table shows where a type is meant to sit and where the panel offers it. The converter reads a type on
+   whatever element carries a state type that needs it, so a diagram written by hand can also hold, for example,
+   `DelayConfig` on a task with `stateType="Delay"`, `GuardConfig` on a task with `stateType="Guard"`,
+   or `CounterConfig` / `SetAttributeConfig` on an intermediate event. The panel offers none of these.
+
+The detail types (`Symptom` … `ReportObservation`) are not offered on an end event: the State Type list
+there is only `Terminal` and `Death`, so their groups never appear (a value that is already set stays visible).
 
 The replace menu also leaves out the loop and multi-instance toggles (the converter ignores them).
 
@@ -74,13 +78,14 @@ The panel's State Type list is limited per element to what the converter accepts
 
 ## 3. What the matrix shows (gaps)
 
-- **The start event and the gateway offer the State Type group** (since 2026-10-12): the converter reads `StateTypeConfig` there; without it a start event is `Initial` and a gateway `Simple` or `Guard`.
+- **The start event and the gateway offer the State Type group**: the converter reads `StateTypeConfig` there; without it a start event is `Initial` and a gateway `Simple` or `Guard`.
 - **Which state types a node kind may carry is fixed in the converter:** start `Initial`, end `Terminal`/`Death`, gateway `Simple`/`Guard`, call activity `CallSubmodule`, sub-process `DiagnosticReport`/`MultiObservation`/`CallSubmodule`, timer event `Delay`. Task and other events take any other state type (`resolve.mjs`, `ALLOWED_BY_KIND` and `infer`).
-- **Detail types on an end event have no effect** (the converter allows only `Terminal` and `Death` there); the panel limits the list, so only `Death`'s sections appear.
+- **Detail types are not offered on an end event:** the State Type list there is only `Terminal` and `Death`, and the converter allows no other type on an end event.
 
 ## 4. Sources and how this was derived
 
 - Panel column: `getGroups` and `createStateDetailGroups` in `extension/src/SyntheaPropertiesProvider.js`, plus `appliesTo` and the `*_STATE_TYPES` lists. Task, flow, gateway, start event and intermediate event were also checked in the demo (07./08.10.).
 - Converter column: where `emit.mjs`, `resolve.mjs`, `transitions.mjs`, `ir.mjs` and `encounters.mjs` read each type, and which node kinds `ir.mjs` accepts.
 - "Sits on" per type: `docs/implicit-rules.md`, section A.
+- Checked in the demo: a task with every one of the 28 state types, the start event, the exclusive gateway, the call activity, the end event, the text annotation and a sub-process (loaded from the draft in `drafts/`). An intermediate event was checked with every one of the 28 state types, and 40 sequence flows (probability, condition, and the combinators with their three sub-condition sections). The converter column was read from the code and, for intermediate and end events, run on small diagrams (a type on an event that the panel does not offer, such as `SetAttribute` or `Counter`, converts); not every cell has a test of its own.
 - Not generated by a script. When a type, a panel group or an emitter changes, update this table by hand.

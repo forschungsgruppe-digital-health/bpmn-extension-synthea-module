@@ -254,6 +254,20 @@
       </bpmn:extensionElements>
     </bpmn:task>
 
+    <!-- state-code-complete: a code with no codeSystem and no codeDisplay -->
+    <bpmn:task id="Task_CodeIncomplete" name="Code incomplete (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" code="399208008" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- state-code-complete: a Procedure with a LOINC code (a procedure takes SNOMED CT) -->
+    <bpmn:task id="Task_CodeWrongSystem" name="Code in the wrong system (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" codeSystem="http://loinc.org" code="1234-5" codeDisplay="x" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
     <!-- gateway-branches-require-condition-or-probability: two outgoing flows, neither has a
          synthea:conditionConfig or synthea:probabilityConfig -->
     <bpmn:exclusiveGateway id="Gateway_BranchesNoConfig" name="Branches (no condition)" />
