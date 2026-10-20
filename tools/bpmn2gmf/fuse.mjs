@@ -10,10 +10,13 @@
 //                 direct transition: that state takes over its conditional /
 //                 distributed transition
 //
+// A second pass (fuseComplexTransitions) folds a conditional state whose branches lead
+// into probability gateways into one complex_transition (see there).
+//
 // Kept as they are: states the modeler drew as a Simple task, gateways with
 // several predecessors (they would lose a branch), and gateways a PriorState
 // condition refers to by name.
-const TRANSITIONS = ['direct_transition', 'distributed_transition', 'conditional_transition'];
+const TRANSITIONS = ['direct_transition', 'distributed_transition', 'conditional_transition', 'complex_transition'];
 const transitionKey = (state) => TRANSITIONS.find((k) => k in state);
 
 function targetsOf(state) {
@@ -22,6 +25,9 @@ function targetsOf(state) {
   for (const k of ['distributed_transition', 'conditional_transition']) {
     for (const t of state[k] ?? []) out.push(t.transition);
   }
+  for (const t of state.complex_transition ?? []) {
+    for (const d of t.distributions ?? [t]) out.push(d.transition);
+  }
   return out;
 }
 
@@ -29,6 +35,9 @@ function retarget(state, rename) {
   if (state.direct_transition !== undefined) state.direct_transition = rename(state.direct_transition);
   for (const k of ['distributed_transition', 'conditional_transition']) {
     for (const t of state[k] ?? []) t.transition = rename(t.transition);
+  }
+  for (const t of state.complex_transition ?? []) {
+    for (const d of t.distributions ?? [t]) d.transition = rename(d.transition);
   }
 }
 
@@ -40,7 +49,7 @@ function referencedByCondition(states, name) {
     return walk(c.condition) || (c.conditions ?? []).some(walk);
   };
   return Object.values(states).some(
-    (s) => walk(s.allow) || (s.conditional_transition ?? []).some((t) => walk(t.condition))
+    (s) => walk(s.allow) || (s.conditional_transition ?? []).some((t) => walk(t.condition)) || (s.complex_transition ?? []).some((t) => walk(t.condition))
   );
 }
 
@@ -81,6 +90,46 @@ export function fuseGateways(states, candidates) {
       removed++;
       changed = true;
     }
+  }
+  return removed;
+}
+
+// "If condition, then these probabilities, otherwise those": a conditional state one of whose
+// branches leads into a probability gateway becomes one complex_transition. Each entry holds
+// the branch's condition and either its target or the gateway's distributions; the entry
+// without a condition (the default flow) comes last, as before. This is how upstream writes
+// it (anemia module, state "Female": pregnant -> 28 %, otherwise 7 %).
+//
+// The gateway is absorbed only if this state is its single predecessor, it is a plain
+// gateway (no remarks, not named by a PriorState condition, not drawn as a Simple task:
+// `candidates` are the gateway-born Simple states), and the state branches to it once.
+// Returns how many gateway states were removed.
+export function fuseComplexTransitions(states, candidates) {
+  let removed = 0;
+  const gateways = new Set(candidates);
+
+  for (const [name, state] of Object.entries(states)) {
+    if (!state.conditional_transition) continue;
+    const absorb = (t) => {
+      const g = states[t.transition];
+      if (!gateways.has(t.transition) || !g || g.type !== 'Simple' || g.remarks || !g.distributed_transition) return false;
+      if (t.transition === name || referencedByCondition(states, t.transition)) return false;
+      const predecessors = Object.entries(states).filter(([n, s]) => targetsOf(s).includes(t.transition));
+      const hits = state.conditional_transition.filter((x) => x.transition === t.transition).length;
+      return predecessors.length === 1 && predecessors[0][0] === name && hits === 1 && targetsOf(g).every((x) => x !== t.transition);
+    };
+    if (!state.conditional_transition.some(absorb)) continue;
+
+    const entries = state.conditional_transition.map((t) => {
+      const { condition } = t;
+      if (!absorb(t)) return t;
+      const gateway = states[t.transition];
+      delete states[t.transition];
+      removed++;
+      return { ...(condition ? { condition } : {}), distributions: gateway.distributed_transition };
+    });
+    delete state.conditional_transition;
+    state.complex_transition = entries;
   }
   return removed;
 }

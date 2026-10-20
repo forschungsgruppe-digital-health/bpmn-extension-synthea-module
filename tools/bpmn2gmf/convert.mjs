@@ -8,7 +8,7 @@ import { buildTransition } from './transitions.mjs';
 import { emitState } from './emit.mjs';
 import { verifyModule, verifySubmodules } from './verify.mjs';
 import { missingFields } from './required-fields.mjs';
-import { fuseGateways } from './fuse.mjs';
+import { fuseGateways, fuseComplexTransitions } from './fuse.mjs';
 import { assignPaths } from './layout.mjs';
 
 // `fileBase` is the module file name without extension, e.g. "anemia_submodule";
@@ -47,6 +47,8 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
         const gateways = [...module.nodes.values()].filter((n) => n.kind === 'gateway' && n.stateType === 'Simple').map((n) => n.stateName);
         const removed = fuseGateways(states, gateways);
         if (removed) diag.note('GATEWAYS_FUSED', `${removed} gateway state(s) merged into their neighbours.`, { module: module.fileBase });
+        const folded = fuseComplexTransitions(states, gateways);
+        if (folded) diag.note('COMPLEX_TRANSITION', `${folded} probability gateway(s) folded into a complex_transition of the conditional state before them.`, { module: module.fileBase });
       }
       // Structural checks are meaningless on a partial module (cascading noise).
       if (diag.forModule(module.fileBase).every((i) => i.level !== 'error')) {

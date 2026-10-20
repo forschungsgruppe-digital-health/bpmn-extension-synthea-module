@@ -949,8 +949,8 @@ test('--fuse-gateways keeps every non-gateway state and what each one leads to',
   const b = await convert(inputs, { strict: true, fuse: true });
   assert.equal(b.diagnostics.errorCount, 0, b.diagnostics.format().join('\n'));
 
-  const targets = (s) => [s.direct_transition, ...(s.distributed_transition ?? []).map((t) => t.transition), ...(s.conditional_transition ?? []).map((t) => t.transition)].filter(Boolean);
-  const body = (s) => { const { direct_transition, distributed_transition, conditional_transition, ...rest } = s; return rest; };
+  const targets = (s) => [s.direct_transition, ...(s.distributed_transition ?? []).map((t) => t.transition), ...(s.conditional_transition ?? []).map((t) => t.transition), ...(s.complex_transition ?? []).flatMap((t) => (t.distributions ?? [t]).map((d) => d.transition))].filter(Boolean);
+  const body = (s) => { const { direct_transition, distributed_transition, conditional_transition, complex_transition, ...rest } = s; return rest; };
 
   for (const [i, before] of a.modules.entries()) {
     const after = b.modules[i].json.states;
@@ -969,6 +969,40 @@ test('--fuse-gateways keeps every non-gateway state and what each one leads to',
       assert.deepEqual([...new Set(targets(after[name]))].sort(), [...new Set(through(name))].sort(), `${before.fileBase}: ${name}`);
     }
   }
+});
+
+test('--fuse-gateways: conditional branches into probability gateways become one complex_transition', async () => {
+  const body =
+    start() + task('A', 'a', setAttr('x', '1')) + gateway('G', 'g?', 'fd') + gateway('P1', 'p1') + task('B', 'b', setAttr('x', '2')) +
+    task('C', 'c', setAttr('x', '3')) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'G') + flow('fc', 'G', 'P1', cond(attrCond('x', '==', '1'))) + flow('fd', 'G', 'C') +
+    flow('p1b', 'P1', 'B', prob(0.28)) + flow('p1c', 'P1', 'C') +
+    flow('f5', 'B', 'E') + flow('f6', 'C', 'E');
+  const plain = await run(body);
+  assert.ok('p1' in plain.module.json.states);
+
+  const { module, diagnostics } = await fused(body);
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.ok(!('p1' in module.json.states) && !('g?' in module.json.states));
+  assert.deepEqual(module.json.states.a.complex_transition, [
+    {
+      condition: { condition_type: 'Attribute', attribute: 'x', operator: '==', value: 1 },
+      distributions: [{ transition: 'b', distribution: 0.28 }, { transition: 'c', distribution: 0.72 }]
+    },
+    { transition: 'c' }
+  ]);
+  assert.ok(!('conditional_transition' in module.json.states.a));
+});
+
+test('--fuse-gateways: a probability gateway with a second predecessor stays a state of its own', async () => {
+  const { module } = await fused(
+    start() + task('A', 'a', setAttr('x', '1')) + gateway('G', 'g?', 'fd') + gateway('P1', 'p1') + task('B', 'b', setAttr('x', '2')) +
+      task('C', 'c', setAttr('x', '3')) + end() +
+      flow('f1', 'S', 'A') + flow('f2', 'A', 'G') + flow('fc', 'G', 'P1', cond(attrCond('x', '==', '1'))) + flow('fd', 'G', 'B') +
+      flow('f3', 'B', 'P1') + flow('p1b', 'P1', 'C', prob(0.5)) + flow('p1e', 'P1', 'E') + flow('f6', 'C', 'E')
+  );
+  assert.ok('p1' in module.json.states);
+  assert.ok(!('complex_transition' in module.json.states.a));
 });
 
 // ---- SetAttribute from a distribution or another attribute -------------------------------------

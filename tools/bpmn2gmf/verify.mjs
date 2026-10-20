@@ -9,6 +9,7 @@ export function verifyModule(module, states, diag, { strict = false } = {}) {
     if (s.direct_transition) return [s.direct_transition];
     if (s.distributed_transition) return s.distributed_transition.map((t) => t.transition);
     if (s.conditional_transition) return s.conditional_transition.map((t) => t.transition);
+    if (s.complex_transition) return s.complex_transition.flatMap((t) => (t.distributions ?? [t]).map((d) => d.transition));
     return [];
   };
 
@@ -34,10 +35,11 @@ export function verifyModule(module, states, diag, { strict = false } = {}) {
         { ...where, element: name }
       );
     }
-    if (s.distributed_transition) {
-      const numeric = s.distributed_transition.map((x) => x.distribution).filter((d) => typeof d === 'number');
+    for (const distribution of [s.distributed_transition, ...(s.complex_transition ?? []).map((t) => t.distributions)]) {
+      if (!distribution) continue;
+      const numeric = distribution.map((x) => x.distribution).filter((d) => typeof d === 'number');
       const sum = numeric.reduce((a, b) => a + b, 0);
-      if (numeric.length === s.distributed_transition.length && Math.abs(sum - 1) > 1e-6) {
+      if (numeric.length === distribution.length && Math.abs(sum - 1) > 1e-6) {
         diag.warn('DISTRIBUTION_SUM', `Distribution sums to ${sum}, not 1.0.`, { ...where, element: name });
       }
     }

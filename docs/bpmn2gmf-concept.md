@@ -27,6 +27,8 @@ Inventory of the five `lung-cancer/*.bpmn` files:
 | `boundaryEvent` (timer) | **1** | **no GMF equivalent** — see Decision 4 |
 | i18n, `cp:` (BPMN4CP), DI shapes/edges | many | ignored |
 
+The counts are those of the first analysis (2026-10-05) and are kept as the reasoning behind the design. Since then: `term:coding` is 44 (the anemia module got its 14 codes), `fhirmap:resourceMapping` is 47, and the `boundaryEvent` is gone (replaced by four `Death` states, Decision 4). The other counts changed with the added states and fields, but they only served to size the work.
+
 Spike result: all five files load via `bpmn-moddle` with the existing `synthea.json` descriptor and **zero warnings**; `term:coding` and `fhirmap:resourceMapping` arrive as generic elements whose attributes are plain properties (`system`, `code`, `display`, `resourceType`). No extra descriptors and no new dependencies are needed to read the models.
 
 For reference, the real Synthea `lung_cancer.json` has 99 states (e.g. 6× `Encounter`/`EncounterEnd`, 11× `ConditionOnset`, 11× `Procedure`, 10× `Symptom`, 9× `SetAttribute`), 80 direct / 9 conditional / 9 distributed transitions, and `"gmf_version": 1`.
@@ -37,7 +39,7 @@ For reference, the real Synthea `lung_cancer.json` has 99 states (e.g. 6× `Enco
 
 **In scope:** one or more `.bpmn` files → one `.json` per process (main module + submodules), written so that Synthea sees the right modules and submodules: a module nobody calls at the top, the modules it calls in a subdirectory named after it (implicit-rules Section E, corrected after the engine test, §12).
 
-**Out of scope (for now):** the reverse direction (GMF → BPMN); `lookup_table_transition`, `type_of_care_transition`, `complex_transition`; running Synthea itself; the mihub governance models (they need clinical remodelling first, see earlier feasibility assessment).
+**Out of scope (for now):** the reverse direction (GMF → BPMN); `lookup_table_transition`, `type_of_care_transition`; running Synthea itself; the mihub governance models (they need clinical remodelling first, see earlier feasibility assessment).
 
 **Constraints** (from `AGENTS.md`): Node ≥ 22, ES modules, no new runtime dependency (only `bpmn-moddle`, already a devDependency, plus `node:test`), `npm run validate` must stay green, and the tool's exit code is the source of truth.
 
@@ -150,7 +152,7 @@ Derived from the *outgoing edges* of every emitted state:
 | none | no transition (only legal on `Terminal`/`Death`-terminal states) |
 | mixed kinds on one node | **error** |
 
-**Gateways:** by default every exclusive gateway becomes its own `Simple` (or `Guard`) state carrying the transition — always correct (implicit-rules Section D). `--fuse-gateways` removes the ones that only exist for the diagram: a join (pass-through) is bypassed, and a branching gateway entered from exactly one state through a direct transition moves onto that state. Kept: gateways with several predecessors (they would lose a branch), gateways a `PriorState` condition names, and `Simple` states the modeler drew. Over the five real files this takes the output from 168 to 142 states (`Simple` 39 → 13); a test checks that every other state and what it can lead to stay the same. Chained gateways would need `complex_transition` and are left alone.
+**Gateways:** by default every exclusive gateway becomes its own `Simple` (or `Guard`) state carrying the transition — always correct (implicit-rules Section D). `--fuse-gateways` removes the ones that only exist for the diagram: a join (pass-through) is bypassed, and a branching gateway entered from exactly one state through a direct transition moves onto that state. Kept: gateways with several predecessors (they would lose a branch), gateways a `PriorState` condition names, and `Simple` states the modeler drew. Over the five real files this takes the output from 168 to 142 states (`Simple` 39 → 13); a test checks that every other state and what it can lead to stay the same. A conditional state whose branches lead into probability gateways ("if pregnant, 28 %, otherwise 7 %") becomes one `complex_transition`: each entry holds the branch's condition and either its target or the gateway's `distributions`, the default flow comes last as the entry without a condition. A probability gateway is absorbed only when that state is its single predecessor; in the anemia module this folds three gateways (`Anemia_Encounter`, `Patient pregnant?`).
 
 ### 4.6 Conditions
 `synthea:condition` → GMF condition object:

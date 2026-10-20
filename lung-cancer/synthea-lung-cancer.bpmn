@@ -1099,10 +1099,6 @@ biopsy of lung (procedure)</bpmn2:text>
       <bpmn2:text>Encounter: Diagnosis IV (outpatient)</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:association id="Association_0uknex9" associationDirection="None" sourceRef="Flow_1260oh2" targetRef="TextAnnotation_09jpaas" />
-    <bpmn2:textAnnotation id="TextAnnotation_06q0fxr">
-      <bpmn2:text>CarePlan: Lung_Cancer_CarePlan</bpmn2:text>
-    </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_1y26obi" associationDirection="None" sourceRef="Flow_1260oh2" targetRef="TextAnnotation_06q0fxr" />
     <bpmn2:textAnnotation id="TextAnnotation_1eqwjjf">
       <bpmn2:text>SNOMED-CT: 418891003
 - Computed tomography of chest and abdomen (procedure)</bpmn2:text>
@@ -1452,10 +1448,6 @@ biopsy of lung (procedure)</bpmn2:text>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_09jpaas_di" bpmnElement="TextAnnotation_09jpaas">
         <dc:Bounds x="8750" y="226" width="102.54965698787493" height="57" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_06q0fxr_di" bpmnElement="TextAnnotation_06q0fxr">
-        <dc:Bounds x="8610" y="226" width="102.54965698787493" height="57" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1eqwjjf_di" bpmnElement="TextAnnotation_1eqwjjf">
@@ -1987,10 +1979,6 @@ biopsy of lung (procedure)</bpmn2:text>
       <bpmndi:BPMNEdge id="Association_0uknex9_di" bpmnElement="Association_0uknex9">
         <di:waypoint x="8712.5" y="313" />
         <di:waypoint x="8752" y="283" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1y26obi_di" bpmnElement="Association_1y26obi">
-        <di:waypoint x="8712.5" y="313" />
-        <di:waypoint x="8689" y="283" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1j7l9vz_di" bpmnElement="Association_1j7l9vz">
         <di:waypoint x="3638" y="140" />
