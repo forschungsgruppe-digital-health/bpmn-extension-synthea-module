@@ -159,10 +159,10 @@ function stateTypeValuesFor(element) {
 const STATE_TYPE_VALUES = [
   'Initial', 'Terminal', 'Simple', 'Guard', 'Delay', 'SetAttribute', 'Counter',
   'CallSubmodule', 'ConditionOnset', 'ConditionEnd',
-  'AllergyOnset', 'AllergyEnd', 'MedicationOrder', 'MedicationEnd', 'CarePlanStart',
-  'CarePlanEnd', 'Procedure', 'ImagingStudy', 'Device', 'DeviceEnd', 'SupplyList',
-  'VitalSign', 'Observation', 'MultiObservation', 'DiagnosticReport', 'Symptom',
-  'Death', 'Physiology'
+  'MedicationOrder', 'MedicationEnd', 'CarePlanStart',
+  'CarePlanEnd', 'Procedure', 'ImagingStudy', 'Device', 'DeviceEnd',
+  'Observation', 'MultiObservation', 'DiagnosticReport', 'Symptom',
+  'Death'
 ];
 
 
@@ -313,7 +313,11 @@ function createStateTypeGroups(element) {
   const groups = [createStateTypeGroup(element)];
   const config = getExtension(element, STATE_TYPE);
 
-  if (CODED_STATE_TYPES.includes(stateTypeOf(element)) || (config && config.get('code'))) {
+  // An end state or Death names the ended entity by its code or by an attribute, not both:
+  // with "Attribute" chosen the Code section is hidden (unless a code is still there).
+  const namesByAttribute = REFERENCED_STATE_TYPES.includes(stateTypeOf(element)) && !!getExtension(element, REFERENCED_BY_ATTRIBUTE_TYPE);
+  const hasCode = !!(config && config.get('code'));
+  if ((CODED_STATE_TYPES.includes(stateTypeOf(element)) && !namesByAttribute) || hasCode) {
     groups.push(createCodeGroup(element));
   }
 
@@ -539,14 +543,51 @@ function createAssignToAttributeGroup(element) {
   };
 }
 
+// "Names the ended entity by": its code (or, for an end state, the nearest earlier start state),
+// or an attribute that an earlier state assigned. The choice is the presence of the config; picking
+// the attribute clears the code, picking the code removes the reference.
 function createReferencedByAttributeGroup(element) {
-  return {
-    id: 'synthea-referenced-by-attribute',
-    label: 'Referenced by Attribute',
-    entries: [
-      { id: 'synthea-referenced-by-attribute-value', element, component: ReferencedByAttributeEntry, isEdited: isTextFieldEntryEdited }
-    ]
+  const byAttribute = !!getExtension(element, REFERENCED_BY_ATTRIBUTE_TYPE);
+  const entries = [{ id: 'synthea-referenced-by-attribute-mode', element, component: ReferencedByModeEntry }];
+  if (byAttribute) {
+    entries.push({ id: 'synthea-referenced-by-attribute-value', element, component: ReferencedByAttributeEntry, isEdited: isTextFieldEntryEdited });
+  }
+  return { id: 'synthea-referenced-by-attribute', label: 'Referenced by Attribute', entries };
+}
+
+function ReferencedByModeEntry(props) {
+  const { element, id } = props;
+  const modeling = useService('modeling');
+  const bpmnFactory = useService('bpmnFactory');
+  const translate = useService('translate');
+
+  const death = stateTypeOf(element) === 'Death';
+  const getValue = () => (getExtension(element, REFERENCED_BY_ATTRIBUTE_TYPE) ? 'ATTRIBUTE' : 'CODE');
+
+  const setValue = (value) => {
+    if (value === 'ATTRIBUTE') {
+      ensureExtension(element, REFERENCED_BY_ATTRIBUTE_TYPE, bpmnFactory, modeling);
+      const state = getExtension(element, STATE_TYPE);
+      if (state) {
+        modeling.updateModdleProperties(element, state, { codeSystem: undefined, code: undefined, codeDisplay: undefined });
+      }
+      return;
+    }
+    const extensionElements = getBusinessObject(element).get('extensionElements');
+    const reference = (extensionElements?.get('values') || []).find((v) => is(v, REFERENCED_BY_ATTRIBUTE_TYPE));
+    if (reference) {
+      modeling.updateModdleProperties(element, extensionElements, {
+        values: extensionElements.get('values').filter((v) => v !== reference)
+      });
+    }
   };
+
+  const getOptions = () => [
+    { value: 'CODE', label: translate(death ? 'Code of the cause (optional)' : 'Code, or the nearest earlier start state') },
+    { value: 'ATTRIBUTE', label: translate('Attribute set by an earlier state') }
+  ];
+
+  return SelectEntry({ element, id, label: translate(death ? 'Cause of death by' : 'Names the ended entity by'), getValue, setValue, getOptions });
 }
 
 // --- generic flat-extension entry factories -----------------------------
@@ -862,7 +903,9 @@ function makeKindSelectEntry(type, kindProp, label, options, fieldsByKind, fallb
   };
 }
 
-function makeSelecetEntry(type, prop, label, values) {
+// `clears` maps a chosen value to the fields of the same config that no longer apply and are
+// cleared with it (a high value on an exact value, for example).
+function makeSelecetEntry(type, prop, label, values, clears = {}) {
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -875,15 +918,16 @@ function makeSelecetEntry(type, prop, label, values) {
     };
 
     const setValue = (value) => {
+      const cleared = Object.fromEntries((clears[value || ''] ?? []).map((field) => [field, undefined]));
       if (!value) {
         const config = getExtension(element, type);
         if (config) {
-          modeling.updateModdleProperties(element, config, { [prop]: undefined });
+          modeling.updateModdleProperties(element, config, { [prop]: undefined, ...cleared });
         }
         return;
       }
       const config = ensureExtension(element, type, bpmnFactory, modeling);
-      modeling.updateModdleProperties(element, config, { [prop]: value });
+      modeling.updateModdleProperties(element, config, { [prop]: value, ...cleared });
     };
 
     const getOptions = () => [
@@ -895,7 +939,7 @@ function makeSelecetEntry(type, prop, label, values) {
   };
 }
 
-const DelayShapeEntry = makeSelecetEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES);
+const DelayShapeEntry = makeSelecetEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES, { EXACT: ['delayValueHigh'], '': ['delayValueHigh'] });
 const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value (exact value, or range low)');
 const DelayValueHighEntry = makeTextEntry(DELAY_TYPE, 'delayValueHigh', 'Delay value, high (range high, only for RANGE)');
 const DelayUnitEntry = makeTextEntry(DELAY_TYPE, 'delayUnit', 'Delay unit');
@@ -923,7 +967,8 @@ const GuardConditionNegateEntry = makeNestedConditionCheckboxEntry(getGuardCondi
 
 const GUARD_CONDITION_FIELD_ENTRIES = buildConditionFieldEntries(getGuardCondition, ensureGuardCondition);
 
-function makeCheckboxEntry(type, prop, label) {
+// `clearedWhenOn`: fields of the same config that no longer apply once the box is ticked.
+function makeCheckboxEntry(type, prop, label, clearedWhenOn = []) {
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -937,7 +982,8 @@ function makeCheckboxEntry(type, prop, label) {
 
     const setValue = (value) => {
       const config = ensureExtension(element, type, bpmnFactory, modeling);
-      modeling.updateModdleProperties(element, config, { [prop]: !!value });
+      const cleared = value ? Object.fromEntries(clearedWhenOn.map((field) => [field, undefined])) : {};
+      modeling.updateModdleProperties(element, config, { [prop]: !!value, ...cleared });
     };
 
     return CheckboxEntry({ element, id, label: translate(label), getValue, setValue });
@@ -947,7 +993,8 @@ function makeCheckboxEntry(type, prop, label) {
 const SubmoduleEntry = makeTextEntry(SUBMODULE_TYPE, 'submodule', 'Submodule reference');
 const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'requiresEncounterContext', 'Encounter context');
 const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
-const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter');
+const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter',
+  ['encounterClass', 'encounterCodeSystem', 'encounterCode', 'encounterCodeDisplay']);
 const EncounterClassEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterClass', 'Encounter class (required for non-wellness encounters)', ENCOUNTER_CLASS_VALUES);
 const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Reason (attribute name or State_Name)');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
@@ -962,7 +1009,7 @@ const EncounterCodeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encount
 
 const SymptomNameEntry = makeTextEntry(SYMPTOM_TYPE, 'symptom', 'Symptom name (e.g. Cough)');
 const ObservationCategoryEntry = makeSelecetEntry(OBSERVATION_TYPE, 'category', 'Observation category', OBSERVATION_CATEGORY_VALUES);
-const ValueShapeEntry = makeSelecetEntry(VALUE_TYPE, 'valueShape', 'Value: exact or range', ['EXACT', 'RANGE']);
+const ValueShapeEntry = makeSelecetEntry(VALUE_TYPE, 'valueShape', 'Value: exact or range', ['EXACT', 'RANGE'], { EXACT: ['valueHigh'], '': ['valueHigh'] });
 const ValueEntry = makeTextEntry(VALUE_TYPE, 'value', 'Value (EXACT) / lowest value (RANGE)', { parse: parseFloat });
 const ValueHighEntry = makeTextEntry(VALUE_TYPE, 'valueHigh', 'Highest value (RANGE only)', { parse: parseFloat });
 const ValueDecimalsEntry = makeTextEntry(VALUE_TYPE, 'decimals', 'Decimals (optional)', { parse: parseInt });

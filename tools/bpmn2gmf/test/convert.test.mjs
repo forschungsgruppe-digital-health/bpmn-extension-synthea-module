@@ -1169,6 +1169,28 @@ test('a probability: fixed and attribute together, or an attribute without a def
   assert.ok((await branch('<synthea:probabilityConfig probabilityKind="FIXED"/>')).codes.includes('TRANSITION_PROBABILITY_EMPTY'));
 });
 
+test('AllergyOnset is reported as incomplete: allergy_type and category are required and not modeled', async () => {
+  const bare = await clinical('AllergyOnset', coding(SNOMED, '91935009', 'Allergy to peanuts'));
+  assert.match(bare.module.json.states.clin.remarks[0], /allergy_type, category/);
+});
+
+test('leftovers are reported: delay high on an exact delay, wellness with a class, a reference with a code, a config the state does not read', async () => {
+  const delay = await run(start() + timer('T', 'wait', '<synthea:delayConfig delayShape="EXACT" delayValue="1" delayValueHigh="3" delayUnit="days"/>') + end() + flow('f1', 'S', 'T') + flow('f2', 'T', 'E'));
+  assert.ok(delay.codes.includes('DELAY_CONFIG_INVALID'));
+
+  const enc = await run(start() + task('A', 'a', stateType('Procedure') + coding(SNOMED, '1', 'p') + '<synthea:encounterContext requiresEncounterContext="true" encounterId="E1" wellness="true" encounterClass="inpatient"/>') + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'));
+  assert.ok(enc.codes.includes('ENCOUNTER_WELLNESS_CLASS'));
+
+  const death = await run(start() + task('A', 'a', stateType('ConditionOnset') + coding(SNOMED, '1', 'Dx') + '<synthea:assignToAttributeConfig attribute="dx"/>') +
+    '<bpmn2:endEvent id="E" name="Death"><bpmn2:extensionElements>' + '<synthea:stateTypeConfig stateType="Death" codeSystem="http://snomed.info/sct" code="1" codeDisplay="Dx"/>' + '<synthea:referencedByAttributeConfig attribute="dx"/></bpmn2:extensionElements></bpmn2:endEvent>' +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'E'));
+  assert.ok(death.codes.includes('CODE_NOT_USED'));
+  assert.equal(death.module.json.states.E?.referenced_by_attribute ?? death.module.json.states.Death?.referenced_by_attribute, 'dx');
+
+  const stray = await run(start() + task('A', 'a', stateType('Simple') + '<synthea:counterConfig attribute="x" action="increment"/>') + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'));
+  assert.ok(stray.codes.includes('CONFIG_IGNORED'));
+});
+
 test('an Attribute condition "== nil" is an error: it compares with the text "nil"', async () => {
   const eq = await withCondition(attrCond('anemia', '==', 'nil'));
   assert.ok(eq.codes.includes('CONDITION_INVALID'));

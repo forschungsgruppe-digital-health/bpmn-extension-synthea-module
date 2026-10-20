@@ -274,5 +274,45 @@
     <bpmn:sequenceFlow id="Flow_BranchNoConfig_A" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_Counter_NoConfig" />
     <bpmn:sequenceFlow id="Flow_BranchNoConfig_B" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_SetAttribute_NoConfig" />
 
+  
+    <!-- alternatives-not-mixed: a fixed value and a copy of another attribute on one Set Attribute -->
+    <bpmn:task id="Task_SetTwoWays" name="Set two ways (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="x" value="3" valueAttribute="y" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- alternatives-not-mixed: wellness together with an encounter class -->
+    <bpmn:task id="Task_WellnessAndClass" name="Wellness and class (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="E_mixed" wellness="true" encounterClass="inpatient" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+  
+    <!-- alternatives-not-mixed: delayValueHigh on an exact delay -->
+    <bpmn:intermediateCatchEvent id="Event_DelayHighOnExact" name="Delay high on exact (bad)">
+      <bpmn:extensionElements>
+        <synthea:DelayConfig delayShape="EXACT" delayValue="1" delayValueHigh="3" delayUnit="days" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- alternatives-not-mixed: valueHigh on an exact value -->
+    <bpmn:task id="Task_ValueHighOnExact" name="Value high on exact (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Observation" />
+        <synthea:ValueConfig valueShape="EXACT" value="1" valueHigh="3" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- alternatives-not-mixed: an end state with a code and a reference to an attribute -->
+    <bpmn:task id="Task_ReferenceAndCode" name="Reference and code (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ConditionEnd" codeSystem="http://snomed.info/sct" code="1" codeDisplay="x" />
+        <synthea:ReferencedByAttributeConfig attribute="dx" />
+      </bpmn:extensionElements>
+    </bpmn:task>
   </bpmn:process>
 </bpmn:definitions>

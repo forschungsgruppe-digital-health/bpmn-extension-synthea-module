@@ -8,7 +8,7 @@ const SYSTEMS = {
 
 export const systemName = (uri) => SYSTEMS[uri] ?? null;
 
-// Which code systems each state type accepts (implicit-rules.md, "term:" table).
+// Which code systems each state type accepts (implicit-rules.md, code system table).
 export const SYSTEMS_BY_STATE_TYPE = {
   ConditionOnset: ['SNOMED-CT'],
   ConditionEnd: ['SNOMED-CT'],

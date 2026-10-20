@@ -261,8 +261,11 @@ Attribute": `attribute` plus the choice **"Value as"**, which decides which fiel
 A leftover field of another choice is an error; none sets the attribute to
 `null`. (Synthea's `valueCode`/`range`/`expression` aren't modeled. The
 States wiki lists neither `distribution` nor `value_attribute` for
-`SetAttribute`; both are used by the upstream module and follow the
-`distribution` format the wiki documents for `Delay`.)
+`SetAttribute`; both exist in the engine (`State.java`, class `SetAttribute`: `distribution`
+from GMF 2, `valueAttribute`) and are used by the upstream module; the
+`distribution` follows the format the wiki documents for `Delay`. If several
+are set, Synthea takes the first in the order expression, range, series data,
+distribution, code, attribute, which is why the converter rejects a mix.)
 
 **`CounterConfig`** (Task, `stateType="Counter"`) → group "Counter":
 `attribute`, `action` (`increment`/`decrement`), `amount` (defaults to 1 if
@@ -398,7 +401,7 @@ diagram order is ambiguous.
 **How:** on the *start* state (e.g. `MedicationOrder`), group "Assign to
 Attribute" → pick any attribute name, e.g. `chemotherapy_i_order`. On the
 *end* state (e.g. the matching `MedicationEnd`), group "Referenced by
-Attribute" → the **same** attribute name. That's the whole mechanism — no ID
+Attribute" → choose "Attribute set by an earlier state" and enter the **same** attribute name (the other choice, "Code", names the entity by its code instead, and the Code section reappears; the panel clears the code when you pick the attribute and removes the reference when you pick the code, because Synthea takes one of the two). That's the whole mechanism — no ID
 reference, just a matching string on both ends.
 
 ```xml

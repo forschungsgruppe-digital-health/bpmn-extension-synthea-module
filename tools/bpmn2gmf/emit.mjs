@@ -18,6 +18,13 @@ const codesField = (node, ctx) => {
   return codes.length ? { codes } : {};
 };
 
+// Synthea names the ended entity in one way only; a reference to an attribute wins over a code.
+function warnCodeNotUsed(node, ctx) {
+  if (first(node.ext, 'synthea:StateTypeConfig')?.code) {
+    ctx.warn('CODE_NOT_USED', `${node.stateType} refers to an attribute (referencedByAttributeConfig), so its code is not written; Synthea takes one or the other.`);
+  }
+}
+
 // For an *End state without an explicit link: the nearest upstream Onset/Order/Start
 // state of the matching type on any path ("pairing by flow order", implicit-rules E).
 function upstream(node, module, onsetType) {
@@ -42,7 +49,10 @@ function upstream(node, module, onsetType) {
 // matching start state found upstream.
 const endState = (onsetType, pairField) => (node, ctx) => {
   const referenced = first(node.ext, 'synthea:ReferencedByAttributeConfig')?.attribute;
-  if (referenced) return { referenced_by_attribute: referenced };
+  if (referenced) {
+    warnCodeNotUsed(node, ctx);
+    return { referenced_by_attribute: referenced };
+  }
 
   const codes = codesField(node, ctx);
   if (codes.codes) return codes;
@@ -187,6 +197,9 @@ const EMITTERS = {
     if (!d.delayUnit || Number.isNaN(quantity)) {
       return ctx.report('DELAY_CONFIG_INVALID', 'delayConfig needs a numeric delayValue and a delayUnit.');
     }
+    if (d.delayShape !== 'RANGE' && d.delayValueHigh !== undefined && d.delayValueHigh !== '') {
+      return ctx.report('DELAY_CONFIG_INVALID', 'delayValueHigh only belongs to a RANGE delay; set delayShape="RANGE" or remove it.');
+    }
     if (d.delayShape === 'RANGE') {
       const high = Number(d.delayValueHigh);
       if (Number.isNaN(high)) return ctx.report('DELAY_CONFIG_INVALID', 'RANGE delay needs a numeric delayValueHigh.');
@@ -249,6 +262,8 @@ const EMITTERS = {
   // Start states: code + optional assign_to_attribute. target_encounter on
   // ConditionOnset/AllergyOnset waits for the encounter synthesis (phase 3).
   ConditionOnset: onsetEmitter(true),
+  // Synthea also requires allergy_type and category; the extension has no fields for them,
+  // so verify reports them as missing (the panel does not offer AllergyOnset).
   AllergyOnset: onsetEmitter(true),
   // administration: the medication is given during the encounter (inpatient) instead of prescribed.
   MedicationOrder(node, ctx) {
@@ -342,6 +357,7 @@ const EMITTERS = {
   Death(node, ctx) {
     const referenced = first(node.ext, 'synthea:ReferencedByAttributeConfig')?.attribute;
     const value = readValue(node, ctx, 'inside');
+    if (referenced) warnCodeNotUsed(node, ctx);
     const cause = referenced ? { referenced_by_attribute: referenced } : codesField(node, ctx);
     return { ...cause, ...(value ? value.value : {}) };
   }
@@ -389,6 +405,25 @@ function onsetEmitter(allowsTarget) {
   };
 }
 
+// The state types that read each configuration; on any other state it is ignored (and said so).
+const ASSIGNING = ['ConditionOnset', 'AllergyOnset', 'MedicationOrder', 'CarePlanStart', 'Device'];
+const CONFIG_READ_BY = {
+  'synthea:GuardConfig': ['Guard'],
+  'synthea:DelayConfig': ['Delay'],
+  'synthea:SubmoduleConfig': ['CallSubmodule'],
+  'synthea:CounterConfig': ['Counter'],
+  'synthea:SetAttributeConfig': ['SetAttribute'],
+  'synthea:AssignToAttributeConfig': ASSIGNING,
+  'synthea:ReferencedByAttributeConfig': ['ConditionEnd', 'AllergyEnd', 'MedicationEnd', 'CarePlanEnd', 'DeviceEnd', 'Death'],
+  'synthea:SymptomConfig': ['Symptom'],
+  'synthea:ObservationConfig': ['Observation', 'MultiObservation'],
+  'synthea:ValueConfig': ['Observation', 'Symptom', 'Death', 'Procedure'],
+  'synthea:MedicationConfig': ['MedicationOrder'],
+  'synthea:CarePlanActivity': ['CarePlanStart'],
+  'synthea:ImagingStudySeries': ['ImagingStudy'],
+  'synthea:ReportObservation': ['DiagnosticReport', 'MultiObservation']
+};
+
 export function emitState(node, module, diag) {
   const where = { module: module.fileBase, element: node.id, label: node.label };
   const emitter = EMITTERS[node.stateType];
@@ -405,6 +440,9 @@ export function emitState(node, module, diag) {
       failed = true;
       return null;
     },
+    warn(code, message) {
+      diag.warn(code, message, where);
+    },
     // codes in the systems this state type accepts; other codings on the same
     // element are left out and mentioned once
     codes() {
@@ -419,6 +457,12 @@ export function emitState(node, module, diag) {
       return result;
     }
   };
+
+  for (const [type, states] of Object.entries(CONFIG_READ_BY)) {
+    if (node.ext[type]?.length && !states.includes(node.stateType)) {
+      diag.warn('CONFIG_IGNORED', `${type} is not read for state type ${node.stateType} (it belongs to ${states.join(', ')}).`, where);
+    }
+  }
 
   const fields = emitter(node, ctx);
   if (failed || !fields) return null;

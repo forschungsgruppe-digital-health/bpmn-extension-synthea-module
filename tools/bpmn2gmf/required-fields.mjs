@@ -13,7 +13,7 @@ export const REQUIRED_FIELDS = {
   Counter: ['attribute', 'action'],
   CallSubmodule: ['submodule'],
   ConditionOnset: ['codes'],
-  AllergyOnset: ['codes'],
+  AllergyOnset: ['allergy_type', 'category', 'codes'],
   MedicationOrder: ['codes'],
   CarePlanStart: ['codes'],
   Procedure: ['codes'],

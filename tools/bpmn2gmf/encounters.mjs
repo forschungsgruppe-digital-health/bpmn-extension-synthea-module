@@ -144,6 +144,10 @@ export function synthesizeEncounters(module, diag) {
       continue;
     }
     if (!node.stateType) continue;
+    if (ctx.wellness && ctx.encounterClass && !node.wellnessClassReported) {
+      node.wellnessClassReported = true;
+      diag.error('ENCOUNTER_WELLNESS_CLASS', 'An encounter is either a wellness visit or has an encounterClass, not both.', where(node));
+    }
     const attrs = {
       wellness: !!ctx.wellness,
       encounterClass: ctx.encounterClass || undefined,
