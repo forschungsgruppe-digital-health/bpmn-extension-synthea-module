@@ -135,33 +135,35 @@ function reportObservation(o, ctx, index) {
   return out;
 }
 
-// synthea:DistributionConfig -> {kind, round?, parameters}. Which parameters each
-// kind needs follows the States wiki (Delay, "distribution"): EXACT value;
-// UNIFORM low+high; GAUSSIAN mean+standardDeviation (optional min/max);
-// EXPONENTIAL mean.
+// The distribution fields of a synthea:SetAttributeConfig -> {kind, round?, parameters}. Which
+// parameters each kind needs follows the States wiki (Delay, "distribution"): EXACT value;
+// UNIFORM low+high; GAUSSIAN mean+standardDeviation (optional min/max); EXPONENTIAL mean.
 const DISTRIBUTION_PARAMETERS = {
   EXACT: { need: ['value'], optional: [] },
   UNIFORM: { need: ['low', 'high'], optional: [] },
   GAUSSIAN: { need: ['mean', 'standardDeviation'], optional: ['min', 'max'] },
   EXPONENTIAL: { need: ['mean'], optional: [] }
 };
+const DISTRIBUTION_FIELDS = ['value', 'mean', 'standardDeviation', 'min', 'max', 'low', 'high'];
+const distributionField = (name) => `distribution${name[0].toUpperCase()}${name.slice(1)}`;
 
-function distributionToGmf(d, ctx) {
-  const spec = DISTRIBUTION_PARAMETERS[d.kind];
-  if (!spec) return ctx.report('DISTRIBUTION_INVALID', 'distributionConfig needs a kind: EXACT, UNIFORM, GAUSSIAN or EXPONENTIAL.');
+function distributionToGmf(c, ctx) {
+  const kind = c.distribution;
+  const spec = DISTRIBUTION_PARAMETERS[kind];
+  if (!spec) return ctx.report('DISTRIBUTION_INVALID', 'A distribution needs a kind: EXACT, UNIFORM, GAUSSIAN or EXPONENTIAL.');
   const parameters = {};
   for (const name of [...spec.need, ...spec.optional]) {
-    const v = num(d[name]);
+    const v = num(c[distributionField(name)]);
     if (v === undefined) {
-      if (spec.need.includes(name)) return ctx.report('DISTRIBUTION_INVALID', `A ${d.kind} distribution needs ${spec.need.join(' + ')} (missing ${name}).`);
+      if (spec.need.includes(name)) return ctx.report('DISTRIBUTION_INVALID', `A ${kind} distribution needs ${spec.need.join(' + ')} (missing ${name}).`);
       continue;
     }
-    if (Number.isNaN(v)) return ctx.report('DISTRIBUTION_INVALID', `distributionConfig ${name} must be a number.`);
+    if (Number.isNaN(v)) return ctx.report('DISTRIBUTION_INVALID', `The distribution field ${name} must be a number.`);
     parameters[name] = v;
   }
-  const stray = ['value', 'mean', 'standardDeviation', 'min', 'max', 'low', 'high'].filter((n) => d[n] !== undefined && !(n in parameters));
-  if (stray.length) return ctx.report('DISTRIBUTION_INVALID', `A ${d.kind} distribution does not use: ${stray.join(', ')}.`);
-  return { kind: d.kind, ...(d.round ? { round: true } : {}), parameters };
+  const stray = DISTRIBUTION_FIELDS.filter((n) => c[distributionField(n)] !== undefined && !(n in parameters));
+  if (stray.length) return ctx.report('DISTRIBUTION_INVALID', `A ${kind} distribution does not use: ${stray.join(', ')}.`);
+  return { kind, ...(c.distributionRound ? { round: true } : {}), parameters };
 }
 
 // ---- emitters: (node, ctx) -> fields, or ctx.report(...) for an error ---------
@@ -193,21 +195,31 @@ const EMITTERS = {
     return { exact: { quantity, unit: d.delayUnit } };
   },
 
-  // What the attribute is set to: a fixed value, a copy of another attribute's value,
-  // or a value drawn from a distribution; none of the three sets it to null.
+  // What the attribute is set to, chosen with valueKind: a fixed value (VALUE), a copy of
+  // another attribute's value (ATTRIBUTE) or a value drawn from a distribution (DISTRIBUTION).
+  // Without a valueKind it is read from the fields that are set; fields of another kind than
+  // the chosen one are an error (the three are alternatives). None of the three sets it to null.
   // (Wiki table lists value/valueCode/range/expression/seriesData; the upstream lung
   // cancer module also uses value_attribute and distribution on SetAttribute.)
   SetAttribute(node, ctx) {
     const c = first(node.ext, 'synthea:SetAttributeConfig');
     if (!c?.attribute) return ctx.report('SET_ATTRIBUTE_MISSING', 'SetAttribute needs synthea:setAttributeConfig with an attribute.');
-    const d = first(node.ext, 'synthea:DistributionConfig');
-    const given = [c.value !== undefined, !!c.valueAttribute, !!d].filter(Boolean).length;
-    if (given > 1) {
-      return ctx.report('SET_ATTRIBUTE_VALUE', 'SetAttribute takes only one of: a value, a valueAttribute, a distribution.');
+    const hasDistribution = c.distribution !== undefined || c.distributionRound || DISTRIBUTION_FIELDS.some((n) => c[distributionField(n)] !== undefined);
+    const present = { VALUE: c.value !== undefined, ATTRIBUTE: !!c.valueAttribute, DISTRIBUTION: hasDistribution };
+    const kind = c.valueKind ?? Object.keys(present).find((k) => present[k]);
+    const others = Object.keys(present).filter((k) => k !== kind && present[k]);
+    if (others.length || (!c.valueKind && Object.values(present).filter(Boolean).length > 1)) {
+      return ctx.report(
+        'SET_ATTRIBUTE_VALUE',
+        `SetAttribute takes only one of: a value, a valueAttribute, a distribution${c.valueKind ? ` (valueKind is ${c.valueKind}, but ${others.join(' and ')} is also set)` : ''}.`
+      );
     }
-    if (d) {
-      const distribution = distributionToGmf(d, ctx);
+    if (kind === 'DISTRIBUTION') {
+      const distribution = distributionToGmf(c, ctx);
       return distribution ? { attribute: c.attribute, distribution } : null;
+    }
+    if (c.valueKind && !present[kind]) {
+      return ctx.report('SET_ATTRIBUTE_VALUE', `valueKind is ${kind}, but ${kind === 'VALUE' ? 'value' : 'valueAttribute'} is not set.`);
     }
     return compact({
       attribute: c.attribute,
@@ -224,6 +236,12 @@ const EMITTERS = {
 
   CallSubmodule(node, ctx) {
     const c = first(node.ext, 'synthea:SubmoduleConfig');
+    if (node.generatedSubmodule) {
+      if (c?.submodule) {
+        return ctx.report('SUBPROCESS_SUBMODULE_CONFLICT', 'This sub-process has content, which becomes its own module; remove synthea:submoduleConfig (or empty the sub-process to call a module of a file of its own).');
+      }
+      return { submodule: node.generatedSubmodule };
+    }
     if (!c?.submodule) return ctx.report('SUBMODULE_MISSING', 'CallSubmodule needs synthea:submoduleConfig with a submodule name.');
     return { submodule: c.submodule };
   },
@@ -270,7 +288,13 @@ const EMITTERS = {
       ...(value ? value.value : {})
     });
   },
-  MultiObservation: (node, ctx) => codesField(node, ctx),
+  // A panel (e.g. blood pressure): a category, a code and the contained observations.
+  MultiObservation(node, ctx) {
+    const observations = (node.ext['synthea:ReportObservation'] ?? []).map((o, i) => reportObservation(o, ctx, i));
+    if (observations.includes(null)) return null;
+    const category = first(node.ext, 'synthea:ObservationConfig')?.category;
+    return compact({ category, ...codesField(node, ctx), ...(observations.length ? { observations } : {}) });
+  },
   DiagnosticReport(node, ctx) {
     const observations = (node.ext['synthea:ReportObservation'] ?? []).map((o, i) => reportObservation(o, ctx, i));
     if (observations.includes(null)) return null;

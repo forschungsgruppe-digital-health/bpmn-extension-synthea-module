@@ -1,7 +1,7 @@
 // Pure pipeline: BPMN XML strings in, GMF module objects + diagnostics out.
 import { Diagnostics } from './diagnostics.mjs';
 import { parseBpmn } from './parse.mjs';
-import { buildModules } from './ir.mjs';
+import { buildModules, first } from './ir.mjs';
 import { resolveStates } from './resolve.mjs';
 import { synthesizeEncounters } from './encounters.mjs';
 import { buildTransition } from './transitions.mjs';
@@ -60,6 +60,7 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
     }
   }
 
+  checkEncountersAcrossSubprocesses(modules, diag);
   verifySubmodules(modules, diag);
   assignPaths(modules);
 
@@ -70,6 +71,21 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
     json: { name: m.name, states: m.states }
   }));
   return { modules: results, diagnostics: diag };
+}
+
+// An encounter is synthesized per module, so an encounterId must not be used both in a module and
+// in a module that was made from a sub-process inside it.
+function checkEncountersAcrossSubprocesses(modules, diag) {
+  const idsOf = (m) => new Set([...m.nodes.values()].map((n) => first(n.ext, 'synthea:EncounterContext')?.encounterId).filter(Boolean));
+  const byName = new Map(modules.map((m) => [m.fileBase, m]));
+  for (const m of modules.filter((x) => x.parent)) {
+    const parentIds = idsOf(byName.get(m.parent));
+    for (const id of idsOf(m)) {
+      if (parentIds.has(id)) {
+        diag.error('ENCOUNTER_ACROSS_SUBPROCESS', `Encounter "${id}" is used inside the sub-process and outside it; an encounter cannot span two modules. Use a different encounterId inside, or keep the whole encounter on one side.`, { module: m.fileBase });
+      }
+    }
+  }
 }
 
 // A Death state drawn as an end event has no outgoing flow, but Synthea wants it

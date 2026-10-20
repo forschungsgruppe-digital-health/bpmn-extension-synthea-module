@@ -48,13 +48,10 @@ concept.
 
 ## Clinical codes
 
-The models used to carry `fhirmap:` (which FHIR resource a state produces) and `term:` (its code) from two separate extensions. Both were taken out of this repository's models. The codes stayed:
-
 - The 44 clinical codes (SNOMED CT, LOINC, RxNorm) sit on the element's `synthea:stateTypeConfig` as `codeSystem`, `code` and `codeDisplay`. The converter writes them into `codes`; the properties panel has a "Code" section for the state types that carry one.
-- The state types never depended on `fhirmap:`: every state-bearing element has an explicit `synthea:stateTypeConfig` (or an inferable element kind).
+- Every state-bearing element has an explicit `synthea:stateTypeConfig` (or an inferable element kind).
 - The Encounter codes are part of `synthea:encounterContext`.
 - `npm run convert:check` runs with `--strict` and passes; the comparison with the upstream module includes the codes.
-- The converter still reads `term:coding` if a diagram from the separate extension carries one.
 
 ## BPMN conformance class (SYN-1)
 

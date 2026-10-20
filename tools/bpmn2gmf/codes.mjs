@@ -1,4 +1,4 @@
-// Code system URIs (as used by synthea:stateTypeConfig codeSystem, synthea:Condition.codeSystem and term:coding)
+// Code system URIs (as used by synthea:stateTypeConfig codeSystem, and synthea:Condition.codeSystem)
 // -> the names Synthea's GMF expects in `codes`.
 const SYSTEMS = {
   'http://snomed.info/sct': 'SNOMED-CT',
@@ -28,31 +28,12 @@ export const SYSTEMS_BY_STATE_TYPE = {
   Death: ['SNOMED-CT']
 };
 
-const localName = (el) => (el.$type ?? '').split(':').pop().toLowerCase();
-
-// Collects every coding on a node, whatever form it comes in:
-//   <synthea:stateTypeConfig codeSystem= code= codeDisplay= />   (the form the models use)
-//   <term:coding .../>                                           (optional input from the separate term: extension)
-//   <term:annotations><term:annotation><term:coding/>…           (that extension's own form)
-// The namespace prefix is ignored, and so is whether a descriptor was registered
-// (generic elements keep children in $children, typed ones in values/codings).
-function collect(el, out) {
-  if (el.$type === 'synthea:StateTypeConfig' && el.code) {
-    out.push({ uri: el.codeSystem, code: el.code, display: el.codeDisplay });
-  }
-  if (localName(el) === 'coding' && (el.system || el.code)) {
-    out.push({ uri: el.system, code: el.code, display: el.display });
-  }
-  for (const child of el.$children ?? []) collect(child, out);
-  for (const key of ['values', 'codings']) {
-    for (const child of el[key] ?? []) collect(child, out);
-  }
-}
-
+// The code of a node: <synthea:stateTypeConfig codeSystem= code= codeDisplay= />.
+// A state has one code (the extension keeps no other source of codes).
 export function readCodings(node) {
-  const out = [];
-  for (const el of Object.values(node.ext).flat()) collect(el, out);
-  return out;
+  return (node.ext['synthea:StateTypeConfig'] ?? [])
+    .filter((el) => el.code)
+    .map((el) => ({ uri: el.codeSystem, code: el.code, display: el.codeDisplay }));
 }
 
 // Codes of a node as Synthea wants them for `stateType`: only systems the state

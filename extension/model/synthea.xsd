@@ -63,8 +63,12 @@
     <xsd:attribute name="submodule" type="xsd:string"/>
   </xsd:complexType>
 
+  <xsd:element name="probabilityKind" type="synthea:tProbabilityKind"/>
+  <xsd:complexType name="tProbabilityKind"/>
+
   <xsd:element name="probabilityConfig" type="synthea:tProbabilityConfig"/>
   <xsd:complexType name="tProbabilityConfig">
+    <xsd:attribute name="probabilityKind" type="xsd:string"/>
     <xsd:attribute name="probability" type="xsd:double"/>
     <xsd:attribute name="probabilityAttribute" type="xsd:string"/>
     <xsd:attribute name="probabilityDefault" type="xsd:double"/>
@@ -100,27 +104,27 @@
     <xsd:attribute name="amount" type="xsd:double"/>
   </xsd:complexType>
 
-  <xsd:element name="setAttributeConfig" type="synthea:tSetAttributeConfig"/>
-  <xsd:complexType name="tSetAttributeConfig">
-    <xsd:attribute name="attribute" type="xsd:string"/>
-    <xsd:attribute name="value" type="xsd:string"/>
-    <xsd:attribute name="valueAttribute" type="xsd:string"/>
-  </xsd:complexType>
+  <xsd:element name="setAttributeValueKind" type="synthea:tSetAttributeValueKind"/>
+  <xsd:complexType name="tSetAttributeValueKind"/>
 
   <xsd:element name="distributionKind" type="synthea:tDistributionKind"/>
   <xsd:complexType name="tDistributionKind"/>
 
-  <xsd:element name="distributionConfig" type="synthea:tDistributionConfig"/>
-  <xsd:complexType name="tDistributionConfig">
-    <xsd:attribute name="kind" type="xsd:string"/>
-    <xsd:attribute name="round" type="xsd:boolean" default="false"/>
-    <xsd:attribute name="value" type="xsd:double"/>
-    <xsd:attribute name="mean" type="xsd:double"/>
-    <xsd:attribute name="standardDeviation" type="xsd:double"/>
-    <xsd:attribute name="min" type="xsd:double"/>
-    <xsd:attribute name="max" type="xsd:double"/>
-    <xsd:attribute name="low" type="xsd:double"/>
-    <xsd:attribute name="high" type="xsd:double"/>
+  <xsd:element name="setAttributeConfig" type="synthea:tSetAttributeConfig"/>
+  <xsd:complexType name="tSetAttributeConfig">
+    <xsd:attribute name="attribute" type="xsd:string"/>
+    <xsd:attribute name="valueKind" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:string"/>
+    <xsd:attribute name="valueAttribute" type="xsd:string"/>
+    <xsd:attribute name="distribution" type="xsd:string"/>
+    <xsd:attribute name="distributionRound" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="distributionValue" type="xsd:double"/>
+    <xsd:attribute name="distributionMean" type="xsd:double"/>
+    <xsd:attribute name="distributionStandardDeviation" type="xsd:double"/>
+    <xsd:attribute name="distributionMin" type="xsd:double"/>
+    <xsd:attribute name="distributionMax" type="xsd:double"/>
+    <xsd:attribute name="distributionLow" type="xsd:double"/>
+    <xsd:attribute name="distributionHigh" type="xsd:double"/>
   </xsd:complexType>
 
   <xsd:element name="assignToAttributeConfig" type="synthea:tAssignToAttributeConfig"/>

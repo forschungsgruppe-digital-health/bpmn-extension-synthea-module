@@ -66,22 +66,27 @@ combination). A true parallel (`AND`) fork/join has no direct equivalent
 either — it usually becomes either a fixed sequence (if one branch always
 finishes before the other matters) or separate submodule calls.
 
-**3. Flatten embedded subprocesses, or convert placeholders to real
-submodule calls.** An embedded (expanded) `subProcess` with ordinary
-sequential content inside — no multi-instance loop, no boundary events —
-can simply be inlined: remove the subprocess boundary, wire its internal
-states directly into the parent flow. A subprocess that's actually an empty
+**3. Embedded subprocesses and placeholders.** An embedded (expanded)
+`subProcess` with ordinary sequential content inside — no multi-instance loop,
+no boundary events — is converted by `tools/bpmn2gmf`: its content becomes a
+module of its own and the subprocess becomes the call of it (see below).
+Remove the subprocess boundary and wire its states into the parent flow only
+if you want one module instead of two. A subprocess that's actually an empty
 placeholder linking out to a separate diagram (e.g. via an external
 `cp:definitionCanonical` reference) should instead become a `Call Activity`
 with `SubmoduleConfig` pointing at that separate pathway (see §11) — it
 already matches the intent, just the wrong BPMN element type.
 
-*Embedded sub-process:* the converter accepts an embedded sub-process as **one state** of
-type `DiagnosticReport` (or `MultiObservation`) with its measurements in
-`synthea:reportObservation`, or as a **submodule call** (`stateType="CallSubmodule"` with
-`synthea:submoduleConfig`, how drafts and the mihub models use it). Give it that `stateType`. The elements drawn inside are not
-converted (note `SUBPROCESS_CONTENT_IGNORED`). A sub-process with ordinary sequential
-content still has to be flattened as described above.
+*Sub-process:* what is drawn inside a sub-process (it needs its own start event and an end event)
+becomes a module of its own, `<file>_<sub-process name>`, a submodule; the sub-process becomes the
+`CallSubmodule` state that calls it (note `SUBPROCESS_EXTRACTED`). Nested sub-processes become
+modules inside modules. Patient attributes are global in Synthea, so what the inside sets is seen
+outside. An encounter cannot span the boundary: use a different `encounterId` inside (error
+`ENCOUNTER_ACROSS_SUBPROCESS`). An empty sub-process names a module of a file of its own with
+`synthea:submoduleConfig`, like a call activity (the plain way); naming a module on a sub-process
+with content is `SUBPROCESS_SUBMODULE_CONFLICT`. A lab report with contained measurements is **not** a sub-process:
+it is a task of type `DiagnosticReport` whose values are listed as `synthea:reportObservation`,
+because Synthea embeds the observations inside that one state.
 
 **4. Drop data objects, message flows, and organization-specific
 extensions.** `dataObject`/`dataObjectReference` elements, quality
@@ -165,7 +170,8 @@ probability lives on the flow, not the gateway itself).
 
 **Group:** "Probability" → either `probability` (a fixed 0.0–1.0 number —
 every flow's values across the group must sum to 1.0, checked by lint rule
-`probability-sum-valid`), or `probabilityAttribute` + `probabilityDefault`
+`probability-sum-valid`), or "Probability as" **value of a patient attribute**: `probabilityAttribute` +
+`probabilityDefault` (required; an attribute without a default is an error)
 for a runtime-computed weight read from a patient attribute instead of a
 hardcoded number.
 
@@ -240,19 +246,19 @@ fallback when nothing else matches.
 ## 5. Changing the simulated patient
 
 **`SetAttributeConfig`** (Task, `stateType="SetAttribute"`) → group "Set
-Attribute": `attribute` plus **one** of three ways to give it a value:
-- `value` — a fixed numeric, boolean or string value (the plain Synthea case);
+Attribute": `attribute` plus the choice **"Value as"**, which decides which fields follow (the fields of the other choices are cleared when the choice changes):
+- **Fixed value** (`value`) — a fixed numeric, boolean or string value (the plain Synthea case);
 - **copy the value of this attribute** (`valueAttribute`) — e.g. a hospice
   reason that always is the patient's lung cancer diagnosis, whatever
   `ConditionOnset` stored it (the attribute must have been assigned by an
   earlier state, see section 8);
-- group **"Distribution"** — a value drawn per patient: `EXACT` (value),
+- **Drawn from a distribution** — a value drawn per patient: `EXACT` (value),
   `UNIFORM` (lowest/highest), `GAUSSIAN` (mean, standard deviation, optional
   min/max) or `EXPONENTIAL` (mean), optionally rounded to a whole number. The
   upstream lung cancer module draws the length of stay this way (exponential,
   mean 3, rounded) — a fixed `3` would give every patient the same stay.
 
-Using more than one of the three is an error; none sets the attribute to
+A leftover field of another choice is an error; none sets the attribute to
 `null`. (Synthea's `valueCode`/`range`/`expression` aren't modeled. The
 States wiki lists neither `distribution` nor `value_attribute` for
 `SetAttribute`; both are used by the upstream module and follow the
@@ -285,8 +291,7 @@ elsewhere in this guide, not clinical events.)
   "State Type" — system, code and display text. They are the attributes
   `codeSystem`, `code` and `codeDisplay` of `synthea:stateTypeConfig`. Synthea
   needs the code (a `ConditionOnset` without one stops the simulation). One code
-  per state; the converter accepts a `term:coding` from the separate terminology
-  extension as an alternative input.
+  per state.
 - For `ConditionOnset`/`AllergyOnset` specifically: "Assign to Attribute" if
   a later state needs to reference this exact instance (see §8), and
   "Encounter Reference" (`targetEncounter`) if the diagnosis should only be

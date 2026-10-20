@@ -102,8 +102,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set Mean(lung_cancer_los) = 3</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_los" />
-        <synthea:distributionConfig kind="EXPONENTIAL" round="true" mean="3" />
+        <synthea:setAttributeConfig attribute="lung_cancer_los" valueKind="DISTRIBUTION" distribution="EXPONENTIAL" distributionRound="true" distributionMean="3" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1wu1rz7</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0l2qjq2</bpmn2:outgoing>

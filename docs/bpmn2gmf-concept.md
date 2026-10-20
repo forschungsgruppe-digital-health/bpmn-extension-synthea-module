@@ -14,7 +14,7 @@ Inventory of the five `lung-cancer/*.bpmn` files:
 
 | Construct | Count | Consequence |
 |---|---|---|
-| `synthea:stateTypeConfig` | 103 | explicit state type on every state-bearing node (the converter never used `fhirmap:`) |
+| `synthea:stateTypeConfig` | 103 | explicit state type on every state-bearing node |
 | `task` / `scriptTask` | 65 / 15 | `scriptTask` (used for SetAttribute/Counter) is treated exactly like `task` |
 | `exclusiveGateway` | 37 | each becomes a `Simple` (or `Guard`) state in the MVP, see §4.5 |
 | `intermediateCatchEvent` (timer) | 14 | → `Delay`; the number comes from `synthea:delayConfig`, never from `timeDuration`/`timeDate` text |
@@ -22,14 +22,14 @@ Inventory of the five `lung-cancer/*.bpmn` files:
 | `synthea:encounterContext` | 32 | encounter synthesis is on the critical path |
 | `synthea:condition` | 17 | conditions incl. nesting/`negate` |
 | `synthea:probabilityConfig` | 18 | `distributed_transition` |
-| `term:coding` | 29 | codes; systems are URIs and must be mapped to Synthea system names. The codes sit on `synthea:stateTypeConfig` instead |
+| clinical codes | 29 | systems are URIs and must be mapped to Synthea system names; the codes sit on `synthea:stateTypeConfig` |
 | `textAnnotation` / `association` | 60 / 60 | documentation only → ignored |
 | `boundaryEvent` (timer) | **1** | **no GMF equivalent** — see Decision 4 |
 | i18n, `cp:` (BPMN4CP), DI shapes/edges | many | ignored |
 
-The counts are those of the first analysis and are kept as the reasoning behind the design. The models have changed since: `term:coding` was 44 and `fhirmap:resourceMapping` 47 until both were removed from the models (the 44 codes moved onto `synthea:stateTypeConfig`), and the `boundaryEvent` is gone (replaced by four `Death` states, Decision 4). The other counts changed with the added states and fields, but they only served to size the work.
+The counts are those of the first analysis and are kept as the reasoning behind the design. The models have changed since: the 44 clinical codes moved onto `synthea:stateTypeConfig`, and the `boundaryEvent` is gone (replaced by four `Death` states, Decision 4). The other counts changed with the added states and fields, but they only served to size the work.
 
-Spike result: all five files load via `bpmn-moddle` with the existing `synthea.json` descriptor and **zero warnings**; foreign elements such as `term:coding` arrive as generic elements whose attributes are plain properties (`system`, `code`, `display`). No extra descriptors and no new dependencies are needed to read the models.
+Spike result: all five files load via `bpmn-moddle` with the existing `synthea.json` descriptor and **zero warnings**; foreign elements arrive as generic elements whose attributes are plain properties. No extra descriptors and no new dependencies are needed to read the models.
 
 For reference, the real Synthea `lung_cancer.json` has 99 states (e.g. 6× `Encounter`/`EncounterEnd`, 11× `ConditionOnset`, 11× `Procedure`, 10× `Symptom`, 9× `SetAttribute`), 80 direct / 9 conditional / 9 distributed transitions, and `"gmf_version": 1`.
 
@@ -77,7 +77,7 @@ encounters.mjs     stage 4a (Encounter synthesis)
 transitions.mjs    stage 4b/5 (Table C)
 conditions.mjs     synthea:Condition → GMF condition (recursion, negate → Not, value typing)
 emit/<StateType>.mjs  or one emit.mjs with a table: StateType → emitter
-codes.mjs          term:coding system URI → Synthea system name
+codes.mjs          code system URI → Synthea system name
 verify.mjs         stage 6
 test/              node:test unit tests + golden files
 ```
@@ -107,7 +107,7 @@ The IR is the only thing the emitters see. Everything BPMN-specific (event defin
 The start event is always named `Initial` (Synthea requires exactly this name; found while implementing). Every other state: the BPMN `name` **verbatim**. Empty → `<stateType>_<id>`. A duplicate name within one module → append `_<id>`. No prefix stripping (labels like "Symptom: Cough" stay as they are): it is deterministic, needs no heuristics, and Synthea only requires uniqueness per module. The generated names will therefore differ from the hand-written upstream names; the comparison in §7 is keyed on state type and codes, not on names.
 
 ### 4.3 Codes
-Codes sit on the element's `synthea:stateTypeConfig` (`codeSystem`, `code`, `codeDisplay`, one per state). As optional input every `term:coding` from the separate terminology extension is collected as well, whatever its form (a flat `<term:coding/>` or `term:annotations > annotation > coding`; prefix and namespace are ignored). `system` URIs map to Synthea names:
+Codes sit on the element's `synthea:stateTypeConfig` (`codeSystem`, `code`, `codeDisplay`, one per state). `system` URIs map to Synthea names:
 
 | URI | Synthea `system` |
 |---|---|
@@ -116,7 +116,7 @@ Codes sit on the element's `synthea:stateTypeConfig` (`codeSystem`, `code`, `cod
 | `http://www.nlm.nih.gov/research/umls/rxnorm` | `RxNorm` |
 | NUBC (discharge disposition) | `NUBC` (not needed yet) |
 
-Each state type accepts only some systems (Procedure/ConditionOnset/CarePlanStart/Device/ImagingStudy: SNOMED-CT, MedicationOrder/End: RxNorm, Observation/DiagnosticReport: LOINC, AllergyOnset/End: SNOMED-CT or RxNorm). Codings in other systems on the same element (e.g. the IHE codes in the terminology repo's example) are left out and mentioned as a note (`CODING_IGNORED`), not an error. A state that ends up with no usable code is reported as incomplete (`REQUIRED_FIELD_MISSING`).
+Each state type accepts only some systems (Procedure/ConditionOnset/CarePlanStart/Device/ImagingStudy: SNOMED-CT, MedicationOrder/End: RxNorm, Observation/DiagnosticReport: LOINC, AllergyOnset/End: SNOMED-CT or RxNorm). Codings in other systems on the same element are left out and mentioned as a note (`CODING_IGNORED`), not an error. A state that ends up with no usable code is reported as incomplete (`REQUIRED_FIELD_MISSING`).
 
 **Start/end pairing** (`*End` states): `referencedByAttributeConfig` first, then the state's own code, then the single matching start state upstream on every path (nearest wins in a chain; two start states on parallel branches that merge are ambiguous → error `END_STATE_UNPAIRED`).
 
@@ -187,7 +187,7 @@ Comparing our BPMN files with the real `lung_cancer.json` and with the Synthea S
 | `MedicationOrder` | `codes`; optional `reason`, `prescription`, `chronic` | codes, assign yes | 5 |
 | all states | optional `remarks[]` | no | — |
 
-**Finding (fixed) — our two `Pain_Vital` states were modeled as the wrong type.** Both carry a LOINC code, but GMF `VitalSign` has no `codes` (it only *sets* a value and is not recorded in the chart). In the real `lung_cancer.json` all three `Pain_Vital*` states are `Observation` (`category: vital-signs`, `unit: {score}`, `range` 4–8). The fix was a model correction (`stateType="VitalSign"` → `Observation`, done in both files; `fhirmap:` was never part of this extension), not an extension change — so **no `VitalSign` fields are needed** for the current pathways.
+**Finding (fixed) — our two `Pain_Vital` states were modeled as the wrong type.** Both carry a LOINC code, but GMF `VitalSign` has no `codes` (it only *sets* a value and is not recorded in the chart). In the real `lung_cancer.json` all three `Pain_Vital*` states are `Observation` (`category: vital-signs`, `unit: {score}`, `range` 4–8). The fix was a model correction (`stateType="VitalSign"` → `Observation`, done in both files; the state type was never derived from a resource type), not an extension change — so **no `VitalSign` fields are needed** for the current pathways.
 
 Until a decision is made the converter must not silently produce invalid JSON. The proposed default behavior is described in Decision 1.
 
@@ -223,7 +223,7 @@ These are our own checks (a small required-fields table in `verify.mjs`), not a 
 |---|---|---|
 | 0 | Spike (done): moddle loads all five files without warnings | — |
 | 1 | CLI, parse, IR, state-type/name resolution, `Initial`/`Terminal`/`Simple`/`Delay`/`SetAttribute`/`Counter`/`CallSubmodule`, all three transition types, conditions + `Not`, verify | **Implemented** (22 unit tests, `npm run test:bpmn2gmf`). The planned golden file for `lung-cancer-probabilities-submodule.bpmn` is blocked by the *model*: its 3 gateways have no `synthea:conditionConfig` (see §10) |
-| 2 | Codes, `term:` mapping, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
+| 2 | Codes, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
 | 3 | Encounter synthesis + `targetEncounter` | **Implemented** (51 tests). Anemia and the treatment submodule get their Encounter/EncounterEnd states; the main module still waits for the boundary-timer remodeling |
 | 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | **Implemented** (61 tests). Encounter code, `SymptomConfig`, `ObservationConfig`, `ValueConfig`, `ImagingStudySeries` and `ReportObservation` (the contained values of a `DiagnosticReport`) are in schema, panel, converter, lint (SYN-28, SYN-29) and guide; the main pathway's boundary timer is replaced by `Death` states with time spans. **All five real files convert and pass `--strict` with no warning**; the nine lab reports (92 contained observations) are identical to upstream |
 | 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | **Implemented** (70 tests): `--fuse-gateways`, fewer `Encounter` copies, `npm run compare:upstream` with the three upstream modules kept in `tools/bpmn2gmf/test/upstream/` (Apache-2.0, see NOTICE.md), and `npm run validate` / the CI workflow now also run `xsd:gen:check`, `xsd:ext`, the converter tests and `convert:check` (all five real files, `--strict`). Not done: loading the generated JSON in a real Synthea (see §11) |
@@ -276,7 +276,7 @@ Differences from upstream in the main pathway. Four were found by the first comp
 
 | What | Before | Now |
 |---|---|---|
-| `lung_cancer_los` | `SetAttribute` = 3 (every patient the same) | `DistributionConfig` EXPONENTIAL, mean 3, rounded — as upstream |
+| `lung_cancer_los` | `SetAttribute` = 3 (every patient the same) | `SetAttributeConfig` with `valueKind="DISTRIBUTION"`, EXPONENTIAL, mean 3, rounded — as upstream |
 | `hospice_reason` | the text "Lung Cancer" | copies the attribute `lung_cancer_diagnosis` (`valueAttribute`); that attribute is assigned by the two `Diagnosis: NSCLC/SCLC` states, upstream's "Lung Cancer" |
 | cause of death | none | the four `Death` states refer to `lung_cancer_diagnosis` (`referencedByAttributeConfig`), as upstream |
 | counter attribute | `lung_cancer_non_diagnosis_counter` | `lung_cancer_nondiagnosis_counter`, spelled as upstream |

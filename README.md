@@ -54,7 +54,7 @@ Veröffentlichung liegt bei den Autor:innen.
 
 | Part | Where | What it does |
 |---|---|---|
-| **Moddle descriptor** | `extension/model/synthea.json` | The 21 `synthea:` types (and 8 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
+| **Moddle descriptor** | `extension/model/synthea.json` | The 20 `synthea:` types (and 10 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
 | **Properties panel** | `extension/src/` | One group "Synthea" in the bpmn-js properties panel, one collapsible section per type, showing only what fits the chosen State Type and what the converter accepts. |
 | **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 21 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. |
 | **Converter** | `tools/bpmn2gmf/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
@@ -148,7 +148,7 @@ npm run compare:upstream      # compares the result with Synthea's own lung canc
 
 - **Gateways:** only exclusive gateways. Inclusive, parallel, complex and event-based gateways have no counterpart in Synthea (one path per transition); they are an error, and the properties panel and menus do not offer them.
 - **Events:** start, end (`Terminal` or `Death`), timer (`Delay`) and other intermediate events with an explicit state type. Boundary events are an error.
-- **Sub-processes:** an embedded sub-process becomes **one** state (`DiagnosticReport`, `MultiObservation` or `CallSubmodule`); what is drawn inside is not converted. Event sub-processes, ad-hoc sub-processes and transactions are an error. A **call activity** becomes a `CallSubmodule`.
+- **Sub-processes:** what is drawn inside a sub-process becomes a module of its own (`<file>_<sub-process name>.json`, a submodule), and the sub-process becomes the `CallSubmodule` state that calls it; nested ones likewise. An empty sub-process names a module of a file of its own (`synthea:submoduleConfig`), like a call activity. An encounter cannot span the boundary. Event sub-processes, ad-hoc sub-processes and transactions are an error. A **call activity** becomes a `CallSubmodule`.
 - **Transitions:** direct, distributed, conditional and complex. `lookup_table_transition` and `type_of_care_transition` have no BPMN pattern.
 - **Codes:** one code per state, SNOMED CT, LOINC or RxNorm, depending on the state type.
 - **Other:** text annotations and data objects are ignored; the direction GMF → BPMN does not exist.

@@ -39,7 +39,8 @@ export function buildModule(process, fileBase, diag) {
     name: process.name || process.id,
     processId: process.id,
     nodes: new Map(),
-    edges: []
+    edges: [],
+    children: [] // sub-processes with content: { element, node }
   };
   const where = (el) => ({ module: fileBase, element: el.id, label: el.name });
   const flows = [];
@@ -81,14 +82,10 @@ export function buildModule(process, fileBase, diag) {
       outgoing: []
     });
 
-    // An embedded sub-process is one state (a report or a multi-observation). What it contains
-    // is not converted: the contained observations belong in synthea:reportObservation.
+    // A sub-process with content becomes a module of its own; the sub-process itself becomes the
+    // CallSubmodule state that calls it (see buildModules).
     if (kind === 'subprocess' && (el.flowElements ?? []).length) {
-      diag.note(
-        'SUBPROCESS_CONTENT_IGNORED',
-        `The ${el.flowElements.length} element(s) inside this sub-process are not converted; it becomes a single state. Put contained observations in synthea:reportObservation.`,
-        where(el)
-      );
+      module.children.push({ element: el, node: module.nodes.get(el.id) });
     }
   }
 
@@ -122,12 +119,44 @@ export function buildModule(process, fileBase, diag) {
   return module;
 }
 
+const GERMAN = { ä: 'ae', ö: 'oe', ü: 'ue', ß: 'ss' };
+const slug = (text) =>
+  text.toLowerCase().replace(/[äöüß]/g, (c) => GERMAN[c]).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
+// A process becomes a module. A sub-process with content inside becomes a module of its own
+// (named <parent>_<sub-process name>, nested ones likewise) and the sub-process becomes the
+// CallSubmodule state that calls it. Synthea has no embedded flows: a module is a flat list of
+// states and a submodule is a separate file.
+function expand(module, diag, used) {
+  const result = [module];
+  for (const { element, node } of module.children) {
+    let base = `${module.fileBase}_${slug(element.name ?? '') || slug(element.id)}`;
+    while (used.has(base)) base += '_';
+    used.add(base);
+    const child = buildModule(element, base, diag);
+    child.name = element.name || element.id;
+    child.parent = module.fileBase;
+    node.generatedSubmodule = base;
+    diag.note(
+      'SUBPROCESS_EXTRACTED',
+      `The ${element.flowElements.length} element(s) inside this sub-process became the module "${base}", which this state calls (CallSubmodule).`,
+      { module: module.fileBase, element: element.id, label: element.name }
+    );
+    result.push(...expand(child, diag, used));
+  }
+  return result;
+}
+
 export function buildModules(definitions, fileBase, diag) {
   const processes = (definitions.rootElements ?? []).filter((e) => e.$type === 'bpmn:Process');
   if (processes.length === 0) {
     diag.error('NO_PROCESS', 'The file contains no process.', { module: fileBase });
   }
-  return processes.map((p, i) =>
-    buildModule(p, processes.length > 1 ? `${fileBase}_${i + 1}` : fileBase, diag)
-  );
+  const used = new Set();
+  return processes.flatMap((p, i) => {
+    const base = processes.length > 1 ? `${fileBase}_${i + 1}` : fileBase;
+    used.add(base);
+    return expand(buildModule(p, base, diag), diag, used);
+  });
 }

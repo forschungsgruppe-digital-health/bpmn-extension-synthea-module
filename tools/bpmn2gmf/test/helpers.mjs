@@ -2,9 +2,7 @@ import { convert } from '../convert.mjs';
 
 const NS =
   'xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
-  'xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" ' +
-  'xmlns:fhirmap="https://forschungsgruppe-digital-health.github.io/schema/fhirmap/1.0" ' +
-  'xmlns:term="https://forschungsgruppe-digital-health.github.io/schema/terminology/1.0"';
+  'xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"';
 
 export const wrap = (body, name = 'Test Module') =>
   `<?xml version="1.0" encoding="UTF-8"?>
@@ -12,7 +10,18 @@ export const wrap = (body, name = 'Test Module') =>
   <bpmn2:process id="P" name="${name}">${body}</bpmn2:process>
 </bpmn2:definitions>`;
 
-const ext = (inner) => (inner ? `<bpmn2:extensionElements>${inner}</bpmn2:extensionElements>` : '');
+// coding() leaves a marker; the first one becomes codeSystem/code/codeDisplay on the stateTypeConfig
+// (a state has one code, and it sits on the state type).
+const CODING_MARKER = /<!--CODING ([^|]*)\|([^|]*)\|(.*?)-->/g;
+const ext = (inner) => {
+  if (!inner) return '';
+  const first = [...inner.matchAll(CODING_MARKER)][0];
+  let out = inner.replace(CODING_MARKER, '');
+  if (first) {
+    out = out.replace('<synthea:stateTypeConfig ', `<synthea:stateTypeConfig codeSystem="${first[1]}" code="${first[2]}" codeDisplay="${first[3]}" `);
+  }
+  return `<bpmn2:extensionElements>${out}</bpmn2:extensionElements>`;
+};
 
 export const start = (id = 'S') => `<bpmn2:startEvent id="${id}" name="Initial"/>`;
 export const end = (id = 'E', name = 'Terminal') => `<bpmn2:endEvent id="${id}" name="${name}"/>`;
@@ -34,7 +43,7 @@ export const cond = (inner) => `<synthea:conditionConfig>${inner}</synthea:condi
 export const attrCond = (attribute, operator, value, extra = '') =>
   `<synthea:condition conditionType="Attribute" attribute="${attribute}" operator="${operator}"${value === undefined ? '' : ` value="${value}"`}${extra}/>`;
 
-export const coding = (system, code, display) => `<term:coding system="${system}" code="${code}" display="${display}"/>`;
+export const coding = (system, code, display) => `<!--CODING ${system}|${code}|${display}-->`;
 export const SNOMED = 'http://snomed.info/sct';
 export const LOINC = 'http://loinc.org';
 export const RXNORM = 'http://www.nlm.nih.gov/research/umls/rxnorm';

@@ -37,12 +37,24 @@ export function buildTransition(node, module, diag) {
       const p = e.probability;
       let distribution;
       if (!p) distribution = round(1 - fixedSum);
-      else if (p.probabilityAttribute) {
-        distribution = { attribute: p.probabilityAttribute, default: num(p.probabilityDefault) ?? 0 };
-      } else if (p.probability !== undefined) distribution = num(p.probability);
       else {
-        diag.error('TRANSITION_PROBABILITY_EMPTY', 'probabilityConfig has neither probability nor probabilityAttribute.', { ...where, element: e.id });
-        distribution = 0;
+        const hasFixed = p.probability !== undefined;
+        const hasAttribute = !!p.probabilityAttribute;
+        const kind = p.probabilityKind ?? (hasAttribute ? 'ATTRIBUTE' : 'FIXED');
+        const here = { ...where, element: e.id };
+        if (hasFixed && hasAttribute) {
+          diag.error('TRANSITION_PROBABILITY_CONFLICT', 'probabilityConfig has both a probability and a probabilityAttribute; choose one.', here);
+          distribution = 0;
+        } else if (kind === 'ATTRIBUTE' && hasAttribute) {
+          if (p.probabilityDefault === undefined) {
+            diag.error('TRANSITION_PROBABILITY_DEFAULT', 'A probability read from an attribute needs a probabilityDefault (Synthea uses it when the attribute is not set).', here);
+          }
+          distribution = { attribute: p.probabilityAttribute, default: num(p.probabilityDefault) ?? 0 };
+        } else if (kind === 'FIXED' && hasFixed) distribution = num(p.probability);
+        else {
+          diag.error('TRANSITION_PROBABILITY_EMPTY', `probabilityConfig (${kind}) has no ${kind === 'ATTRIBUTE' ? 'probabilityAttribute' : 'probability'}.`, here);
+          distribution = 0;
+        }
       }
       return { transition: target(e), distribution };
     });

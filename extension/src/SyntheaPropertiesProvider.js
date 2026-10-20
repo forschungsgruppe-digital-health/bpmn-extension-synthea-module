@@ -27,7 +27,6 @@ const VALUE_TYPE = 'synthea:ValueConfig';
 const SERIES_TYPE = 'synthea:ImagingStudySeries';
 const MEDICATION_TYPE = 'synthea:MedicationConfig';
 const ACTIVITY_TYPE = 'synthea:CarePlanActivity';
-const DISTRIBUTION_TYPE = 'synthea:DistributionConfig';
 const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
 const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
@@ -49,6 +48,19 @@ const DISTRIBUTION_PARAMETERS_BY_KIND = {
   UNIFORM: ['low', 'high'],
   GAUSSIAN: ['mean', 'standardDeviation', 'min', 'max'],
   EXPONENTIAL: ['mean']
+};
+
+// Alternatives that exclude each other ("Value as", "Probability as"): the fields that belong
+// to each choice. The choice is read from the stored kind, or from the fields that are set.
+const SET_ATTRIBUTE_KIND_FIELDS = {
+  VALUE: ['value'],
+  ATTRIBUTE: ['valueAttribute'],
+  DISTRIBUTION: ['distribution', 'distributionRound', 'distributionValue', 'distributionMean',
+    'distributionStandardDeviation', 'distributionMin', 'distributionMax', 'distributionLow', 'distributionHigh']
+};
+const PROBABILITY_KIND_FIELDS = {
+  FIXED: ['probability'],
+  ATTRIBUTE: ['probabilityAttribute', 'probabilityDefault']
 };
 
 const OBSERVATION_CATEGORY_VALUES = ['vital-signs', 'laboratory', 'procedure', 'imaging', 'survey', 'exam', 'therapy', 'social-history'];
@@ -121,7 +133,7 @@ function isCombinatorConditionType(conditionType) {
 }
 
 // Systems the code of an Observation/Active-* condition can come from; the value
-// is the same URI term:coding uses, tools/bpmn2gmf maps it to Synthea's name.
+// is the system URI; tools/bpmn2gmf maps it to Synthea's name.
 const CODE_SYSTEM_OPTIONS = [
   { value: 'http://loinc.org', label: 'LOINC' },
   { value: 'http://snomed.info/sct', label: 'SNOMED CT' },
@@ -130,12 +142,17 @@ const CODE_SYSTEM_OPTIONS = [
 
 // The state types the converter accepts per kind of element (tools/bpmn2gmf/resolve.mjs,
 // ALLOWED_BY_KIND). Tasks and other events accept every state type.
+const TASK_EXCLUDED_STATE_TYPES = ['Initial', 'Terminal', 'CallSubmodule', 'Guard', 'Delay'];
+
 function stateTypeValuesFor(element) {
   if (is(element, 'bpmn:StartEvent')) return ['Initial'];
   if (is(element, 'bpmn:EndEvent')) return ['Terminal', 'Death'];
   if (is(element, 'bpmn:ExclusiveGateway')) return ['Simple', 'Guard'];
   if (is(element, 'bpmn:CallActivity')) return ['CallSubmodule'];
-  if (is(element, 'bpmn:SubProcess')) return ['DiagnosticReport', 'MultiObservation', 'CallSubmodule'];
+  if (is(element, 'bpmn:SubProcess')) return ['CallSubmodule'];
+  // Initial, Terminal, CallSubmodule, Guard and Delay each have an element of their own (start event,
+  // end event, call activity, gateway, timer event); a task is none of them.
+  if (is(element, 'bpmn:Task')) return STATE_TYPE_VALUES.filter((v) => !TASK_EXCLUDED_STATE_TYPES.includes(v));
   return STATE_TYPE_VALUES;
 }
 
@@ -192,12 +209,11 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
         groups.push(...createStateTypeGroups(element));
         groups.push(createEncounterContextGroup(element));
-        if (is(element, 'bpmn:SubProcess')) {
-          groups.push(...createStateDetailGroups(element));
-
-          if (stateTypeOf(element) === 'CallSubmodule') {
-            groups.push(createSubmoduleGroup(element));
-          }
+        // A sub-process with content becomes a module of its own, which it calls; only an empty one
+        // names a module of a file of its own.
+        const hasContent = is(element, 'bpmn:SubProcess') && (getBusinessObject(element).get('flowElements') || []).length > 0;
+        if (is(element, 'bpmn:SubProcess') && stateTypeOf(element) === 'CallSubmodule' && !hasContent) {
+          groups.push(createSubmoduleGroup(element));
         }
       }
 
@@ -326,15 +342,23 @@ function createStateTypeGroup(element) {
   };
 }
 
+// "Probability as" decides which fields follow; the fields of the other choice are cleared.
 function createProbabilityGroup(element) {
+  const kind = kindOf(getExtension(element, PROBABILITY_TYPE), 'probabilityKind', PROBABILITY_KIND_FIELDS, 'FIXED');
+  const entries = [{ id: 'synthea-probability-kind', element, component: ProbabilityKindEntry }];
+  if (kind === 'FIXED') {
+    entries.push({ id: 'synthea-probability-value', element, component: ProbabilityEntry, isEdited: isTextFieldEntryEdited });
+  }
+  if (kind === 'ATTRIBUTE') {
+    entries.push(
+      { id: 'synthea-probability-attribute', element, component: ProbabilityAttributeEntry, isEdited: isTextFieldEntryEdited },
+      { id: 'synthea-probability-default', element, component: ProbabilityDefaultEntry, isEdited: isTextFieldEntryEdited }
+    );
+  }
   return {
     id: 'synthea-probability',
     label: 'Probability',
-    entries: [
-      { id: 'synthea-probability-value', element, component: ProbabilityEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-probability-attribute', element, component: ProbabilityAttributeEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-probability-default', element, component: ProbabilityDefaultEntry, isEdited: isTextFieldEntryEdited }
-    ]
+    entries
   };
 }
 
@@ -478,16 +502,31 @@ function createCounterGroup(element) {
   };
 }
 
+// "Value as" decides which fields follow (a fixed value, a copy of another attribute or a
+// distribution); the fields of the other choices are cleared when the choice changes.
 function createSetAttributeGroup(element) {
-  return {
-    id: 'synthea-set-attribute',
-    label: 'Set Attribute',
-    entries: [
-      { id: 'synthea-set-attribute-value', element, component: SetAttributeEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-set-attribute-assigned-value', element, component: SetAttributeValueEntry, isEdited: isTextFieldEntryEdited },
-      { id: 'synthea-set-attribute-value-attribute', element, component: SetAttributeValueAttributeEntry, isEdited: isTextFieldEntryEdited }
-    ]
-  };
+  const config = getExtension(element, SET_ATTRIBUTE_TYPE);
+  const kind = kindOf(config, 'valueKind', SET_ATTRIBUTE_KIND_FIELDS, 'VALUE');
+  const entries = [
+    { id: 'synthea-set-attribute-value', element, component: SetAttributeEntry, isEdited: isTextFieldEntryEdited },
+    { id: 'synthea-set-attribute-kind', element, component: SetAttributeKindEntry }
+  ];
+  if (kind === 'VALUE') {
+    entries.push({ id: 'synthea-set-attribute-assigned-value', element, component: SetAttributeValueEntry, isEdited: isTextFieldEntryEdited });
+  }
+  if (kind === 'ATTRIBUTE') {
+    entries.push({ id: 'synthea-set-attribute-value-attribute', element, component: SetAttributeValueAttributeEntry, isEdited: isTextFieldEntryEdited });
+  }
+  if (kind === 'DISTRIBUTION') {
+    entries.push(
+      { id: 'synthea-distribution-kind', element, component: DistributionKindEntry },
+      { id: 'synthea-distribution-round', element, component: DistributionRoundEntry }
+    );
+    for (const parameter of DISTRIBUTION_PARAMETERS_BY_KIND[config.get('distribution')] ?? []) {
+      entries.push({ id: `synthea-distribution-${parameter}`, element, component: DISTRIBUTION_PARAMETER_ENTRIES[parameter], isEdited: isTextFieldEntryEdited });
+    }
+  }
+  return { id: 'synthea-set-attribute', label: 'Set Attribute', entries };
 }
 
 function createAssignToAttributeGroup(element) {
@@ -578,9 +617,13 @@ function StateTypeEntry(props) {
 
 // --- Probability entries --------------------------------------------------
 
+const ProbabilityKindEntry = makeKindSelectEntry(PROBABILITY_TYPE, 'probabilityKind', 'Probability as', [
+  { value: 'FIXED', label: 'Fixed number' },
+  { value: 'ATTRIBUTE', label: 'Value of a patient attribute' }
+], PROBABILITY_KIND_FIELDS, 'FIXED');
 const ProbabilityEntry = makeTextEntry(PROBABILITY_TYPE, 'probability', 'Probability (0.0 - 1.0)', { parse: parseFloat });
-const ProbabilityAttributeEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityAttribute', 'Probability attribute (named/dynamic)');
-const ProbabilityDefaultEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityDefault', 'Default probability (if attribute unset)', { parse: parseFloat });
+const ProbabilityAttributeEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityAttribute', 'Attribute that holds the probability');
+const ProbabilityDefaultEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityDefault', 'Default probability (used when the attribute is not set; required)', { parse: parseFloat });
 
 // --- Flow condition entries (synthea:ConditionConfig on sequence flows,
 //     for conditional_transition) -----------------------------------------
@@ -787,6 +830,38 @@ const FlowConditionNegateEntry = makeNestedConditionCheckboxEntry(getFlowConditi
 
 const FLOW_CONDITION_FIELD_ENTRIES = buildConditionFieldEntries(getFlowCondition, ensureFlowCondition);
 
+function kindOf(config, kindProp, fieldsByKind, fallback) {
+  if (!config) return fallback;
+  const stored = config.get(kindProp);
+  if (stored) return stored;
+  const set = (name) => { const v = config.get(name); return v !== undefined && v !== null && v !== '' && v !== false; };
+  return Object.keys(fieldsByKind).find((kind) => fieldsByKind[kind].some(set)) ?? fallback;
+}
+
+function makeKindSelectEntry(type, kindProp, label, options, fieldsByKind, fallback) {
+  return function Entry(props) {
+    const { element, id } = props;
+    const modeling = useService('modeling');
+    const bpmnFactory = useService('bpmnFactory');
+    const translate = useService('translate');
+
+    const getValue = () => kindOf(getExtension(element, type), kindProp, fieldsByKind, fallback);
+
+    const setValue = (value) => {
+      const config = ensureExtension(element, type, bpmnFactory, modeling);
+      const cleared = {};
+      for (const [kind, fields] of Object.entries(fieldsByKind)) {
+        if (kind !== value) for (const field of fields) cleared[field] = undefined;
+      }
+      modeling.updateModdleProperties(element, config, { ...cleared, [kindProp]: value });
+    };
+
+    const getOptions = () => options.map((o) => ({ value: o.value, label: translate(o.label) }));
+
+    return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
+  };
+}
+
 function makeSelecetEntry(type, prop, label, values) {
   return function Entry(props) {
     const { element, id } = props;
@@ -908,21 +983,26 @@ const ActivityDisplayEntry = makeTextEntry(ACTIVITY_TYPE, 'codeDisplay', 'Displa
 const SeriesMaxInstancesEntry = makeTextEntry(SERIES_TYPE, 'maxInstances', 'Max. number of instances (optional)', { parse: parseInt });
 
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
+const SetAttributeKindEntry = makeKindSelectEntry(SET_ATTRIBUTE_TYPE, 'valueKind', 'Value as', [
+  { value: 'VALUE', label: 'Fixed value' },
+  { value: 'ATTRIBUTE', label: 'Copy of another attribute' },
+  { value: 'DISTRIBUTION', label: 'Drawn from a distribution' }
+], SET_ATTRIBUTE_KIND_FIELDS, 'VALUE');
 const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name');
-const SetAttributeValueEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'value', 'Value to assign (numeric, boolean, or string)');
-const SetAttributeValueAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'valueAttribute', 'Or: copy the value of this attribute');
+const SetAttributeValueEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'value', 'Value (number, true/false or text)');
+const SetAttributeValueAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'valueAttribute', 'Attribute to copy the value from');
 
-const DistributionKindEntry = makeSelecetEntry(DISTRIBUTION_TYPE, 'kind', 'Or: draw from a distribution', DISTRIBUTION_KINDS);
-const DistributionRoundEntry = makeCheckboxEntry(DISTRIBUTION_TYPE, 'round', 'Round to a whole number');
-const distributionParameter = (prop, label) => makeTextEntry(DISTRIBUTION_TYPE, prop, label, { parse: parseFloat });
+const DistributionKindEntry = makeSelecetEntry(SET_ATTRIBUTE_TYPE, 'distribution', 'Distribution', DISTRIBUTION_KINDS);
+const DistributionRoundEntry = makeCheckboxEntry(SET_ATTRIBUTE_TYPE, 'distributionRound', 'Round to a whole number');
+const distributionParameter = (prop, label) => makeTextEntry(SET_ATTRIBUTE_TYPE, prop, label, { parse: parseFloat });
 const DISTRIBUTION_PARAMETER_ENTRIES = {
-  value: distributionParameter('value', 'Value'),
-  mean: distributionParameter('mean', 'Mean'),
-  standardDeviation: distributionParameter('standardDeviation', 'Standard deviation'),
-  min: distributionParameter('min', 'Minimum (optional)'),
-  max: distributionParameter('max', 'Maximum (optional)'),
-  low: distributionParameter('low', 'Lowest value'),
-  high: distributionParameter('high', 'Highest value')
+  value: distributionParameter('distributionValue', 'Value'),
+  mean: distributionParameter('distributionMean', 'Mean'),
+  standardDeviation: distributionParameter('distributionStandardDeviation', 'Standard deviation'),
+  min: distributionParameter('distributionMin', 'Minimum (optional)'),
+  max: distributionParameter('distributionMax', 'Maximum (optional)'),
+  low: distributionParameter('distributionLow', 'Lowest value'),
+  high: distributionParameter('distributionHigh', 'Highest value')
 };
 const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribute', 'Assign result to attribute');
 const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute');
@@ -945,7 +1025,7 @@ function createStateDetailGroups(element) {
     });
   }
 
-  if (type === 'Observation') {
+  if (type === 'Observation' || type === 'MultiObservation') {
     groups.push({
       id: 'synthea-observation',
       label: 'Observation',
@@ -973,12 +1053,7 @@ function createStateDetailGroups(element) {
     groups.push(createImagingSeriesGroup(element));
   }
 
-  // The distribution is an alternative to the value of a Set Attribute, which only a task offers.
-  if (type === 'SetAttribute' && is(element, 'bpmn:Task')) {
-    groups.push(createDistributionGroup(element));
-  }
-
-  if (type === 'DiagnosticReport') {
+  if (type === 'DiagnosticReport' || type === 'MultiObservation') {
     groups.push(createReportObservationsGroup(element));
   }
 
@@ -1053,21 +1128,6 @@ function createReportObservationsGroup(element) {
     label: 'Report observations',
     entries: [{ id: 'synthea-report-observations-list', element, component: ReportObservationsEntry }]
   };
-}
-
-// Alternative to a fixed value for a SetAttribute: a value drawn from a distribution
-// (the upstream lung cancer module draws the length of stay from an exponential one).
-// Only the parameters of the chosen kind are shown.
-function createDistributionGroup(element) {
-  const kind = getExtension(element, DISTRIBUTION_TYPE)?.get('kind');
-  const entries = [
-    { id: 'synthea-distribution-kind', element, component: DistributionKindEntry },
-    { id: 'synthea-distribution-round', element, component: DistributionRoundEntry }
-  ];
-  for (const parameter of DISTRIBUTION_PARAMETERS_BY_KIND[kind] ?? []) {
-    entries.push({ id: `synthea-distribution-${parameter}`, element, component: DISTRIBUTION_PARAMETER_ENTRIES[parameter], isEdited: isTextFieldEntryEdited });
-  }
-  return { id: 'synthea-distribution', label: 'Distribution', entries };
 }
 
 // One activity of a care plan; further activities can be added in the XML.

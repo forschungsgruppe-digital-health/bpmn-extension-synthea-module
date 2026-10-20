@@ -353,7 +353,7 @@ test('lung-cancer-probabilities-submodule.bpmn converts to the golden file', asy
 const clinical = (type, inner, opts) =>
   run(start() + task('A', 'clin', stateType(type) + inner) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'), opts);
 
-test('ConditionOnset: term:coding becomes codes (system URI -> Synthea name)', async () => {
+test('ConditionOnset: the code on the state type becomes codes (system URI -> Synthea name)', async () => {
   const { module, diagnostics } = await clinical('ConditionOnset', coding(SNOMED, '271737000', 'Anemia (disorder)'));
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
   assert.deepEqual(module.json.states.clin.codes, [{ system: 'SNOMED-CT', code: '271737000', display: 'Anemia (disorder)' }]);
@@ -381,22 +381,9 @@ test('a code system the state type does not accept is left out and reported', as
   assert.ok(codes.includes('REQUIRED_FIELD_MISSING'));
 });
 
-test('the real package form term:annotations/annotation/coding reads the same', async () => {
-  const real =
-    '<term:annotations><term:annotation id="a1" text="x">' + coding(SNOMED, '271737000', 'Anemia (disorder)') +
-    '</term:annotation></term:annotations>';
-  const { module } = await clinical('ConditionOnset', real);
-  assert.deepEqual(module.json.states.clin.codes, [{ system: 'SNOMED-CT', code: '271737000', display: 'Anemia (disorder)' }]);
-});
-
-test('only codings in a system the state accepts are used; the others are mentioned', async () => {
-  const { module, diagnostics } = await clinical(
-    'Procedure',
-    coding(SNOMED, '399208008', 'Plain X-ray of chest') + coding(LOINC, '36643-5', 'Chest X-ray') +
-      coding('http://ihe-d.de/CodeSystems/IHEXDStypeCode', 'ERGE', 'Diagnostic imaging results')
-  );
+test('a state has one code: a second code field is not part of the extension', async () => {
+  const { module } = await clinical('Procedure', coding(SNOMED, '399208008', 'Plain X-ray of chest') + coding(LOINC, '36643-5', 'Chest X-ray'));
   assert.deepEqual(module.json.states.clin.codes.map((c) => c.system), ['SNOMED-CT']);
-  assert.ok(diagnostics.items.some((i) => i.code === 'CODING_IGNORED'));
 });
 
 test('a state without a usable code is reported as incomplete, and an error with strict', async () => {
@@ -881,6 +868,22 @@ test('DiagnosticReport: contained observations as range, coded value and vital s
   noRemark(s);
 });
 
+test('MultiObservation: category, code and the contained observations (States wiki)', async () => {
+  const { module, diagnostics } = await clinical(
+    'MultiObservation',
+    coding(LOINC, '85354-9', 'Blood pressure panel') + '<synthea:observationConfig category="vital-signs"/>' +
+      '<synthea:reportObservation code="8480-6" codeDisplay="Systolic Blood Pressure" category="vital-signs" unit="mm[Hg]" valueShape="RANGE" value="110" valueHigh="140"/>' +
+      '<synthea:reportObservation code="8462-4" codeDisplay="Diastolic Blood Pressure" category="vital-signs" unit="mm[Hg]" valueShape="RANGE" value="70" valueHigh="90"/>'
+  );
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  const s = module.json.states.clin;
+  assert.equal(s.category, 'vital-signs');
+  assert.equal(s.codes[0].code, '85354-9');
+  assert.equal(s.observations.length, 2);
+  const bare = await clinical('MultiObservation', coding(LOINC, '85354-9', 'Blood pressure panel'));
+  assert.ok(bare.codes.includes('REQUIRED_FIELD_MISSING'));
+});
+
 test('a contained observation needs code, category, unit and exactly one kind of value', async () => {
   const cases = {
     noUnit: '<synthea:reportObservation code="1" codeDisplay="x" category="laboratory" value="1"/>',
@@ -1036,32 +1039,23 @@ const subProcess = (type, ext, inner = '') =>
       end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
   );
 
-test('an embedded sub-process is accepted as a DiagnosticReport state with its contained observations', async () => {
-  const { module, diagnostics } = await subProcess(
-    'DiagnosticReport',
-    coding(LOINC, '58410-2', 'CBC panel') + reportObs('valueShape="RANGE" value="10" valueHigh="11.9"')
-  );
-  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
-  const s = module.json.states.clin;
-  assert.equal(s.type, 'DiagnosticReport');
-  assert.equal(s.observations.length, 1);
-  assert.equal(s.direct_transition, 'Terminal');
-  assert.equal(module.json.states.Initial.direct_transition, 'clin');
-});
-
-test('a sub-process can also call a submodule (how drafts and the mihub models use it)', async () => {
+test('a sub-process that stands for a module becomes a CallSubmodule state (how drafts and the mihub models use it)', async () => {
   const { module, diagnostics } = await subProcess('CallSubmodule', '<synthea:submoduleConfig submodule="anemia_submodule"/>');
   assert.ok(!diagnostics.items.some((i) => i.code === 'STATE_TYPE_MISMATCH' || i.code === 'SUBMODULE_MISSING'), diagnostics.format().join('\n'));
   assert.equal(module.json.states.clin.type, 'CallSubmodule');
   assert.equal(module.json.states.clin.submodule, 'anemia_submodule');
 });
 
-test('a sub-process needs an explicit state type of DiagnosticReport, MultiObservation or CallSubmodule', async () => {
-  const none = await subProcess(null, '');
-  assert.ok(none.codes.includes('STATE_TYPE_REQUIRED'));
+test('a sub-process is a CallSubmodule by itself; another state type is a mismatch', async () => {
+  const none = await subProcess(null, '<synthea:submoduleConfig submodule="anemia_submodule"/>');
+  assert.equal(none.module.json.states.clin.type, 'CallSubmodule');
+  const empty = await subProcess(null, '');
+  assert.ok(empty.codes.includes('SUBMODULE_MISSING'));
   const wrong = await subProcess('Procedure', coding(SNOMED, '399208008', 'Plain X-ray of chest (procedure)'));
+  const report = await subProcess('DiagnosticReport', coding(LOINC, '58410-2', 'CBC panel'));
+  assert.ok(report.codes.includes('STATE_TYPE_MISMATCH'));
   assert.ok(wrong.codes.includes('STATE_TYPE_MISMATCH'));
-  assert.match(wrong.diagnostics.format().join('\n'), /DiagnosticReport, MultiObservation, CallSubmodule/);
+  assert.match(wrong.diagnostics.format().join('\n'), /allowed: CallSubmodule/);
 });
 
 test('an event sub-process is not accepted', async () => {
@@ -1071,12 +1065,61 @@ test('an event sub-process is not accepted', async () => {
   assert.ok(codes.includes('UNSUPPORTED_ELEMENT'));
 });
 
-test('the elements inside a sub-process are not converted, and the converter says so', async () => {
-  const inner = '<bpmn2:task id="In1" name="inside"/><bpmn2:task id="In2" name="inside too"/>';
-  const { module, diagnostics, codes } = await subProcess('DiagnosticReport', coding(LOINC, '58410-2', 'CBC panel') + reportObs('value="1"'), inner);
+// What is drawn inside a sub-process becomes a module of its own, which the sub-process calls.
+const inner = (extra = '') =>
+  '<bpmn2:startEvent id="IS" name="Initial"/>' + task('IT', 'inside', setAttr('x', '1') + extra) + '<bpmn2:endEvent id="IE" name="Terminal"/>' +
+  flow('if1', 'IS', 'IT') + flow('if2', 'IT', 'IE');
+
+test('the content of a sub-process becomes a module of its own, called by the sub-process', async () => {
+  const { modules, diagnostics } = await convert([{ path: 'test.bpmn', xml: wrap(
+    start() + `<bpmn2:subProcess id="A" name="Anemia check">${inner()}</bpmn2:subProcess>` + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  ) }]);
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
-  assert.ok(codes.includes('SUBPROCESS_CONTENT_IGNORED'));
-  assert.ok(!('inside' in module.json.states));
+  assert.equal(modules.length, 2);
+  const [parent, child] = modules;
+  assert.equal(parent.json.states['Anemia check'].type, 'CallSubmodule');
+  assert.equal(parent.json.states['Anemia check'].submodule, 'test/test_anemia_check');
+  assert.equal(child.path, 'test/test_anemia_check');
+  assert.equal(child.json.name, 'Anemia check');
+  assert.deepEqual(Object.keys(child.json.states).sort(), ['Initial', 'Terminal', 'inside']);
+  assert.ok(diagnostics.items.some((i) => i.code === 'SUBPROCESS_EXTRACTED'));
+});
+
+test('sub-processes inside sub-processes become modules of their own, one inside the other', async () => {
+  const nested = '<bpmn2:startEvent id="S2" name="Initial"/>' +
+    '<bpmn2:subProcess id="B" name="Deep">' + inner() + '</bpmn2:subProcess><bpmn2:endEvent id="E2" name="Terminal"/>' +
+    flow('g1', 'S2', 'B') + flow('g2', 'B', 'E2');
+  const { modules, diagnostics } = await convert([{ path: 'test.bpmn', xml: wrap(
+    start() + `<bpmn2:subProcess id="A" name="Outer">${nested}</bpmn2:subProcess>` + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+  ) }]);
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(modules.map((m) => m.path), ['test', 'test/test_outer', 'test/test_outer_deep']);
+  assert.equal(modules[1].json.states.Deep.submodule, 'test/test_outer_deep');
+});
+
+test('the module name of a sub-process is made from its name: umlauts are transliterated, a name without letters falls back to the id', async () => {
+  const { modules } = await convert([{ path: 'test.bpmn', xml: wrap(
+    start() + `<bpmn2:subProcess id="A" name="Größe prüfen">${inner()}</bpmn2:subProcess><bpmn2:subProcess id="B" name="???">${inner().replace(/IS|IT|IE|if1|if2/g, (m) => 'X' + m)}</bpmn2:subProcess>` + end() +
+      flow('f1', 'S', 'A') + flow('f1b', 'A', 'B') + flow('f2', 'B', 'E')
+  ) }]);
+  assert.deepEqual(modules.map((m) => m.path), ['test', 'test/test_groesse_pruefen', 'test/test_b']);
+});
+
+test('a sub-process with content must not also name a module, and needs a start event of its own', async () => {
+  const both = await subProcess('CallSubmodule', '<synthea:submoduleConfig submodule="anemia_submodule"/>', inner());
+  assert.ok(both.codes.includes('SUBPROCESS_SUBMODULE_CONFLICT'));
+  const noStart = await subProcess(null, '', task('IT', 'inside', setAttr('x', '1')) + '<bpmn2:endEvent id="IE" name="Terminal"/>' + flow('if2', 'IT', 'IE'));
+  assert.ok(noStart.codes.includes('INITIAL_COUNT'));
+});
+
+test('an encounter cannot span a sub-process: the same encounterId inside and outside is an error', async () => {
+  const encounterCtx = '<synthea:encounterContext requiresEncounterContext="true" encounterId="E1" encounterClass="ambulatory" encounterCodeSystem="http://snomed.info/sct" encounterCode="1" encounterCodeDisplay="x"/>';
+  const { diagnostics } = await convert([{ path: 'test.bpmn', xml: wrap(
+    start() + task('P1', 'p', stateType('Procedure') + coding(SNOMED, '1', 'p') + encounterCtx) +
+      `<bpmn2:subProcess id="A" name="Sub">${inner(encounterCtx)}</bpmn2:subProcess>` + end() +
+      flow('f0', 'S', 'P1') + flow('f1', 'P1', 'A') + flow('f2', 'A', 'E')
+  ) }]);
+  assert.ok(diagnostics.items.some((i) => i.code === 'ENCOUNTER_ACROSS_SUBPROCESS'));
 });
 
 // ---- SetAttribute from a distribution or another attribute -------------------------------------
@@ -1085,12 +1128,12 @@ const setting = (config, extra = '') =>
   run(start() + task('A', 'set', stateType('SetAttribute') + config + extra) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'));
 
 test('SetAttribute from a distribution (kind, round, parameters)', async () => {
-  const { module, diagnostics } = await setting('<synthea:setAttributeConfig attribute="los"/>', '<synthea:distributionConfig kind="EXPONENTIAL" round="true" mean="3"/>');
+  const { module, diagnostics } = await setting('<synthea:setAttributeConfig attribute="los" valueKind="DISTRIBUTION" distribution="EXPONENTIAL" distributionRound="true" distributionMean="3"/>');
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
   assert.deepEqual(module.json.states.set.distribution, { kind: 'EXPONENTIAL', round: true, parameters: { mean: 3 } });
   assert.ok(!('value' in module.json.states.set));
 
-  const gaussian = await setting('<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig kind="GAUSSIAN" mean="10" standardDeviation="2" min="5"/>');
+  const gaussian = await setting('<synthea:setAttributeConfig attribute="x" distribution="GAUSSIAN" distributionMean="10" distributionStandardDeviation="2" distributionMin="5"/>');
   assert.deepEqual(gaussian.module.json.states.set.distribution, { kind: 'GAUSSIAN', parameters: { mean: 10, standardDeviation: 2, min: 5 } });
 });
 
@@ -1101,16 +1144,29 @@ test('SetAttribute copies the value of another attribute', async () => {
 
 test('SetAttribute: a distribution that does not match its kind, or two ways to set the value, are errors', async () => {
   const cases = {
-    missingMean: ['<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig kind="EXPONENTIAL"/>', 'DISTRIBUTION_INVALID'],
-    strayParameter: ['<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig kind="EXACT" value="1" mean="2"/>', 'DISTRIBUTION_INVALID'],
-    noKind: ['<synthea:setAttributeConfig attribute="x"/>', '<synthea:distributionConfig mean="2"/>', 'DISTRIBUTION_INVALID'],
-    valueAndDistribution: ['<synthea:setAttributeConfig attribute="x" value="3"/>', '<synthea:distributionConfig kind="EXACT" value="1"/>', 'SET_ATTRIBUTE_VALUE'],
-    valueAndCopy: ['<synthea:setAttributeConfig attribute="x" value="3" valueAttribute="y"/>', '', 'SET_ATTRIBUTE_VALUE']
+    missingMean: ['<synthea:setAttributeConfig attribute="x" distribution="EXPONENTIAL"/>', 'DISTRIBUTION_INVALID'],
+    strayParameter: ['<synthea:setAttributeConfig attribute="x" distribution="EXACT" distributionValue="1" distributionMean="2"/>', 'DISTRIBUTION_INVALID'],
+    noKind: ['<synthea:setAttributeConfig attribute="x" valueKind="DISTRIBUTION" distributionMean="2"/>', 'DISTRIBUTION_INVALID'],
+    valueAndDistribution: ['<synthea:setAttributeConfig attribute="x" value="3" distribution="EXACT" distributionValue="1"/>', 'SET_ATTRIBUTE_VALUE'],
+    valueAndCopy: ['<synthea:setAttributeConfig attribute="x" value="3" valueAttribute="y"/>', 'SET_ATTRIBUTE_VALUE'],
+    leftoverOfOtherKind: ['<synthea:setAttributeConfig attribute="x" valueKind="VALUE" value="3" valueAttribute="y"/>', 'SET_ATTRIBUTE_VALUE'],
+    kindWithoutField: ['<synthea:setAttributeConfig attribute="x" valueKind="ATTRIBUTE"/>', 'SET_ATTRIBUTE_VALUE']
   };
-  for (const [name, [config, extra, code]] of Object.entries(cases)) {
-    const { codes } = await setting(config, extra);
+  for (const [name, [config, code]] of Object.entries(cases)) {
+    const { codes } = await setting(config);
     assert.ok(codes.includes(code), `${name} should be ${code}`);
   }
+});
+
+test('a probability: fixed and attribute together, or an attribute without a default, are errors', async () => {
+  const branch = (p) =>
+    run(start() + task('A', 'a', stateType('Simple')) + task('B', 'b', stateType('Simple')) + task('C', 'c', stateType('Simple')) + end() +
+      flow('f1', 'S', 'A') + flow('f2', 'A', 'B', p) + flow('f3', 'A', 'C') + flow('f4', 'B', 'E') + flow('f5', 'C', 'E'));
+  const ok = await branch('<synthea:probabilityConfig probabilityKind="ATTRIBUTE" probabilityAttribute="p" probabilityDefault="0.2"/>');
+  assert.equal(ok.diagnostics.errorCount, 0, ok.diagnostics.format().join('\n'));
+  assert.ok((await branch('<synthea:probabilityConfig probability="0.3" probabilityAttribute="p" probabilityDefault="0.2"/>')).codes.includes('TRANSITION_PROBABILITY_CONFLICT'));
+  assert.ok((await branch('<synthea:probabilityConfig probabilityAttribute="p"/>')).codes.includes('TRANSITION_PROBABILITY_DEFAULT'));
+  assert.ok((await branch('<synthea:probabilityConfig probabilityKind="FIXED"/>')).codes.includes('TRANSITION_PROBABILITY_EMPTY'));
 });
 
 test('an Attribute condition "== nil" is an error: it compares with the text "nil"', async () => {

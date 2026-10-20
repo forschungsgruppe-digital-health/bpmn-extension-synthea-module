@@ -12,14 +12,15 @@ const ALLOWED_BY_KIND = {
   end: new Set(['Terminal', 'Death']),
   gateway: new Set(['Simple', 'Guard']),
   call: new Set(['CallSubmodule']),
-  subprocess: new Set(['DiagnosticReport', 'MultiObservation', 'CallSubmodule'])
+  subprocess: new Set(['CallSubmodule'])
 };
 
 function infer(node) {
   switch (node.kind) {
     case 'start': return 'Initial';
     case 'end': return 'Terminal';
-    case 'call': return 'CallSubmodule';
+    case 'call':
+    case 'subprocess': return 'CallSubmodule';
     case 'event': return node.hasTimer ? 'Delay' : null;
     case 'gateway': return first(node.ext, 'synthea:GuardConfig') ? 'Guard' : 'Simple';
     default: return null;
