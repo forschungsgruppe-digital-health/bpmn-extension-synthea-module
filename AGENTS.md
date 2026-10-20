@@ -28,12 +28,12 @@ checks. Node 22, ES modules.
 ## Never do
 - Never report "XSD passed" as "extension valid" — the XSD does not cover `<extensionElements>`.
 - Never hand-edit the version in `package.json` or `.release-please-manifest.json`; Release Please owns it.
-- Never publish manually or outside the release workflow without an explicit request.
+- Never publish the package anywhere (it is `private`) without an explicit request.
 
 ## Commits & releases
 Use [Conventional Commits](https://www.conventionalcommits.org/): `fix:` → patch,
 `feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major. Release Please turns these
-into a release PR and publishes on merge. See `CONTRIBUTING.md`.
+into a release PR; merging it tags a release. Nothing is published to npm. See `CONTRIBUTING.md`.
 
 ## Commands
 - Full check: `npm run validate`

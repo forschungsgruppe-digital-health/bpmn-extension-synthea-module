@@ -79,12 +79,8 @@ Release-As: 1.0.0
    `CHANGELOG.md`.
 3. When you merge that release PR, Release Please tags the commit and creates a
    GitHub Release.
-4. The same workflow then publishes to npm (gated on `release_created`).
-
-> Publishing runs inside `release-please.yml`, not on a tag trigger: a tag
-> pushed by `GITHUB_TOKEN` does not start a second workflow, so a tag-triggered
-> publish would never fire. Add an `NPM_TOKEN` repository secret to enable the
-> publish step.
+The package is **not published to npm** (`"private": true` in `package.json`). A release
+is a tag and a GitHub Release with the generated `CHANGELOG.md`.
 
 Never hand-edit the version in `package.json` or the manifest — let Release
 Please own it.

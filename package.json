@@ -1,7 +1,16 @@
 {
   "name": "bpmn-js-synthea-extension",
   "version": "0.1.0",
-  "description": "Template for a custom BPMN 2.0 / bpmn.io extension with automated conformance checks.",
+  "description": "bpmn.io extension and converter to model patient pathways in BPMN and generate Synthea modules",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module.git"
+  },
+  "homepage": "https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module#readme",
+  "bugs": {
+    "url": "https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module/issues"
+  },
+  "private": true,
   "type": "module",
   "license": "MIT",
   "engines": {
