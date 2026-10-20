@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
                    xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
-                   xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1"
                    id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
 
   <bpmn:process id="Process_1" isExecutable="false">
@@ -86,14 +85,6 @@
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
 
-    <!-- state-type-fhirmap-consistent: stateType="Procedure" but
-         fhirmap:resourceType is absent -->
-    <bpmn:task id="Task_Procedure_Bad" name="Bad procedure mapping">
-      <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Procedure" />
-      </bpmn:extensionElements>
-    </bpmn:task>
-
     <!-- guard-state-requires-guard-config: stateType="Guard" with no GuardConfig at all -->
     <bpmn:exclusiveGateway id="Gateway_Guard_NoConfig" name="Guard (missing GuardConfig)">
       <bpmn:extensionElements>
@@ -141,9 +132,6 @@
     <bpmn:intermediateCatchEvent id="ConditionEnd_BadReference" name="Condition end (bad reference)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionEnd" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
         <synthea:EncounterReference targetEncounter="Encounter_1" />
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
@@ -211,9 +199,6 @@
     <bpmn:task id="Procedure_AssignBad" name="Procedure with assign (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
         <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -232,9 +217,6 @@
     <bpmn:task id="Procedure_ReferencedBad" name="Procedure with referenced-by (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
         <synthea:ReferencedByAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -245,9 +227,6 @@
     <bpmn:endEvent id="ConditionEnd_ReferencedUnmatched" name="Condition end with unmatched referenced-by (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionEnd" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
         <synthea:ReferencedByAttributeConfig attribute="never_assigned_attribute" />
       </bpmn:extensionElements>
     </bpmn:endEvent>

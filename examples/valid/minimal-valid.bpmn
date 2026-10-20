@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
                    xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
-                   xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1"
                    id="Definitions_valid" targetNamespace="http://bpmn.io/schema/bpmn">
 
   <bpmn:process id="Process_1" isExecutable="false">
@@ -20,20 +19,15 @@
       <bpmn:outgoing>Flow_P2</bpmn:outgoing>
     </bpmn:task>
 
-    <!-- state-type-fhirmap-consistent: stateType="Procedure" matches fhirmap:resourceType="Procedure" -->
     <bpmn:task id="Task_A" name="A">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_P1</bpmn:incoming>
       <bpmn:outgoing>Flow_A_Out</bpmn:outgoing>
     </bpmn:task>
 
-    <!-- state-type-fhirmap-consistent: stateType="SetAttribute" allows an absent resourceType;
-         set-attribute-requires-attribute: SetAttributeConfig has an attribute name -->
+    <!-- set-attribute-requires-attribute: SetAttributeConfig has an attribute name -->
     <bpmn:task id="Task_B" name="B">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
@@ -160,9 +154,6 @@
     <bpmn:intermediateCatchEvent id="ConditionOnset_Good" name="Condition onset (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
         <synthea:EncounterReference targetEncounter="Encounter_1" />
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
@@ -253,9 +244,6 @@
     <bpmn:intermediateCatchEvent id="ConditionOnset_AssignGood" name="Condition onset with assign (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
         <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
@@ -289,9 +277,6 @@
     <bpmn:task id="Observation_Good" name="Observation (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Observation" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Observation" />
-        </fhirmap:resourceMappings>
         <synthea:ObservationConfig category="vital-signs" />
         <synthea:ValueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
         <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_CodeGood" wellness="false" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
@@ -301,9 +286,6 @@
     <bpmn:task id="Imaging_Good" name="Imaging study with series (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ImagingStudy" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="ImagingStudy" />
-        </fhirmap:resourceMappings>
         <synthea:ImagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -311,9 +293,6 @@
     <bpmn:task id="Procedure_Duration_Good" name="Procedure with duration (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
         <synthea:ValueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -321,9 +300,6 @@
     <bpmn:task id="MedicationOrder_Administration_Good" name="Administered medication (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="MedicationOrder" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        </fhirmap:resourceMappings>
         <synthea:MedicationConfig administration="true" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -331,9 +307,6 @@
     <bpmn:task id="CarePlan_Activities_Good" name="Care plan with activities (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="CarePlanStart" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="CarePlan" />
-        </fhirmap:resourceMappings>
         <synthea:CarePlanActivity code="133918004" codeDisplay="Comfort measures (regime/therapy)" />
         <synthea:CarePlanActivity code="243072006" codeDisplay="Cancer education (procedure)" />
       </bpmn:extensionElements>
@@ -342,9 +315,6 @@
     <bpmn:task id="DiagnosticReport_Good" name="Lab panel with contained observations (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        </fhirmap:resourceMappings>
         <synthea:ReportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
         <synthea:ReportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
         <synthea:ReportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />

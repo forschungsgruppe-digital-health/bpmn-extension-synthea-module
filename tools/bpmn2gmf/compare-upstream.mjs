@@ -15,7 +15,7 @@ const files = [
   'synthea-lung-cancer', 'anemia-submodule', 'lung-cancer-treatment-submodule',
   'symptom-check-submodule', 'lung-cancer-probabilities-submodule'
 ].map((f) => `lung-cancer/${f}.bpmn`);
-const { modules } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
+const { modules } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: false });
 const ours = Object.fromEntries(modules.map((m) => [m.fileBase, m.json.states]));
 const upstream = (f) => JSON.parse(readFileSync(new URL(`./test/upstream/${f}.json`, import.meta.url), 'utf8')).states;
 
@@ -25,10 +25,10 @@ const report = (title, c) => {
   c.onlyUpstream.forEach((l) => console.log(`  - ${l}`));
 };
 
-report('anemia_submodule vs anemia_sub.json', compare(ours.anemia_submodule, upstream('anemia_sub')));
-report('lung_cancer_probabilities_submodule vs lung_cancer_probabilities.json', compare(ours.lung_cancer_probabilities_submodule, upstream('lung_cancer_probabilities')));
+report('anemia_submodule vs anemia_sub.json', compare(ours.anemia_submodule, upstream('anemia_sub'), { ignoreCodes: true }));
+report('lung_cancer_probabilities_submodule vs lung_cancer_probabilities.json', compare(ours.lung_cancer_probabilities_submodule, upstream('lung_cancer_probabilities'), { ignoreCodes: true }));
 const together = merge(ours.synthea_lung_cancer, ours.lung_cancer_treatment_submodule, ours.symptom_check_submodule);
-report('main + treatment + symptom-check vs lung_cancer.json', compare(together, upstream('lung_cancer'), { alias: ALIAS }));
+report('main + treatment + symptom-check vs lung_cancer.json', compare(together, upstream('lung_cancer'), { alias: ALIAS, ignoreCodes: true }));
 
 // Fields that link states or change the output (not compared above): how many states carry each, ours vs upstream.
 const l = [links(together), links(upstream('lung_cancer'))];

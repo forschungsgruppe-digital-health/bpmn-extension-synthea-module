@@ -1,5 +1,12 @@
 # BPMN → Synthea: Conversion Rules
 
+> **Update 2026-10-11:** `fhirmap:` and `term:` are no longer part of this repository
+> (models, lint, tests). They live as separate extensions. Where this document says that
+> `fhirmap:resourceType` or `term:coding` disambiguates or supplies something, read it as
+> a description of those separate extensions: in this repository the state type comes from
+> an explicit `synthea:stateTypeConfig`, and the clinical codes are not in the models
+> (see `lung-cancer/README.md`). The converter still accepts `term:coding` as input.
+
 Starting point: an arbitrary BPMN diagram (modeled with the `synthea:`, `fhirmap:`, and `term:` extensions) exists and needs to be converted into a Synthea GMF `.json` module.
 
 Core problem: several Synthea states share the same BPMN element (e.g. ten different states all end up as a `TextAnnotation`). The mapping tables below therefore list, per BPMN element, **all** candidate Synthea states plus the **disambiguation signal** the converter uses to decide between them — usually an extension attribute, occasionally a naming convention.

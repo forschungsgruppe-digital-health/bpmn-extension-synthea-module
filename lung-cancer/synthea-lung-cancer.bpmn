@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:cp="http://www.helict.de/bpmn4cp" xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1" xmlns:term="https://clinical-bpmn.org/terminology/v1" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:cp="http://www.helict.de/bpmn4cp" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
   <bpmn2:process id="Process_1" isExecutable="false">
     <bpmn2:extensionElements>
       <cp:bibliographyItem id="BibliographyItem_203p1sh" refLabel="1" text="Symptom Check" link="https://modeler.helict.eu/modeler/6a5905ad99ae3e21509fa6de" />
@@ -137,14 +137,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">ConditionOnset: Suspected Lung Cancer</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-1" text="Suspected lung cancer (situation)">
-            <term:coding system="http://snomed.info/sct" code="162573006" display="Suspected lung cancer (situation)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="suspected_lung_cancer" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_I" />
       </bpmn2:extensionElements>
@@ -157,14 +149,6 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <synthea:observationConfig category="vital-signs" />
         <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Observation" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-2" text="Pain severity - 0-10 verbal numeric rating [Score] - Reported">
-            <term:coding system="http://loinc.org" code="72514-3" display="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0179hmu</bpmn2:incoming>
@@ -175,14 +159,6 @@
         <i18n:translation lang="de">Procedure: Chest X-Ray</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="10" valueHigh="25" unit="minutes" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-3" text="Plain X-ray of chest (procedure)">
-            <term:coding system="http://snomed.info/sct" code="399208008" display="Plain X-ray of chest (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_I" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_01tcpcf</bpmn2:incoming>
@@ -205,14 +181,6 @@
         <i18n:translation lang="de">Procedure: Chest CT Scan</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="20" valueHigh="60" unit="minutes" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-4" text="Computed tomography of chest and abdomen (procedure)">
-            <term:coding system="http://snomed.info/sct" code="418891003" display="Computed tomography of chest and abdomen (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_II" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0b7k95z</bpmn2:incoming>
@@ -257,14 +225,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-5" text="Non-small cell lung cancer (disorder)">
-            <term:coding system="http://snomed.info/sct" code="254637007" display="Non-small cell lung cancer (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_diagnosis" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_III" />
       </bpmn2:extensionElements>
@@ -275,14 +235,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-6" text="Small cell carcinoma of lung (disorder)">
-            <term:coding system="http://snomed.info/sct" code="254632001" display="Small cell carcinoma of lung (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_diagnosis" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_III" />
       </bpmn2:extensionElements>
@@ -300,14 +252,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Sputum Cytology (Phlegm)</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-7" text="Sputum microscopy (procedure)">
-            <term:coding system="http://snomed.info/sct" code="167995008" display="Sputum microscopy (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_12hxynv</bpmn2:incoming>
@@ -317,14 +261,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Thoracentesis (Fluid)</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-8" text="Thoracentesis (procedure)">
-            <term:coding system="http://snomed.info/sct" code="91602002" display="Thoracentesis (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qe74a4</bpmn2:incoming>
@@ -334,14 +270,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Needle Biopsy (Cells)</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-9" text="Fine needle aspiration biopsy of lung (procedure)">
-            <term:coding system="http://snomed.info/sct" code="432231006" display="Fine needle aspiration biopsy of lung (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_089g81c</bpmn2:incoming>
@@ -351,14 +279,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Bronchoscopy (Tube)</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-10" text="Fiberoptic bronchoscopy (procedure)">
-            <term:coding system="http://snomed.info/sct" code="85765000" display="Fiberoptic bronchoscopy (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_III" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0xltu63</bpmn2:incoming>
@@ -549,14 +469,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC I</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-11" text="Primary small cell malignant neoplasm of lung, TNM stage 1 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="67811000119102" display="Primary small cell malignant neoplasm of lung, TNM stage 1 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -567,14 +479,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC I</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-12" text="Non-small cell carcinoma of lung, TNM stage 1 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="424132000" display="Non-small cell carcinoma of lung, TNM stage 1 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -585,14 +489,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC II</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-13" text="Primary small cell malignant neoplasm of lung, TNM stage 2 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="67821000119109" display="Primary small cell malignant neoplasm of lung, TNM stage 2 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -603,14 +499,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC II</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-14" text="Non-small cell carcinoma of lung, TNM stage 2 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="425048006" display="Non-small cell carcinoma of lung, TNM stage 2 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -621,14 +509,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC III</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-15" text="Primary small cell malignant neoplasm of lung, TNM stage 3 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="67831000119107" display="Primary small cell malignant neoplasm of lung, TNM stage 3 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -639,14 +519,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC III</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-16" text="Non-small cell carcinoma of lung, TNM stage 3 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="422968005" display="Non-small cell carcinoma of lung, TNM stage 3 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -657,14 +529,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: SCLC IV</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-17" text="Primary small cell malignant neoplasm of lung, TNM stage 4 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="67841000119103" display="Primary small cell malignant neoplasm of lung, TNM stage 4 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -675,14 +539,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnosis: NSCLC IV</i18n:translation>
         <synthea:stateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Condition" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-18" text="Non-small cell carcinoma of lung, TNM stage 4 (disorder)">
-            <term:coding system="http://snomed.info/sct" code="423121009" display="Non-small cell carcinoma of lung, TNM stage 4 (disorder)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="lung_cancer_condition" />
         <synthea:encounterReference targetEncounter="Diagnosis_Encounter_IV" />
       </bpmn2:extensionElements>
@@ -889,14 +745,6 @@
         <synthea:carePlanActivity code="133918004" codeDisplay="Comfort measures (regime/therapy)" />
         <synthea:carePlanActivity code="408957008" codeDisplay="Chronic pain control management (procedure)" />
         <synthea:carePlanActivity code="243072006" codeDisplay="Cancer education (procedure)" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="CarePlan" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-19" text="Terminal care (regime/therapy)">
-            <term:coding system="http://snomed.info/sct" code="182964004" display="Terminal care (regime/therapy)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1260oh2</bpmn2:incoming>
@@ -907,14 +755,6 @@
         <i18n:translation lang="de">Procedure: MRI Brain</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="30" valueHigh="120" unit="minutes" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-20" text="Magnetic resonance imaging for measurement of brain volume (procedure)">
-            <term:coding system="http://snomed.info/sct" code="698354004" display="Magnetic resonance imaging for measurement of brain volume (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_careplan_to_MRI</bpmn2:incoming>

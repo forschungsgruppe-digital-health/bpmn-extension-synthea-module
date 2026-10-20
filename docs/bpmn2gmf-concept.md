@@ -1,5 +1,12 @@
 # `tools/bpmn2gmf` — Concept
 
+> **Update 2026-10-11:** `fhirmap:` and `term:` are no longer part of this repository
+> (models, lint, tests). They live as separate extensions. Where this document says that
+> `fhirmap:resourceType` or `term:coding` disambiguates or supplies something, read it as
+> a description of those separate extensions: in this repository the state type comes from
+> an explicit `synthea:stateTypeConfig`, and the clinical codes are not in the models
+> (see `lung-cancer/README.md`). The converter still accepts `term:coding` as input.
+
 - **Status:** all phases implemented; decisions made (see [§8](#8-build-order))
 - **Goal:** turn the BPMN pathway models (`synthea:` + `fhirmap:` + `term:`) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).

@@ -12,7 +12,10 @@ const SKIPPED = new Set(['Initial', 'Terminal', 'Simple', 'EncounterEnd', 'CallS
 const attr = (a) => String(a).trim().toLowerCase().replace(/[\s]+/g, '_');
 // JSON with sorted keys, so {low, high} and {high, low} are the same value
 const canon = (v) => JSON.stringify(v, (k, x) => (x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a.localeCompare(b))) : x));
-const codes = (list) => (list ?? []).map((c) => `${c.system}:${c.code}`).sort().join(',');
+// Codes are part of a signature unless `ignoreCodes` is set. The real pathway files carry no
+// codes any more (term: is a separate extension), so comparing them with upstream leaves them out.
+let ignoreCodes = false;
+const codes = (list) => (ignoreCodes ? '' : (list ?? []).map((c) => `${c.system}:${c.code}`).sort().join(','));
 const value = (o) => canon(o.range ?? o.exact ?? o.value_code ?? o.vital_sign ?? null);
 
 function observation(o) {
@@ -44,7 +47,7 @@ export function signature(state, alias = {}) {
     case 'DiagnosticReport':
       return `DiagnosticReport ${codes(state.codes)} [${(state.observations ?? []).map(observation).sort().join(' ; ')}]`;
     case 'ImagingStudy':
-      return `ImagingStudy ${state.procedure_code?.code} ${(state.series ?? []).map((s) => `${s.body_site?.code}/${s.modality?.code}`).join(',')}`;
+      return `ImagingStudy ${ignoreCodes ? '' : state.procedure_code?.code} ${(state.series ?? []).map((s) => `${s.body_site?.code}/${s.modality?.code}`).join(',')}`;
     case 'MedicationOrder': case 'MedicationEnd': case 'ConditionOnset': case 'ConditionEnd':
     case 'CarePlanStart': case 'CarePlanEnd': case 'Procedure':
       return `${state.type} ${codes(state.codes)}`;
@@ -54,14 +57,19 @@ export function signature(state, alias = {}) {
 
 const count = (arr) => arr.reduce((m, s) => m.set(s, (m.get(s) ?? 0) + 1), new Map());
 
-export function signatures(states, alias) {
-  return Object.values(states).filter((s) => !SKIPPED.has(s.type)).map((s) => signature(s, alias));
+export function signatures(states, alias, { ignoreCodes: skip = false } = {}) {
+  ignoreCodes = skip;
+  try {
+    return Object.values(states).filter((s) => !SKIPPED.has(s.type)).map((s) => signature(s, alias));
+  } finally {
+    ignoreCodes = false;
+  }
 }
 
 // Multiset difference in both directions, as readable lines.
-export function compare(oursStates, upstreamStates, { alias = {} } = {}) {
-  const ours = count(signatures(oursStates));
-  const theirs = count(signatures(upstreamStates, alias));
+export function compare(oursStates, upstreamStates, { alias = {}, ignoreCodes = false } = {}) {
+  const ours = count(signatures(oursStates, {}, { ignoreCodes }));
+  const theirs = count(signatures(upstreamStates, alias, { ignoreCodes }));
   const diff = (a, b) => [...a].flatMap(([sig, n]) => (n > (b.get(sig) ?? 0) ? [`${n - (b.get(sig) ?? 0)}x ${sig}`] : [])).sort();
   return { onlyOurs: diff(ours, theirs), onlyUpstream: diff(theirs, ours), same: !diff(ours, theirs).length && !diff(theirs, ours).length };
 }

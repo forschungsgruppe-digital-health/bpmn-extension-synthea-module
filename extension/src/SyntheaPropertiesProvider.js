@@ -1,5 +1,6 @@
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import {
+  CollapsibleEntry,
   TextFieldEntry,
   TextAreaEntry,
   isTextFieldEntryEdited,
@@ -30,6 +31,13 @@ const DISTRIBUTION_TYPE = 'synthea:DistributionConfig';
 const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
 const REFERENCED_BY_ATTRIBUTE_TYPE = 'synthea:ReferencedByAttributeConfig';
+
+// Which state types a group applies to. The two attribute lists mirror the lint rules
+// assign-to-attribute-requires-valid-state and referenced-by-attribute-requires-valid-state.
+const COUNTER_STATE_TYPES = ['Counter'];
+const SET_ATTRIBUTE_STATE_TYPES = ['SetAttribute'];
+const ASSIGN_STATE_TYPES = ['ConditionOnset', 'AllergyOnset', 'MedicationOrder', 'CarePlanStart', 'Device'];
+const REFERENCED_STATE_TYPES = ['ConditionEnd', 'AllergyEnd', 'MedicationEnd', 'CarePlanEnd', 'DeviceEnd', 'Death'];
 
 const DELAY_SHAPE_VALUES = ['EXACT', 'RANGE'];
 const COUNTER_ACTION_VALUES = ['increment', 'decrement'];
@@ -133,21 +141,32 @@ const STATE_TYPE_VALUES = [
 export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector) {
   this.getGroups = function (element) {
     return function (groups) {
+      const firstOwn = groups.length;
 
       if (is(element, 'bpmn:EndEvent')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createEncounterContextGroup(element));
-        groups.push(createReferencedByAttributeGroup(element));
+        if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
+          groups.push(createReferencedByAttributeGroup(element));
+        }
         groups.push(...createStateDetailGroups(element));
       }
 
       if (is(element, 'bpmn:Task')) {
         groups.push(createStateTypeGroup(element));
         groups.push(createEncounterContextGroup(element));
-        groups.push(createCounterGroup(element));
-        groups.push(createSetAttributeGroup(element));
-        groups.push(createAssignToAttributeGroup(element));
-        groups.push(createReferencedByAttributeGroup(element));
+        if (appliesTo(element, COUNTER_STATE_TYPES, COUNTER_TYPE)) {
+          groups.push(createCounterGroup(element));
+        }
+        if (appliesTo(element, SET_ATTRIBUTE_STATE_TYPES, SET_ATTRIBUTE_TYPE)) {
+          groups.push(createSetAttributeGroup(element));
+        }
+        if (appliesTo(element, ASSIGN_STATE_TYPES, ASSIGN_TO_ATTRIBUTE_TYPE)) {
+          groups.push(createAssignToAttributeGroup(element));
+        }
+        if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
+          groups.push(createReferencedByAttributeGroup(element));
+        }
         groups.push(...createStateDetailGroups(element));
 
         if (isConditionOrAllergyOnset(element)) {
@@ -164,8 +183,12 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createStateTypeGroup(element));
         groups.push(createDelayGroup(element));
         groups.push(createEncounterContextGroup(element));
-        groups.push(createAssignToAttributeGroup(element));
-        groups.push(createReferencedByAttributeGroup(element));
+        if (appliesTo(element, ASSIGN_STATE_TYPES, ASSIGN_TO_ATTRIBUTE_TYPE)) {
+          groups.push(createAssignToAttributeGroup(element));
+        }
+        if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
+          groups.push(createReferencedByAttributeGroup(element));
+        }
         groups.push(...createStateDetailGroups(element));
 
         if (isConditionOrAllergyOnset(element)) {
@@ -194,6 +217,13 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
         groups.push(createSubmoduleGroup(element));
       }
 
+      // Everything above is ours: fold it into one "Synthea" group whose sections open and
+      // close on their own, so the panel shows a single entry instead of a long list.
+      const own = groups.splice(firstOwn);
+      if (own.length) {
+        groups.push(createSyntheaGroup(own));
+      }
+
       return groups;
     };
   };
@@ -204,6 +234,23 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
 SyntheaMiniPropertiesProvider.$inject = ['propertiesPanel', 'injector'];
 
 // --- groups ------------------------------------------------------------
+
+// One group "Synthea" holding every synthea: group as a collapsible section of its own.
+// The first section starts open.
+function createSyntheaGroup(sections) {
+  return {
+    id: 'synthea',
+    label: 'Synthea',
+    shouldOpen: true,
+    entries: sections.map((section, index) => ({
+      id: `synthea-section-${section.id}`,
+      component: CollapsibleEntry,
+      label: section.label,
+      open: index === 0,
+      entries: section.entries
+    }))
+  };
+}
 
 function createStateTypeGroup(element) {
   return {
@@ -986,6 +1033,16 @@ function isConditionOrAllergyOnset(element) {
   const stateType = config ? config.get('stateType') : undefined;
 
   return stateType === 'ConditionOnset' || stateType === 'AllergyOnset';
+}
+
+// Is a group relevant for the chosen state type? With no state type chosen nothing is hidden
+// (the type is then inferred), and a group that already holds a value is never hidden.
+function appliesTo(element, stateTypes, configType) {
+  const type = stateTypeOf(element);
+  if (!type || stateTypes.includes(type)) {
+    return true;
+  }
+  return !!getExtension(element, configType);
 }
 
 function getExtension(element, type) {

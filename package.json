@@ -26,7 +26,7 @@
     "check:attributes": "node tools/check-attribute-usage.mjs",
     "bpmn2gmf": "node tools/bpmn2gmf/cli.mjs",
     "test:bpmn2gmf": "node --test \"tools/bpmn2gmf/test/*.test.mjs\"",
-    "convert:check": "node tools/bpmn2gmf/cli.mjs lung-cancer --check --strict",
+    "convert:check": "node tools/bpmn2gmf/cli.mjs lung-cancer --check",
     "compare:upstream": "node tools/bpmn2gmf/compare-upstream.mjs",
     "synthea:smoke": "node tools/synthea-smoke.mjs",
     "validate": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run xsd:gen:check && npm run xsd:ext && npm run conventions && npm run test:bpmn2gmf && npm run convert:check",

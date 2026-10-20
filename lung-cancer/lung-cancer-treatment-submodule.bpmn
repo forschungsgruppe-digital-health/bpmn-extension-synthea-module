@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1" xmlns:term="https://clinical-bpmn.org/terminology/v1" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
   <bpmn2:process id="Process_LungCancerTreatmentCycle" name="Lung Cancer Treatment Cycle" isExecutable="false">
     <bpmn2:startEvent id="Event_TreatmentCycleStart" name="Initial">
       <bpmn2:extensionElements>
@@ -30,14 +30,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CMP</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-1" text="Comprehensive metabolic 2000 panel - Serum or Plasma">
-            <term:coding system="http://loinc.org" code="24323-8" display="Comprehensive metabolic 2000 panel - Serum or Plasma" />
-          </term:annotation>
-        </term:annotations>
         <synthea:reportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />
         <synthea:reportObservation code="6299-2" codeDisplay="Urea nitrogen [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Urea Nitrogen" />
         <synthea:reportObservation code="38483-4" codeDisplay="Creatinine [Mass/volume] in Blood" category="laboratory" unit="mg/dL" valueShape="RANGE" value="2.5" valueHigh="3.5" />
@@ -64,14 +56,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_Urinalysis</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-2" text="Urinalysis macro (dipstick) panel - Urine">
-            <term:coding system="http://loinc.org" code="24357-6" display="Urinalysis macro (dipstick) panel - Urine" />
-          </term:annotation>
-        </term:annotations>
         <synthea:reportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
         <synthea:reportObservation code="34533-0" codeDisplay="Odor of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167248002" valueCodeDisplay="Urine smell ammoniacal (finding)" />
         <synthea:reportObservation code="32167-9" codeDisplay="Clarity of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="300828005" valueCodeDisplay="Translucent (qualifier value)" />
@@ -98,14 +82,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CBC_Panel</i18n:translation>
         <synthea:stateTypeConfig stateType="DiagnosticReport" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="DiagnosticReport" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-3" text="CBC panel - Blood by Automated count">
-            <term:coding system="http://loinc.org" code="58410-2" display="CBC panel - Blood by Automated count" />
-          </term:annotation>
-        </term:annotations>
         <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="0.5" valueHigh="5" />
         <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
         <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="12" valueHigh="17.5" />
@@ -156,14 +132,6 @@
         <i18n:translation lang="de">Procedure: Hearing_Test</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="EXACT" value="30" unit="minutes" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-4" text="Hearing examination (procedure)">
-            <term:coding system="http://snomed.info/sct" code="398171003" display="Hearing examination (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0vqvpbj</bpmn2:incoming>
@@ -174,14 +142,6 @@
         <i18n:translation lang="de">Medication Prescription: Chemotherapy I</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <synthea:medicationConfig administration="true" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-5" text="Cisplatin 50 MG Injection">
-            <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" display="Cisplatin 50 MG Injection" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -192,9 +152,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Discontinue Medication: Chemotherapy IB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        </fhirmap:resourceMappings>
         <synthea:referencedByAttributeConfig attribute="chemotherapy_i_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -211,14 +168,6 @@
         <i18n:translation lang="de">Medication Prescription: SCLC Chemotherapy II</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <synthea:medicationConfig administration="true" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-6" text="etoposide 100 MG Injection [Etopophos]">
-            <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="etoposide 100 MG Injection [Etopophos]" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -230,14 +179,6 @@
         <i18n:translation lang="de">Medication Prescription: NSCLC Chemotherapy II</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationOrder" />
         <synthea:medicationConfig administration="true" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-7" text="PACLitaxel 100 MG Injection">
-            <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100 MG Injection" />
-          </term:annotation>
-        </term:annotations>
         <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -248,9 +189,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Discontinue Medication: SCLC Chemotherapy IIB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        </fhirmap:resourceMappings>
         <synthea:referencedByAttributeConfig attribute="sclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -261,9 +199,6 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Discontinue Medication: NSCLC Chemotherapy IIB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        </fhirmap:resourceMappings>
         <synthea:referencedByAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
@@ -280,14 +215,6 @@
         <i18n:translation lang="de">Procedure: Radiation</i18n:translation>
         <synthea:stateTypeConfig stateType="Procedure" />
         <synthea:valueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Procedure" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-8" text="Combined chemotherapy and radiation therapy (procedure)">
-            <term:coding system="http://snomed.info/sct" code="703423002" display="Combined chemotherapy and radiation therapy (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA2_out</bpmn2:incoming>
@@ -299,14 +226,6 @@
         <synthea:stateTypeConfig stateType="Observation" />
         <synthea:observationConfig category="vital-signs" />
         <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="10" unit="{score}" decimals="0" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="Observation" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-9" text="Pain severity - 0-10 verbal numeric rating [Score] - Reported">
-            <term:coding system="http://loinc.org" code="72514-3" display="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1niwvy9</bpmn2:incoming>
@@ -322,14 +241,6 @@
         <i18n:translation lang="de">Imaging: Chest_CT</i18n:translation>
         <synthea:stateTypeConfig stateType="ImagingStudy" />
         <synthea:imagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
-        <fhirmap:resourceMappings>
-          <fhirmap:resourceMapping resourceType="ImagingStudy" />
-        </fhirmap:resourceMappings>
-        <term:annotations>
-          <term:annotation id="term-ann-10" text="High resolution computed tomography of chest without contrast (procedure)">
-            <term:coding system="http://snomed.info/sct" code="16335031000119103" display="High resolution computed tomography of chest without contrast (procedure)" />
-          </term:annotation>
-        </term:annotations>
         <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qje2av</bpmn2:incoming>

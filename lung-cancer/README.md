@@ -46,14 +46,22 @@ and the result of the runs (equal stay length, medication category, care plan
 activities, symptom behavior; what is left over) are in section 12 of the
 concept.
 
-## `fhirmap:` and `term:`
+## Clinical codes and FHIR resource types (removed for now)
 
-The models carry `fhirmap:` (which FHIR resource a state produces) and `term:`
-(its code) in the form and with the namespaces of the real packages
-(`bpmn-js-clinical-semantics`, `bpmn-extension-medical-terminology`):
-`fhirmap:resourceMappings > resourceMapping` and `term:annotations > annotation
-> coding`. States that produce no FHIR resource (`Symptom`, `SetAttribute`,
-`Counter`, `Death`, `VitalSign`) have no mapping.
+The models used to carry `fhirmap:` (which FHIR resource a state produces) and `term:`
+(its code). Both are separate extensions and were taken out of this repository's models
+(2026-10-11). What that means:
+
+- **State types** are not affected: every state-bearing element carries an explicit
+  `synthea:stateTypeConfig`, the converter never used `fhirmap:` to decide.
+- **Codes are gone.** Procedures, diagnoses, medications, observations, diagnostic reports,
+  the care plan and the imaging study have no `codes` any more, so the converted modules
+  lack a field Synthea requires and are **not complete**. The converter reports each one
+  as `REQUIRED_FIELD_MISSING` (44 across the five files) and, with `--strict`, as an error.
+  That is why `npm run convert:check` runs without `--strict` for now.
+- The converter still reads `term:coding` if an input carries it (`codes.mjs`), so models
+  with codes from the separate `term:` extension convert as before.
+- The Encounter codes are part of `synthea:encounterContext` and are still there.
 
 ## BPMN conformance class (SYN-1)
 
