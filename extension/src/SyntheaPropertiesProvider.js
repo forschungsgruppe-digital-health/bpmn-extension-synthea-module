@@ -166,7 +166,30 @@ const STATE_TYPE_VALUES = [
 ];
 
 
+// Which sections of the Synthea group are open, per element (kept while the diagram is open, not
+// saved). The section id contains the element id, so every element has sections of its own and
+// starts with the first one open until the user opens or closes one.
+const openSections = new Map();
+
+function rememberToggles(injector) {
+  const eventBus = injector.get('eventBus');
+
+  const onClick = (event) => {
+    const header = event.target.closest && event.target.closest('.bio-properties-panel-collapsible-entry-header');
+    const entry = header && header.closest('[data-entry-id^="synthea-section-"]');
+    if (!entry) return;
+    // the panel flips its state after this click handler ran
+    setTimeout(() => openSections.set(entry.getAttribute('data-entry-id'), entry.classList.contains('open')), 0);
+  };
+
+  document.addEventListener('click', onClick);
+  eventBus.on('diagram.destroy', () => document.removeEventListener('click', onClick));
+  eventBus.on('import.done', () => openSections.clear());
+}
+
 export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector) {
+  rememberToggles(injector);
+
   this.getGroups = function (element) {
     return function (groups) {
       const firstOwn = groups.length;
@@ -254,7 +277,7 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       // close on their own, so the panel shows a single entry instead of a long list.
       const own = groups.splice(firstOwn);
       if (own.length) {
-        groups.push(createSyntheaGroup(own));
+        groups.push(createSyntheaGroup(own, element));
       }
 
       return groups;
@@ -284,16 +307,16 @@ function isSectionEdited(input) {
 
 // One group "Synthea" holding every synthea: group as a collapsible section of its own.
 // The first section starts open.
-function createSyntheaGroup(sections) {
+function createSyntheaGroup(sections, element) {
   return {
     id: 'synthea',
     label: 'Synthea',
     shouldOpen: true,
     entries: sections.map((section, index) => ({
-      id: `synthea-section-${section.id}`,
+      id: `synthea-section-${section.id}@${element.id}`,
       component: CollapsibleEntry,
       label: section.label,
-      open: index === 0,
+      open: openSections.get(`synthea-section-${section.id}@${element.id}`) ?? index === 0,
       entries: section.entries,
       isEdited: isSectionEdited
     }))

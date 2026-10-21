@@ -1105,6 +1105,15 @@ test('the module name of a sub-process is made from its name: umlauts are transl
   assert.deepEqual(modules.map((m) => m.path), ['test', 'test/test_groesse_pruefen', 'test/test_b']);
 });
 
+test('examples/valid/sub-process.bpmn converts to a main module and the module made from the sub-process', async () => {
+  const path = 'examples/valid/sub-process.bpmn';
+  const { modules, diagnostics } = await convert([{ path, xml: readFileSync(path, 'utf8') }], { strict: true });
+  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
+  assert.deepEqual(modules.map((m) => m.path), ['sub_process', 'sub_process/sub_process_diagnostic_work_up']);
+  assert.equal(modules[0].json.states['Diagnostic work-up'].submodule, 'sub_process/sub_process_diagnostic_work_up');
+  assert.equal(modules[1].json.states['Set risk'].distribution.kind, 'UNIFORM');
+});
+
 test('a sub-process with content must not also name a module, and needs a start event of its own', async () => {
   const both = await subProcess('CallSubmodule', '<synthea:submoduleConfig submodule="anemia_submodule"/>', inner());
   assert.ok(both.codes.includes('SUBPROCESS_SUBMODULE_CONFLICT'));
