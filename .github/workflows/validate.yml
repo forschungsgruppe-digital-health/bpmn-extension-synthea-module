@@ -53,3 +53,6 @@ jobs:
 
       - name: Real pathways convert completely (strict)
         run: npm run convert:check
+
+      - name: Real pathways have the same logic as the Synthea modules
+        run: npm run compare:structure

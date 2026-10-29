@@ -56,10 +56,10 @@
         <synthea:probabilityConfig probabilityAttribute="probability_of_lung_cancer" probabilityDefault="0.0645" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_04qqbk6" name="default_probability_of_no_lung_cancer = 0.9355" sourceRef="Gateway_0qihhud" targetRef="Event_0blllxp">
+    <bpmn2:sequenceFlow id="Flow_04qqbk6" name="default_probability_of_no_lung_cancer = 0.93355" sourceRef="Gateway_0qihhud" targetRef="Event_0blllxp">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">default_probability_of_no_lung_cancer = 0.9355</i18n:translation>
-        <synthea:probabilityConfig probabilityAttribute="probability_of_no_lung_cancer" probabilityDefault="0.9355" />
+        <i18n:translation lang="de">default_probability_of_no_lung_cancer = 0.93355</i18n:translation>
+        <synthea:probabilityConfig probabilityAttribute="probability_of_no_lung_cancer" probabilityDefault="0.93355" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:scriptTask id="Activity_0zyiii6" name="Onset_Lung_Cancer: Set lung_cancer = true">
@@ -723,7 +723,8 @@
         <synthea:stateTypeConfig stateType="CallSubmodule" />
         <synthea:submoduleConfig submodule="lung_cancer_treatment_submodule" />
       </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_MRIBrain_to_Cycle</bpmn2:incoming>
+      <bpmn2:incoming>Flow_StemGateway_99</bpmn2:incoming>
+      <bpmn2:incoming>Flow_StemCells_to_Cycle</bpmn2:incoming>
       <bpmn2:outgoing>Flow_TreatmentCycle_End</bpmn2:outgoing>
     </bpmn2:callActivity>
     <bpmn2:sequenceFlow id="Flow_1jrrxax_07j08mi" sourceRef="Event_1jrrxax" targetRef="Gateway_07j08mi" />
@@ -758,9 +759,41 @@
         <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_careplan_to_MRI</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_MRIBrain_to_Cycle</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_MRIBrain_to_StemGateway</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:sequenceFlow id="Flow_MRIBrain_to_Cycle" sourceRef="Activity_MRIBrain" targetRef="Activity_LungCancerTreatmentCycle" />
+    <bpmn2:sequenceFlow id="Flow_MRIBrain_to_StemGateway" sourceRef="Activity_MRIBrain" targetRef="Gateway_StemCells" />
+    <bpmn2:exclusiveGateway id="Gateway_StemCells" default="Flow_StemGateway_99">
+      <bpmn2:incoming>Flow_MRIBrain_to_StemGateway</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_StemGateway_1</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_StemGateway_99</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:scriptTask id="Activity_StemCells" name="Stem Cells Set bone_marrow = True">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">Stem Cells Set bone_marrow = True</i18n:translation>
+        <synthea:stateTypeConfig stateType="SetAttribute" />
+        <synthea:setAttributeConfig attribute="bone_marrow" value="true" />
+        <synthea:encounterContext requiresEncounterContext="false" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_StemGateway_1</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_StemCells_to_Cycle</bpmn2:outgoing>
+    </bpmn2:scriptTask>
+    <bpmn2:sequenceFlow id="Flow_StemGateway_1" name="1%" sourceRef="Gateway_StemCells" targetRef="Activity_StemCells">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">1%</i18n:translation>
+        <synthea:probabilityConfig probability="0.01" />
+      </bpmn2:extensionElements>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="Flow_StemGateway_99" name="99%" sourceRef="Gateway_StemCells" targetRef="Activity_LungCancerTreatmentCycle">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">99%</i18n:translation>
+        <synthea:probabilityConfig probability="0.99" />
+      </bpmn2:extensionElements>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="Flow_StemCells_to_Cycle" sourceRef="Activity_StemCells" targetRef="Activity_LungCancerTreatmentCycle" />
+    <bpmn2:textAnnotation id="TextAnnotation_EndEncounterIV">
+      <bpmn2:text>End Encounter: End_Diagnosis_Encounter_IV</bpmn2:text>
+    </bpmn2:textAnnotation>
+    <bpmn2:association id="Association_EndEncounterIV" associationDirection="None" sourceRef="Flow_StemGateway_99" targetRef="TextAnnotation_EndEncounterIV" />
     <bpmn2:textAnnotation id="TextAnnotation_1h8ai1n">
       <bpmn2:extensionElements>
         <i18n:translation target="@text" lang="de">SNOMED-CT: 162573006
@@ -1183,11 +1216,11 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="5885" y="135" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_LungCancerTreatmentCycle_di" bpmnElement="Activity_LungCancerTreatmentCycle">
-        <dc:Bounds x="9100" y="273" width="100" height="80" />
+        <dc:Bounds x="9380" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_MRIBrain_di" bpmnElement="TextAnnotation_MRIBrain">
-        <dc:Bounds x="8974" y="180" width="200" height="72" />
+        <dc:Bounds x="8960" y="160" width="140" height="92" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_MRIBrain_di" bpmnElement="Association_MRIBrain">
@@ -1657,9 +1690,43 @@ biopsy of lung (procedure)</bpmn2:text>
         <dc:Bounds x="8960" y="273" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_MRIBrain_to_Cycle_di" bpmnElement="Flow_MRIBrain_to_Cycle">
+      <bpmndi:BPMNEdge id="Flow_MRIBrain_to_StemGateway_di" bpmnElement="Flow_MRIBrain_to_StemGateway">
         <di:waypoint x="9060" y="313" />
         <di:waypoint x="9100" y="313" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Gateway_StemCells_di" bpmnElement="Gateway_StemCells" isMarkerVisible="true">
+        <dc:Bounds x="9100" y="288" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_StemCells_di" bpmnElement="Activity_StemCells">
+        <dc:Bounds x="9200" y="170" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_EndEncounterIV_di" bpmnElement="TextAnnotation_EndEncounterIV">
+        <dc:Bounds x="9215" y="350" width="102" height="57" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_StemGateway_1_di" bpmnElement="Flow_StemGateway_1">
+        <di:waypoint x="9125" y="288" />
+        <di:waypoint x="9125" y="210" />
+        <di:waypoint x="9200" y="210" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="9132" y="246" width="16" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_StemGateway_99_di" bpmnElement="Flow_StemGateway_99">
+        <di:waypoint x="9150" y="313" />
+        <di:waypoint x="9380" y="313" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="9250" y="293" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_StemCells_to_Cycle_di" bpmnElement="Flow_StemCells_to_Cycle">
+        <di:waypoint x="9300" y="210" />
+        <di:waypoint x="9430" y="210" />
+        <di:waypoint x="9430" y="273" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_EndEncounterIV_di" bpmnElement="Association_EndEncounterIV">
+        <di:waypoint x="9265" y="313" />
+        <di:waypoint x="9266" y="350" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_092d7h1_di" bpmnElement="Flow_092d7h1">
         <di:waypoint x="4840" y="180" />
@@ -1719,14 +1786,14 @@ biopsy of lung (procedure)</bpmn2:text>
         <di:waypoint x="7645" y="570" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Event_TreatmentCycle_End_di" bpmnElement="Event_TreatmentCycle_End">
-        <dc:Bounds x="9242" y="295" width="36" height="36" />
+        <dc:Bounds x="9522" y="295" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9235" y="338" width="50" height="14" />
+          <dc:Bounds x="9515" y="338" width="50" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_TreatmentCycle_End_di" bpmnElement="Flow_TreatmentCycle_End">
-        <di:waypoint x="9200" y="313" />
-        <di:waypoint x="9242" y="313" />
+        <di:waypoint x="9480" y="313" />
+        <di:waypoint x="9522" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1nisonf_di" bpmnElement="Association_1nisonf">
         <di:waypoint x="2255" y="140" />
@@ -1830,8 +1897,4 @@ biopsy of lung (procedure)</bpmn2:text>
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1r3cip1" />
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1wxtn3o" />
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1uvpzjm" />
-  <bpmndi:BPMNDiagram id="BPMNDiagram_LungCancerTreatmentCycle" />
 </bpmn2:definitions>

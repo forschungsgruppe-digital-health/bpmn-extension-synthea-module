@@ -7,23 +7,8 @@
       </bpmn2:extensionElements>
       <bpmn2:outgoing>Flow_TreatmentCycleStart</bpmn2:outgoing>
     </bpmn2:startEvent>
-    <bpmn2:exclusiveGateway id="Gateway_0iu5rc0" default="Flow_045p3wr">
-      <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0jhspua</bpmn2:outgoing>
-      <bpmn2:outgoing>Flow_045p3wr</bpmn2:outgoing>
-    </bpmn2:exclusiveGateway>
-    <bpmn2:scriptTask id="Activity_0xuk3ku" name="Stem Cells Set bone_marrow = True">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Stem Cells Set bone_marrow = True</i18n:translation>
-        <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="bone_marrow" value="true" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_0jhspua</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0p8q6xn</bpmn2:outgoing>
-    </bpmn2:scriptTask>
     <bpmn2:exclusiveGateway id="Gateway_130sh5c">
-      <bpmn2:incoming>Flow_0p8q6xn</bpmn2:incoming>
-      <bpmn2:incoming>Flow_045p3wr</bpmn2:incoming>
+      <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
       <bpmn2:outgoing>Flow_gw130_to_careplan</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:task id="Activity_11vsro0" name="Diagnostic Area: Record_CMP">
@@ -41,7 +26,7 @@
         <synthea:reportObservation code="33914-3" codeDisplay="Glomerular filtration rate [Volume Rate/Area] in Serum or Plasma by Creatinine-based formula (MDRD)/1.73 sq M" category="laboratory" unit="mL/min" valueShape="RANGE" value="4" valueHigh="29" />
         <synthea:reportObservation code="2885-2" codeDisplay="Protein [Mass/volume] in Serum or Plasma" category="laboratory" unit="g/dL" valueShape="RANGE" value="6" valueHigh="8" />
         <synthea:reportObservation code="1751-7" codeDisplay="Albumin [Mass/volume] in Serum or Plasma" category="laboratory" unit="g/dL" valueShape="RANGE" value="3.5" valueHigh="5.5" />
-        <synthea:reportObservation code="10834-0" codeDisplay="Globulin [Mass/volume] in Serum by calculation" category="laboratory" unit="g/L" valueShape="RANGE" value="2" valueHigh="3.5" />
+        <synthea:reportObservation code="10834-0" codeDisplay="Globulin [Mass/volume] in Serum by calculation" category="laboratory" unit="g/dL" valueShape="RANGE" value="2" valueHigh="3.5" />
         <synthea:reportObservation code="1975-2" codeDisplay="Bilirubin.total [Mass/volume] in Serum or Plasma" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0.1" valueHigh="1.2" />
         <synthea:reportObservation code="6768-6" codeDisplay="Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="20" valueHigh="140" />
         <synthea:reportObservation code="1742-6" codeDisplay="Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="20" valueHigh="60" />
@@ -297,20 +282,7 @@
       <bpmn2:incoming>Flow_1eee7nb</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeB2_out</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="Flow_TreatmentCycleStart" sourceRef="Event_TreatmentCycleStart" targetRef="Gateway_0iu5rc0" />
-    <bpmn2:sequenceFlow id="Flow_0jhspua" name="1%" sourceRef="Gateway_0iu5rc0" targetRef="Activity_0xuk3ku">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">1%</i18n:translation>
-        <synthea:probabilityConfig probability="0.01" />
-      </bpmn2:extensionElements>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_045p3wr" name="99%" sourceRef="Gateway_0iu5rc0" targetRef="Gateway_130sh5c">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">99%</i18n:translation>
-        <synthea:probabilityConfig probability="0.99" />
-      </bpmn2:extensionElements>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_0p8q6xn" sourceRef="Activity_0xuk3ku" targetRef="Gateway_130sh5c" />
+    <bpmn2:sequenceFlow id="Flow_TreatmentCycleStart" sourceRef="Event_TreatmentCycleStart" targetRef="Gateway_130sh5c" />
     <bpmn2:sequenceFlow id="Flow_gw130_to_careplan" sourceRef="Gateway_130sh5c" targetRef="Activity_11vsro0" />
     <bpmn2:sequenceFlow id="Flow_1772ltf" sourceRef="Activity_11vsro0" targetRef="Activity_1rbjl3t" />
     <bpmn2:sequenceFlow id="Flow_02g4inp" sourceRef="Activity_1rbjl3t" targetRef="Activity_0g6jkau" />
@@ -446,10 +418,6 @@
     <bpmn2:association id="Association_0s8tz8a" associationDirection="None" sourceRef="Activity_1wt86vs" targetRef="TextAnnotation_1plfojx" />
     <bpmn2:association id="Association_0xca2tl" associationDirection="None" sourceRef="Activity_11qamf8" targetRef="TextAnnotation_09aikim" />
     <bpmn2:association id="Association_0eaf2yh" associationDirection="None" sourceRef="Activity_04ktum8" targetRef="TextAnnotation_1858nwf" />
-    <bpmn2:textAnnotation id="TextAnnotation_1m96ltu">
-      <bpmn2:text>End Encounter: End_Diagnosis_Encounter_IV</bpmn2:text>
-    </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_0lk2kks" associationDirection="None" sourceRef="Flow_045p3wr" targetRef="TextAnnotation_1m96ltu" />
     <bpmn2:textAnnotation id="TextAnnotation_1s5cihb">
       <bpmn2:text>SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
     </bpmn2:textAnnotation>
@@ -480,13 +448,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="8673" y="336" width="30" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0iu5rc0_di" bpmnElement="Gateway_0iu5rc0" isMarkerVisible="true">
-        <dc:Bounds x="9075" y="288" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0xuk3ku_di" bpmnElement="Activity_0xuk3ku">
-        <dc:Bounds x="9240" y="110" width="100" height="80" />
-        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_130sh5c_di" bpmnElement="Gateway_130sh5c" isMarkerVisible="true">
         <dc:Bounds x="9445" y="288" width="50" height="50" />
@@ -631,9 +592,6 @@
         <dc:Bounds x="12590" y="187" width="180" height="57" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1m96ltu_di" bpmnElement="TextAnnotation_1m96ltu">
-        <dc:Bounds x="9235" y="150" width="102" height="57" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0p94u3s_di" bpmnElement="TextAnnotation_0p94u3s">
         <dc:Bounds x="13130" y="20" width="108" height="57" />
       </bpmndi:BPMNShape>
@@ -642,27 +600,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_TreatmentCycleStart_di" bpmnElement="Flow_TreatmentCycleStart">
         <di:waypoint x="8706" y="313" />
-        <di:waypoint x="9075" y="313" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0jhspua_di" bpmnElement="Flow_0jhspua">
-        <di:waypoint x="9100" y="288" />
-        <di:waypoint x="9100" y="150" />
-        <di:waypoint x="9240" y="150" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="9107" y="221" width="16" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_045p3wr_di" bpmnElement="Flow_045p3wr">
-        <di:waypoint x="9125" y="313" />
         <di:waypoint x="9445" y="313" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="9189" y="293" width="23" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0p8q6xn_di" bpmnElement="Flow_0p8q6xn">
-        <di:waypoint x="9340" y="150" />
-        <di:waypoint x="9470" y="150" />
-        <di:waypoint x="9470" y="288" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_gw130_to_careplan_di" bpmnElement="Flow_gw130_to_careplan">
         <di:waypoint x="9495" y="313" />
@@ -853,10 +791,6 @@
       <bpmndi:BPMNEdge id="Association_0eaf2yh_di" bpmnElement="Association_0eaf2yh">
         <di:waypoint x="12655" y="273" />
         <di:waypoint x="12644" y="244" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0lk2kks_di" bpmnElement="Association_0lk2kks">
-        <di:waypoint x="9285" y="313" />
-        <di:waypoint x="9286" y="207" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_15y26as_di" bpmnElement="Association_15y26as">
         <di:waypoint x="13220" y="100" />

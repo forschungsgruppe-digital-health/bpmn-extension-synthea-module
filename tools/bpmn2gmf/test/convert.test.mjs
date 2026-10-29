@@ -555,6 +555,31 @@ test('untagged states after the last tagged one inherit the open encounter until
   assert.ok(!diagnostics.items.some((i) => i.code === 'STATE_OUTSIDE_ENCOUNTER'));
 });
 
+test('neutral states after the last state that needs the encounter stay outside it', async () => {
+  // upstream ends the visit right after the last clinical state; a SetAttribute behind it is not part of it
+  const { module } = await run(
+    start() + procedure('A', 'a', 'E1') + task('X', 'x', setAttr('n', '1')) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'X') + flow('f3', 'X', 'E')
+  );
+  assert.deepEqual(walk(module.json.states), ['Initial', 'E1', 'a', 'E1_End', 'x', 'Terminal']);
+  // but a neutral state in front of a clinical one still inherits the encounter
+  const inside = await run(
+    start() + procedure('A', 'a', 'E1') + task('X', 'x', setAttr('n', '1')) + order('M', 'meds', null) + end() +
+    flow('f1', 'S', 'A') + flow('f2', 'A', 'X') + flow('f3', 'X', 'M') + flow('f4', 'M', 'E')
+  );
+  assert.deepEqual(walk(inside.module.json.states), ['Initial', 'E1', 'a', 'x', 'meds', 'E1_End', 'Terminal']);
+});
+
+test('a diagnosis without target_encounter after the last clinical state stays inside the encounter that records it', async () => {
+  for (const type of ['ConditionOnset', 'AllergyOnset']) {
+    const { module } = await run(
+      start() + procedure('A', 'a', 'E1') + task('C', 'dx', stateType(type) + coding(SNOMED, '1', 'dx')) + end() +
+      flow('f1', 'S', 'A') + flow('f2', 'A', 'C') + flow('f3', 'C', 'E')
+    );
+    assert.deepEqual(walk(module.json.states), ['Initial', 'E1', 'a', 'dx', 'E1_End', 'Terminal'], type);
+  }
+});
+
 test('between two states of one encounter a delay stays inside up to a week; after the last one a day ends it', async () => {
   const between = (value, unit) => run(
     start() + procedure('A', 'a', 'E1') + delay('D', 'wait', value, unit) + procedure('B', 'b', 'E1') + end() +

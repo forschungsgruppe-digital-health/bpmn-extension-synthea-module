@@ -18,11 +18,11 @@ own (and in CI). Individual checks:
 
 | Command | Purpose |
 |---------|---------|
-| `npm run lint:valid` | `examples/valid/` must pass lint |
+| `npm run lint:valid` | `examples/valid/` and the real pathways in `lung-cancer/` must pass lint |
 | `npm run lint:invalid` | `examples/invalid/` must fail lint (negative test) |
-| `npm run roundtrip` | extension data round-trips through `bpmn-moddle` |
-| `npm run xsd` | BPMN core validates against `BPMN20.xsd` |
-| `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate examples against BPMN core + that XSD |
+| `npm run roundtrip` | extension data of the examples and of `lung-cancer/` round-trips through `bpmn-moddle` |
+| `npm run xsd` | BPMN core of the examples and of `lung-cancer/` validates against `BPMN20.xsd` |
+| `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `lung-cancer/` against BPMN core + that XSD |
 | `npm run conventions` | `package.json` follows bpmn.io naming rules |
 | `npm run demo` | (optional) interactive modeler playground — not a pass/fail gate |
 

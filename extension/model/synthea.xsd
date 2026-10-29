@@ -25,7 +25,7 @@
   <xsd:element name="condition" type="synthea:tCondition"/>
   <xsd:complexType name="tCondition">
     <xsd:sequence>
-      <xsd:element ref="synthea:condition" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="conditions" type="synthea:tCondition" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
     <xsd:attribute name="conditionType" type="xsd:string"/>
     <xsd:attribute name="attribute" type="xsd:string"/>
@@ -54,7 +54,7 @@
   <xsd:element name="guardConfig" type="synthea:tGuardConfig"/>
   <xsd:complexType name="tGuardConfig">
     <xsd:sequence>
-      <xsd:element ref="synthea:condition" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="allow" type="synthea:tCondition" minOccurs="0" maxOccurs="1"/>
     </xsd:sequence>
   </xsd:complexType>
 

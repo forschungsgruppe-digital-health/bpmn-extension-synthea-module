@@ -143,7 +143,8 @@ The converted modules run in Synthea v4.0.0 (needs Java and `synthea-with-depend
 npm run synthea:smoke -- <path to synthea-with-dependencies.jar>
 npm run synthea:smoke -- <path to the jar> --force-diagnosis   # every patient takes the disease and treatment path
 npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules   # shows which submodules were entered
-npm run compare:upstream      # compares the result with Synthea's own lung cancer module
+npm run compare:upstream      # compares the result with Synthea's own lung cancer module by content
+npm run compare:structure     # compares every state and transition (conditions, probabilities, their order)
 ```
 
 ## What is supported and what is not

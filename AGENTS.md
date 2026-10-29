@@ -37,10 +37,10 @@ into a release PR; merging it tags a release. Nothing is published to npm. See `
 
 ## Commands
 - Full check: `npm run validate`
-- Lint, valid (must pass): `npm run lint:valid`
+- Lint, valid (must pass; covers `examples/valid/` and `lung-cancer/`): `npm run lint:valid`
 - Lint, invalid (must fail): `npm run lint:invalid`
 - Round-trip: `npm run roundtrip`
 - XSD core: `npm run xsd`
 - Extension XSD (optional, structure-only): generate `npm run xsd:gen`, drift-guard `npm run xsd:gen:check`, validate `npm run xsd:ext`
 - Conventions: `npm run conventions`
-- BPMN → Synthea converter (`docs/bpmn2gmf-concept.md`): tests `npm run test:bpmn2gmf`; convert the real pathways (must pass, strict) `npm run convert:check`; write the modules `npm run bpmn2gmf -- lung-cancer --out-dir out/modules` (`--fuse-gateways` for fewer Simple states, `--strict` to refuse incomplete modules); compare with the hand-written upstream modules `npm run compare:upstream`; run them in a real Synthea (needs Java + the release jar, not part of `validate`) `npm run synthea:smoke -- <synthea-with-dependencies.jar>`
+- BPMN → Synthea converter (`docs/bpmn2gmf-concept.md`): tests `npm run test:bpmn2gmf`; convert the real pathways (must pass, strict) `npm run convert:check`; write the modules `npm run bpmn2gmf -- lung-cancer --out-dir out/modules` (`--fuse-gateways` for fewer Simple states, `--strict` to refuse incomplete modules); compare with the hand-written upstream modules by content `npm run compare:upstream` and state by state, transition by transition `npm run compare:structure` (part of `validate`); run them in a real Synthea (needs Java + the release jar, not part of `validate`) `npm run synthea:smoke -- <synthea-with-dependencies.jar>`

@@ -40,8 +40,8 @@
     </bpmn2:exclusiveGateway>
     <bpmn2:exclusiveGateway id="Gateway_0t9k9ce" name="Severe anemia?" default="Flow_0wjuj6o">
       <bpmn2:incoming>Flow_0r3lwdr</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_00jy2p5</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0wjuj6o</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_00jy2p5</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
     <bpmn2:task id="Activity_0v2ypfd" name="Diagnostic Area: CBC_Panel_F_Severe">
       <bpmn2:extensionElements>
@@ -421,16 +421,16 @@
         <synthea:probabilityConfig probability="0.28" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_00jy2p5" name="93%" sourceRef="Gateway_0t9k9ce" targetRef="Activity_15f8jor">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">93%</i18n:translation>
-        <synthea:probabilityConfig probability="0.93" />
-      </bpmn2:extensionElements>
-    </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0wjuj6o" name="7%" sourceRef="Gateway_0t9k9ce" targetRef="Activity_0v2ypfd">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">7%</i18n:translation>
         <synthea:probabilityConfig probability="0.07" />
+      </bpmn2:extensionElements>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="Flow_00jy2p5" name="93%" sourceRef="Gateway_0t9k9ce" targetRef="Activity_15f8jor">
+      <bpmn2:extensionElements>
+        <i18n:translation lang="de">93%</i18n:translation>
+        <synthea:probabilityConfig probability="0.93" />
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0k3wt2u" name="72%" sourceRef="Gateway_11e1kl7" targetRef="Activity_15f8jor">

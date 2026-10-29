@@ -9,7 +9,12 @@
 //   tail  from the span on, untagged states keep the encounter open (a state
 //         left untagged inherits whatever encounter is open, modeling guide
 //         section 9) until the flow reaches a boundary: a long Delay, Terminal,
-//         Death, CallSubmodule, or a state of another encounter
+//         Death, CallSubmodule, or a state of another encounter. The tail only
+//         reaches as far as the last state that uses the encounter (a clinical
+//         state, or a diagnosis without target_encounter): neutral
+//         states after it (gateways, SetAttribute, a hospice check) are
+//         outside, so the encounter ends right after the last clinical state,
+//         as upstream does (an open encounter there changed the random draws)
 // When a Delay ends the encounter depends on where it is:
 //   between two states of the same encounter (the modeler tagged both sides):
 //     a delay of a week or more ends it, shorter ones are part of the stay
@@ -49,6 +54,12 @@ const REQUIRES_ENCOUNTER = new Set([
   'MedicationOrder', 'CarePlanStart', 'Procedure', 'ImagingStudy', 'Device',
   'SupplyList', 'Observation', 'MultiObservation', 'DiagnosticReport'
 ]);
+
+// States that use the encounter that is open when they run: the ones above, and a diagnosis (ConditionOnset,
+// AllergyOnset) that names no target_encounter, which Synthea records in the current encounter.
+const usesEncounter = (node) =>
+  REQUIRES_ENCOUNTER.has(node.stateType) ||
+  (['ConditionOnset', 'AllergyOnset'].includes(node.stateType) && !first(node.ext, 'synthea:EncounterReference')?.targetEncounter);
 
 // States that take no time and record nothing: an encounter may be opened before
 // them without changing what happens (gateways, plain Simple/SetAttribute/Counter).
@@ -215,6 +226,18 @@ export function synthesizeEncounters(module, diag) {
         }
       }
     }
+    // keep only the tail states from which a state that uses the open encounter is still reachable through the tail
+    const keep = new Set([...group.tail].filter(usesEncounter));
+    for (let grew = true; grew; ) {
+      grew = false;
+      for (const n of group.tail) {
+        if (!keep.has(n) && successors(n).some((m) => keep.has(m))) {
+          keep.add(n);
+          grew = true;
+        }
+      }
+    }
+    group.tail = keep;
     group.region = new Set([...group.span, ...group.tail]);
   };
 
