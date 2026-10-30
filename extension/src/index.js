@@ -12,7 +12,9 @@ import SyntheaNoBoundaryRules from './SyntheaNoBoundaryRules.js';
  * `wellness`/`reason`, see ADR-0003), EncounterReference, CounterConfig,
  * SetAttributeConfig, AssignToAttributeConfig, and ReferencedByAttributeConfig
  * (the assign/reference pair for linking a *End/Death state back to the
- * *Onset/Order/Start state it concerns).
+ * *Onset/Order/Start state it concerns), plus the clinical-state groups: Code,
+ * Symptom, Observation, Value, Medication, Care plan activity, Imaging series and
+ * the read-only list of report observations.
  */
 export default {
   __init__: ['syntheaPropertiesProvider', 'syntheaReplaceMenuFilter', 'syntheaNoBoundaryRules'],

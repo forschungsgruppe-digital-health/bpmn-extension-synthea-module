@@ -1,7 +1,7 @@
 const { is, getExtension } = require('../lib/utils');
 
 /**
- * SYN-14 — probability-sum-valid.
+ * SYN-16 — probability-sum-valid.
  *
  * Fixed (non-attribute) probabilities among the outgoing flows of one
  * gateway/state must sum to <= 1.0. Flag if the sum exceeds 1.0, or if

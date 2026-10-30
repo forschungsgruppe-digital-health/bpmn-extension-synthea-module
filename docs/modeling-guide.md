@@ -290,6 +290,11 @@ other 9 — `Initial`/`Terminal`/`Simple`/`Guard`/`Delay`/`SetAttribute`/
 `Counter`/`CallSubmodule`/`Physiology` — are control states covered
 elsewhere in this guide, not clinical events.)
 
+**Allergies:** Synthea also requires `allergy_type` and `category` on
+`AllergyOnset`, and the extension has no fields for them yet. The converter
+reports them as missing (an error with `--strict`); none of the five lung
+cancer files uses an allergy.
+
 **Add, where applicable:**
 - The clinical **code** of the state (SNOMED for most conditions/procedures,
   RxNorm for medications, LOINC for observations): group "Code", right below

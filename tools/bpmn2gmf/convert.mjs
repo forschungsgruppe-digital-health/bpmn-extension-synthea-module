@@ -12,7 +12,7 @@ import { fuseGateways, fuseComplexTransitions } from './fuse.mjs';
 import { assignPaths } from './layout.mjs';
 
 // `fileBase` is the module file name without extension, e.g. "anemia_submodule";
-// it is also what CallSubmodule refers to (flat layout).
+// it is also what CallSubmodule refers to until layout.mjs turns it into a path.
 export const fileBaseFor = (path) =>
   path.split('/').pop().replace(/\.bpmn$/i, '').replace(/-/g, '_');
 

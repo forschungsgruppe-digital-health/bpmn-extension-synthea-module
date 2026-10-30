@@ -3,7 +3,7 @@ const { is } = require('../lib/utils');
 const VALID_STATE_TYPES = ['ConditionEnd', 'AllergyEnd', 'MedicationEnd', 'CarePlanEnd', 'DeviceEnd', 'Death'];
 
 /**
- * SYN-23 — ReferencedByAttributeConfig.attribute is only meaningful on
+ * SYN-33 — ReferencedByAttributeConfig.attribute is only meaningful on
  * ConditionEnd / AllergyEnd / MedicationEnd / CarePlanEnd / DeviceEnd /
  * Death states (warn).
  *

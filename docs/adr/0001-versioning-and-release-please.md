@@ -56,5 +56,5 @@ the XSD, applied automatically by Release Please — and we leave the namespace
   a silent miss would leave the XSD stale. The annotated comment + drift guard is
   more robust.
 - **Separate Release Please components with the `linked-versions` plugin** —
-  rejected as heavier (multiple changelogs/tags) than this template needs; one
+  rejected as heavier (multiple changelogs/tags) than this repository needs; one
   component with `extra-files` keeps a single version, changelog, and tag.

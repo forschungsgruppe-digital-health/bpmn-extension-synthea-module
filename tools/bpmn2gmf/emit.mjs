@@ -259,11 +259,11 @@ const EMITTERS = {
     return { submodule: c.submodule };
   },
 
-  // Start states: code + optional assign_to_attribute. target_encounter on
-  // ConditionOnset/AllergyOnset waits for the encounter synthesis (phase 3).
+  // Start states: code + optional assign_to_attribute; target_encounter on
+  // ConditionOnset/AllergyOnset is resolved against the synthesized encounters.
   ConditionOnset: onsetEmitter(true),
   // Synthea also requires allergy_type and category; the extension has no fields for them,
-  // so verify reports them as missing (the panel does not offer AllergyOnset).
+  // so verify reports them as missing (an error with --strict).
   AllergyOnset: onsetEmitter(true),
   // administration: the medication is given during the encounter (inpatient) instead of prescribed.
   MedicationOrder(node, ctx) {
@@ -363,9 +363,6 @@ const EMITTERS = {
   }
 };
 
-// `target_encounter` (ConditionOnset/AllergyOnset only): the modeler writes the
-// encounterId of the group; here it becomes the name of that group's Encounter
-// state. Only well-defined when the group has exactly one (decision 3).
 // One synthea:ImagingStudySeries -> a GMF series (body site SNOMED, modality
 // DICOM-DCM, one kind of image with its DICOM SOP class).
 function imagingSeries(s, ctx) {
@@ -383,6 +380,9 @@ function imagingSeries(s, ctx) {
   });
 }
 
+// `target_encounter` (ConditionOnset/AllergyOnset only): the modeler writes the
+// encounterId of the group; here it becomes the name of that group's Encounter
+// state. Only well-defined when the group has exactly one (decision 3).
 function onsetEmitter(allowsTarget) {
   return (node, ctx) => {
     const fields = { ...codesField(node, ctx), ...assignTo(node) };

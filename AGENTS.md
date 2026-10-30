@@ -5,12 +5,13 @@ files (e.g. `CLAUDE.md`) import this file; point other agents (Cursor, Codex, �
 at it too.
 
 ## Project
-A template for a custom BPMN 2.0 / bpmn.io extension with automated conformance
-checks. Node 22, ES modules.
+A custom BPMN 2.0 / bpmn.io extension (`synthea:`) with a converter from BPMN to
+Synthea modules (`tools/bpmn2gmf`) and automated conformance checks. Node 22, ES modules.
 
 - `extension/` — the custom extension you author (moddle model descriptor, lint plugin, optional bpmn-js modules).
 - `examples/valid/` and `examples/invalid/` — abstract diagrams used as positive and negative validation fixtures.
-- `tools/` — deterministic checkers; their exit code is the source of truth for pass/fail.
+- `tools/` — deterministic checkers and the converter `tools/bpmn2gmf`; their exit code is the source of truth for pass/fail.
+- `lung-cancer/` — the real pathways (main pathway and four submodules) that the converter is checked against.
 - `skills/` — agent skills that orchestrate the checkers.
 - `demo/` — private (non-published) bpmn-js modeler playground for trying the extension by hand; an npm workspace. NOT a pass/fail gate.
 - `.devcontainer/` + `.github/workflows/pages.yml` — reproducible dev/Codespaces env and the GitHub Pages deploy for `demo/`.
