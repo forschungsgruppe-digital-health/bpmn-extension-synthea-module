@@ -30,7 +30,7 @@ The two slots are the whole mental model: **`moddleExtensions` is the data layer
 **`additionalModules` is the UI layer** (the editing controls — optional). See
 [`../docs/concepts.md`](../docs/concepts.md).
 
-> The sample panel covers all thirteen `synthea:` types (`ProbabilityConfig`,
+> The sample panel covers the `synthea:` types (`ProbabilityConfig`,
 > `ConditionConfig`/`Condition`, `StateTypeConfig`, `DelayConfig`, `GuardConfig`,
 > `SubmoduleConfig`, `EncounterContext`, `EncounterReference`, `CounterConfig`,
 > `SetAttributeConfig`, `AssignToAttributeConfig`, `ReferencedByAttributeConfig`) — see

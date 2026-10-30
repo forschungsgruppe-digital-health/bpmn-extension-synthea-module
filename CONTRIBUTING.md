@@ -8,13 +8,14 @@ convention.
 
 ```bash
 npm install        # Node 22+; sets up the workspaces (lint plugin + demo)
-npm run validate   # positive lint, round-trip, XSD core, conventions
+npm run validate   # lint, round-trip, XSD, conventions, converter tests, convert and structure checks
 npm run demo       # optional: interactive modeler playground at http://localhost:5173
 ```
 
-`npm run validate` chains the **positive** lint, round-trip, XSD core, and
-conventions. The negative lint and the optional extension-XSD check run on their
-own (and in CI). Individual checks:
+`npm run validate` chains the **positive** lint, round-trip, XSD core, the
+generated extension XSD (drift guard and validation), conventions, the converter
+tests, `convert:check` and `compare:structure`. The negative lint and the engine
+run (`synthea:smoke`) run on their own. Individual checks:
 
 | Command | Purpose |
 |---------|---------|
@@ -24,6 +25,10 @@ own (and in CI). Individual checks:
 | `npm run xsd` | BPMN core of the examples and of `lung-cancer/` validates against `BPMN20.xsd` |
 | `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `lung-cancer/` against BPMN core + that XSD |
 | `npm run conventions` | `package.json` follows bpmn.io naming rules |
+| `npm run test:bpmn2gmf` | tests of the converter in `tools/bpmn2gmf/` |
+| `npm run convert:check` | the real pathways in `lung-cancer/` convert strictly (`--strict`) |
+| `npm run compare:structure` | converted modules vs. the upstream modules, state by state |
+| `npm run synthea:smoke` | (optional, needs Java) run the converted modules in a Synthea jar; not part of `validate` |
 | `npm run demo` | (optional) interactive modeler playground — not a pass/fail gate |
 
 For every lint rule you add, add a positive fixture in `examples/valid/` **and**
@@ -54,7 +59,7 @@ Releases and version bumps are automated by
 | Commit | Example | Release effect |
 |--------|---------|----------------|
 | `fix:` | `fix: serialise empty notes` | PATCH (`0.1.0` → `0.1.1`) |
-| `feat:` | `feat: add severity attribute` | MINOR (`0.1.0` → `0.2.0`) |
+| `feat:` | `feat: add severity attribute` | MINOR from 1.0; PATCH while pre-1.0 (`0.1.0` → `0.1.1`) |
 | `feat!:` or `BREAKING CHANGE:` footer | `feat!: rename prefix` | MAJOR after 1.0; MINOR while pre-1.0 |
 | `docs:` `chore:` `refactor:` `test:` `ci:` `build:` `style:` | `docs: clarify scope boundary` | no release |
 

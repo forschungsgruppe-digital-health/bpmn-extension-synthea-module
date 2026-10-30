@@ -227,7 +227,7 @@ but deeper/wider nesting needs hand-edited XML.
 
 ### 4c. By waiting until a condition becomes true — `GuardConfig`
 
-**Element:** an exclusive or inclusive gateway.
+**Element:** an exclusive gateway (the panel and the converter accept `GuardConfig` only there).
 
 **Group:** "Guard" → same `Condition` structure and table as 4b (including
 combinators), just reached via `allow` instead of `condition`. The

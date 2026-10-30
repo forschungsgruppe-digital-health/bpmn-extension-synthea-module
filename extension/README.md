@@ -1,13 +1,13 @@
-# Your custom BPMN extension
+# The `synthea:` extension
 
-Author your extension here. The parts:
+The BPMN extension for Synthea modules (prefix `synthea`). The parts:
 
-- `model/` — the moddle descriptor (JSON) that defines the data your extension
+- `model/` — the moddle descriptor (JSON) that defines the data the extension
   persists into the BPMN XML. This is the **required** core and the single
   source of truth. (`model/*.xsd` is *generated* from it by `npm run xsd:gen`
   for optional XSD-native validation — never hand-edit it.)
 - `lint/bpmnlint-plugin-synthea/` — custom bpmnlint rules that enforce the
-  semantics of your extension data.
+  semantics of the extension data.
 - `src/` — *optional* bpmn-js modules (custom renderer, palette entries,
   context-pad actions, modeling rules, properties-panel groups). These change
   the editor/viewer behaviour but are not needed for the data to be valid.

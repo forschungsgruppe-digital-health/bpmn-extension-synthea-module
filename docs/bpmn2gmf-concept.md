@@ -4,7 +4,7 @@
 - **Goal:** turn the BPMN pathway models (`synthea:`; the clinical codes are attributes of its state type) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
 - **Reads:** [implicit-rules.md](implicit-rules.md) (the mapping rules, tables B/B.1/C), [ADR-0003](adr/0003-encounter-context-implicit-scoping.md) (encounter synthesis), [modeling-guide.md](modeling-guide.md) (what modelers are told to draw).
 
-This document fixes the architecture, the build order, and — most importantly — the points where the extension currently does **not** carry enough information to produce a valid GMF module. Those need a decision before the tool can be called complete (see [Decisions needed](#decisions-needed)).
+This document fixes the architecture, the build order, and — most importantly — the points where the extension currently does **not** carry enough information to produce a valid GMF module. Those needed a decision before the tool could be called complete; they are made and recorded under [Decisions](#decisions).
 
 ---
 
@@ -100,7 +100,7 @@ The IR is the only thing the emitters see. Everything BPMN-specific (event defin
 
 ### 4.1 State type resolution
 1. `synthea:stateTypeConfig` wins if present.
-2. Otherwise infer per [implicit-rules Table B](implicit-rules.md): start event → `Initial`, end event → `Terminal`, timer catch event → `Delay`, call activity → `CallSubmodule`, exclusive gateway + `guardConfig` → `Guard`, other exclusive gateway → `Simple`, task/sub-process/other event → only via the explicit `stateType` (sub-process: `DiagnosticReport`, `MultiObservation` or `CallSubmodule`).
+2. Otherwise infer per [implicit-rules Table B](implicit-rules.md): start event → `Initial`, end event → `Terminal`, timer catch event → `Delay`, call activity → `CallSubmodule`, exclusive gateway + `guardConfig` → `Guard`, other exclusive gateway → `Simple`, task/sub-process/other event → only via the explicit `stateType` (sub-process: inferred as `CallSubmodule`, the only type it accepts).
 3. Still ambiguous (e.g. a task with no `stateType`) → **error** with element id and label. No guessing.
 
 ### 4.2 State names
@@ -127,11 +127,11 @@ Implemented in `tools/bpmn2gmf/encounters.mjs`, between state resolution and emi
 
 **Which part of the flow belongs to an encounter** (its *region*), per `encounterId` group:
 - **span:** the tagged states plus every node on a path between two of them. Another encounter's states and anything that ends an encounter (below) cannot lie inside a span.
-- **tail:** after the span, untagged states keep the encounter open — a state left untagged inherits whatever encounter is open (guide §9, upstream `anemia_sub.json`) — until the flow reaches a boundary. The tail only reaches as far as the last state that uses the encounter (`MedicationOrder`, `Procedure`, … and a `ConditionOnset`/`AllergyOnset` without `target_encounter`, which Synthea records in the open encounter): neutral states behind it (gateways, `SetAttribute`, a hospice check) are outside, so the visit ends right after the last clinical state, as in upstream `lung_cancer.json`. Left open, the visit ran through the anemia check and the hospice draw and the patient's random draws drifted away from upstream (seed test, §11).
+- **tail:** after the span, untagged states keep the encounter open — a state left untagged inherits whatever encounter is open (guide §9, upstream `anemia_sub.json`) — until the flow reaches a boundary. The tail only reaches as far as the last state that uses the encounter (`MedicationOrder`, `Procedure`, … and a `ConditionOnset`/`AllergyOnset` without `target_encounter`, which Synthea records in the open encounter): neutral states behind it (gateways, `SetAttribute`, a hospice check) are outside, so the visit ends right after the last clinical state, as in upstream `lung_cancer.json`. Left open, the visit ran through the anemia check and the hospice draw and the patient's random draws drifted away from upstream (seed test, §12).
 - **boundaries:** `Terminal`, `Death`, `CallSubmodule`, a state of another encounter, and a **Delay**: in the tail one of a day or more ends the encounter; *between* two states of the same encounter (both tagged) a delay of a week or more does, shorter ones are part of the stay. These limits are a rule of this tool, chosen because they reproduce upstream: the anemia module keeps a 1 hour delay inside the encounter and ends it before the 1 day delay after it; the upstream treatment cycle is one inpatient encounter with a loop of 1 day delays inside it (the length of stay) and weeks between two cycles. A single threshold of one day broke the stay into 343 one-day encounters in the engine test.
 
 **What is inserted:**
-- `Encounter` on every edge that enters a span, one per (encounter, entered state), named `encounterId` (suffix `_2`, `_3` … for further copies). `wellness` → `"wellness": true`, otherwise `encounter_class`; `reason` is passed through; `codes` stay missing until phase 4 (reported).
+- `Encounter` on every edge that enters a span, one per (encounter, entered state), named `encounterId` (suffix `_2`, `_3` … for further copies). `wellness` → `"wellness": true`, otherwise `encounter_class`; `reason` is passed through; `codes` come from `encounterCodeSystem`/`encounterCode`/`encounterCodeDisplay` (`ENCOUNTER_CODE_INCOMPLETE` if only part is given).
 - `EncounterEnd` on every edge that leaves all regions the edge started in, shared per successor (EncounterEnd ends whichever encounter is current at runtime, so one state can serve two groups with a common tail). Named `<encounterId>_End`.
 - Leaving one encounter straight into another gives `EncounterEnd → Encounter`.
 - `synthea:encounterReference.targetEncounter` → `target_encounter` = the name of the group's `Encounter` state; an error if the group has none (`TARGET_ENCOUNTER_UNKNOWN`) or several (`TARGET_ENCOUNTER_AMBIGUOUS`).
@@ -152,7 +152,7 @@ Derived from the *outgoing edges* of every emitted state:
 | none | no transition (only legal on `Terminal`/`Death`-terminal states) |
 | mixed kinds on one node | **error** |
 
-**Gateways:** by default every exclusive gateway becomes its own `Simple` (or `Guard`) state carrying the transition — always correct (implicit-rules Section D). `--fuse-gateways` removes the ones that only exist for the diagram: a join (pass-through) is bypassed, and a branching gateway entered from exactly one state through a direct transition moves onto that state. Kept: gateways with several predecessors (they would lose a branch), gateways a `PriorState` condition names, and `Simple` states the modeler drew. Over the five real files this takes the output from 168 to 142 states (`Simple` 39 → 13); a test checks that every other state and what it can lead to stay the same. A conditional state whose branches lead into probability gateways ("if pregnant, 28 %, otherwise 7 %") becomes one `complex_transition`: each entry holds the branch's condition and either its target or the gateway's `distributions`, the default flow comes last as the entry without a condition. A probability gateway is absorbed only when that state is its single predecessor; in the anemia module this folds three gateways (`Anemia_Encounter`, `Patient pregnant?`).
+**Gateways:** by default every exclusive gateway becomes its own `Simple` (or `Guard`) state carrying the transition — always correct (implicit-rules Section D). `--fuse-gateways` removes the ones that only exist for the diagram: a join (pass-through) is bypassed, and a branching gateway entered from exactly one state through a direct transition moves onto that state. Kept: gateways with several predecessors (they would lose a branch), gateways a `PriorState` condition names, and `Simple` states the modeler drew. Over the five real files this takes the output from 155 to 123 states (`Simple` 39 → 7); a test checks that every other state and what it can lead to stay the same. A conditional state whose branches lead into probability gateways ("if pregnant, 28 %, otherwise 7 %") becomes one `complex_transition`: each entry holds the branch's condition and either its target or the gateway's `distributions`, the default flow comes last as the entry without a condition. A probability gateway is absorbed only when that state is its single predecessor; in the anemia module this folds three gateways (`Anemia_Encounter`, `Patient pregnant?`).
 
 ### 4.6 Conditions
 `synthea:condition` → GMF condition object:
@@ -212,8 +212,8 @@ These are our own checks (a small required-fields table in `verify.mjs`), not a 
 
 - **Unit tests** (`node:test`) per stage with tiny hand-written BPMN/IR fixtures: each transition type, condition recursion + `negate`, remainder probability, implicit Terminal, encounter synthesis (single group, two groups in one path, multiple entries/exits, re-entry error).
 - **Golden files** for the real models, built up in the order of §8, stored under `tools/bpmn2gmf/test/golden/`.
-- **Structural comparison against upstream:** a script that compares our generated module to the real `lung_cancer*.json` by *multiset of (state type, codes)* and by transition-shape counts — not by names or exact text, since our BPMN deliberately differs (names, gateway states, the explicit simplifications). Differences are expected and are reviewed, not auto-failed.
-- **Optional smoke test (later):** load the generated JSON in a local Synthea build (needs Java). Out of scope for the first iterations.
+- **Structural comparison against upstream:** a script that compares our generated module to the real `lung_cancer*.json` by *multiset of (state type, codes)* and by transition-shape counts — not by names or exact text, since our BPMN deliberately differs (names, gateway states, the explicit simplifications). `npm run compare:upstream` reports the content, `npm run compare:structure` (§11) walks both modules together and fails on any difference that is not an accepted one.
+- **Smoke test:** `npm run synthea:smoke` loads the generated JSON in a local Synthea build (needs Java); it is not part of `validate` (§12).
 
 ---
 
@@ -226,13 +226,13 @@ These are our own checks (a small required-fields table in `verify.mjs`), not a 
 | 2 | Codes, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
 | 3 | Encounter synthesis + `targetEncounter` | **Implemented** (51 tests). Anemia and the treatment submodule get their Encounter/EncounterEnd states; the main module still waits for the boundary-timer remodeling |
 | 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | **Implemented** (61 tests). Encounter code, `SymptomConfig`, `ObservationConfig`, `ValueConfig`, `ImagingStudySeries` and `ReportObservation` (the contained values of a `DiagnosticReport`) are in schema, panel, converter, lint (SYN-28, SYN-29) and guide; the main pathway's boundary timer is replaced by `Death` states with time spans. **All five real files convert and pass `--strict` with no warning**; the nine lab reports (92 contained observations) are identical to upstream |
-| 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | **Implemented** (70 tests): `--fuse-gateways`, fewer `Encounter` copies, `npm run compare:upstream` with the three upstream modules kept in `tools/bpmn2gmf/test/upstream/` (Apache-2.0, see NOTICE.md), and `npm run validate` / the CI workflow now also run `xsd:gen:check`, `xsd:ext`, the converter tests and `convert:check` (all five real files, `--strict`). Not done: loading the generated JSON in a real Synthea (see §11) |
+| 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | **Implemented** (70 tests): `--fuse-gateways`, fewer `Encounter` copies, `npm run compare:upstream` with the three upstream modules kept in `tools/bpmn2gmf/test/upstream/` (Apache-2.0, see NOTICE.md), and `npm run validate` / the CI workflow now also run `xsd:gen:check`, `xsd:ext`, the converter tests and `convert:check` (all five real files, `--strict`). Loading the generated JSON in a real Synthea and the structure comparison came later (§11, §12) |
 
 Phases 1–3 do not depend on the field decisions (missing fields only produce warnings), so they ran ahead of phase 4.
 
 ---
 
-## 9. Proposed extension additions (Decision 1, phase 4)
+## 9. Extension additions (Decision 1, phase 4; implemented)
 
 Minimal set that makes all five current pathways convertible. Everything optional in the wiki (`cause`, `probability`, `prescription`, Procedure `duration`, `remarks`, `value_code`, Observation `attribute`/`vital_sign` values, `VitalSign` state) is deliberately left out until a model needs it.
 
@@ -250,7 +250,7 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 
 ## 10. Findings from the first run on the real files (phase 1)
 
-`npm run bpmn2gmf -- lung-cancer --check` — none of the five files converts yet:
+`npm run bpmn2gmf -- lung-cancer --check` on the first run — none of the five files converted; what was found and how it was resolved:
 
 | Finding | Where | Needed |
 |---|---|---|
@@ -333,7 +333,7 @@ Adding `reason` to 18 states of a test copy did not change a single time line (1
 1. **Stay length** (median 120 h vs 133 h). To find the cause with more than 54 patients, the probability of lung cancer and of treatment was set to 0.9999 in copies of both modules (about 316 diagnosed patients per variant). Stays: 5.98 vs 6.64 days on average, equal for SCLC and NSCLC, equal gap between stays. Upstream's procedures carry a `duration` (radiation 0.5–4 h, hearing test 30 min, imaging 10–120 min) and Synthea lets the procedure take that time. Adding the durations to the test copy gave 6.65 vs 6.64 days, median 5.57 vs 5.57.
 2. **Chemotherapy orders**: `administration: true` in upstream; without it Synthea writes a "community" prescription instead of an inpatient order.
 
-The care plan's `activities` also appeared only in upstream's output. All three are optional in the wiki; they were added to the extension because the original sets them (see the table above). `reason` stays out on purpose. A value of 1.0 for a probability attribute makes the engine fail with a `ClassCastException` (Integer cannot be cast to Double), so test runs use 0.9999; this is an engine quirk, not a module problem. Upstream's second branch of the lung-cancer gateway has the default 0.93355 (sum 0.99805); ours has 0.9355. It does not matter because the last branch receives the remainder.
+The care plan's `activities` also appeared only in upstream's output. All three are optional in the wiki; they were added to the extension because the original sets them (see the table above). `reason` stays out on purpose. A value of 1.0 for a probability attribute makes the engine fail with a `ClassCastException` (Integer cannot be cast to Double), so test runs use 0.9999; this is an engine quirk, not a module problem. Upstream's second branch of the lung-cancer gateway has the default 0.93355 (sum 0.99805); ours had 0.9355, a typing error that the structure comparison found and that is now corrected (see above). It made no difference in the engine because the last branch receives the remainder.
 
 
 ---

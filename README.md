@@ -197,7 +197,7 @@ npm run validate
 
 Run `npm run validate` before a commit or pull request. Commits follow
 [Conventional Commits](https://www.conventionalcommits.org/): `fix:` makes a patch, `feat:` a minor
-version, `feat!:` a major one. [Release Please](https://github.com/googleapis/release-please) turns them
+version (a patch while below 1.0.0), `feat!:` a major one (a minor while below 1.0.0). [Release Please](https://github.com/googleapis/release-please) turns them
 into a release pull request; do not change the version by hand. The namespace `uri` and `prefix` of the
 extension must not change, or diagrams already in the wild break. See [CONTRIBUTING.md](CONTRIBUTING.md)
 and [AGENTS.md](AGENTS.md).

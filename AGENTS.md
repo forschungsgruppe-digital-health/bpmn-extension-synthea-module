@@ -32,7 +32,7 @@ checks. Node 22, ES modules.
 
 ## Commits & releases
 Use [Conventional Commits](https://www.conventionalcommits.org/): `fix:` → patch,
-`feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major. Release Please turns these
+`feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major (one level lower while below 1.0.0, see `CONTRIBUTING.md`). Release Please turns these
 into a release PR; merging it tags a release. Nothing is published to npm. See `CONTRIBUTING.md`.
 
 ## Commands
