@@ -12,7 +12,7 @@ fields?" Read top to bottom once, then use it as a lookup.
 ## 0. Setup
 
 ```bash
-git clone -b dev <repo-url>
+git clone -b feat/bpmn2gmf <repo-url>   # the converter is on this branch, not yet on dev or main
 npm install
 npm run demo
 ```
@@ -26,7 +26,7 @@ for the value you've already set (e.g. picking `conditionType="Age"` swaps in
 `Quantity`/`Unit` and hides the Attribute-only fields). If a field you expect
 isn't there, check whether a sibling dropdown needs to be set first.
 
-Before treating any change as done: `npm run validate` (schema/roundtrip/XSD),
+Before treating any change as done: `npm run validate` (lint, round trip, XSD, converter tests, strict conversion and structure comparison of the lung cancer files),
 `npx bpmnlint "lung-cancer/**/*.bpmn"` (your real pathway content), and a
 look at the element in the running demo. All three are cheap; skipping them
 is how silent mismatches happen.
@@ -235,11 +235,13 @@ difference from 4b isn't structural, it's *when* it's checked: a Guard
 re-evaluates on every simulation tick until it passes — a plain conditional
 flow checks once, when reached.
 
-Every exclusive gateway with more than one outgoing flow (branching on 4a or
-4b) needs a **default flow** marked (right-click the flow → "Set as default
-flow", or the `default="FlowId"` attribute) — pick the flow with no explicit
-condition, or one literally named "else". Without it, Synthea has no
-fallback when nothing else matches.
+A gateway that branches on conditions (4b) should have its **default flow**
+marked (right-click the flow → "Set as default flow", or the
+`default="FlowId"` attribute) — the flow with no condition of its own. If the
+flow without a condition is not marked, the converter still treats it as the
+fallback and warns (`TRANSITION_FALLBACK_NOT_DEFAULT`). If every flow has a
+condition, Synthea goes to its default `Terminal` when none matches; the
+converter adds nothing and reports the note `TRANSITION_NO_FALLBACK`.
 
 ---
 
@@ -445,7 +447,8 @@ instead — see [ADR-0003](adr/0003-encounter-context-implicit-scoping.md)).
   `wellness=false`.
 - `encounterClass` — **only shown while `wellness` is unchecked** (Synthea
   requires it for every non-wellness encounter): `ambulatory`, `emergency`,
-  `urgentcare`, `inpatient`, or `outpatient`.
+  `urgentcare`, `inpatient`, or `outpatient`. (The Synthea engine v4.0.0 also knows
+  `hospice`, `home`, `snf` and `virtual`; the extension does not offer them yet.)
 - `reason` (optional) — an attribute name or a reference to a prior
   `ConditionOnset` explaining why the visit happens.
 - **Encounter code** (`encounterCodeSystem`, `encounterCode`,
@@ -577,8 +580,9 @@ an endless recursion; found by running the converted modules in Synthea.)
 
 ## 12. Before you consider it done
 
-1. `npm run validate` — schema, roundtrip, XSD conformance, package
-   conventions.
+1. `npm run validate` — lint, round trip, XSD conformance, package
+   conventions, converter tests, strict conversion and structure comparison
+   of the lung cancer files.
 2. `npx bpmnlint "lung-cancer/**/*.bpmn"` (or whichever real files you
    touched) — your actual content, not just the example fixtures.
 3. Open it in `npm run demo`, click through the elements you changed, and

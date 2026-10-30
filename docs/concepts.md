@@ -20,13 +20,12 @@ this with an **extension mechanism**. Every BPMN element can carry a
 well-formed XML in your own namespace**:
 
 ```xml
-<bpmn:task id="Task_1" name="Reviewed task">
+<bpmn:intermediateCatchEvent id="Event_1" name="Wait 3 to 4 weeks">
   <bpmn:extensionElements>
-    <synthea:annotation category="quality" reviewed="true">
-      <synthea:note author="example">Looks good.</synthea:note>
-    </synthea:annotation>
+    <synthea:delayConfig delayShape="RANGE" delayValue="21" delayValueHigh="28" delayUnit="days" />
   </bpmn:extensionElements>
-</bpmn:task>
+  <bpmn:timerEventDefinition />
+</bpmn:intermediateCatchEvent>
 ```
 
 Two rules make this safe:
@@ -224,7 +223,7 @@ See [`demo/README.md`](../demo/README.md).
 | **moddle** | A library for defining a data model in JSON and binding it to objects. |
 | **bpmn-moddle** | moddle loaded with the BPMN model; reads/writes BPMN XML (`fromXML` / `toXML`) and accepts your extension descriptor. |
 | **moddle descriptor** | The JSON file (`extension/model/*.json`) that declares your namespace, prefix, and typed element shapes. The required core of an extension. |
-| **descriptor type** | One entry in the descriptor's `types` array — a custom element (e.g. `Annotation`) with its `properties`. |
+| **descriptor type** | One entry in the descriptor's `types` array — a custom element (e.g. `DelayConfig`) with its `properties`. |
 | **`superClass: ["Element"]`** | Marks a descriptor type as something that can live under `extensionElements`. |
 | **`isAttr` / `isMany` / `isBody`** | Property flags: XML attribute / repeatable child element / element text content. |
 | **bpmnlint** | The BPMN linter; runs `recommended` plus your plugin's rules over the parsed model. |
