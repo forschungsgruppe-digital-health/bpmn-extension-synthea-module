@@ -1,11 +1,16 @@
-// Fields Synthea requires per state type (States wiki: everything not marked
-// "(optional)"). An array entry is a choice group: exactly one of its fields
-// must be present. This is what the converter checks the output against; a
-// missing field is reported, not guessed.
+// Fields Synthea requires per state type: everything the States wiki does not mark "(optional)", checked
+// against the whole page on 2026-11-04. An array entry is a choice group: exactly one of its fields
+// must be present. This is what the converter checks the output against; a missing field is
+// reported, not guessed. Encounter is handled in missingFields (it depends on `wellness`).
 //
-// Deliberately partial: states the project does not use yet (AllergyOnset's
-// reaction details, Physiology) are added when they are modeled. Encounter is
-// handled in missingFields (it depends on `wellness`).
+// Where this is more lenient than the wiki, because the 536 shipped modules do it too:
+//   - ConditionOnset / AllergyOnset: the wiki does not mark target_encounter optional, but 1360 of
+//     1624 ConditionOnset states have none (Synthea records the diagnosis in the current encounter).
+//   - Symptom: the wiki does not mark `cause` optional, but 208 of 309 states have none.
+//   - SetAttribute: the wiki lists a choice group (value, value_code, range, expression, series_data),
+//     but 48 of 791 states have none (a copy from another attribute, or just resetting it).
+// Vaccine is not on the wiki page; the engine reads codes[0], so codes is required.
+// Physiology is not converted (PHYSIOLOGY_UNSUPPORTED).
 export const REQUIRED_FIELDS = {
   Guard: ['allow'],
   Delay: [['exact', 'range']],

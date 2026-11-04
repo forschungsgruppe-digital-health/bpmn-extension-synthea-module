@@ -149,11 +149,14 @@ npm run compare:structure     # compares every state and transition (conditions,
 
 ## What is supported and what is not
 
-- **Gateways:** only exclusive gateways. Inclusive, parallel, complex and event-based gateways have no counterpart in Synthea (one path per transition); they are an error, and the properties panel and menus do not offer them.
-- **Events:** start, end (`Terminal` or `Death`), timer (`Delay`) and other intermediate events with an explicit state type. Boundary events are an error.
+- **Gateways:** exclusive gateways pick one path (conditions or probabilities on the flows). A **parallel** or **inclusive** split with its join is rewritten into a sequence: parallel branches run one after the other in the order of the flows, and each inclusive branch is decided on its own by the condition or probability on its flow. Both only as a structured block (every branch a region with one way in and one way out, ending in one join of the same kind; see `docs/extension-matrix.md`). Complex and event-based gateways are an error (`COMPLEX_GATEWAY_UNSUPPORTED`, `EVENT_BASED_GATEWAY_UNSUPPORTED`), and the menus do not offer them.
+- **Events:** start, end (`Terminal` or `Death`), timer (`Delay`) and other intermediate events with an explicit state type. A link throw and the link catch event with the same name become one direct flow. Boundary events are an error.
 - **Sub-processes:** what is drawn inside a sub-process becomes a module of its own (`<file>_<sub-process name>.json`, a submodule), and the sub-process becomes the `CallSubmodule` state that calls it; nested ones likewise. An empty sub-process names a module of a file of its own (`synthea:submoduleConfig`), like a call activity. An encounter cannot span the boundary (example: `examples/valid/sub-process.bpmn`). Event sub-processes, ad-hoc sub-processes and transactions are an error. A **call activity** becomes a `CallSubmodule`.
 - **Transitions:** direct, distributed, conditional and complex. `lookup_table_transition` and `type_of_care_transition` have no BPMN pattern.
-- **Codes:** one code per state, SNOMED CT, LOINC or RxNorm, depending on the state type.
+- **Codes:** one code per state, SNOMED CT, LOINC, RxNorm or (for `Vaccine`) CVX, depending on the state type. The discharge disposition of an encounter is a NUBC code with a fixed system.
+- **Documentation only:** a task, an exclusive gateway or an intermediate event marked `synthea:documentationOnly` stays in the diagram but gets no state; the flows around it are joined.
+- **Pools:** each pool becomes a module of its own; message flows between pools are reported (`MESSAGE_FLOWS_IGNORED`), not converted.
+- **Rejected with their own error code:** event, ad-hoc sub-processes and transactions, complex and event-based gateways, loop and multi-instance markers, and the `Physiology` state. `docs/extension-matrix.md` has the codes and the reasons.
 - **Other:** text annotations and data objects are ignored; the direction GMF → BPMN does not exist.
 
 `docs/extension-matrix.md` lists, per BPMN element, which `synthea:` type the panel offers and the converter reads.

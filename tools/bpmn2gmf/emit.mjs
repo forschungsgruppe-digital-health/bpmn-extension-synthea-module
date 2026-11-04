@@ -190,7 +190,7 @@ function readReactions(node, ctx) {
     if (levels.some((l) => Number.isNaN(l.value) || l.value < 0 || l.value > 1)) return ctx.report('REACTION_SEVERITIES_INVALID', `The severities of the reaction "${r.codeDisplay}" must be numbers between 0 and 1.`);
     const sum = levels.reduce((n, l) => n + l.value, 0);
     if (Math.abs(sum - 1) > 1e-6) {
-      ctx.warn('REACTION_SEVERITIES_SUM', `The severities of the reaction "${r.codeDisplay}" add up to ${Math.round(sum * 1e6) / 1e6}, not 1; add severityNone for the share without this reaction.`);
+      ctx.warn('REACTION_SEVERITIES_SUM', `The severities of the reaction "${r.codeDisplay}" add up to ${Math.round(sum * 1e6) / 1e6}, not 1; the values act as weights, so with only the listed severities every patient gets one of them; add severityNone for the share without this reaction.`);
     }
     out.push({ reaction: { system: 'SNOMED-CT', code: r.code, display: r.codeDisplay }, possible_severities: levels });
   }
@@ -339,9 +339,9 @@ const EMITTERS = {
       ...(reactions.length ? { reactions } : {})
     };
   },
-  // administration: the medication is given during the encounter (inpatient) instead of prescribed.
-  // administration: given during the encounter instead of prescribed; chronic: reissued at every wellness
-  // visit; prescription: dosage, duration, refills and instructions (all optional).
+  // administration: given during the encounter instead of prescribed. chronic: Synthea plans wellness visits
+  // more often (seen: 1252 instead of 889 in a run of 20 patients; the wiki says it also reissues the
+  // prescription, which was not seen). prescription: dosage, duration, refills and instructions (all optional).
   MedicationOrder(node, ctx) {
     const fields = onsetEmitter(false)(node, ctx);
     if (!fields) return fields;

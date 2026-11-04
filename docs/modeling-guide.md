@@ -55,16 +55,25 @@ message flow back → "GP reviews result" — becomes a single state:
 "what does the *outcome* of this mean for the patient" and model only that
 outcome as one state — not the handoff itself.
 
-**2. Only gateway patterns that pick exactly one active path.** A Synthea
-transition always resolves to exactly one next state (or waits, via Guard)
-— there's no native "0 to N of these can happen" construct. An inclusive
-(`OR`) gateway needs a clinical decision, not a mechanical rule: either
-rewrite it as a sequence of exclusive checks (if the branches are really
-mutually exclusive in practice), or split it into independent
-`CallSubmodule` paths (if the branches genuinely can co-occur in any
-combination). A true parallel (`AND`) fork/join has no direct equivalent
-either — it usually becomes either a fixed sequence (if one branch always
-finishes before the other matters) or separate submodule calls.
+**2. Gateway patterns.** A Synthea transition always resolves to exactly one
+next state (or waits, via Guard), so GMF has neither "0 to N of these can
+happen" nor true parallelism. The converter rewrites the two block patterns
+into a sequence, and the diagram keeps the meaning for the reader:
+
+- **Parallel (`AND`) split with its join:** the branches run one after the
+  other, in the order of the split's outgoing flows. Put them in the order
+  that matters clinically; a condition or probability on such a flow is an
+  error, because every parallel branch is taken.
+- **Inclusive (`OR`) split with its join:** each branch is decided on its own
+  by the condition or probability on its flow, so none, some or all branches
+  can happen. Every branch needs one (see the lint rule below).
+
+Both must be a structured block: every branch is a region with one way in and
+one way out (decisions and sub-processes inside are fine, nested blocks too)
+and all branches end in one join of the same kind. A branch that ends the
+process, loops back to the split, or has flows from outside is an error
+(`PARALLEL_NOT_STRUCTURED`, `INCLUSIVE_NOT_STRUCTURED`) and has to be
+remodelled. Complex and event-based gateways have no counterpart.
 
 **3. Embedded subprocesses and placeholders.** An embedded (expanded)
 `subProcess` with ordinary sequential content inside — no multi-instance loop,
@@ -286,18 +295,22 @@ Neither produces a FHIR record — they're pure simulation bookkeeping.
 **Element:** usually a `Task` (also valid: Intermediate Event for
 `ConditionOnset`/`ConditionEnd`/`AllergyOnset`/`AllergyEnd` — both element
 choices are equally correct, the real lung-cancer pathway actually uses Task
-for all of these). Which of the 19 clinical `stateType` values applies
+for all of these). Which of the 20 clinical `stateType` values applies
 (`Procedure`, `Observation`, `MedicationOrder`, `ImagingStudy`, `CarePlanStart`,
 `Device`, `SupplyList`, …) is set explicitly via "State Type" — don't rely on
-inferring it from the element's name. (The full enum has 28 values; the
+inferring it from the element's name. (The full enum has 29 values; the
 other 9 — `Initial`/`Terminal`/`Simple`/`Guard`/`Delay`/`SetAttribute`/
 `Counter`/`CallSubmodule`/`Physiology` — are control states covered
 elsewhere in this guide, not clinical events.)
 
-**Allergies:** Synthea also requires `allergy_type` and `category` on
-`AllergyOnset`, and the extension has no fields for them yet. The converter
-reports them as missing (an error with `--strict`); none of the five lung
-cancer files uses an allergy.
+**Allergies:** Synthea requires `allergy_type` and `category` on
+`AllergyOnset`; they sit on `synthea:allergyConfig` (`allergyType`:
+`allergy` or `intolerance`; `category`: `medication`, `food` or
+`environment`). Reactions are `synthea:allergyReaction` elements with a SNOMED CT
+code and the probability of each severity (`severityNone`, `severityMild`,
+`severityModerate`, `severitySevere`). Synthea uses these as weights, so list
+`severityNone` for the share without the reaction. None of the five lung cancer
+files uses an allergy.
 
 **Add, where applicable:**
 - The clinical **code** of the state (SNOMED for most conditions/procedures,
