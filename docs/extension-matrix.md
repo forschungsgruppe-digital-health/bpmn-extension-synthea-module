@@ -63,7 +63,7 @@ or `CounterConfig` / `SetAttributeConfig` on an intermediate event. The panel of
 The detail types (`Symptom` … `ReportObservation`) are not offered on an end event: the State Type list
 there is only `Terminal` and `Death`, so their groups never appear (a value that is already set stays visible).
 
-The replace menu also leaves out the loop and multi-instance toggles (the converter ignores them).
+The replace menu also leaves out the loop and multi-instance toggles: the converter reports a marker on an element as `LOOP_MARKER_UNSUPPORTED` instead of dropping the repetition silently. Draw the loop with a gateway whose flow leads back.
 
 ## 2. What each type does
 
@@ -76,6 +76,7 @@ The replace menu also leaves out the loop and multi-instance toggles (the conver
 | `GuardConfig` | Holds the condition (`allow`) of a `Guard` state, which waits until the condition is true. It sits on an exclusive gateway. |
 | `DelayConfig` | Sets how long a `Delay` state waits: one value or a range, with a unit. It sits on a timer event. |
 | `SubmoduleConfig` | Names the Synthea submodule that a `CallSubmodule` state calls. It sits on a call activity, or on an empty sub-process. |
+| `DocumentationOnly` | Marks a task, exclusive gateway or intermediate event that stays in the diagram but gets no Synthea state. The converter removes it and joins its incoming flows to its one outgoing flow (note `DOCUMENTATION_ONLY`); the order of the branches at the gateway before it is kept. It excludes every other `synthea:` group on the element, needs one outgoing flow, and a condition or probability may sit on the flow before or after it, not both. The panel shows it as the section "Documentation only" (a switch) on tasks, exclusive gateways and intermediate events; once it is on, the other Synthea sections of the element are hidden. |
 | `EncounterContext` | Marks the states of one visit with a shared `encounterId`; the converter creates the `Encounter` and `EncounterEnd` states from the group. It also holds the visit's class, code, reason and whether it is a wellness visit. |
 | `EncounterReference` | Names the future encounter at which a `ConditionOnset` or `AllergyOnset` is diagnosed (`target_encounter`). It is valid only on those two states. |
 | `CounterConfig` | Describes a `Counter` state: which attribute it counts and whether it increments or decrements, by an optional amount. |
@@ -95,10 +96,18 @@ The replace menu also leaves out the loop and multi-instance toggles (the conver
 | BPMN element | Converter | Panel |
 |---|---|---|
 | Boundary event | error `BOUNDARY_EVENT_UNSUPPORTED` | no `synthea:` groups; the replace menu does not offer the boundary variants, and an event can no longer be dropped or moved onto a task, where it would be attached as a boundary event (`SyntheaNoBoundaryRules`); a boundary event already in an imported diagram stays and can be moved |
-| Inclusive, parallel, complex, event-based gateway | error `UNSUPPORTED_ELEMENT` | no `synthea:` groups; the replace menu no longer offers them (`SyntheaReplaceMenuFilter`). Existing ones in an imported diagram stay visible. |
+| Parallel gateway (split + join) | rewritten into a sequence: the branches run one after the other, in the order of the split's outgoing flows (note `PARALLEL_LINEARIZED`). Errors: `PARALLEL_BRANCH_CONFIG`, `PARALLEL_JOIN_FLOW_CONFIG`, `PARALLEL_NOT_STRUCTURED` | no `synthea:` groups; offered in the replace menu |
+| Inclusive gateway (split + join) | each branch is decided on its own by a Simple state, using the condition or probability on the branch's flow, so none, some or all branches can happen (note `INCLUSIVE_CHAINED`). Errors: `INCLUSIVE_BRANCH_CONFIG_MISSING`, `INCLUSIVE_JOIN_FLOW_CONFIG`, `INCLUSIVE_NOT_STRUCTURED` | no `synthea:` groups for the gateway; its flows take `ProbabilityConfig` or `ConditionConfig`; offered in the replace menu |
+| Link events (throw + catch) | the pair with the same name (the name of the link definition, or the event label if it has none; case is ignored) is replaced by a direct flow to the element after the catch event (note `LINK_RESOLVED`). Errors: `LINK_UNMATCHED`, `LINK_NAME_MISSING`, `LINK_DUPLICATE_CATCH`, `LINK_FLOW`, `LINK_HAS_CONFIG`, `LINK_EDGE_CONFLICT` | no `synthea:` groups |
+| Complex gateway | error `COMPLEX_GATEWAY_UNSUPPORTED` | no `synthea:` groups; the replace menu no longer offers it (`SyntheaReplaceMenuFilter`). An existing one in an imported diagram stays |
+| Event-based gateway | error `EVENT_BASED_GATEWAY_UNSUPPORTED` (GMF cannot race events) | same as above |
 | Text annotation | ignored (not a flow element) | no `synthea:` groups |
 | Data object, data store | ignored | no `synthea:` groups |
-| Ad-hoc sub-process, transaction, event sub-process | error `UNSUPPORTED_ELEMENT` | no `synthea:` groups; not offered in the replace menu |
+| Ad-hoc sub-process | error `ADHOC_SUBPROCESS_UNSUPPORTED` | no `synthea:` groups; not offered in the replace menu |
+| Transaction | error `TRANSACTION_UNSUPPORTED` | same as above |
+| Event sub-process | error `EVENT_SUBPROCESS_UNSUPPORTED` | same as above |
+
+Parallel and inclusive blocks must be structured: every branch is a region with one way in and one way out and all branches meet in one join of the same kind. A branch may contain decisions (an exclusive gateway, a sub-process) and nested blocks are fine; every way out of a branch then leads to the start of the next one. A branch must not contain an end event, loop back to the split, or have flows in from or out to the rest of the diagram: that gives `*_NOT_STRUCTURED` (a split without a join, as when branches end separately or jump out through a link event, must be remodelled). The flow after the join carries no condition or probability.
 
 A **sub-process** is accepted: its content becomes a module of its own and it becomes the `CallSubmodule` state that calls it (see footnote 4).
 

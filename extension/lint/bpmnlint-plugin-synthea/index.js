@@ -23,7 +23,8 @@ module.exports = {
         'synthea/value-range-requires-high-value': 'warn',
         'synthea/careplan-activity-requires-code-and-display': 'warn',
         'synthea/state-code-complete': 'warn',
-        'synthea/alternatives-not-mixed': 'warn'
+        'synthea/alternatives-not-mixed': 'warn',
+        'synthea/inclusive-branches-require-condition-or-probability': 'warn'
       }
     }
   },
@@ -49,6 +50,7 @@ module.exports = {
     'value-range-requires-high-value': './rules/value-range-requires-high-value',
     'careplan-activity-requires-code-and-display': './rules/careplan-activity-requires-code-and-display',
     'state-code-complete': './rules/state-code-complete',
-    'alternatives-not-mixed': './rules/alternatives-not-mixed'
+    'alternatives-not-mixed': './rules/alternatives-not-mixed',
+    'inclusive-branches-require-condition-or-probability': './rules/inclusive-branches-require-condition-or-probability'
   }
 };

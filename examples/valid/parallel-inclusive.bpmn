@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
+                   id="Definitions_parallel_inclusive" targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="Process_ParallelInclusive" name="Parallel and inclusive example" isExecutable="false">
+
+    <bpmn:startEvent id="StartEvent_1" name="Initial">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Parallel: GMF has no parallelism, so the branches run one after the other in the order of the
+         outgoing flows (here: first "Set group", then "Set risk"). Neither flow carries a condition. -->
+    <bpmn:parallelGateway id="Gateway_Split" name="Preparation">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:task id="Task_Group" name="Set group">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="group" valueKind="VALUE" value="1" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_Risk" name="Set risk">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="risk" valueKind="VALUE" value="1" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:parallelGateway id="Gateway_Join" name="Prepared">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <!-- Inclusive: every branch is decided on its own, so none, one or both can happen. Each branch needs
+         its own probability or condition. -->
+    <bpmn:inclusiveGateway id="Gateway_Or" name="Therapies">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+
+    <bpmn:task id="Task_Radio" name="Radiotherapy given">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="radiotherapy" valueKind="VALUE" value="true" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_Chemo" name="Chemotherapy given">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="chemotherapy" valueKind="VALUE" value="true" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:inclusiveGateway id="Gateway_OrJoin" name="Therapies done">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+
+    <bpmn:endEvent id="EndEvent_1" name="Terminal">
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Gateway_Split" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Gateway_Split" targetRef="Task_Group" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Gateway_Split" targetRef="Task_Risk" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_Group" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_Risk" targetRef="Gateway_Join" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Gateway_Join" targetRef="Gateway_Or" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Gateway_Or" targetRef="Task_Radio">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probabilityKind="FIXED" probability="0.3" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Gateway_Or" targetRef="Task_Chemo">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probabilityKind="FIXED" probability="0.5" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_Radio" targetRef="Gateway_OrJoin" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_Chemo" targetRef="Gateway_OrJoin" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Gateway_OrJoin" targetRef="EndEvent_1" />
+
+  </bpmn:process>
+</bpmn:definitions>

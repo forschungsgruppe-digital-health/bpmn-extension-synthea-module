@@ -1087,7 +1087,7 @@ test('an event sub-process is not accepted', async () => {
   const { codes } = await run(
     start() + '<bpmn2:subProcess id="A" name="ev" triggeredByEvent="true"><bpmn2:extensionElements><synthea:stateTypeConfig stateType="DiagnosticReport"/></bpmn2:extensionElements></bpmn2:subProcess>' + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
   );
-  assert.ok(codes.includes('UNSUPPORTED_ELEMENT'));
+  assert.ok(codes.includes('EVENT_SUBPROCESS_UNSUPPORTED'));
 });
 
 // What is drawn inside a sub-process becomes a module of its own, which the sub-process calls.
@@ -1247,4 +1247,233 @@ test('probabilities from attributes: a note names the branch that receives the r
   ]);
   const note = diagnostics.items.find((i) => i.code === 'DISTRIBUTION_REMAINDER');
   assert.ok(note && note.message.includes('(none)'), 'the last branch gets the remainder');
+});
+
+// --- documentation-only elements ---
+const docOnly = '<synthea:documentationOnly/>';
+
+test('documentation-only task: no state, its neighbours are connected', async () => {
+  const { module, diagnostics } = await run(
+    start() + task('D', 'Treatment coordination', docOnly) + task('A', 'Set smoker', setAttr('smoker', 'true')) + end() +
+    flow('f1', 'S', 'D') + flow('f2', 'D', 'A') + flow('f3', 'A', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0);
+  assert.ok(!('Treatment coordination' in module.json.states));
+  assert.equal(module.json.states.Initial.direct_transition, 'Set smoker');
+  assert.ok(diagnostics.items.some((i) => i.code === 'DOCUMENTATION_ONLY'));
+});
+
+test('documentation-only chain and branch order: the joined flow keeps its place among the branches', async () => {
+  const { module, diagnostics } = await run(
+    start() + gateway('G', 'Smoker?') +
+      task('D1', 'Doc one', docOnly) + task('D2', 'Doc two', docOnly) +
+      task('A', 'Yes path', setAttr('x', '1')) + task('B', 'No path', setAttr('x', '0')) + end() +
+      flow('f1', 'S', 'G') +
+      flow('f2', 'G', 'D1', cond(attrCond('smoker', '==', 'true'))) +
+      flow('f3', 'G', 'B', cond(attrCond('smoker', '==', 'false'))) +
+      flow('f4', 'D1', 'D2') + flow('f5', 'D2', 'A') + flow('f6', 'A', 'E') + flow('f7', 'B', 'E')
+  );
+  assert.equal(diagnostics.errorCount, 0);
+  const { conditional_transition: branches } = module.json.states['Smoker?'];
+  assert.deepEqual(branches.map((b) => b.transition), ['Yes path', 'No path']);
+  assert.equal(branches[0].condition.attribute, 'smoker');
+});
+
+test('documentation-only: errors for config, start/end, branching and conflicting flows', async () => {
+  const codes = async (body) => (await run(body)).diagnostics.items.filter((i) => i.level === 'error').map((i) => i.code);
+  assert.ok((await codes(
+    start() + task('D', 'Doc', docOnly + stateType('SetAttribute')) + end() + flow('f1', 'S', 'D') + flow('f2', 'D', 'E')
+  )).includes('DOCUMENTATION_ONLY_HAS_CONFIG'));
+  assert.ok((await codes(
+    '<bpmn2:startEvent id="S" name="Initial">' + `<bpmn2:extensionElements>${docOnly}</bpmn2:extensionElements></bpmn2:startEvent>` + end() + flow('f1', 'S', 'E')
+  )).includes('DOCUMENTATION_ONLY_NOT_ALLOWED'));
+  assert.ok((await codes(
+    start() + task('D', 'Doc', docOnly) + end() + end('E2', 'Other') + flow('f1', 'S', 'D') + flow('f2', 'D', 'E') + flow('f3', 'D', 'E2')
+  )).includes('DOCUMENTATION_ONLY_NEEDS_ONE_EXIT'));
+  assert.ok((await codes(
+    start() + gateway('G', 'g') + task('D', 'Doc', docOnly) + task('A', 'a', setAttr('x', '1')) + end() +
+    flow('f1', 'S', 'G') + flow('f2', 'G', 'D', prob(0.5)) + flow('f3', 'D', 'A', prob(0.5)) + flow('f4', 'G', 'A', prob(0.5)) + flow('f5', 'A', 'E')
+  )).includes('DOCUMENTATION_ONLY_EDGE_CONFLICT'));
+});
+
+// --- parallel and inclusive gateways ---
+const par = (id, name) => `<bpmn2:parallelGateway id="${id}" name="${name}"/>`;
+const inc = (id, name) => `<bpmn2:inclusiveGateway id="${id}" name="${name}"/>`;
+const errorCodes = (diagnostics) => diagnostics.items.filter((i) => i.level === 'error').map((i) => i.code);
+
+test('parallel gateway: branches run one after the other in the order of the outgoing flows', async () => {
+  const { module, diagnostics } = await run(
+    start() + par('SP', 'Split') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + task('C', 'c', setAttr('z', '1')) +
+      par('J', 'Join') + end() +
+      flow('f1', 'S', 'SP') + flow('f2', 'SP', 'B') + flow('f3', 'SP', 'A') + flow('f4', 'B', 'C') + flow('f5', 'A', 'J') + flow('f6', 'C', 'J') +
+      flow('f7', 'J', 'E')
+  );
+  assert.deepEqual(errorCodes(diagnostics), []);
+  const s = module.json.states;
+  assert.equal(s.Initial.direct_transition, 'b');
+  assert.equal(s.b.direct_transition, 'c');
+  assert.equal(s.c.direct_transition, 'a');
+  assert.equal(s.a.direct_transition, 'Terminal');
+  assert.ok(!('Split' in s) && !('Join' in s));
+});
+
+test('inclusive gateway: each branch is decided on its own, any combination can happen', async () => {
+  const { module, diagnostics } = await run(
+    start() + inc('I', 'Therapies') + task('A', 'Radiotherapy', setAttr('x', '1')) + task('B', 'Chemotherapy', setAttr('y', '1')) +
+      inc('J', 'Done') + end() +
+      flow('f1', 'S', 'I') + flow('f2', 'I', 'A', prob(0.3)) + flow('f3', 'I', 'B', cond(attrCond('fit', '==', 'true'))) +
+      flow('f4', 'A', 'J') + flow('f5', 'B', 'J') + flow('f6', 'J', 'E')
+  );
+  assert.deepEqual(errorCodes(diagnostics), []);
+  const s = module.json.states;
+  assert.equal(s.Initial.direct_transition, 'Therapies: Radiotherapy');
+  assert.deepEqual(s['Therapies: Radiotherapy'].distributed_transition, [
+    { transition: 'Radiotherapy', distribution: 0.3 },
+    { transition: 'Therapies: Chemotherapy', distribution: 0.7 }
+  ]);
+  assert.equal(s['Therapies: Chemotherapy'].conditional_transition[0].transition, 'Chemotherapy');
+  assert.equal(s['Therapies: Chemotherapy'].conditional_transition[1].transition, 'Terminal');
+  assert.equal(s.Radiotherapy.direct_transition, 'Therapies: Chemotherapy');
+  assert.equal(s.Chemotherapy.direct_transition, 'Terminal');
+});
+
+test('nested parallel blocks are linearized from the inside out', async () => {
+  const { module, diagnostics } = await run(
+    start() + par('P1', 'p1') + par('P2', 'p2') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + task('C', 'c', setAttr('z', '1')) +
+      par('J2', 'j2') + par('J1', 'j1') + end() +
+      flow('f1', 'S', 'P1') + flow('f2', 'P1', 'P2') + flow('f3', 'P1', 'C') + flow('f4', 'P2', 'A') + flow('f5', 'P2', 'B') +
+      flow('f6', 'A', 'J2') + flow('f7', 'B', 'J2') + flow('f8', 'J2', 'J1') + flow('f9', 'C', 'J1') + flow('f10', 'J1', 'E')
+  );
+  assert.deepEqual(errorCodes(diagnostics), []);
+  const s = module.json.states;
+  assert.deepEqual([s.Initial.direct_transition, s.a.direct_transition, s.b.direct_transition, s.c.direct_transition], ['a', 'b', 'c', 'Terminal']);
+});
+
+test('parallel and inclusive gateways: unstructured or incomplete blocks are errors', async () => {
+  // a split without a join
+  assert.ok(errorCodes((await run(
+    start() + par('SP', 'p') + task('A', 'a', setAttr('x', '1')) + end() + end('E2', 'Other') +
+      flow('f1', 'S', 'SP') + flow('f2', 'SP', 'A') + flow('f3', 'SP', 'E2') + flow('f4', 'A', 'E')
+  )).diagnostics).includes('PARALLEL_NOT_STRUCTURED'));
+  // a condition on a parallel branch
+  assert.ok(errorCodes((await run(
+    start() + par('SP', 'p') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + par('J', 'j') + end() +
+      flow('f1', 'S', 'SP') + flow('f2', 'SP', 'A', prob(0.5)) + flow('f3', 'SP', 'B') + flow('f4', 'A', 'J') + flow('f5', 'B', 'J') + flow('f6', 'J', 'E')
+  )).diagnostics).includes('PARALLEL_BRANCH_CONFIG'));
+  // an inclusive branch without condition or probability
+  assert.ok(errorCodes((await run(
+    start() + inc('I', 'i') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + inc('J', 'j') + end() +
+      flow('f1', 'S', 'I') + flow('f2', 'I', 'A', prob(0.5)) + flow('f3', 'I', 'B') + flow('f4', 'A', 'J') + flow('f5', 'B', 'J') + flow('f6', 'J', 'E')
+  )).diagnostics).includes('INCLUSIVE_BRANCH_CONFIG_MISSING'));
+  // a decision inside a branch is fine, but not when one of its ways ends the process
+  assert.ok(errorCodes((await run(
+    start() + par('SP', 'p') + gateway('G', 'g') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + par('J', 'j') + end() + end('E2', 'Other') +
+      flow('f1', 'S', 'SP') + flow('f2', 'SP', 'G') + flow('f3', 'SP', 'B') + flow('f4', 'G', 'A', prob(0.5)) + flow('f5', 'G', 'E2') + flow('f6', 'A', 'J') + flow('f7', 'B', 'J') + flow('f8', 'J', 'E')
+  )).diagnostics).includes('PARALLEL_NOT_STRUCTURED'));
+});
+
+// --- link events and loop markers ---
+const linkEvent = (id, name, role) =>
+  role === 'throw'
+    ? `<bpmn2:intermediateThrowEvent id="${id}" name="${name}"><bpmn2:linkEventDefinition name="${name}"/></bpmn2:intermediateThrowEvent>`
+    : `<bpmn2:intermediateCatchEvent id="${id}" name="${name}"><bpmn2:linkEventDefinition name="${name}"/></bpmn2:intermediateCatchEvent>`;
+
+test('link events: the throw and the catch event with the same name become one direct flow', async () => {
+  const { module, diagnostics } = await run(
+    start() + gateway('G', 'Smoker?') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + end() +
+      linkEvent('T', 'to-b', 'throw') + linkEvent('C', 'to-b', 'catch') +
+      flow('f1', 'S', 'G') + flow('f2', 'G', 'T', cond(attrCond('smoker', '==', 'true'))) + flow('f3', 'G', 'A', cond(attrCond('smoker', '==', 'false'))) +
+      flow('f4', 'C', 'B') + flow('f5', 'A', 'E') + flow('f6', 'B', 'E')
+  );
+  assert.deepEqual(errorCodes(diagnostics), []);
+  const branches = module.json.states['Smoker?'].conditional_transition;
+  assert.deepEqual(branches.map((b) => b.transition), ['b', 'a']);
+  assert.ok(!('to-b' in module.json.states));
+});
+
+test('link events: unmatched, unnamed and configured link events are errors', async () => {
+  assert.ok(errorCodes((await run(
+    start() + linkEvent('T', 'nowhere', 'throw') + end() + flow('f1', 'S', 'T')
+  )).diagnostics).includes('LINK_UNMATCHED'));
+  assert.ok(errorCodes((await run(
+    start() + linkEvent('C', 'orphan', 'catch') + end() + flow('f1', 'C', 'E') + flow('f2', 'S', 'E')
+  )).diagnostics).includes('LINK_UNMATCHED'));
+});
+
+test('a loop or multi-instance marker is an error, not silently dropped', async () => {
+  const looping = '<bpmn2:task id="A" name="a"><bpmn2:standardLoopCharacteristics/></bpmn2:task>';
+  const { diagnostics } = await run(start() + looping + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E'));
+  assert.ok(errorCodes(diagnostics).includes('LOOP_MARKER_UNSUPPORTED'));
+});
+
+test('link events without a definition name are paired by their label, ignoring case', async () => {
+  const unnamed = (id, label, role) =>
+    role === 'throw'
+      ? `<bpmn2:intermediateThrowEvent id="${id}" name="${label}"><bpmn2:linkEventDefinition/></bpmn2:intermediateThrowEvent>`
+      : `<bpmn2:intermediateCatchEvent id="${id}" name="${label}"><bpmn2:linkEventDefinition/></bpmn2:intermediateCatchEvent>`;
+  const { module, diagnostics } = await run(
+    start() + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + end() +
+      unnamed('T', 'Re-Evaluation', 'throw') + unnamed('C', 'Re-evaluation', 'catch') +
+      flow('f1', 'S', 'A') + flow('f2', 'A', 'T') + flow('f3', 'C', 'B') + flow('f4', 'B', 'E')
+  );
+  assert.deepEqual(errorCodes(diagnostics), []);
+  assert.equal(module.json.states.a.direct_transition, 'b');
+  assert.ok(diagnostics.items.some((i) => i.code === 'LINK_RESOLVED' && /label/.test(i.message)));
+});
+
+test('a branch may contain decisions: parallel branches with a decision inside run in order', async () => {
+  const { module, diagnostics } = await run(
+    start() + par('SP', 'Split') + gateway('G', 'Risk?') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + task('C', 'c', setAttr('z', '1')) +
+      par('J', 'Join') + end() +
+      flow('f1', 'S', 'SP') + flow('f2', 'SP', 'G') + flow('f3', 'SP', 'C') +
+      flow('f4', 'G', 'A', cond(attrCond('risk', '==', 'true'))) + flow('f5', 'G', 'B') +
+      flow('f6', 'A', 'J') + flow('f7', 'B', 'J') + flow('f8', 'C', 'J') + flow('f9', 'J', 'E')
+  );
+  assert.deepEqual(errorCodes(diagnostics), []);
+  const s = module.json.states;
+  assert.equal(s.Initial.direct_transition, 'Risk?');
+  assert.deepEqual(s['Risk?'].conditional_transition.map((b) => b.transition), ['a', 'b']);
+  assert.equal(s.a.direct_transition, 'c'); // both ways out of the first branch lead to the second
+  assert.equal(s.b.direct_transition, 'c');
+  assert.equal(s.c.direct_transition, 'Terminal');
+});
+
+test('a branch with an end event, or a flow in from outside, is still not structured; the join is not reported twice', async () => {
+  const ended = await run(
+    start() + inc('I', 'i') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + inc('J', 'j') + end() + end('E2', 'Other') +
+      flow('f1', 'S', 'I') + flow('f2', 'I', 'A', prob(0.5)) + flow('f3', 'I', 'B', prob(0.5)) + flow('f4', 'A', 'J') + flow('f5', 'B', 'E2') + flow('f6', 'J', 'E')
+  );
+  assert.ok(errorCodes(ended.diagnostics).includes('INCLUSIVE_NOT_STRUCTURED'));
+  const missing = await run(
+    start() + inc('I', 'i') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('y', '1')) + inc('J', 'j') + end() +
+      flow('f1', 'S', 'I') + flow('f2', 'I', 'A', prob(0.5)) + flow('f3', 'I', 'B') + flow('f4', 'A', 'J') + flow('f5', 'B', 'J') + flow('f6', 'J', 'E')
+  );
+  assert.deepEqual(errorCodes(missing.diagnostics).filter((c) => c.startsWith('INCLUSIVE')), ['INCLUSIVE_BRANCH_CONFIG_MISSING']);
+});
+
+test('constructs GMF cannot express get their own error code and a hint', async () => {
+  const codeOf = async (el) => errorCodes((await run(start() + el + end() + flow('f1', 'S', 'X') + flow('f2', 'X', 'E'))).diagnostics);
+  const inner = '<bpmn2:startEvent id="IS"/>';
+  assert.ok((await codeOf(`<bpmn2:adHocSubProcess id="X" name="x">${inner}</bpmn2:adHocSubProcess>`)).includes('ADHOC_SUBPROCESS_UNSUPPORTED'));
+  assert.ok((await codeOf(`<bpmn2:transaction id="X" name="x">${inner}</bpmn2:transaction>`)).includes('TRANSACTION_UNSUPPORTED'));
+  assert.ok((await codeOf(`<bpmn2:subProcess id="X" name="x" triggeredByEvent="true">${inner}</bpmn2:subProcess>`)).includes('EVENT_SUBPROCESS_UNSUPPORTED'));
+  assert.ok((await codeOf('<bpmn2:eventBasedGateway id="X"/>')).includes('EVENT_BASED_GATEWAY_UNSUPPORTED'));
+  assert.ok((await codeOf('<bpmn2:complexGateway id="X"/>')).includes('COMPLEX_GATEWAY_UNSUPPORTED'));
+  assert.ok((await codeOf('<bpmn2:manualTask id="X"/>')).includes('STATE_TYPE_REQUIRED')); // a task is still a task
+});
+
+test('every encounter class Synthea knows can be used (hospice, home, snf, virtual included)', async () => {
+  for (const cls of ['wellness', 'ambulatory', 'outpatient', 'inpatient', 'emergency', 'urgentcare', 'hospice', 'home', 'snf', 'virtual']) {
+    const wellness = cls === 'wellness';
+    const { module, diagnostics } = await run(
+      start() +
+        task('A', 'a', stateType('Procedure') + coding(SNOMED, '1', 'p') +
+          `<synthea:encounterContext requiresEncounterContext="true" encounterId="V"${wellness ? ' wellness="true"' : ` encounterClass="${cls}" encounterCodeSystem="${SNOMED}" encounterCode="185345009" encounterCodeDisplay="Encounter"`}/>`) +
+        end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
+    );
+    assert.ok(!errorCodes(diagnostics).some((c) => c.startsWith('ENCOUNTER_') && c !== 'ENCOUNTER_CODE_MISSING'), cls);
+    const encounter = Object.values(module.json.states).find((s) => s.type === 'Encounter');
+    if (wellness) assert.equal(encounter.wellness, true);
+    else assert.equal(encounter.encounter_class, cls);
+  }
 });

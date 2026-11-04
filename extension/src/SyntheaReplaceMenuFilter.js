@@ -1,10 +1,10 @@
-// What the converter does not accept (tools/bpmn2gmf/ir.mjs: UNSUPPORTED_ELEMENT and
-// BOUNDARY_EVENT_UNSUPPORTED) is not offered in the replace menu: every gateway but the
-// exclusive one, transactions, ad-hoc and event sub-processes, the boundary events, and the
-// loop / multi-instance markers (the converter ignores them, so they would only mislead).
+// What the converter does not accept (tools/bpmn2gmf/ir.mjs: REJECTED and
+// BOUNDARY_EVENT_UNSUPPORTED) is not offered in the replace menu: the complex and event-based
+// gateway, transactions, ad-hoc and event sub-processes, the boundary events, and the
+// loop / multi-instance markers (the converter reports them as LOOP_MARKER_UNSUPPORTED).
+// The parallel and the inclusive gateway are offered: a split and its join are rewritten
+// (tools/bpmn2gmf/gateways.mjs).
 const UNSUPPORTED_ENTRIES = [
-  'replace-with-parallel-gateway',
-  'replace-with-inclusive-gateway',
   'replace-with-complex-gateway',
   'replace-with-event-based-gateway',
   'replace-with-transaction',

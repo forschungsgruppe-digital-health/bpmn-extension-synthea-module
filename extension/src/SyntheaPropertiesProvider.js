@@ -18,6 +18,7 @@ const STATE_TYPE = 'synthea:StateTypeConfig';
 const DELAY_TYPE = 'synthea:DelayConfig';
 const GUARD_TYPE = 'synthea:GuardConfig';
 const SUBMODULE_TYPE = 'synthea:SubmoduleConfig';
+const DOCUMENTATION_ONLY_TYPE = 'synthea:DocumentationOnly';
 const ENCOUNTER_CONTEXT_TYPE = 'synthea:EncounterContext';
 const ENCOUNTER_REFERENCE_TYPE = 'synthea:EncounterReference';
 const COUNTER_TYPE = 'synthea:CounterConfig';
@@ -65,7 +66,7 @@ const PROBABILITY_KIND_FIELDS = {
 
 const OBSERVATION_CATEGORY_VALUES = ['vital-signs', 'laboratory', 'procedure', 'imaging', 'survey', 'exam', 'therapy', 'social-history'];
 
-const ENCOUNTER_CLASS_VALUES = ['wellness', 'ambulatory', 'emergency', 'urgentcare', 'inpatient', 'outpatient'];
+const ENCOUNTER_CLASS_VALUES = ['wellness', 'ambulatory', 'emergency', 'urgentcare', 'inpatient', 'outpatient', 'hospice', 'home', 'snf', 'virtual'];
 
 const CONDITION_TYPE_VALUES = [
   'Attribute', 'Gender', 'Race', 'Socioeconomic Status', 'Age', 'Date', 'Symptom',
@@ -194,83 +195,96 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
     return function (groups) {
       const firstOwn = groups.length;
 
-      if (is(element, 'bpmn:StartEvent')) {
-        groups.push(...createStateTypeGroups(element));
-      }
+      // A documentation-only element stays in the diagram but gets no state: it has no other Synthea
+      // settings (the converter rejects both together), so only the switch is shown.
+      const documentable = canBeDocumentationOnly(element);
+      const documentationOnly = documentable && !!getExtension(element, DOCUMENTATION_ONLY_TYPE);
 
-      if (is(element, 'bpmn:EndEvent')) {
-        groups.push(...createStateTypeGroups(element));
-        groups.push(createEncounterContextGroup(element));
-        if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
-          groups.push(createReferencedByAttributeGroup(element));
+      if (documentationOnly) {
+        groups.push(createDocumentationOnlyGroup(element));
+      } else {
+        if (is(element, 'bpmn:StartEvent')) {
+          groups.push(...createStateTypeGroups(element));
         }
-        groups.push(...createStateDetailGroups(element));
-      }
 
-      if (is(element, 'bpmn:Task')) {
-        groups.push(...createStateTypeGroups(element));
-        groups.push(createEncounterContextGroup(element));
-        if (appliesTo(element, COUNTER_STATE_TYPES, COUNTER_TYPE)) {
-          groups.push(createCounterGroup(element));
+        if (is(element, 'bpmn:EndEvent')) {
+          groups.push(...createStateTypeGroups(element));
+          groups.push(createEncounterContextGroup(element));
+          if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
+            groups.push(createReferencedByAttributeGroup(element));
+          }
+          groups.push(...createStateDetailGroups(element));
         }
-        if (appliesTo(element, SET_ATTRIBUTE_STATE_TYPES, SET_ATTRIBUTE_TYPE)) {
-          groups.push(createSetAttributeGroup(element));
-        }
-        if (appliesTo(element, ASSIGN_STATE_TYPES, ASSIGN_TO_ATTRIBUTE_TYPE)) {
-          groups.push(createAssignToAttributeGroup(element));
-        }
-        if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
-          groups.push(createReferencedByAttributeGroup(element));
-        }
-        groups.push(...createStateDetailGroups(element));
 
-        if (isConditionOrAllergyOnset(element)) {
-          groups.push(createEncounterReferenceGroup(element));
-        }
-      }
+        if (is(element, 'bpmn:Task')) {
+          groups.push(...createStateTypeGroups(element));
+          groups.push(createEncounterContextGroup(element));
+          if (appliesTo(element, COUNTER_STATE_TYPES, COUNTER_TYPE)) {
+            groups.push(createCounterGroup(element));
+          }
+          if (appliesTo(element, SET_ATTRIBUTE_STATE_TYPES, SET_ATTRIBUTE_TYPE)) {
+            groups.push(createSetAttributeGroup(element));
+          }
+          if (appliesTo(element, ASSIGN_STATE_TYPES, ASSIGN_TO_ATTRIBUTE_TYPE)) {
+            groups.push(createAssignToAttributeGroup(element));
+          }
+          if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
+            groups.push(createReferencedByAttributeGroup(element));
+          }
+          groups.push(...createStateDetailGroups(element));
 
-      if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
-        groups.push(...createStateTypeGroups(element));
-        groups.push(createEncounterContextGroup(element));
-        // A sub-process with content becomes a module of its own, which it calls; only an empty one
-        // names a module of a file of its own.
-        const hasContent = is(element, 'bpmn:SubProcess') && (getBusinessObject(element).get('flowElements') || []).length > 0;
-        if (is(element, 'bpmn:SubProcess') && stateTypeOf(element) === 'CallSubmodule' && !hasContent) {
+          if (isConditionOrAllergyOnset(element)) {
+            groups.push(createEncounterReferenceGroup(element));
+          }
+        }
+
+        if (is(element, 'bpmn:SubProcess') || is(element, 'bpmn:CallActivity')) {
+          groups.push(...createStateTypeGroups(element));
+          groups.push(createEncounterContextGroup(element));
+          // A sub-process with content becomes a module of its own, which it calls; only an empty one
+          // names a module of a file of its own.
+          const hasContent = is(element, 'bpmn:SubProcess') && (getBusinessObject(element).get('flowElements') || []).length > 0;
+          if (is(element, 'bpmn:SubProcess') && stateTypeOf(element) === 'CallSubmodule' && !hasContent) {
+            groups.push(createSubmoduleGroup(element));
+          }
+        }
+
+        if (is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent')) {
+          groups.push(...createStateTypeGroups(element));
+          groups.push(createDelayGroup(element));
+          groups.push(createEncounterContextGroup(element));
+          if (appliesTo(element, ASSIGN_STATE_TYPES, ASSIGN_TO_ATTRIBUTE_TYPE)) {
+            groups.push(createAssignToAttributeGroup(element));
+          }
+          if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
+            groups.push(createReferencedByAttributeGroup(element));
+          }
+          groups.push(...createStateDetailGroups(element));
+
+          if (isConditionOrAllergyOnset(element)) {
+            groups.push(createEncounterReferenceGroup(element));
+          }
+        }
+
+        if (is(element, 'bpmn:SequenceFlow')) {
+          groups.push(createProbabilityGroup(element));
+          groups.push(createConditionGroup(element));
+          groups.push(...createNestedConditionGroups(element, getFlowCondition, ensureFlowCondition, 'synthea-condition'));
+        }
+
+        if (is(element, 'bpmn:ExclusiveGateway')) {
+          groups.push(...createStateTypeGroups(element));
+          groups.push(createGuardGroup(element));
+          groups.push(...createNestedConditionGroups(element, getGuardCondition, ensureGuardCondition, 'synthea-guard-condition'));
+        }
+
+        if (is(element, 'bpmn:CallActivity')) {
           groups.push(createSubmoduleGroup(element));
         }
-      }
 
-      if (is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent')) {
-        groups.push(...createStateTypeGroups(element));
-        groups.push(createDelayGroup(element));
-        groups.push(createEncounterContextGroup(element));
-        if (appliesTo(element, ASSIGN_STATE_TYPES, ASSIGN_TO_ATTRIBUTE_TYPE)) {
-          groups.push(createAssignToAttributeGroup(element));
+        if (documentable) {
+          groups.push(createDocumentationOnlyGroup(element));
         }
-        if (appliesTo(element, REFERENCED_STATE_TYPES, REFERENCED_BY_ATTRIBUTE_TYPE)) {
-          groups.push(createReferencedByAttributeGroup(element));
-        }
-        groups.push(...createStateDetailGroups(element));
-
-        if (isConditionOrAllergyOnset(element)) {
-          groups.push(createEncounterReferenceGroup(element));
-        }
-      }
-
-      if (is(element, 'bpmn:SequenceFlow')) {
-        groups.push(createProbabilityGroup(element));
-        groups.push(createConditionGroup(element));
-        groups.push(...createNestedConditionGroups(element, getFlowCondition, ensureFlowCondition, 'synthea-condition'));
-      }
-
-      if (is(element, 'bpmn:ExclusiveGateway')) {
-        groups.push(...createStateTypeGroups(element));
-        groups.push(createGuardGroup(element));
-        groups.push(...createNestedConditionGroups(element, getGuardCondition, ensureGuardCondition, 'synthea-guard-condition'));
-      }
-
-      if (is(element, 'bpmn:CallActivity')) {
-        groups.push(createSubmoduleGroup(element));
       }
 
       // Everything above is ours: fold it into one "Synthea" group whose sections open and
@@ -463,6 +477,45 @@ function createGuardGroup(element) {
     id: 'synthea-guard',
     label: 'Guard',
     entries
+  };
+}
+
+// Tasks, exclusive gateways and intermediate events can be marked "documentation only"
+// (tools/bpmn2gmf/documentation.mjs: DOCUMENTATION_ONLY_NOT_ALLOWED).
+function canBeDocumentationOnly(element) {
+  return is(element, 'bpmn:Task') || is(element, 'bpmn:ExclusiveGateway') ||
+    is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent');
+}
+
+function DocumentationOnlyEntry(props) {
+  const { element, id } = props;
+  const modeling = useService('modeling');
+  const bpmnFactory = useService('bpmnFactory');
+  const translate = useService('translate');
+
+  const getValue = () => !!getExtension(element, DOCUMENTATION_ONLY_TYPE);
+
+  const setValue = (value) => {
+    if (value) {
+      ensureExtension(element, DOCUMENTATION_ONLY_TYPE, bpmnFactory, modeling);
+      return;
+    }
+    const extensionElements = getBusinessObject(element).get('extensionElements');
+    modeling.updateModdleProperties(element, extensionElements, {
+      values: (extensionElements.get('values') || []).filter((v) => !is(v, DOCUMENTATION_ONLY_TYPE))
+    });
+  };
+
+  return CheckboxEntry({ element, id, label: translate('No Synthea state (documentation only)'), getValue, setValue });
+}
+
+function createDocumentationOnlyGroup(element) {
+  return {
+    id: 'synthea-documentation-only',
+    label: 'Documentation only',
+    entries: [
+      { id: 'synthea-documentation-only-switch', element, component: DocumentationOnlyEntry }
+    ]
   };
 }
 

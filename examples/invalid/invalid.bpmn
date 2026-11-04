@@ -274,6 +274,16 @@
     <bpmn:sequenceFlow id="Flow_BranchNoConfig_A" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_Counter_NoConfig" />
     <bpmn:sequenceFlow id="Flow_BranchNoConfig_B" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_SetAttribute_NoConfig" />
 
+    <!-- inclusive-branches-require-condition-or-probability: every branch is decided on its own, so the
+         second flow needs a condition or probability too (unlike an exclusive gateway there is no fallback) -->
+    <bpmn:inclusiveGateway id="Gateway_InclusiveNoConfig" name="Inclusive (branch without probability)" />
+    <bpmn:sequenceFlow id="Flow_InclusiveNoConfig_A" sourceRef="Gateway_InclusiveNoConfig" targetRef="Task_Counter_NoConfig">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probabilityKind="FIXED" probability="0.4" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_InclusiveNoConfig_B" sourceRef="Gateway_InclusiveNoConfig" targetRef="Task_SetAttribute_NoConfig" />
+
   
     <!-- alternatives-not-mixed: a fixed value and a copy of another attribute on one Set Attribute -->
     <bpmn:task id="Task_SetTwoWays" name="Set two ways (bad)">

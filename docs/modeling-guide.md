@@ -163,6 +163,10 @@ branch that receives the probability remainder). Lint rule SYN-27
 (`gateway-branches-require-condition-or-probability`) warns about gateways
 that break this.
 
+An **inclusive** gateway is different: each branch is decided on its own, so none, some or all
+of them can happen, and there is no fallback or remainder branch. Every outgoing flow needs its
+own condition or probability (lint rule `inclusive-branches-require-condition-or-probability`).
+
 ### 4a. By fixed or dynamic probability — `ProbabilityConfig`
 
 **Element:** a sequence flow leaving a gateway (any gateway type — the
@@ -452,8 +456,8 @@ instead — see [ADR-0003](adr/0003-encounter-context-implicit-scoping.md)).
   `wellness=false`.
 - `encounterClass` — **only shown while `wellness` is unchecked** (Synthea
   requires it for every non-wellness encounter): `ambulatory`, `emergency`,
-  `urgentcare`, `inpatient`, or `outpatient`. (The Synthea engine v4.0.0 also knows
-  `hospice`, `home`, `snf` and `virtual`; the extension does not offer them yet.)
+  `urgentcare`, `inpatient`, `outpatient`, `hospice`, `home`, `snf` or `virtual`
+  (the encounter types of Synthea v4.0.0).
 - `reason` (optional) — an attribute name or a reference to a prior
   `ConditionOnset` explaining why the visit happens.
 - **Encounter code** (`encounterCodeSystem`, `encounterCode`,

@@ -63,6 +63,9 @@
     <xsd:attribute name="submodule" type="xsd:string"/>
   </xsd:complexType>
 
+  <xsd:element name="documentationOnly" type="synthea:tDocumentationOnly"/>
+  <xsd:complexType name="tDocumentationOnly"/>
+
   <xsd:element name="probabilityKind" type="synthea:tProbabilityKind"/>
   <xsd:complexType name="tProbabilityKind"/>
 

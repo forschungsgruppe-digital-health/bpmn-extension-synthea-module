@@ -52,6 +52,7 @@
     { "name": "SubmoduleConfig", "superClass": ["Element"], "properties": [
       { "name": "submodule", "type": "String", "isAttr": true }
     ]},
+    { "name": "DocumentationOnly", "superClass": ["Element"], "properties": [] },
     { "name": "ProbabilityKind", "isEnum": true, "literalValues": [
       {"name": "FIXED"}, {"name": "ATTRIBUTE"}
     ]},
@@ -62,7 +63,8 @@
       { "name": "probabilityDefault", "type": "Real", "isAttr": true }
     ]},
     { "name": "EncounterClass", "isEnum": true, "literalValues": [
-      {"name": "wellness"}, {"name": "ambulatory"}, {"name": "emergency"}, {"name": "urgentcare"}, {"name": "inpatient"}, {"name": "outpatient"}
+      {"name": "wellness"}, {"name": "ambulatory"}, {"name": "emergency"}, {"name": "urgentcare"}, {"name": "inpatient"}, {"name": "outpatient"},
+      {"name": "hospice"}, {"name": "home"}, {"name": "snf"}, {"name": "virtual"}
     ]},
     { "name": "EncounterContext", "superClass": ["Element"], "properties": [
       { "name": "requiresEncounterContext", "type": "Boolean", "isAttr": true, "default": false },

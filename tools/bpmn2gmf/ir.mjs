@@ -4,11 +4,39 @@
 // does not matter for GMF (diagram interchange, annotations, associations,
 // i18n, BPMN4CP, data objects) is dropped here.
 
+import { bypassDocumentationNodes } from './documentation.mjs';
+import { resolveLinks } from './links.mjs';
+import { linearizeGateways } from './gateways.mjs';
+
 const IGNORED_FLOW_ELEMENTS = new Set([
   'bpmn:DataObject',
   'bpmn:DataObjectReference',
   'bpmn:DataStoreReference'
 ]);
+
+// Constructs GMF cannot express, each with the reason and what to draw instead.
+const REJECTED = {
+  'event-subprocess': {
+    code: 'EVENT_SUBPROCESS_UNSUPPORTED',
+    message: 'An event sub-process interrupts a running flow when its event happens; GMF only runs one state after the other. Draw what it does as a normal part of the flow (e.g. a Delay or a Death state with a time range at the point where it can happen), or as a module that is called with a call activity.'
+  },
+  'bpmn:AdHocSubProcess': {
+    code: 'ADHOC_SUBPROCESS_UNSUPPORTED',
+    message: 'An ad-hoc sub-process leaves the order and the choice of its tasks open; GMF needs a fixed order or probabilities. Use a sequence, a parallel gateway (branches run in a fixed order) or an inclusive gateway (each branch has its own condition or probability).'
+  },
+  'bpmn:Transaction': {
+    code: 'TRANSACTION_UNSUPPORTED',
+    message: 'A transaction has rollback and compensation, which GMF does not have. If a plain group of steps is meant, draw an ordinary sub-process.'
+  },
+  'bpmn:EventBasedGateway': {
+    code: 'EVENT_BASED_GATEWAY_UNSUPPORTED',
+    message: 'An event-based gateway waits for the first of several events; GMF cannot race events. Decide on a condition or probability with an exclusive gateway, or on a Delay followed by a Guard.'
+  },
+  'bpmn:ComplexGateway': {
+    code: 'COMPLEX_GATEWAY_UNSUPPORTED',
+    message: 'A complex gateway has no GMF equivalent. Use exclusive, parallel or inclusive gateways.'
+  }
+};
 
 export function extensionsOf(element) {
   const out = {};
@@ -25,12 +53,25 @@ function kindOf(el) {
     case 'bpmn:StartEvent': return 'start';
     case 'bpmn:EndEvent': return 'end';
     case 'bpmn:ExclusiveGateway': return 'gateway';
+    case 'bpmn:ParallelGateway': return 'parallel';
+    case 'bpmn:InclusiveGateway': return 'inclusive';
     case 'bpmn:CallActivity': return 'call';
     case 'bpmn:SubProcess': return 'subprocess';
     case 'bpmn:IntermediateCatchEvent':
     case 'bpmn:IntermediateThrowEvent': return 'event';
     default: return el.$instanceOf('bpmn:Task') ? 'task' : null;
   }
+}
+
+function linkOf(el) {
+  const def = (el.eventDefinitions ?? []).find((d) => d.$type === 'bpmn:LinkEventDefinition');
+  if (!def) return null;
+  // BPMN pairs the events by the name of the link definition; modelers often only label the event
+  return {
+    name: def.name || el.name,
+    byLabel: !def.name,
+    role: el.$type === 'bpmn:IntermediateThrowEvent' ? 'throw' : 'catch'
+  };
 }
 
 export function buildModule(process, fileBase, diag) {
@@ -65,9 +106,19 @@ export function buildModule(process, fileBase, diag) {
 
     const kind = el.triggeredByEvent ? null : kindOf(el); // an event sub-process has no GMF equivalent
     if (!kind) {
-      diag.error('UNSUPPORTED_ELEMENT', `BPMN element ${el.$type} cannot be converted.`, where(el));
+      const known = REJECTED[el.triggeredByEvent ? 'event-subprocess' : el.$type];
+      if (known) diag.error(known.code, known.message, where(el));
+      else diag.error('UNSUPPORTED_ELEMENT', `BPMN element ${el.$type} cannot be converted.`, where(el));
       skipped.add(el.id);
       continue;
+    }
+
+    if (el.loopCharacteristics) {
+      diag.error(
+        'LOOP_MARKER_UNSUPPORTED',
+        `A ${el.loopCharacteristics.$type.replace('bpmn:', '')} marker is ignored by GMF and would silently drop the repetition. Draw the loop: a gateway after the element whose flow leads back to it, with a condition or probability.`,
+        where(el)
+      );
     }
 
     module.nodes.set(el.id, {
@@ -77,6 +128,7 @@ export function buildModule(process, fileBase, diag) {
       label: el.name ?? '',
       ext: extensionsOf(el),
       hasTimer: (el.eventDefinitions ?? []).some((d) => d.$type === 'bpmn:TimerEventDefinition'),
+      link: linkOf(el),
       defaultFlow: el.default?.id ?? null,
       incoming: [],
       outgoing: []
@@ -116,6 +168,9 @@ export function buildModule(process, fileBase, diag) {
     module.nodes.get(to).incoming.push(edge);
   }
 
+  bypassDocumentationNodes(module, diag);
+  resolveLinks(module, diag);
+  linearizeGateways(module, diag);
   return module;
 }
 
