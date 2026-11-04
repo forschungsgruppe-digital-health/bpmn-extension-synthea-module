@@ -31,7 +31,6 @@ const OFFERED_NOT_COMPLETE = {
 // states in shipped modules (Synthea v4.0.0, 536 modules). The test below checks that none of them
 // appears in the converter, so implementing one makes it fail until the entry is removed.
 const FIELDS_NOT_WRITTEN = {
-  'CarePlanStart.goals': '5 states in 5 modules',
   'Observation.sampled_data': '1 state in 1 module',
   'Observation.attachment': '1 state in 1 module'
 };
@@ -40,6 +39,9 @@ const FIELDS_NOT_WRITTEN = {
 // (org.mitre.synthea.engine) has a field or string of that name, so the engine ignores them.
 // The converter leaves them out on purpose.
 const FIELDS_IGNORED_BY_ENGINE = {
+  // CarePlanStart.goals is declared `transient` and nothing in the engine fills it, so it stays empty:
+  // a run with two goals exported a CarePlan without any Goal resource (checked with and without a reason).
+  'CarePlanStart.goals': '5 states in 5 shipped modules; the field is transient and never loaded in v4.0.0',
   'DiagnosticReport.number_of_observations': '25 states in 12 modules; the lipid panel example of the wiki sets 4, other modules 4 with 11 observations',
   'MultiObservation.number_of_observations': '14 states in 9 modules; one sets 0 with 3 observations'
 };
