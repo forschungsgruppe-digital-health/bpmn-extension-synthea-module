@@ -38,8 +38,15 @@ of one group "Synthea"; a mark in the matrix means that section appears. "Conver
 | `ReferencedByAttributeConfig` | — | P K | P K | P K | — | — | — | — | — | `ConditionEnd`, `AllergyEnd`, `MedicationEnd`, `CarePlanEnd`, `DeviceEnd`, `Death` |
 | `SymptomConfig` | — | — | P K | P K | — | — | — | — | — | `Symptom` |
 | `ObservationConfig` | — | — | P K | P K | — | — | — | — | — | `Observation`, `MultiObservation` |
-| `ValueConfig` | — | P K ³ | P K | P K | — | — | — | — | — | `Observation`, `Symptom`, `Death`, `Procedure` |
+| `ValueConfig` | — | P K ³ | P K | P K | — | — | — | — | — | `Observation`, `Symptom`, `Death`, `Procedure`, `VitalSign` |
 | `MedicationConfig` | — | — | P K | P K | — | — | — | — | — | `MedicationOrder` |
+| `PrescriptionConfig` | — | — | P K | P K | — | — | — | — | — | `MedicationOrder` |
+| `PrescriptionInstruction` | — | — | P K | P K | — | — | — | — | — | `MedicationOrder` |
+| `VaccineConfig` | — | — | P K | P K | — | — | — | — | — | `Vaccine` |
+| `SupplyItem` | — | — | P K | P K | — | — | — | — | — | `SupplyList` |
+| `VitalSignConfig` | — | — | P K | P K | — | — | — | — | — | `VitalSign` |
+| `AllergyConfig` | — | — | P K | P K | — | — | — | — | — | `AllergyOnset` |
+| `AllergyReaction` | — | — | P K | P K | — | — | — | — | — | `AllergyOnset` |
 | `CarePlanActivity` | — | — | P K | P K | — | — | — | — | — | `CarePlanStart` |
 | `ImagingStudySeries` | — | — | P K | P K | — | — | — | — | — | `ImagingStudy` |
 | `ReportObservation` | — | — | P K | P K | — | — | — | — | — | `DiagnosticReport`, `MultiObservation` |
@@ -77,7 +84,7 @@ The replace menu also leaves out the loop and multi-instance toggles: the conver
 | `DelayConfig` | Sets how long a `Delay` state waits: one value or a range, with a unit. It sits on a timer event. |
 | `SubmoduleConfig` | Names the Synthea submodule that a `CallSubmodule` state calls. It sits on a call activity, or on an empty sub-process. |
 | `DocumentationOnly` | Marks a task, exclusive gateway or intermediate event that stays in the diagram but gets no Synthea state. The converter removes it and joins its incoming flows to its one outgoing flow (note `DOCUMENTATION_ONLY`); the order of the branches at the gateway before it is kept. It excludes every other `synthea:` group on the element, needs one outgoing flow, and a condition or probability may sit on the flow before or after it, not both. The panel shows it as the section "Documentation only" (a switch) on tasks, exclusive gateways and intermediate events; once it is on, the other Synthea sections of the element are hidden. |
-| `EncounterContext` | Marks the states of one visit with a shared `encounterId`; the converter creates the `Encounter` and `EncounterEnd` states from the group. It also holds the visit's class, code, reason and whether it is a wellness visit. |
+| `EncounterContext` | Marks the states of one visit with a shared `encounterId`; the converter creates the `Encounter` and `EncounterEnd` states from the group. It also holds the visit's class, code, reason and whether it is a wellness visit. It also holds the optional `telemedicinePossibility` (`none`, `possible`, `always`): Synthea may turn the visit into a virtual one. `dischargeCode` and `dischargeDisplay` (NUBC, the system is fixed; both or none) become the `discharge_disposition` of the `EncounterEnd`. |
 | `EncounterReference` | Names the future encounter at which a `ConditionOnset` or `AllergyOnset` is diagnosed (`target_encounter`). It is valid only on those two states. |
 | `CounterConfig` | Describes a `Counter` state: which attribute it counts and whether it increments or decrements, by an optional amount. |
 | `SetAttributeConfig` | Describes a `SetAttribute` state: which attribute it sets, and "Value as" a fixed value, a copy of another attribute or a value drawn from a distribution (exact, uniform, Gaussian, exponential). The lung cancer models draw the length of stay from a distribution. |
@@ -86,7 +93,14 @@ The replace menu also leaves out the loop and multi-instance toggles: the conver
 | `SymptomConfig` | Gives a `Symptom` state the symptom name Synthea tracks, which is required; the element's label is not used. |
 | `ObservationConfig` | Gives an `Observation` or `MultiObservation` state its HL7 category (`vital-signs`, `laboratory`, …), which Synthea requires. |
 | `ValueConfig` | Sets a number or a range, with a unit, for an observation value, a symptom severity, the time until death or a procedure's duration. |
-| `MedicationConfig` | Marks that a `MedicationOrder` is given during the encounter (`administration`) and not only prescribed. |
+| `VitalSignConfig` | The name of the vital sign a `VitalSign` state sets (`vitalSign`, one of Synthea's vital signs, e.g. `Systolic Blood Pressure`; the converter does not check the name). The value comes from `ValueConfig` (exact or range, with `unit`; no unit is written as `""`, as upstream does). A vital sign is only set, never recorded. |
+| `SupplyItem` | One item of a `SupplyList` (`quantity` of at least 1, SNOMED CT `code` and `codeDisplay`). Repeatable; the panel shows one, further ones are added in the XML. A `SupplyList` without one is reported as missing `supplies`. |
+| `AllergyConfig` | The `allergyType` (`allergy` or `intolerance`) and `category` (`medication`, `food`, `environment`) of an `AllergyOnset`; Synthea requires both. |
+| `AllergyReaction` | One reaction of an `AllergyOnset` (`code`, `codeDisplay`, SNOMED CT) with the probability of each severity (`severityNone`, `severityMild`, `severityModerate`, `severitySevere`, which should add up to 1: `REACTION_SEVERITIES_SUM`). Repeatable; the panel shows one, further ones are added in the XML. |
+| `VaccineConfig` | Gives the dose number (`series`) of a `Vaccine` within its series. Optional. The CVX code of the vaccine sits on `StateTypeConfig`. |
+| `MedicationConfig` | Marks that a `MedicationOrder` is given during the encounter (`administration`) and not only prescribed, and that a medication is `chronic` (Synthea reissues it at every wellness visit). |
+| `PrescriptionConfig` | The prescription of a `MedicationOrder`: `refills`, `asNeeded`, a dosage (`dosageAmount` doses, `dosageFrequency` times per `dosagePeriod` of `dosageUnit`) and a duration (`durationQuantity` of `durationUnit`). Dosage and duration are all-or-nothing (`PRESCRIPTION_INCOMPLETE`). The panel shows one block; instructions are added in the XML. |
+| `PrescriptionInstruction` | One SNOMED CT instruction of the prescription (`code`, `codeDisplay`, e.g. "before food"). Repeatable. |
 | `CarePlanActivity` | Lists an activity (SNOMED code and text) of a `CarePlanStart`; there can be several. |
 | `ImagingStudySeries` | Describes one series of an `ImagingStudy` (body site, modality, kind of image, number of instances); a study needs at least one. |
 | `ReportObservation` | Lists one contained value of a `DiagnosticReport` or `MultiObservation` (a single value of a lab panel or a blood pressure panel), as a range, a coded value or a vital sign. Synthea embeds these in the state itself. |
@@ -101,6 +115,8 @@ The replace menu also leaves out the loop and multi-instance toggles: the conver
 | Link events (throw + catch) | the pair with the same name (the name of the link definition, or the event label if it has none; case is ignored) is replaced by a direct flow to the element after the catch event (note `LINK_RESOLVED`). Errors: `LINK_UNMATCHED`, `LINK_NAME_MISSING`, `LINK_DUPLICATE_CATCH`, `LINK_FLOW`, `LINK_HAS_CONFIG`, `LINK_EDGE_CONFLICT` | no `synthea:` groups |
 | Complex gateway | error `COMPLEX_GATEWAY_UNSUPPORTED` | no `synthea:` groups; the replace menu no longer offers it (`SyntheaReplaceMenuFilter`). An existing one in an imported diagram stays |
 | Event-based gateway | error `EVENT_BASED_GATEWAY_UNSUPPORTED` (GMF cannot race events) | same as above |
+| Pool, message flow | each pool (process) becomes a module of its own; message flows are not converted (warning `MESSAGE_FLOWS_IGNORED`). A message start event counts as a start event, so a process with one plain and one message start gives `INITIAL_COUNT` with a hint | no `synthea:` groups |
+| Message, signal, conditional events (intermediate) | no state type is inferred (`STATE_TYPE_REQUIRED`); mark them `DocumentationOnly` if they only describe a hand-over | `DocumentationOnly` offered; other groups as for a timer-less intermediate event |
 | Text annotation | ignored (not a flow element) | no `synthea:` groups |
 | Data object, data store | ignored | no `synthea:` groups |
 | Ad-hoc sub-process | error `ADHOC_SUBPROCESS_UNSUPPORTED` | no `synthea:` groups; not offered in the replace menu |
@@ -115,7 +131,7 @@ On the fields that exclude each other the panel clears what no longer applies: t
 
 The panel's State Type list is limited per element to what the converter accepts: start event `Initial`, end event `Terminal`/`Death`, exclusive gateway `Simple`/`Guard`, call activity `CallSubmodule`, sub-process `CallSubmodule`; a task takes every type except `Initial`, `Terminal`, `CallSubmodule`, `Guard` and `Delay`, which have elements of their own. A value that is already set stays selectable.
 
-`AllergyOnset`, `AllergyEnd`, `VitalSign`, `SupplyList` and `Physiology` are not offered: the extension has no fields for them (an allergy needs `allergy_type` and `category`), so the converter could only write an incomplete state (reported as missing fields) or reject it (`Physiology`).
+`Physiology` is not offered and is rejected (`PHYSIOLOGY_UNSUPPORTED`): it simulates a physiological model with a differential equation solver (1 state in 1 of 536 shipped modules), has a second transition (`alt_direct_transition`) and no counterpart in a care pathway. It stays in the descriptor's `StateType` list only so that an existing diagram gets that message and not an unknown-type error.
 
 ## 4. What the matrix shows
 

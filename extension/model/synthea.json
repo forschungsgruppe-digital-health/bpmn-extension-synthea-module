@@ -66,12 +66,18 @@
       {"name": "wellness"}, {"name": "ambulatory"}, {"name": "emergency"}, {"name": "urgentcare"}, {"name": "inpatient"}, {"name": "outpatient"},
       {"name": "hospice"}, {"name": "home"}, {"name": "snf"}, {"name": "virtual"}
     ]},
+    { "name": "TelemedicinePossibility", "isEnum": true, "literalValues": [
+      {"name": "none"}, {"name": "possible"}, {"name": "always"}
+    ]},
     { "name": "EncounterContext", "superClass": ["Element"], "properties": [
       { "name": "requiresEncounterContext", "type": "Boolean", "isAttr": true, "default": false },
       { "name": "encounterId", "type": "String", "isAttr": true },
       { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false },
       { "name": "encounterClass", "type": "EncounterClass", "isAttr": true },
       { "name": "reason", "type": "String", "isAttr": true },
+      { "name": "telemedicinePossibility", "type": "TelemedicinePossibility", "isAttr": true },
+      { "name": "dischargeCode", "type": "String", "isAttr": true },
+      { "name": "dischargeDisplay", "type": "String", "isAttr": true },
       { "name": "encounterCodeSystem", "type": "String", "isAttr": true },
       { "name": "encounterCode", "type": "String", "isAttr": true },
       { "name": "encounterCodeDisplay", "type": "String", "isAttr": true }
@@ -122,7 +128,7 @@
       { "name": "CarePlanStart" }, { "name": "CarePlanEnd" }, { "name": "Procedure" }, { "name": "ImagingStudy" },
       { "name": "Device" }, { "name": "DeviceEnd" }, { "name": "SupplyList" }, { "name": "VitalSign" },
       { "name": "Observation" }, { "name": "MultiObservation" }, { "name": "DiagnosticReport" }, { "name": "Symptom" },
-      { "name": "Death" }, { "name": "Physiology" }
+      { "name": "Death" }, { "name": "Physiology" }, { "name": "Vaccine" }
     ]},
     { "name": "StateTypeConfig", "superClass": ["Element"], "properties": [
       { "name": "stateType", "type": "StateType", "isAttr": true },
@@ -151,7 +157,47 @@
       { "name": "decimals", "type": "Integer", "isAttr": true }
     ]},
     { "name": "MedicationConfig", "superClass": ["Element"], "properties": [
-      { "name": "administration", "type": "Boolean", "isAttr": true, "default": false }
+      { "name": "administration", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "chronic", "type": "Boolean", "isAttr": true, "default": false }
+    ]},
+    { "name": "PrescriptionConfig", "superClass": ["Element"], "properties": [
+      { "name": "refills", "type": "Integer", "isAttr": true },
+      { "name": "asNeeded", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "dosageAmount", "type": "Real", "isAttr": true },
+      { "name": "dosageFrequency", "type": "Real", "isAttr": true },
+      { "name": "dosagePeriod", "type": "Real", "isAttr": true },
+      { "name": "dosageUnit", "type": "String", "isAttr": true },
+      { "name": "durationQuantity", "type": "Real", "isAttr": true },
+      { "name": "durationUnit", "type": "String", "isAttr": true }
+    ]},
+    { "name": "PrescriptionInstruction", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
+    ]},
+    { "name": "AllergyType", "isEnum": true, "literalValues": [ {"name": "allergy"}, {"name": "intolerance"} ]},
+    { "name": "AllergyCategory", "isEnum": true, "literalValues": [ {"name": "medication"}, {"name": "food"}, {"name": "environment"} ]},
+    { "name": "AllergyConfig", "superClass": ["Element"], "properties": [
+      { "name": "allergyType", "type": "AllergyType", "isAttr": true },
+      { "name": "category", "type": "AllergyCategory", "isAttr": true }
+    ]},
+    { "name": "AllergyReaction", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true },
+      { "name": "severityNone", "type": "Real", "isAttr": true },
+      { "name": "severityMild", "type": "Real", "isAttr": true },
+      { "name": "severityModerate", "type": "Real", "isAttr": true },
+      { "name": "severitySevere", "type": "Real", "isAttr": true }
+    ]},
+    { "name": "VitalSignConfig", "superClass": ["Element"], "properties": [
+      { "name": "vitalSign", "type": "String", "isAttr": true }
+    ]},
+    { "name": "SupplyItem", "superClass": ["Element"], "properties": [
+      { "name": "quantity", "type": "Integer", "isAttr": true },
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
+    ]},
+    { "name": "VaccineConfig", "superClass": ["Element"], "properties": [
+      { "name": "series", "type": "Integer", "isAttr": true }
     ]},
     { "name": "CarePlanActivity", "superClass": ["Element"], "properties": [
       { "name": "code", "type": "String", "isAttr": true },

@@ -3,7 +3,8 @@
 const SYSTEMS = {
   'http://snomed.info/sct': 'SNOMED-CT',
   'http://loinc.org': 'LOINC',
-  'http://www.nlm.nih.gov/research/umls/rxnorm': 'RxNorm'
+  'http://www.nlm.nih.gov/research/umls/rxnorm': 'RxNorm',
+  'http://hl7.org/fhir/sid/cvx': 'CVX'
 };
 
 export const systemName = (uri) => SYSTEMS[uri] ?? null;
@@ -25,7 +26,8 @@ export const SYSTEMS_BY_STATE_TYPE = {
   Observation: ['LOINC'],
   MultiObservation: ['LOINC'],
   DiagnosticReport: ['LOINC'],
-  Death: ['SNOMED-CT']
+  Death: ['SNOMED-CT'],
+  Vaccine: ['CVX']
 };
 
 // The code of a node: <synthea:stateTypeConfig codeSystem= code= codeDisplay= />.

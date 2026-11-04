@@ -17,6 +17,7 @@ export const REQUIRED_FIELDS = {
   MedicationOrder: ['codes'],
   CarePlanStart: ['codes'],
   Procedure: ['codes'],
+  Vaccine: ['codes'],
   ImagingStudy: ['procedure_code', 'series'],
   Device: ['code'],
   SupplyList: ['supplies'],

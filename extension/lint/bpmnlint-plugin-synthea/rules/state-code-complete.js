@@ -3,6 +3,7 @@ const { is } = require('../lib/utils');
 const SNOMED = 'http://snomed.info/sct';
 const LOINC = 'http://loinc.org';
 const RXNORM = 'http://www.nlm.nih.gov/research/umls/rxnorm';
+const CVX = 'http://hl7.org/fhir/sid/cvx';
 
 // The code systems each state type accepts (mirrors SYSTEMS_BY_STATE_TYPE in
 // tools/bpmn2gmf/codes.mjs). A state type that is not listed carries no code.
@@ -22,7 +23,8 @@ const SYSTEMS_BY_STATE_TYPE = {
   Observation: [LOINC],
   MultiObservation: [LOINC],
   DiagnosticReport: [LOINC],
-  Death: [SNOMED]
+  Death: [SNOMED],
+  Vaccine: [CVX]
 };
 
 /**

@@ -129,6 +129,7 @@ export function buildModule(process, fileBase, diag) {
       ext: extensionsOf(el),
       hasTimer: (el.eventDefinitions ?? []).some((d) => d.$type === 'bpmn:TimerEventDefinition'),
       link: linkOf(el),
+      hasMessage: (el.eventDefinitions ?? []).some((d) => d.$type === 'bpmn:MessageEventDefinition'),
       defaultFlow: el.default?.id ?? null,
       incoming: [],
       outgoing: []
@@ -207,6 +208,16 @@ export function buildModules(definitions, fileBase, diag) {
   const processes = (definitions.rootElements ?? []).filter((e) => e.$type === 'bpmn:Process');
   if (processes.length === 0) {
     diag.error('NO_PROCESS', 'The file contains no process.', { module: fileBase });
+  }
+  // Message flows run between pools. Each pool becomes a module of its own, and nothing calls
+  // another module through a message, so the flows are not converted. Say so instead of dropping them.
+  const messageFlows = (definitions.rootElements ?? []).flatMap((e) => (e.$type === 'bpmn:Collaboration' ? e.messageFlows ?? [] : []));
+  if (messageFlows.length) {
+    diag.warn(
+      'MESSAGE_FLOWS_IGNORED',
+      `${messageFlows.length} message flow(s) between pools are not converted. Each pool becomes a module of its own; to let one pathway hand over to another, call it with a call activity.`,
+      { module: fileBase }
+    );
   }
   const used = new Set();
   return processes.flatMap((p, i) => {

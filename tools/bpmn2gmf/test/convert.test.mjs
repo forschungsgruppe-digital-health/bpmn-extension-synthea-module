@@ -269,7 +269,7 @@ test('state types that are not supported at all say so', async () => {
   const { codes } = await run(
     start() + task('A', 'sim', stateType('Physiology')) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E')
   );
-  assert.ok(codes.includes('STATE_TYPE_NOT_IMPLEMENTED'));
+  assert.ok(codes.includes('PHYSIOLOGY_UNSUPPORTED'));
 });
 
 test('a missing transition target / dead end is reported by verify', async () => {
@@ -1476,4 +1476,183 @@ test('every encounter class Synthea knows can be used (hospice, home, snf, virtu
     if (wellness) assert.equal(encounter.wellness, true);
     else assert.equal(encounter.encounter_class, cls);
   }
+});
+
+test('Vaccine: the CVX code becomes codes, the dose number becomes series, and it needs an open encounter', async () => {
+  const CVX = 'http://hl7.org/fhir/sid/cvx';
+  const { module, diagnostics } = await run(
+    start() +
+      task('V', 'Administer Tdap', stateType('Vaccine') + coding(CVX, '115', 'Tdap vaccine') + '<synthea:vaccineConfig series="1"/>' + enc('W', '').replace('encounterClass="ambulatory"', 'wellness="true"')) +
+      end() + flow('f1', 'S', 'V') + flow('f2', 'V', 'E')
+  );
+  assert.deepEqual(errorCodes(diagnostics), []);
+  assert.deepEqual(module.json.states['Administer Tdap'].codes, [{ system: 'CVX', code: '115', display: 'Tdap vaccine' }]);
+  assert.equal(module.json.states['Administer Tdap'].series, 1);
+  assert.ok(Object.values(module.json.states).some((s) => s.type === 'Encounter'));
+  // a code from another system is not accepted for a vaccine
+  const wrong = await run(start() + task('V', 'v', stateType('Vaccine') + coding(SNOMED, '1', 'x') + enc('W', '')) + end() + flow('f1', 'S', 'V') + flow('f2', 'V', 'E'));
+  assert.ok(wrong.diagnostics.items.some((i) => i.code === 'CODING_IGNORED' && i.element === 'V'));
+  assert.ok(wrong.diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING' && /Vaccine/.test(i.message)));
+});
+
+test('pools: message flows are reported, and several start events say which and why', async () => {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" id="d" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn2:collaboration id="C">
+    <bpmn2:participant id="Pa" name="Patient" processRef="P1"/>
+    <bpmn2:participant id="Pb" name="Practice" processRef="P2"/>
+    <bpmn2:messageFlow id="M1" sourceRef="A" targetRef="MS"/>
+  </bpmn2:collaboration>
+  <bpmn2:process id="P1" name="Patient">
+    <bpmn2:startEvent id="S" name="Initial"/><bpmn2:task id="A" name="a"/><bpmn2:endEvent id="E" name="Terminal"/>
+    <bpmn2:sequenceFlow id="f1" sourceRef="S" targetRef="A"/><bpmn2:sequenceFlow id="f2" sourceRef="A" targetRef="E"/>
+  </bpmn2:process>
+  <bpmn2:process id="P2" name="Practice">
+    <bpmn2:startEvent id="S2" name="Initial"/>
+    <bpmn2:startEvent id="MS" name="Referral received"><bpmn2:messageEventDefinition/></bpmn2:startEvent>
+    <bpmn2:endEvent id="E2" name="Terminal"/>
+    <bpmn2:sequenceFlow id="g1" sourceRef="S2" targetRef="E2"/><bpmn2:sequenceFlow id="g2" sourceRef="MS" targetRef="E2"/>
+  </bpmn2:process>
+</bpmn2:definitions>`;
+  const { diagnostics } = await convert([{ path: 'pools.bpmn', xml }], {});
+  const items = diagnostics.items;
+  assert.ok(items.some((i) => i.code === 'MESSAGE_FLOWS_IGNORED' && i.level === 'warning'));
+  const initial = items.find((i) => i.code === 'INITIAL_COUNT');
+  assert.match(initial.message, /"Referral received" \(message\)/);
+  assert.match(initial.message, /call activity/);
+});
+
+// --- MedicationOrder: chronic and prescription ---
+const rx = (extra) =>
+  start() + task('M', 'Prescribe Examplitol', stateType('MedicationOrder') + coding(RXNORM, '123456', 'Examplitol') + enc('W', '') .replace('encounterClass="ambulatory"', 'wellness="true"') + extra) +
+  end() + flow('f1', 'S', 'M') + flow('f2', 'M', 'E');
+
+test('MedicationOrder: chronic, refills, as needed, dosage, duration and instructions', async () => {
+  const { module, diagnostics } = await run(rx(
+    '<synthea:medicationConfig chronic="true"/>' +
+    '<synthea:prescriptionConfig refills="2" asNeeded="true" dosageAmount="1" dosageFrequency="2" dosagePeriod="1" dosageUnit="days" durationQuantity="2" durationUnit="weeks"/>' +
+    '<synthea:prescriptionInstruction code="311501008" codeDisplay="Half to one hour before food"/>'
+  ));
+  assert.deepEqual(errorCodes(diagnostics), []);
+  const state = module.json.states['Prescribe Examplitol'];
+  assert.equal(state.chronic, true);
+  assert.deepEqual(state.prescription, {
+    refills: 2,
+    as_needed: true,
+    dosage: { amount: 1, frequency: 2, period: 1, unit: 'days' },
+    duration: { quantity: 2, unit: 'weeks' },
+    instructions: [{ system: 'SNOMED-CT', code: '311501008', display: 'Half to one hour before food' }]
+  });
+});
+
+test('MedicationOrder: nothing drawn writes neither prescription nor chronic; a half-filled dosage is an error', async () => {
+  const plain = (await run(rx(''))).module.json.states['Prescribe Examplitol'];
+  assert.ok(!('prescription' in plain) && !('chronic' in plain));
+  const asNeeded = (await run(rx('<synthea:prescriptionConfig asNeeded="true"/>'))).module.json.states['Prescribe Examplitol'];
+  assert.deepEqual(asNeeded.prescription, { as_needed: true });
+  const half = await run(rx('<synthea:prescriptionConfig dosageAmount="1" dosageUnit="days"/>'));
+  assert.ok(errorCodes(half.diagnostics).includes('PRESCRIPTION_INCOMPLETE'));
+  const nan = await run(rx('<synthea:prescriptionConfig durationQuantity="x" durationUnit="days"/>'));
+  assert.ok(errorCodes(nan.diagnostics).includes('PRESCRIPTION_INVALID'));
+  const instruction = await run(rx('<synthea:prescriptionInstruction code="1"/>'));
+  assert.ok(errorCodes(instruction.diagnostics).includes('PRESCRIPTION_INSTRUCTION_INCOMPLETE'));
+});
+
+test('telemedicinePossibility: written on the Encounter, optional, and the same on every member of the group', async () => {
+  const member = (id, telemedicine) =>
+    task(id, id, stateType('Procedure') + coding(SNOMED, '1', 'p') +
+      `<synthea:encounterContext requiresEncounterContext="true" encounterId="T" encounterClass="ambulatory" encounterCodeSystem="${SNOMED}" encounterCode="185345009" encounterCodeDisplay="Encounter"${telemedicine ? ` telemedicinePossibility="${telemedicine}"` : ''}/>`);
+  const model = (a, b) => start() + member('A', a) + member('B', b) + end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'B') + flow('f3', 'B', 'E');
+  const set = await run(model('possible', 'possible'));
+  assert.deepEqual(errorCodes(set.diagnostics), []);
+  assert.equal(Object.values(set.module.json.states).find((s) => s.type === 'Encounter').telemedicine_possibility, 'possible');
+  const unset = await run(model(undefined, undefined));
+  assert.ok(!('telemedicine_possibility' in Object.values(unset.module.json.states).find((s) => s.type === 'Encounter')));
+  assert.ok(errorCodes((await run(model('possible', 'none'))).diagnostics).includes('ENCOUNTER_INCONSISTENT'));
+});
+
+// --- AllergyOnset: type, category and reactions ---
+const allergy = (extra) =>
+  start() + task('A', 'Pet dander allergy', stateType('AllergyOnset') + coding(SNOMED, '264287008', 'Animal dander (substance)') + enc('W', '').replace('encounterClass="ambulatory"', 'wellness="true"') + extra) +
+  end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E');
+
+test('AllergyOnset: allergy_type, category and reactions with their severities', async () => {
+  const { module, diagnostics } = await run(allergy(
+    '<synthea:allergyConfig allergyType="allergy" category="environment"/>' +
+    '<synthea:allergyReaction code="49727002" codeDisplay="Cough (finding)" severityModerate="0.23" severityNone="0.77"/>' +
+    '<synthea:allergyReaction code="267036007" codeDisplay="Dyspnea (finding)" severityMild="0.2" severityNone="0.8"/>'
+  ));
+  assert.deepEqual(errorCodes(diagnostics), []);
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
+  const state = module.json.states['Pet dander allergy'];
+  assert.equal(state.allergy_type, 'allergy');
+  assert.equal(state.category, 'environment');
+  assert.deepEqual(state.reactions[0], {
+    reaction: { system: 'SNOMED-CT', code: '49727002', display: 'Cough (finding)' },
+    possible_severities: [{ level: 'moderate', value: 0.23 }, { level: 'none', value: 0.77 }]
+  });
+  assert.equal(state.reactions.length, 2);
+});
+
+test('AllergyOnset: without allergyConfig the state is reported incomplete; bad reactions are errors', async () => {
+  const bare = await run(allergy(''));
+  assert.ok(bare.diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING' && /allergy_type/.test(i.message)));
+  const reaction = (attrs) => run(allergy(`<synthea:allergyConfig allergyType="allergy" category="food"/><synthea:allergyReaction ${attrs}/>`));
+  assert.ok(errorCodes((await reaction('code="1"')).diagnostics).includes('REACTION_INCOMPLETE'));
+  assert.ok(errorCodes((await reaction('code="1" codeDisplay="x"')).diagnostics).includes('REACTION_SEVERITIES_MISSING'));
+  assert.ok(errorCodes((await reaction('code="1" codeDisplay="x" severityMild="1.5"')).diagnostics).includes('REACTION_SEVERITIES_INVALID'));
+  const sum = await reaction('code="1" codeDisplay="x" severityMild="0.3"');
+  assert.ok(sum.diagnostics.items.some((i) => i.code === 'REACTION_SEVERITIES_SUM' && i.level === 'warning'));
+});
+
+test('discharge disposition: a NUBC code on the encounter group is written on the EncounterEnd', async () => {
+  const model = (attrs) =>
+    start() + task('A', 'a', stateType('Procedure') + coding(SNOMED, '1', 'p') +
+      `<synthea:encounterContext requiresEncounterContext="true" encounterId="D" wellness="true"${attrs}/>`) +
+      end() + flow('f1', 'S', 'A') + flow('f2', 'A', 'E');
+  const set = await run(model(' dischargeCode="01" dischargeDisplay="Discharged to home care or self care (routine discharge)"'));
+  assert.deepEqual(errorCodes(set.diagnostics), []);
+  assert.deepEqual(Object.values(set.module.json.states).find((s) => s.type === 'EncounterEnd').discharge_disposition,
+    { system: 'NUBC', code: '01', display: 'Discharged to home care or self care (routine discharge)' });
+  const unset = await run(model(''));
+  assert.ok(!('discharge_disposition' in Object.values(unset.module.json.states).find((s) => s.type === 'EncounterEnd')));
+  assert.ok(errorCodes((await run(model(' dischargeCode="01"'))).diagnostics).includes('ENCOUNTER_DISCHARGE_INCOMPLETE'));
+});
+
+test('SupplyList: each supplyItem becomes one supply with a quantity and a SNOMED code', async () => {
+  const supplies = (items) =>
+    start() + task('S1', 'Necessary Supplies', stateType('SupplyList') + enc('W', '').replace('encounterClass="ambulatory"', 'wellness="true"') + items) +
+    end() + flow('f1', 'S', 'S1') + flow('f2', 'S1', 'E');
+  const { module, diagnostics } = await run(supplies(
+    '<synthea:supplyItem quantity="2" code="52291003" codeDisplay="Glove, device (physical object)"/>' +
+    '<synthea:supplyItem quantity="1" code="788177008" codeDisplay="Examination gown, single-use (physical object)"/>'
+  ));
+  assert.deepEqual(errorCodes(diagnostics), []);
+  assert.ok(!diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING'));
+  assert.deepEqual(module.json.states['Necessary Supplies'].supplies, [
+    { quantity: 2, code: { system: 'SNOMED-CT', code: '52291003', display: 'Glove, device (physical object)' } },
+    { quantity: 1, code: { system: 'SNOMED-CT', code: '788177008', display: 'Examination gown, single-use (physical object)' } }
+  ]);
+  assert.ok(errorCodes((await run(supplies('<synthea:supplyItem quantity="1" code="1"/>'))).diagnostics).includes('SUPPLY_ITEM_INCOMPLETE'));
+  assert.ok(errorCodes((await run(supplies('<synthea:supplyItem quantity="0" code="1" codeDisplay="x"/>'))).diagnostics).includes('SUPPLY_ITEM_INVALID'));
+});
+
+test('VitalSign: the name, a unit and an exact value or a range', async () => {
+  const sign = (extra) => start() + task('V', 'Set LVEF', stateType('VitalSign') + extra) + end() + flow('f1', 'S', 'V') + flow('f2', 'V', 'E');
+  const range = await run(sign('<synthea:vitalSignConfig vitalSign="Left ventricular Ejection fraction"/><synthea:valueConfig valueShape="RANGE" value="50" valueHigh="100"/>'));
+  assert.deepEqual(errorCodes(range.diagnostics), []);
+  assert.deepEqual(range.module.json.states['Set LVEF'], {
+    type: 'VitalSign', vital_sign: 'Left ventricular Ejection fraction', unit: '', range: { low: 50, high: 100 }, direct_transition: 'Terminal'
+  });
+  const exact = await run(sign('<synthea:vitalSignConfig vitalSign="Systolic Blood Pressure"/><synthea:valueConfig valueShape="EXACT" value="120" unit="mmHg"/>'));
+  assert.deepEqual([exact.module.json.states['Set LVEF'].unit, exact.module.json.states['Set LVEF'].exact], ['mmHg', { quantity: 120 }]);
+  // without a value the state is reported incomplete
+  const bare = await run(sign('<synthea:vitalSignConfig vitalSign="Systolic Blood Pressure"/>'));
+  assert.ok(bare.diagnostics.items.some((i) => i.code === 'REQUIRED_FIELD_MISSING' && /VitalSign/.test(i.message)));
+});
+
+test('Physiology is rejected with its own code, not as "not implemented"', async () => {
+  const { diagnostics } = await run(start() + task('PH', 'Sim', stateType('Physiology')) + end() + flow('f1', 'S', 'PH') + flow('f2', 'PH', 'E'));
+  assert.ok(errorCodes(diagnostics).includes('PHYSIOLOGY_UNSUPPORTED'));
+  assert.ok(!errorCodes(diagnostics).includes('STATE_TYPE_NOT_IMPLEMENTED'));
 });

@@ -51,7 +51,7 @@ const endsEncounter = (node) => BOUNDARY.has(node.stateType) || delayAtLeast(nod
 
 // States Synthea only processes during an encounter (States wiki).
 const REQUIRES_ENCOUNTER = new Set([
-  'MedicationOrder', 'CarePlanStart', 'Procedure', 'ImagingStudy', 'Device',
+  'MedicationOrder', 'CarePlanStart', 'Procedure', 'ImagingStudy', 'Device', 'Vaccine',
   'SupplyList', 'Observation', 'MultiObservation', 'DiagnosticReport'
 ]);
 
@@ -117,7 +117,8 @@ const reach = (start, next, allowed) => {
 };
 
 const signature = (g) => ({
-  wellness: g.wellness, encounterClass: g.encounterClass, reason: g.reason,
+  wellness: g.wellness, encounterClass: g.encounterClass, reason: g.reason, telemedicine: g.telemedicine,
+  dischargeCode: g.dischargeCode, dischargeDisplay: g.dischargeDisplay,
   codeSystem: g.codeSystem, code: g.code, codeDisplay: g.codeDisplay
 });
 
@@ -163,6 +164,9 @@ export function synthesizeEncounters(module, diag) {
       wellness: !!ctx.wellness,
       encounterClass: ctx.encounterClass || undefined,
       reason: ctx.reason || undefined,
+      telemedicine: ctx.telemedicinePossibility || undefined,
+      dischargeCode: ctx.dischargeCode || undefined,
+      dischargeDisplay: ctx.dischargeDisplay || undefined,
       codeSystem: ctx.encounterCodeSystem || undefined,
       code: ctx.encounterCode || undefined,
       codeDisplay: ctx.encounterCodeDisplay || undefined
@@ -173,12 +177,17 @@ export function synthesizeEncounters(module, diag) {
       groups.set(group.id, group);
     } else if (!group.inconsistent && JSON.stringify(attrs) !== JSON.stringify(signature(group))) {
       group.inconsistent = true;
-      diag.error('ENCOUNTER_INCONSISTENT', `Members of encounter "${group.id}" disagree on wellness / encounterClass / reason / code.`, where(node));
+      diag.error('ENCOUNTER_INCONSISTENT', `Members of encounter "${group.id}" disagree on wellness / encounterClass / reason / telemedicinePossibility / code / discharge.`, where(node));
     }
     group.members.add(node);
     node.group = group.id;
   }
-  for (const group of groups.values()) checkEncounterCode(group, [...group.members][0], diag, where);
+  for (const group of groups.values()) {
+    checkEncounterCode(group, [...group.members][0], diag, where);
+    if (!group.dischargeCode !== !group.dischargeDisplay) {
+      diag.error('ENCOUNTER_DISCHARGE_INCOMPLETE', `Encounter "${group.id}" needs dischargeCode and dischargeDisplay together (NUBC discharge disposition).`, where([...group.members][0]));
+    }
+  }
 
   if (!groups.size) {
     warnOutside();

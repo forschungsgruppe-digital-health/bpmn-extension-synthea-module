@@ -27,6 +27,15 @@ const OBSERVATION_TYPE = 'synthea:ObservationConfig';
 const VALUE_TYPE = 'synthea:ValueConfig';
 const SERIES_TYPE = 'synthea:ImagingStudySeries';
 const MEDICATION_TYPE = 'synthea:MedicationConfig';
+const VACCINE_TYPE = 'synthea:VaccineConfig';
+const SUPPLY_TYPE = 'synthea:SupplyItem';
+const VITAL_SIGN_TYPE = 'synthea:VitalSignConfig';
+const ALLERGY_TYPE = 'synthea:AllergyConfig';
+const ALLERGY_REACTION_TYPE = 'synthea:AllergyReaction';
+const ALLERGY_TYPE_VALUES = ['allergy', 'intolerance'];
+const ALLERGY_CATEGORY_VALUES = ['medication', 'food', 'environment'];
+const PRESCRIPTION_TYPE = 'synthea:PrescriptionConfig';
+const PRESCRIPTION_INSTRUCTION_TYPE = 'synthea:PrescriptionInstruction';
 const ACTIVITY_TYPE = 'synthea:CarePlanActivity';
 const SET_ATTRIBUTE_TYPE = 'synthea:SetAttributeConfig';
 const ASSIGN_TO_ATTRIBUTE_TYPE = 'synthea:AssignToAttributeConfig';
@@ -66,6 +75,7 @@ const PROBABILITY_KIND_FIELDS = {
 
 const OBSERVATION_CATEGORY_VALUES = ['vital-signs', 'laboratory', 'procedure', 'imaging', 'survey', 'exam', 'therapy', 'social-history'];
 
+const TELEMEDICINE_VALUES = ['none', 'possible', 'always'];
 const ENCOUNTER_CLASS_VALUES = ['wellness', 'ambulatory', 'emergency', 'urgentcare', 'inpatient', 'outpatient', 'hospice', 'home', 'snf', 'virtual'];
 
 const CONDITION_TYPE_VALUES = [
@@ -141,6 +151,12 @@ const CODE_SYSTEM_OPTIONS = [
   { value: 'http://www.nlm.nih.gov/research/umls/rxnorm', label: 'RxNorm' }
 ];
 
+// The code of a state can also be a vaccine (CVX); conditions and encounters take none.
+const STATE_CODE_SYSTEM_OPTIONS = [
+  ...CODE_SYSTEM_OPTIONS,
+  { value: 'http://hl7.org/fhir/sid/cvx', label: 'CVX (vaccines)' }
+];
+
 // The state types the converter accepts per kind of element (tools/bpmn2gmf/resolve.mjs,
 // ALLOWED_BY_KIND). Tasks and other events accept every state type.
 const TASK_EXCLUDED_STATE_TYPES = ['Initial', 'Terminal', 'CallSubmodule', 'Guard', 'Delay'];
@@ -163,7 +179,7 @@ const STATE_TYPE_VALUES = [
   'MedicationOrder', 'MedicationEnd', 'CarePlanStart',
   'CarePlanEnd', 'Procedure', 'ImagingStudy', 'Device', 'DeviceEnd',
   'Observation', 'MultiObservation', 'DiagnosticReport', 'Symptom',
-  'Death'
+  'Death', 'Vaccine', 'AllergyOnset', 'AllergyEnd', 'SupplyList', 'VitalSign'
 ];
 
 
@@ -341,7 +357,7 @@ function createSyntheaGroup(sections, element) {
 const CODED_STATE_TYPES = [
   'ConditionOnset', 'ConditionEnd', 'AllergyOnset', 'AllergyEnd', 'MedicationOrder', 'MedicationEnd',
   'CarePlanStart', 'CarePlanEnd', 'Procedure', 'ImagingStudy', 'Device', 'DeviceEnd',
-  'Observation', 'MultiObservation', 'DiagnosticReport', 'Death'
+  'Observation', 'MultiObservation', 'DiagnosticReport', 'Death', 'Vaccine'
 ];
 
 // State Type, followed by Code for the state types that carry one. A code that is already
@@ -551,6 +567,9 @@ function createEncounterContextGroup(element) {
     entries.push({ id: 'synthea-encounter-context-code-display', element, component: EncounterCodeDisplayEntry, isEdited: isTextFieldEntryEdited });
   }
 
+  entries.push({ id: 'synthea-encounter-context-telemedicine', element, component: EncounterTelemedicineEntry });
+  entries.push({ id: 'synthea-encounter-context-discharge-code', element, component: EncounterDischargeCodeEntry, isEdited: isTextFieldEntryEdited });
+  entries.push({ id: 'synthea-encounter-context-discharge-display', element, component: EncounterDischargeDisplayEntry, isEdited: isTextFieldEntryEdited });
   entries.push({ id: 'synthea-encounter-context-reason', element, component: EncounterReasonEntry, isEdited: isTextFieldEntryEdited });
 
   return {
@@ -1071,12 +1090,15 @@ const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'require
 const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
 const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter',
   ['encounterClass', 'encounterCodeSystem', 'encounterCode', 'encounterCodeDisplay']);
+const EncounterTelemedicineEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'telemedicinePossibility', 'Telemedicine possibility (optional)', TELEMEDICINE_VALUES);
+const EncounterDischargeCodeEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'dischargeCode', 'Discharge disposition: NUBC code (optional)');
+const EncounterDischargeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'dischargeDisplay', 'Discharge disposition: display text');
 const EncounterClassEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterClass', 'Encounter class (required for non-wellness encounters)', ENCOUNTER_CLASS_VALUES);
 const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Reason (attribute name or State_Name)');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
 const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
-const CodeSystemEntry = makeSelecetEntry(STATE_TYPE, 'codeSystem', 'Code system', CODE_SYSTEM_OPTIONS);
+const CodeSystemEntry = makeSelecetEntry(STATE_TYPE, 'codeSystem', 'Code system', STATE_CODE_SYSTEM_OPTIONS);
 const CodeValueEntry = makeTextEntry(STATE_TYPE, 'code', 'Code');
 const CodeDisplayEntry = makeTextEntry(STATE_TYPE, 'codeDisplay', 'Display text');
 const EncounterCodeSystemEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeSystem', 'Encounter code system (e.g. SNOMED CT)', CODE_SYSTEM_OPTIONS);
@@ -1101,10 +1123,34 @@ const SeriesSopClassCodeEntry = makeTextEntry(SERIES_TYPE, 'sopClassCode', 'SOP 
 const SeriesSopClassDisplayEntry = makeTextEntry(SERIES_TYPE, 'sopClassDisplay', 'SOP class display text');
 const SeriesMinInstancesEntry = makeTextEntry(SERIES_TYPE, 'minInstances', 'Min. number of instances (optional)', { parse: parseInt });
 const MedicationAdministrationEntry = makeCheckboxEntry(MEDICATION_TYPE, 'administration', 'Administered during the encounter (inpatient), not only prescribed');
+const MedicationChronicEntry = makeCheckboxEntry(MEDICATION_TYPE, 'chronic', 'Chronic (reissued at every wellness visit)');
+const PrescriptionRefillsEntry = makeTextEntry(PRESCRIPTION_TYPE, 'refills', 'Refills (default 0)', { parse: parseInt });
+const PrescriptionAsNeededEntry = makeCheckboxEntry(PRESCRIPTION_TYPE, 'asNeeded', 'As needed (not on a schedule)');
+const PrescriptionDosageAmountEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageAmount', 'Dosage: doses at a time', { parse: parseFloat });
+const PrescriptionDosageFrequencyEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageFrequency', 'Dosage: times per period', { parse: parseFloat });
+const PrescriptionDosagePeriodEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosagePeriod', 'Dosage: length of a period', { parse: parseFloat });
+const PrescriptionDosageUnitEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageUnit', 'Dosage: unit of the period (e.g. days)');
+const PrescriptionDurationQuantityEntry = makeTextEntry(PRESCRIPTION_TYPE, 'durationQuantity', 'Duration: how long', { parse: parseFloat });
+const PrescriptionDurationUnitEntry = makeTextEntry(PRESCRIPTION_TYPE, 'durationUnit', 'Duration: unit (e.g. weeks)');
+const PrescriptionInstructionCodeEntry = makeTextEntry(PRESCRIPTION_INSTRUCTION_TYPE, 'code', 'SNOMED code of the instruction');
+const PrescriptionInstructionDisplayEntry = makeTextEntry(PRESCRIPTION_INSTRUCTION_TYPE, 'codeDisplay', 'Display text of the instruction');
 const ActivityCodeEntry = makeTextEntry(ACTIVITY_TYPE, 'code', 'SNOMED code of the activity');
 const ActivityDisplayEntry = makeTextEntry(ACTIVITY_TYPE, 'codeDisplay', 'Display text of the activity');
 const SeriesMaxInstancesEntry = makeTextEntry(SERIES_TYPE, 'maxInstances', 'Max. number of instances (optional)', { parse: parseInt });
 
+const VitalSignNameEntry = makeTextEntry(VITAL_SIGN_TYPE, 'vitalSign', 'Vital sign (a Synthea vital sign, e.g. Systolic Blood Pressure)');
+const SupplyQuantityEntry = makeTextEntry(SUPPLY_TYPE, 'quantity', 'Quantity', { parse: parseInt });
+const SupplyCodeEntry = makeTextEntry(SUPPLY_TYPE, 'code', 'SNOMED code of the supply');
+const SupplyDisplayEntry = makeTextEntry(SUPPLY_TYPE, 'codeDisplay', 'Display text of the supply');
+const AllergyTypeEntry = makeSelecetEntry(ALLERGY_TYPE, 'allergyType', 'Allergy type (required)', ALLERGY_TYPE_VALUES);
+const AllergyCategoryEntry = makeSelecetEntry(ALLERGY_TYPE, 'category', 'Category (required)', ALLERGY_CATEGORY_VALUES);
+const ReactionCodeEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'code', 'SNOMED code of the reaction');
+const ReactionDisplayEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'codeDisplay', 'Display text of the reaction');
+const ReactionNoneEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityNone', 'Probability: no reaction', { parse: parseFloat });
+const ReactionMildEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityMild', 'Probability: mild', { parse: parseFloat });
+const ReactionModerateEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityModerate', 'Probability: moderate', { parse: parseFloat });
+const ReactionSevereEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severitySevere', 'Probability: severe', { parse: parseFloat });
+const SeriesEntry = makeTextEntry(VACCINE_TYPE, 'series', 'Series (dose number, optional)', { parse: parseInt });
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
 const SetAttributeKindEntry = makeKindSelectEntry(SET_ATTRIBUTE_TYPE, 'valueKind', 'Value as', [
   { value: 'VALUE', label: 'Fixed value' },
@@ -1156,7 +1202,15 @@ function createStateDetailGroups(element) {
     });
   }
 
-  if (type === 'Observation' || type === 'Symptom' || type === 'Death' || type === 'Procedure') {
+  if (type === 'VitalSign') {
+    groups.push({
+      id: 'synthea-vital-sign',
+      label: 'Vital sign',
+      entries: [{ id: 'synthea-vital-sign-name', element, component: VitalSignNameEntry, isEdited: isTextFieldEntryEdited }]
+    });
+  }
+
+  if (type === 'Observation' || type === 'Symptom' || type === 'Death' || type === 'Procedure' || type === 'VitalSign') {
     groups.push(createValueGroup(element, type));
   }
 
@@ -1164,7 +1218,58 @@ function createStateDetailGroups(element) {
     groups.push({
       id: 'synthea-medication',
       label: 'Medication',
-      entries: [{ id: 'synthea-medication-administration', element, component: MedicationAdministrationEntry }]
+      entries: [
+        { id: 'synthea-medication-administration', element, component: MedicationAdministrationEntry },
+        { id: 'synthea-medication-chronic', element, component: MedicationChronicEntry }
+      ]
+    });
+    groups.push(createPrescriptionGroup(element));
+  }
+
+  if (type === 'SupplyList') {
+    const edited = isTextFieldEntryEdited;
+    // One supply; further ones can be added in the XML (as for care plan activities).
+    groups.push({
+      id: 'synthea-supply',
+      label: 'Supply',
+      entries: [
+        { id: 'synthea-supply-quantity', element, component: SupplyQuantityEntry, isEdited: edited },
+        { id: 'synthea-supply-code', element, component: SupplyCodeEntry, isEdited: edited },
+        { id: 'synthea-supply-display', element, component: SupplyDisplayEntry, isEdited: edited }
+      ]
+    });
+  }
+
+  if (type === 'AllergyOnset') {
+    const edited = isTextFieldEntryEdited;
+    groups.push({
+      id: 'synthea-allergy',
+      label: 'Allergy',
+      entries: [
+        { id: 'synthea-allergy-type', element, component: AllergyTypeEntry },
+        { id: 'synthea-allergy-category', element, component: AllergyCategoryEntry }
+      ]
+    });
+    // One reaction; further ones can be added in the XML (as for care plan activities).
+    groups.push({
+      id: 'synthea-allergy-reaction',
+      label: 'Reaction',
+      entries: [
+        { id: 'synthea-reaction-code', element, component: ReactionCodeEntry, isEdited: edited },
+        { id: 'synthea-reaction-display', element, component: ReactionDisplayEntry, isEdited: edited },
+        { id: 'synthea-reaction-mild', element, component: ReactionMildEntry, isEdited: edited },
+        { id: 'synthea-reaction-moderate', element, component: ReactionModerateEntry, isEdited: edited },
+        { id: 'synthea-reaction-severe', element, component: ReactionSevereEntry, isEdited: edited },
+        { id: 'synthea-reaction-none', element, component: ReactionNoneEntry, isEdited: edited }
+      ]
+    });
+  }
+
+  if (type === 'Vaccine') {
+    groups.push({
+      id: 'synthea-vaccine',
+      label: 'Vaccine',
+      entries: [{ id: 'synthea-vaccine-series', element, component: SeriesEntry, isEdited: isTextFieldEntryEdited }]
     });
   }
 
@@ -1194,6 +1299,9 @@ function createValueGroup(element, type) {
 
   if (shape === 'RANGE') {
     entries.push({ id: 'synthea-value-high', element, component: ValueHighEntry, isEdited: isTextFieldEntryEdited });
+  }
+  if (type === 'VitalSign') {
+    entries.push({ id: 'synthea-value-unit', element, component: ValueUnitObservationEntry, isEdited: isTextFieldEntryEdited });
   }
   if (type === 'Observation') {
     entries.push({ id: 'synthea-value-unit', element, component: ValueUnitObservationEntry, isEdited: isTextFieldEntryEdited });
@@ -1254,6 +1362,27 @@ function createReportObservationsGroup(element) {
 }
 
 // One activity of a care plan; further activities can be added in the XML.
+// One instruction; further ones can be added in the XML (as for care plan activities).
+function createPrescriptionGroup(element) {
+  const edited = isTextFieldEntryEdited;
+  return {
+    id: 'synthea-prescription',
+    label: 'Prescription',
+    entries: [
+      { id: 'synthea-prescription-refills', element, component: PrescriptionRefillsEntry, isEdited: edited },
+      { id: 'synthea-prescription-as-needed', element, component: PrescriptionAsNeededEntry },
+      { id: 'synthea-prescription-dosage-amount', element, component: PrescriptionDosageAmountEntry, isEdited: edited },
+      { id: 'synthea-prescription-dosage-frequency', element, component: PrescriptionDosageFrequencyEntry, isEdited: edited },
+      { id: 'synthea-prescription-dosage-period', element, component: PrescriptionDosagePeriodEntry, isEdited: edited },
+      { id: 'synthea-prescription-dosage-unit', element, component: PrescriptionDosageUnitEntry, isEdited: edited },
+      { id: 'synthea-prescription-duration-quantity', element, component: PrescriptionDurationQuantityEntry, isEdited: edited },
+      { id: 'synthea-prescription-duration-unit', element, component: PrescriptionDurationUnitEntry, isEdited: edited },
+      { id: 'synthea-prescription-instruction-code', element, component: PrescriptionInstructionCodeEntry, isEdited: edited },
+      { id: 'synthea-prescription-instruction-display', element, component: PrescriptionInstructionDisplayEntry, isEdited: edited }
+    ]
+  };
+}
+
 function createCarePlanActivityGroup(element) {
   return {
     id: 'synthea-careplan-activity',

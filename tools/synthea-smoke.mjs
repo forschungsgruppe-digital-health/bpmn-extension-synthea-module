@@ -95,6 +95,7 @@ const run = spawnSync('java', [
   '-jar', jar, '-s', opt('seed', '7'), '-p', opt('population', '400'), '-a', opt('age', '45-65'),
   '-d', modulesDir, '-m', roots.join(delimiter),
   `--exporter.baseDirectory=${out}`, '--exporter.fhir.export=true',
+  '--exporter.years_of_history=0', // Synthea exports only the last 10 years by default, which hides early encounters
   '--exporter.hospital.fhir.export=false', '--exporter.practitioner.fhir.export=false', 'Massachusetts'
 ], { encoding: 'utf8', maxBuffer: 1 << 28 });
 const log = `${run.stdout}\n${run.stderr}`;

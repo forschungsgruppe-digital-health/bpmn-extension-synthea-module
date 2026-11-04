@@ -61,9 +61,13 @@ export function resolveStates(module, diag) {
   const used = new Set();
   const starts = [...module.nodes.values()].filter((n) => n.stateType === 'Initial');
   if (starts.length !== 1) {
+    const names = starts.map((s) => `"${s.label || s.id}"${s.hasMessage ? ' (message)' : ''}`).join(', ');
+    const hint = starts.some((s) => s.hasMessage)
+      ? ' A message start event is a separate entry point that GMF does not have: keep one start event and draw the hand-over as a normal flow, or call the other pathway with a call activity.'
+      : '';
     diag.error(
       'INITIAL_COUNT',
-      `A module needs exactly one start event, found ${starts.length}.`,
+      `A module needs exactly one start event, found ${starts.length}${starts.length ? `: ${names}` : ''}.${hint}`,
       { module: module.fileBase }
     );
   }

@@ -178,6 +178,68 @@ function distributionToGmf(c, ctx) {
 
 // ---- emitters: (node, ctx) -> fields, or ctx.report(...) for an error ---------
 
+// The reactions of an AllergyOnset (SNOMED CT). Each needs a code with its display and the probabilities
+// of its severities, which should add up to 1. Returns null after an error.
+const SEVERITIES = [['severityMild', 'mild'], ['severityModerate', 'moderate'], ['severitySevere', 'severe'], ['severityNone', 'none']];
+function readReactions(node, ctx) {
+  const out = [];
+  for (const r of node.ext['synthea:AllergyReaction'] ?? []) {
+    if (!r.code || !r.codeDisplay) return ctx.report('REACTION_INCOMPLETE', `allergyReaction "${r.code ?? r.codeDisplay ?? ''}" needs both code and codeDisplay.`);
+    const levels = SEVERITIES.filter(([prop]) => num(r[prop]) !== undefined).map(([prop, level]) => ({ level, value: num(r[prop]) }));
+    if (!levels.length) return ctx.report('REACTION_SEVERITIES_MISSING', `The reaction "${r.codeDisplay}" needs the probability of at least one severity (severityNone, severityMild, severityModerate, severitySevere).`);
+    if (levels.some((l) => Number.isNaN(l.value) || l.value < 0 || l.value > 1)) return ctx.report('REACTION_SEVERITIES_INVALID', `The severities of the reaction "${r.codeDisplay}" must be numbers between 0 and 1.`);
+    const sum = levels.reduce((n, l) => n + l.value, 0);
+    if (Math.abs(sum - 1) > 1e-6) {
+      ctx.warn('REACTION_SEVERITIES_SUM', `The severities of the reaction "${r.codeDisplay}" add up to ${Math.round(sum * 1e6) / 1e6}, not 1; add severityNone for the share without this reaction.`);
+    }
+    out.push({ reaction: { system: 'SNOMED-CT', code: r.code, display: r.codeDisplay }, possible_severities: levels });
+  }
+  return out;
+}
+
+// The prescription of a MedicationOrder. Returns undefined when none is drawn, null after an error.
+// A dosage and a duration are each all-or-nothing: a half-filled one would be a different prescription.
+function readPrescription(node, ctx) {
+  const p = first(node.ext, 'synthea:PrescriptionConfig');
+  const instructions = node.ext['synthea:PrescriptionInstruction'] ?? [];
+  if (!p && !instructions.length) return undefined;
+
+  const block = (name, fields) => {
+    const values = fields.map(([prop]) => p?.[prop]);
+    if (values.every((v) => v === undefined || v === '')) return undefined;
+    if (values.some((v) => v === undefined || v === '')) {
+      return ctx.report('PRESCRIPTION_INCOMPLETE', `The ${name} of a prescription needs all of ${fields.map(([prop]) => prop).join(', ')}.`);
+    }
+    const out = {};
+    for (const [prop, key, numeric] of fields) {
+      const value = numeric ? num(p[prop]) : p[prop];
+      if (numeric && Number.isNaN(value)) return ctx.report('PRESCRIPTION_INVALID', `${prop} must be a number.`);
+      out[key] = value;
+    }
+    return out;
+  };
+
+  const dosage = block('dosage', [['dosageAmount', 'amount', true], ['dosageFrequency', 'frequency', true], ['dosagePeriod', 'period', true], ['dosageUnit', 'unit', false]]);
+  const duration = block('duration', [['durationQuantity', 'quantity', true], ['durationUnit', 'unit', false]]);
+  if (dosage === null || duration === null) return null;
+
+  const coded = instructions.map((i) =>
+    i.code && i.codeDisplay
+      ? { system: 'SNOMED-CT', code: i.code, display: i.codeDisplay }
+      : ctx.report('PRESCRIPTION_INSTRUCTION_INCOMPLETE', `prescriptionInstruction "${i.code ?? i.codeDisplay ?? ''}" needs both code and codeDisplay.`));
+  if (coded.includes(null)) return null;
+
+  const refills = num(p?.refills);
+  if (Number.isNaN(refills)) return ctx.report('PRESCRIPTION_INVALID', 'refills must be a number.');
+  return {
+    ...(refills !== undefined ? { refills } : {}),
+    ...(p?.asNeeded ? { as_needed: true } : {}),
+    ...(dosage ? { dosage } : {}),
+    ...(duration ? { duration } : {}),
+    ...(coded.length ? { instructions: coded } : {})
+  };
+}
+
 const EMITTERS = {
   Initial: () => ({}),
   Terminal: () => ({}),
@@ -262,13 +324,36 @@ const EMITTERS = {
   // Start states: code + optional assign_to_attribute; target_encounter on
   // ConditionOnset/AllergyOnset is resolved against the synthesized encounters.
   ConditionOnset: onsetEmitter(true),
-  // Synthea also requires allergy_type and category; the extension has no fields for them,
-  // so verify reports them as missing (an error with --strict).
-  AllergyOnset: onsetEmitter(true),
+  // allergy_type and category come from synthea:AllergyConfig (Synthea requires both); each
+  // synthea:AllergyReaction becomes one entry of `reactions` with the probabilities of its severities.
+  AllergyOnset(node, ctx) {
+    const fields = onsetEmitter(true)(node, ctx);
+    if (!fields) return fields;
+    const config = first(node.ext, 'synthea:AllergyConfig');
+    const reactions = readReactions(node, ctx);
+    if (reactions === null) return null;
+    return {
+      ...fields,
+      ...(config?.allergyType ? { allergy_type: config.allergyType } : {}),
+      ...(config?.category ? { category: config.category } : {}),
+      ...(reactions.length ? { reactions } : {})
+    };
+  },
   // administration: the medication is given during the encounter (inpatient) instead of prescribed.
+  // administration: given during the encounter instead of prescribed; chronic: reissued at every wellness
+  // visit; prescription: dosage, duration, refills and instructions (all optional).
   MedicationOrder(node, ctx) {
     const fields = onsetEmitter(false)(node, ctx);
-    return fields && first(node.ext, 'synthea:MedicationConfig')?.administration ? { ...fields, administration: true } : fields;
+    if (!fields) return fields;
+    const config = first(node.ext, 'synthea:MedicationConfig');
+    const prescription = readPrescription(node, ctx);
+    if (prescription === null) return null;
+    return {
+      ...fields,
+      ...(config?.administration ? { administration: true } : {}),
+      ...(config?.chronic ? { chronic: true } : {}),
+      ...(prescription ? { prescription } : {})
+    };
   },
   // activities: SNOMED codes that describe the care plan (the code system is fixed).
   CarePlanStart(node, ctx) {
@@ -291,6 +376,12 @@ const EMITTERS = {
   Procedure(node, ctx) {
     const duration = readValue(node, ctx, 'duration');
     return { ...codesField(node, ctx), ...(duration ? duration.value : {}) };
+  },
+
+  // `series` is the dose number within the vaccine's series (optional).
+  Vaccine(node, ctx) {
+    const series = first(node.ext, 'synthea:VaccineConfig')?.series;
+    return { ...codesField(node, ctx), ...(series !== undefined ? { series } : {}) };
   },
 
   Observation(node, ctx) {
@@ -330,10 +421,17 @@ const EMITTERS = {
     return compact({
       ...(g.wellness ? { wellness: true } : { encounter_class: g.encounterClass }),
       reason: g.reason,
+      telemedicine_possibility: g.telemedicine,
       codes: g.code ? [{ system: g.codeSystem, code: g.code, display: g.codeDisplay }] : undefined
     });
   },
-  EncounterEnd: () => ({}),
+  // discharge_disposition: a NUBC code from the group's dischargeCode / dischargeDisplay (the system is fixed).
+  EncounterEnd(node) {
+    const g = node.synthetic.group;
+    return g.dischargeCode && g.dischargeDisplay
+      ? { discharge_disposition: { system: 'NUBC', code: g.dischargeCode, display: g.dischargeDisplay } }
+      : {};
+  },
 
   Symptom(node, ctx) {
     const name = first(node.ext, 'synthea:SymptomConfig')?.symptom;
@@ -343,8 +441,31 @@ const EMITTERS = {
 
   // Nothing in the extension carries these yet (see docs/bpmn2gmf-concept.md §5);
   // the missing required fields are reported by verify.
-  VitalSign: () => ({}),
-  SupplyList: () => ({}),
+  // A vital sign is only set in the patient, never recorded: its name (one of Synthea's vital signs), a
+  // unit ('' for none, as upstream does) and an exact value or a range, from synthea:ValueConfig.
+  VitalSign(node, ctx) {
+    const name = first(node.ext, 'synthea:VitalSignConfig')?.vitalSign;
+    const value = readValue(node, ctx, 'state');
+    if (!value && first(node.ext, 'synthea:ValueConfig')) return null; // the error is reported
+    return compact({ vital_sign: name, ...(value ? { unit: value.unit ?? '', ...value.value } : {}) });
+  },
+
+  // Runs a physiological model with a differential equation solver (1 state in 1 shipped module); it
+  // has no counterpart in a care pathway, and a second transition (alt_direct_transition) besides.
+  Physiology: (node, ctx) => ctx.report('PHYSIOLOGY_UNSUPPORTED', 'Physiology simulates a physiological model (solver, inputs, outputs, alt_direct_transition); it has no BPMN counterpart and is not converted. Write the module by hand if the simulation is needed.'),
+  // supplies: the items the encounter needs (SNOMED CT, the system is fixed), one synthea:SupplyItem each.
+  // None drawn: nothing is written and verify reports the missing `supplies`.
+  SupplyList(node, ctx) {
+    const items = node.ext['synthea:SupplyItem'] ?? [];
+    const supplies = items.map((i) => {
+      const quantity = num(i.quantity);
+      if (!i.code || !i.codeDisplay) return ctx.report('SUPPLY_ITEM_INCOMPLETE', `supplyItem "${i.code ?? i.codeDisplay ?? ''}" needs both code and codeDisplay.`);
+      if (!Number.isInteger(quantity) || quantity < 1) return ctx.report('SUPPLY_ITEM_INVALID', `supplyItem "${i.codeDisplay}" needs a quantity of at least 1.`);
+      return { quantity, code: { system: 'SNOMED-CT', code: i.code, display: i.codeDisplay } };
+    });
+    if (supplies.includes(null)) return null;
+    return supplies.length ? { supplies } : {};
+  },
 
   ConditionEnd: endState('ConditionOnset', 'condition_onset'),
   AllergyEnd: endState('AllergyOnset', 'allergy_onset'),
@@ -417,8 +538,15 @@ const CONFIG_READ_BY = {
   'synthea:ReferencedByAttributeConfig': ['ConditionEnd', 'AllergyEnd', 'MedicationEnd', 'CarePlanEnd', 'DeviceEnd', 'Death'],
   'synthea:SymptomConfig': ['Symptom'],
   'synthea:ObservationConfig': ['Observation', 'MultiObservation'],
-  'synthea:ValueConfig': ['Observation', 'Symptom', 'Death', 'Procedure'],
+  'synthea:ValueConfig': ['Observation', 'Symptom', 'Death', 'Procedure', 'VitalSign'],
+  'synthea:VitalSignConfig': ['VitalSign'],
   'synthea:MedicationConfig': ['MedicationOrder'],
+  'synthea:PrescriptionConfig': ['MedicationOrder'],
+  'synthea:PrescriptionInstruction': ['MedicationOrder'],
+  'synthea:VaccineConfig': ['Vaccine'],
+  'synthea:SupplyItem': ['SupplyList'],
+  'synthea:AllergyConfig': ['AllergyOnset'],
+  'synthea:AllergyReaction': ['AllergyOnset'],
   'synthea:CarePlanActivity': ['CarePlanStart'],
   'synthea:ImagingStudySeries': ['ImagingStudy'],
   'synthea:ReportObservation': ['DiagnosticReport', 'MultiObservation']
