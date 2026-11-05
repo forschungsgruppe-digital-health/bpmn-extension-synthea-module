@@ -41,6 +41,14 @@ The converted modules run in Synthea v4.0.0:
 
     npm run synthea:smoke -- <synthea-with-dependencies.jar>   # needs Java and the release jar, not part of `validate`
 
+`anemia-submodule.bpmn` is not a one-to-one copy of Synthea's `anemia/anemia_sub`:
+the original starts with an `EncounterEnd` because other modules (colorectal cancer,
+pregnancy, COPD, …) call it, ours leaves it out because the only caller,
+`synthea-lung-cancer.bpmn`, ends the visit before the call. Do not call it from
+another pathway without ending the encounter first. The tests in
+`tools/bpmn2gmf/test/structure.test.mjs` check this and that the treatment cycle
+never returns.
+
 The comparison with the hand-written lung cancer module of the Synthea project
 and the result of the runs (equal stay length, medication category, care plan
 activities, symptom behavior; what is left over) are in section 12 of the
