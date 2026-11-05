@@ -56,7 +56,7 @@ Veröffentlichung liegt bei den Autor:innen.
 |---|---|---|
 | **Moddle descriptor** | `extension/model/synthea.json` | The 20 `synthea:` types (and 10 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
 | **Properties panel** | `extension/src/` | One group "Synthea" in the bpmn-js properties panel, one collapsible section per type, showing only what fits the chosen State Type and what the converter accepts. |
-| **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 22 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. |
+| **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 23 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. See [docs/lint-rules.md](docs/lint-rules.md). |
 | **Converter** | `tools/bpmn2gmf/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
 | **Example pathway** | `lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
 | **Demo** | `demo/` | A bpmn-js modeler with the extension, for trying it by hand. Not published. |
@@ -184,6 +184,9 @@ the lung cancer files must pass. `npm run lint:invalid` is **expected to fail**:
 | [docs/modeling-guide.md](docs/modeling-guide.md) | How to model a pathway so it converts: what to draw, what to set in the panel |
 | [docs/implicit-rules.md](docs/implicit-rules.md) | The mapping rules BPMN → Synthea: nodes, edges, gateway chains |
 | [docs/bpmn2gmf-concept.md](docs/bpmn2gmf-concept.md) | The converter: pipeline, decisions, comparison with Synthea's lung cancer module |
+| [docs/converter-overview.md](docs/converter-overview.md) | What the converter does: options, the stages of the pipeline, the comparison with Synthea's modules |
+| [docs/validator-overview.md](docs/validator-overview.md) | What the validator does: the checks that `npm run validate` runs, in order |
+| [docs/lint-rules.md](docs/lint-rules.md) | The 23 lint rules in one table: ID, severity and what each one checks |
 | [docs/extension-matrix.md](docs/extension-matrix.md) | Which `synthea:` type sits on which BPMN element (panel and converter) |
 | [docs/synthea.md](docs/synthea.md) | Background: Synthea and its Generic Module Framework |
 | [docs/concepts.md](docs/concepts.md) | Background: what a BPMN extension is and how the pieces fit |
