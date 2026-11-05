@@ -1,7 +1,9 @@
 # Lung cancer pathway (real content)
 
 The five `.bpmn` files in this folder are the real Synthea lung-cancer patient
-pathway — not test fixtures. `synthea-lung-cancer.bpmn` is the top-level
+pathway — not test fixtures. They are modeled after the Synthea modules
+(Apache-2.0, Copyright The MITRE Corporation and the Synthea contributors; license and notices in
+[`tools/bpmn2gmf/test/upstream/`](../tools/bpmn2gmf/test/upstream/NOTICE.md)). `synthea-lung-cancer.bpmn` is the top-level
 module; the other four are its submodules, called via `bpmn:callActivity`
 (`calledElement` pointing at each file's own process id):
 

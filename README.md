@@ -217,7 +217,10 @@ If you use this software, please cite it using the metadata in [CITATION.cff](CI
 [MIT](LICENSE).
 
 The hand-written Synthea modules used as test references in `tools/bpmn2gmf/test/upstream/` are
-Apache-2.0 licensed; see the `NOTICE.md` there.
+Apache-2.0 licensed (Copyright The MITRE Corporation and the Synthea contributors); the license text and
+Synthea's notices on RxNorm, LOINC and SNOMED CT are in `LICENSE` and `NOTICE.md` there. The pathway
+models in `lung-cancer/` and the files in `tools/bpmn2gmf/test/golden/` are modeled after and generated
+from these Synthea modules, so the same notices apply to them.
 
 The demo uses [bpmn-js](https://github.com/bpmn-io/bpmn-js), which is MIT licensed with one additional
 condition: the bpmn.io watermark must not be removed or hidden in any application that uses it. See
