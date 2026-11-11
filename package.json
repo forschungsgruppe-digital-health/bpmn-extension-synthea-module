@@ -39,7 +39,9 @@
     "compare:upstream": "node tools/bpmn2gmf/compare-upstream.mjs",
     "compare:structure": "node tools/bpmn2gmf/compare-structure.mjs",
     "synthea:smoke": "node tools/synthea-smoke.mjs",
-    "validate": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run xsd:gen:check && npm run xsd:ext && npm run conventions && npm run test:bpmn2gmf && npm run convert:check && npm run compare:structure",
+    "schema:gen": "node tools/bpmn2gmf/gen-schema.mjs",
+    "schema:gen:check": "node tools/bpmn2gmf/gen-schema.mjs --check",
+    "validate": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run xsd:gen:check && npm run xsd:ext && npm run conventions && npm run schema:gen:check && npm run test:bpmn2gmf && npm run convert:check && npm run compare:structure",
     "demo": "npm --prefix demo run dev",
     "demo:build": "npm --prefix demo run build"
   },
@@ -54,6 +56,7 @@
     "bpmn-js-properties-panel": { "optional": true }
   },
   "devDependencies": {
+    "ajv": "^8.20.0",
     "bpmn-moddle": "^9.0.1",
     "bpmnlint": "^11.0.0",
     "bpmn-js-properties-panel": "^5.30.0"
