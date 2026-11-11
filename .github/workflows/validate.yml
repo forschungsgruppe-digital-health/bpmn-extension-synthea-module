@@ -21,9 +21,11 @@ jobs:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
-      - name: Lint valid examples (must pass)
-        run: npm run lint:valid
+      # One list of checks: package.json, script "validate". Do not repeat its steps here.
+      - name: Validate (npm run validate)
+        run: npm run validate
 
+      # Not part of "validate": the files in examples/invalid/ must keep failing.
       - name: Lint invalid examples (negative test, must fail)
         run: |
           if npm run lint:invalid; then
@@ -32,27 +34,3 @@ jobs:
           else
             echo "invalid examples correctly rejected"
           fi
-
-      - name: Moddle round-trip
-        run: npm run roundtrip
-
-      - name: XSD core conformance
-        run: npm run xsd
-
-      - name: Extension XSD up to date (drift guard)
-        run: npm run xsd:gen:check
-
-      - name: XSD extension conformance (BPMN core + extension)
-        run: npm run xsd:ext
-
-      - name: Package conventions
-        run: npm run conventions
-
-      - name: BPMN to Synthea converter tests
-        run: npm run test:bpmn2gmf
-
-      - name: Real pathways convert completely (strict)
-        run: npm run convert:check
-
-      - name: Real pathways have the same logic as the Synthea modules
-        run: npm run compare:structure
