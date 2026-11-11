@@ -24,7 +24,9 @@ module.exports = {
         'synthea/careplan-activity-requires-code-and-display': 'warn',
         'synthea/state-code-complete': 'warn',
         'synthea/alternatives-not-mixed': 'warn',
-        'synthea/inclusive-branches-require-condition-or-probability': 'warn'
+        'synthea/inclusive-branches-require-condition-or-probability': 'warn',
+        'synthea/unique-element-names': 'error',
+        'synthea/exclusive-gateway-requires-default-flow': 'error'
       }
     }
   },
@@ -51,6 +53,8 @@ module.exports = {
     'careplan-activity-requires-code-and-display': './rules/careplan-activity-requires-code-and-display',
     'state-code-complete': './rules/state-code-complete',
     'alternatives-not-mixed': './rules/alternatives-not-mixed',
-    'inclusive-branches-require-condition-or-probability': './rules/inclusive-branches-require-condition-or-probability'
+    'inclusive-branches-require-condition-or-probability': './rules/inclusive-branches-require-condition-or-probability',
+    'unique-element-names': './rules/unique-element-names',
+    'exclusive-gateway-requires-default-flow': './rules/exclusive-gateway-requires-default-flow'
   }
 };

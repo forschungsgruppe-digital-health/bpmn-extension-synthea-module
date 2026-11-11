@@ -14,7 +14,8 @@
 // What is treated as the same on purpose (see norm() and tcmp()):
 //   a 1 day Delay as `exact` or as an EXACT distribution, a Counter without `amount` and with 1,
 //   codes as number or text, mutually exclusive tests of one attribute in another order,
-//   an explicit `Gender M` test and a default branch behind `Gender F`.
+//   an explicit `Gender M` test and a default branch behind `Gender F`, likewise the second of two
+//   `attribute == value` tests of one attribute (lung cancer type SCLC / NSCLC).
 //
 // A state may be paired with several upstream states (upstream often writes the same logic twice,
 // we write it once behind a test of the attribute); conditions that a path already decided
@@ -211,15 +212,21 @@ export function compareStructure(gu, go, { bypassUpstream = [], callNames = {}, 
       let cu = cu0;
       const [co, so] = bo[i];
       const prev = i ? bu[i - 1][0] : null;
-      if (tu.k === 'cond' && co === null && cu?.condition_type === 'Gender' && prev?.condition_type === 'Gender' && prev.gender !== cu.gender) {
-        accept('explicit Gender test (upstream) vs default branch (ours) behind the other gender');
+      const otherGender = cu?.condition_type === 'Gender' && prev?.condition_type === 'Gender' && prev.gender !== cu.gender;
+      const otherValue = tu.b.length === 2 && cu?.condition_type === 'Attribute' && prev?.condition_type === 'Attribute' &&
+        cu.operator === '==' && prev.operator === '==' && cu.attribute === prev.attribute && cu.value !== prev.value;
+      if (tu.k === 'cond' && co === null && (otherGender || otherValue)) {
+        accept(otherGender
+          ? 'explicit Gender test (upstream) vs default branch (ours) behind the other gender'
+          : 'explicit test of the second value (upstream) vs default branch (ours) behind the first, in a split of two');
         cu = null;
       }
       if (!tryEq(cu, co, tu.k === 'dist' ? 'distribution' : undefined)) {
         probs.push(`${path}/${tu.k}[${i}]: ${tu.k === 'dist' ? 'probability' : 'condition'} ${short(cu, 90)} vs ${short(co, 90)}`);
         return;
       }
-      const f = tu.k === 'cond' ? fact(cu) : null;
+      // the path decided this test on the upstream side even where ours reaches it as the default branch
+      const f = tu.k === 'cond' ? fact(cu0) : null;
       probs.push(...tcmp(su, so, f ? { ...facts, [f[0]]: f[1] } : facts, `${path}/${tu.k}[${i}]`, out));
     });
     return probs;

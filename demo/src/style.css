@@ -46,7 +46,8 @@ body {
   background: #fff;
 }
 
-.toolbar button {
+.toolbar button,
+.cp-head button {
   padding: 5px 12px;
   border: 1px solid #1a5dab;
   background: #1a5dab;
@@ -56,7 +57,8 @@ body {
   font-size: 13px;
 }
 
-.toolbar button:hover {
+.toolbar button:hover,
+.cp-head button:hover {
   background: #154a89;
 }
 
@@ -78,3 +80,46 @@ body {
   overflow: auto;
   background: #fff;
 }
+
+.toolbar .primary {
+  background: #2e7d32;
+}
+
+#converter-panel {
+  position: fixed;
+  inset: 0;
+  top: var(--toolbar-h, 56px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  z-index: 200;
+}
+#converter-panel[hidden] { display: none; }
+.cp-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #ccc;
+  background: #fafafa;
+  font-size: 13px;
+}
+.cp-head .spacer { flex: 1; }
+.cp-head .hint { color: #555; }
+#cp-tabs button { background: #fff; color: #333; border: 1px solid #ccc; padding: 3px 10px; }
+#cp-tabs button.active { background: #1a5dab; color: #fff; border-color: #1a5dab; }
+.cp-head select { font-size: 13px; padding: 3px; max-width: 22rem; }
+#cp-body { flex: 1; overflow: auto; background: #f7f8fa; }
+.cp-graph { padding: 12px; }
+.cp-json { margin: 0; padding: 14px; font: 12px/1.5 ui-monospace, monospace; }
+.cp-messages { padding: 14px; max-width: 60rem; font-size: 13px; line-height: 1.5; }
+.cp-messages section { background: #fff; border: 1px solid #ddd; border-left-width: 4px; border-radius: 4px; padding: 8px 14px; margin-bottom: 12px; }
+.cp-messages section.error { border-left-color: #b00020; }
+.cp-messages section.warning { border-left-color: #b26a00; }
+.cp-messages section.note { border-left-color: #1a5dab; }
+.cp-messages h3 { margin: 0 0 6px; font: 600 12px ui-monospace, monospace; }
+.cp-messages dl { margin: 0 0 6px; }
+.cp-messages dt { font-weight: 600; margin-top: 4px; }
+.cp-messages dd { margin: 0; }
+.cp-messages ul { margin: 6px 0 0; padding-left: 18px; color: #444; font: 12px/1.5 ui-monospace, monospace; }
+.cp-note { padding: 14px; }

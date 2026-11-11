@@ -6,7 +6,7 @@ A one-page overview of `npm run validate`. The exit code is the decision; do not
 
 | # | Check | Command and files | What it covers |
 |---|---|---|---|
-| 1 | Lint | `lint:valid`: `extension/lint/bpmnlint-plugin-synthea/` (`index.js`, `lib/utils.js`, `rules/*.js`), configured by `.bpmnlintrc`, reads the descriptor `extension/model/synthea.json` | the 23 semantic rules for the `synthea:` data in `examples/valid/` and `lung-cancer/`; every rule is in [lint-rules.md](lint-rules.md) |
+| 1 | Lint | `lint:valid`: `extension/lint/bpmnlint-plugin-synthea/` (`index.js`, `lib/utils.js`, `rules/*.js`), configured by `.bpmnlintrc`, reads the descriptor `extension/model/synthea.json` | the 25 semantic rules for the `synthea:` data in `examples/valid/` and `lung-cancer/`; every rule is in [lint-rules.md](lint-rules.md) |
 | 2 | Round trip | `roundtrip`: `tools/moddle-roundtrip.mjs` | every example goes through `bpmn-moddle` and back; nothing may be lost and no warning may appear. This is the check that really covers `<extensionElements>` |
 | 3 | XSD, core | `xsd`: `tools/validate-xsd.sh` | BPMN structure against the official BPMN 2.0 schema. Extension elements are not covered |
 | 4 | XSD, extension | `xsd:gen:check`: `tools/moddle-to-xsd.mjs --check` (generates `extension/model/synthea.xsd`); `xsd:ext`: `tools/validate-xsd-ext.mjs` | a schema generated from the moddle descriptor (the single source); `--check` fails if the stored schema has drifted. Structure only, the lint covers meaning |
@@ -31,10 +31,14 @@ A one-page overview of `npm run validate`. The exit code is the decision; do not
 | `schema.test.mjs` | the schema is not stale, accepts the converted `lung-cancer/` modules and the upstream modules, rejects eleven broken modules, and agrees with `missingFields()` for every state type |
 | `verify-flow.test.mjs` | the order checks of `verify-flow.mjs` on plain module JSON: one module that passes and one that is reported per rule |
 | `compare.test.mjs`, `structure.test.mjs` | negative tests: the comparisons must report real differences |
+| `lint-model-rules.test.mjs` | the lint rules `unique-element-names` and `exclusive-gateway-requires-default-flow`, run through the real bpmnlint CLI |
+| `explanations.test.mjs` | every note and warning the converter can emit has an explanation (`explanations.mjs`) |
+| `browser-parity.test.mjs` | the converter bundled for the browser gives the same modules and messages as Node and the command line |
 
 ## Not part of `validate`
 
 - `npm run synthea:smoke` (`tools/synthea-smoke.mjs`) starts the real Synthea engine (needs Java and `synthea-with-dependencies.jar`) and fails if Synthea cannot load a module or find a submodule.
+- `npm run check:pages` (`tools/check-pages-build.mjs`) builds the demo and the converter result with the Pages base path and checks the site before a deploy: asset paths under `/<repo>/`, all linked files present, no conversion errors, and `build.json` with the commit. The Pages workflow runs the same check before it deploys.
 - `npm run check:attributes` (`tools/check-attribute-usage.mjs`) lists which attribute names occur in which files. Synthea attributes have no namespace: the same name in two modules is the same attribute.
 
 ## Order checks (Level 1) and how often they fire on Synthea's own modules

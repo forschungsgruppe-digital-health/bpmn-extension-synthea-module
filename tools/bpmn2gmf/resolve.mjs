@@ -83,7 +83,7 @@ export function resolveStates(module, diag) {
     let name = node.label.trim() || `${node.stateType}_${node.id}`;
     if (used.has(name)) {
       const unique = `${name}_${node.id}`;
-      diag.note('STATE_NAME_DUPLICATE', `State name "${name}" is already used; renamed to "${unique}".`, where(node));
+      diag.warn('STATE_NAME_DUPLICATE', `State name "${name}" is already used; renamed to "${unique}" (lint rule unique-element-names).`, where(node));
       name = unique;
     }
     used.add(name);

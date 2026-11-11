@@ -59,11 +59,16 @@ export function buildTransition(node, module, diag) {
       return { transition: target(e), distribution };
     });
     // With probabilities that come from attributes the sum is only known at run time. Synthea
-    // gives whatever is left to the LAST branch, so the order of the flows matters.
-    if (ordered.some((e) => e.probability?.probabilityAttribute)) {
+    // gives whatever is left to the LAST branch, so the order of the flows matters, and a value
+    // on the last branch itself is never used. Say so only then: a last branch without a value
+    // is the remainder by design.
+    const last = ordered[ordered.length - 1];
+    const own = last.probability;
+    if (ordered.some((e) => e.probability?.probabilityAttribute) && own) {
+      const unused = own.probabilityAttribute ? `its own attribute "${own.probabilityAttribute}"` : `its own probability ${own.probability}`;
       diag.note(
         'DISTRIBUTION_REMAINDER',
-        `Probabilities from attributes: the last branch (${target(ordered[ordered.length - 1])}) receives whatever the others leave, so list the branch whose probability is the attribute's value before it.`,
+        `Probabilities from attributes: the last branch (${target(last)}) receives whatever the others leave, so ${unused} is not used.`,
         where
       );
     }
@@ -94,9 +99,9 @@ export function buildTransition(node, module, diag) {
       return { condition, transition: target(e) };
     });
     if (!fallbacks.length) {
-      diag.note(
+      diag.warn(
         'TRANSITION_NO_FALLBACK',
-        'No fallback branch: if no condition matches, Synthea transitions to its default Terminal.',
+        'No fallback branch: if no condition matches, Synthea transitions to its default Terminal (lint rule exclusive-gateway-requires-default-flow).',
         where
       );
     }

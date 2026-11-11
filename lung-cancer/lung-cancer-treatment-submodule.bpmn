@@ -304,9 +304,6 @@
     <bpmn2:sequenceFlow id="Flow_typeA1_nsclc" name="Lung Cancer Type == NSCLC" sourceRef="Gateway_typeA1" targetRef="Activity_11qamf8">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
-        <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
-        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_04aexph" sourceRef="Activity_1wt86vs" targetRef="Activity_108zv05" />
@@ -354,9 +351,6 @@
     <bpmn2:sequenceFlow id="Flow_typeB1_nsclc" name="Lung Cancer Type == NSCLC" sourceRef="Gateway_typeB1" targetRef="Event_1fph9zh">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
-        <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
-        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0t3aexs" sourceRef="Event_1rh9fit" targetRef="Gateway_typeB2" />

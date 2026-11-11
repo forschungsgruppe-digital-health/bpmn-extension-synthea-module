@@ -13,14 +13,14 @@
             "condition_type": "Gender",
             "gender": "F"
           },
-          "transition": "Type of smoker/ nonsmoker"
+          "transition": "Type of smoker/ nonsmoker (female)"
         },
         {
-          "transition": "Type of smoker/ nonsmoker_Gateway_08b83gc"
+          "transition": "Type of smoker/ nonsmoker (male)"
         }
       ]
     },
-    "Type of smoker/ nonsmoker": {
+    "Type of smoker/ nonsmoker (female)": {
       "type": "Simple",
       "conditional_transition": [
         {
@@ -45,7 +45,7 @@
         }
       ]
     },
-    "Type of smoker/ nonsmoker_Gateway_08b83gc": {
+    "Type of smoker/ nonsmoker (male)": {
       "type": "Simple",
       "conditional_transition": [
         {

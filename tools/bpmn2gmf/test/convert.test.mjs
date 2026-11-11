@@ -91,6 +91,31 @@ test('distributed_transition with probabilityAttribute', async () => {
   });
 });
 
+const remainderNote = async (a, b) => {
+  const { diagnostics } = await run(
+    start() + gateway('G', 'split') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('x', '2')) + end() +
+    flow('f1', 'S', 'G') + flow('f2', 'G', 'A', a) + flow('f3', 'G', 'B', b) + flow('f4', 'A', 'E') + flow('f5', 'B', 'E')
+  );
+  return diagnostics.items.filter((i) => i.code === 'DISTRIBUTION_REMAINDER').map((i) => i.message);
+};
+const attr = (name, d) => `<synthea:probabilityConfig probabilityAttribute="${name}" probabilityDefault="${d}"/>`;
+
+test('DISTRIBUTION_REMAINDER names the unused attribute of the last branch', async () => {
+  const notes = await remainderNote(attr('p', 0.1), attr('p_none', 0.9));
+  assert.equal(notes.length, 1);
+  assert.match(notes[0], /last branch \(b\) receives whatever the others leave, so its own attribute "p_none" is not used/);
+});
+
+test('DISTRIBUTION_REMAINDER names an unused fixed probability on the last branch', async () => {
+  const notes = await remainderNote(attr('p', 0.1), prob('0.9'));
+  assert.match(notes[0], /its own probability 0\.9 is not used/);
+});
+
+test('no DISTRIBUTION_REMAINDER when the last branch has no value of its own, or nothing comes from an attribute', async () => {
+  assert.deepEqual(await remainderNote(attr('p', 0.1), ''), []);
+  assert.deepEqual(await remainderNote(prob('0.1'), prob('0.9')), []);
+});
+
 test('conditional_transition: default flow goes last, negate becomes Not', async () => {
   const { module, diagnostics } = await run(
     start() + gateway('G', 'smoker?', 'fDefault') + task('A', 'a', setAttr('x', '1')) + task('B', 'b', setAttr('x', '2')) + end() +

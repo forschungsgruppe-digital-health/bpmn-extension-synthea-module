@@ -10,6 +10,7 @@ import {
   BpmnPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 
+import { initConverterPanel } from './converter-panel.js';
 import syntheaModule from '../../extension/src/index.js';
 import syntheaModdle from '../../extension/model/synthea.json';
 
@@ -140,3 +141,12 @@ document.querySelector('#download').addEventListener('click', async () => {
 });
 
 openDiagram(currentPathway.xml);
+
+initConverterPanel({
+  getXml: async () => (await modeler.saveXML({ format: true })).xml,
+  getCurrent: () => currentPathway,
+  pathways: PATHWAYS
+});
+
+// The static converter result (modules/) only exists in the built site, not under `vite dev`.
+if (import.meta.env.DEV) document.querySelector('#converter-result').hidden = true;

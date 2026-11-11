@@ -48,6 +48,18 @@ Problems are collected by `diagnostics.mjs` on three levels: **errors** stop a m
 
 The reference is the module set of Synthea master in `tools/bpmn2gmf/test/upstream/`.
 
+## Try it without a checkout
+
+- **Convert to Synthea** in the demo (`npm run demo`, or the published site) runs this converter in the
+  browser on the open diagram: graph of the states and transitions, JSON, and the messages grouped by
+  kind with an explanation (`tools/bpmn2gmf/explanations.mjs`). It is the same code as the command line;
+  `test/browser-parity.test.mjs` bundles the converter for the browser and checks that it gives the same
+  modules and messages, which also fails on any Node-only import in the core.
+- **Converter result** (`modules/` on the published site, `npm run convert:site` locally) lists the
+  JSON modules and the report that `tools/build-converter-site.mjs` made from `lung-cancer/`, with
+  `build.json` (the commit it was built from). The Pages workflow runs it after the demo build and
+  `tools/check-pages-build.mjs` before the deploy.
+
 ## Related
 
 - [validator-overview.md](validator-overview.md): the checks that `npm run validate` runs, including the converter tests, `convert:check` and `compare:structure`.

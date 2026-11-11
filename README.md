@@ -79,6 +79,12 @@ The demo lists the five pathway files of `lung-cancer/` in a dropdown. Click an 
 group "Synthea" in the properties panel. A change in the panel stays in the browser (**Reload** brings
 the original back); **Download .bpmn** saves it.
 
+**Convert to Synthea** runs the converter in the browser on the diagram that is open, with the edits
+you made, and shows the Synthea module as a graph, as JSON and as messages (each kind of message
+comes with an explanation and what to do), with a download of the JSON. On the published site
+(GitHub Pages, rebuilt on every merge into `dev`) the link **Converter result** opens the modules and
+the report that the converter made from `lung-cancer/` at that merge, with the commit they come from.
+
 To use the extension in your own bpmn-js modeler, register the module and the moddle descriptor
 (this is what `demo/src/main.js` does):
 
@@ -186,7 +192,7 @@ the lung cancer files must pass. `npm run lint:invalid` is **expected to fail**:
 | [docs/bpmn2gmf-concept.md](docs/bpmn2gmf-concept.md) | The converter: pipeline, decisions, comparison with Synthea's lung cancer module |
 | [docs/converter-overview.md](docs/converter-overview.md) | What the converter does: options, the stages of the pipeline, the comparison with Synthea's modules |
 | [docs/validator-overview.md](docs/validator-overview.md) | What the validator does: the checks that `npm run validate` runs, in order |
-| [docs/lint-rules.md](docs/lint-rules.md) | The 23 lint rules in one table: ID, severity and what each one checks |
+| [docs/lint-rules.md](docs/lint-rules.md) | The 25 lint rules in one table: ID, severity and what each one checks |
 | [docs/extension-matrix.md](docs/extension-matrix.md) | Which `synthea:` type sits on which BPMN element (panel and converter) |
 | [docs/synthea.md](docs/synthea.md) | Background: Synthea and its Generic Module Framework |
 | [docs/concepts.md](docs/concepts.md) | Background: what a BPMN extension is and how the pieces fit |

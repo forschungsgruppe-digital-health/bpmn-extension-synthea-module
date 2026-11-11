@@ -35,6 +35,7 @@
     "check:attributes": "node tools/check-attribute-usage.mjs",
     "bpmn2gmf": "node tools/bpmn2gmf/cli.mjs",
     "test:bpmn2gmf": "node --test \"tools/bpmn2gmf/test/*.test.mjs\"",
+    "convert:site": "node tools/build-converter-site.mjs lung-cancer --out-dir demo/dist/modules",
     "convert:check": "node tools/bpmn2gmf/cli.mjs lung-cancer --check --strict",
     "compare:upstream": "node tools/bpmn2gmf/compare-upstream.mjs",
     "compare:structure": "node tools/bpmn2gmf/compare-structure.mjs",
@@ -43,6 +44,7 @@
     "schema:gen:check": "node tools/bpmn2gmf/gen-schema.mjs --check",
     "validate": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run xsd:gen:check && npm run xsd:ext && npm run conventions && npm run schema:gen:check && npm run test:bpmn2gmf && npm run convert:check && npm run compare:structure",
     "demo": "npm --prefix demo run dev",
+    "check:pages": "BASE_PATH=/bpmn-extension-synthea-module/ npm --prefix demo run build && npm run convert:site && node tools/check-pages-build.mjs demo/dist /bpmn-extension-synthea-module/",
     "demo:build": "npm --prefix demo run build"
   },
   "peerDependencies": {
@@ -58,6 +60,7 @@
   "devDependencies": {
     "ajv": "^8.20.0",
     "bpmn-moddle": "^9.0.1",
+    "esbuild": "^0.25.12",
     "bpmnlint": "^11.0.0",
     "bpmn-js-properties-panel": "^5.30.0"
   }

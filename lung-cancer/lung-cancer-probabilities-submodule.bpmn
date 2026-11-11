@@ -12,13 +12,13 @@
       <bpmn2:outgoing>Flow_0ihpj3f</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1l6hu1u</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_1je2c8j" name="Type of smoker/ nonsmoker" default="Flow_03pipu1">
+    <bpmn2:exclusiveGateway id="Gateway_1je2c8j" name="Type of smoker/ nonsmoker (female)" default="Flow_03pipu1">
       <bpmn2:incoming>Flow_0ihpj3f</bpmn2:incoming>
       <bpmn2:outgoing>Flow_069pe3f</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_11ty117</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_03pipu1</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_08b83gc" name="Type of smoker/ nonsmoker" default="Flow_0bzbjwr">
+    <bpmn2:exclusiveGateway id="Gateway_08b83gc" name="Type of smoker/ nonsmoker (male)" default="Flow_0bzbjwr">
       <bpmn2:incoming>Flow_1l6hu1u</bpmn2:incoming>
       <bpmn2:outgoing>Flow_05fwd47</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_029pq7p</bpmn2:outgoing>

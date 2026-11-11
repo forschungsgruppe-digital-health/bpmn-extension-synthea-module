@@ -41,6 +41,15 @@ jobs:
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
 
+      - name: Add the converter result (modules and report)
+        # Runs the converter on the lung cancer pathway and publishes the JSON
+        # modules and the report under <site>/modules/. Fails on conversion errors.
+        run: node tools/build-converter-site.mjs lung-cancer --out-dir demo/dist/modules
+
+      - name: Check the site before it is deployed
+        # Asset paths under the repo sub-path, converter result complete, no errors.
+        run: node tools/check-pages-build.mjs demo/dist /${{ github.event.repository.name }}/
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: demo/dist

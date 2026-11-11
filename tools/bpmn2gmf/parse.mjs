@@ -1,9 +1,9 @@
-import { readFileSync } from 'node:fs';
 import BpmnModdle from 'bpmn-moddle';
+// A JSON import instead of readFileSync, so this file also runs in the browser
+// (the demo converts the open diagram client-side).
+import descriptor from '../../extension/model/synthea.json' with { type: 'json' };
 
-export const descriptor = JSON.parse(
-  readFileSync(new URL('../../extension/model/synthea.json', import.meta.url))
-);
+export { descriptor };
 
 // fhirmap:, term:, i18n: and cp: have no descriptor here on purpose: bpmn-moddle
 // keeps unknown-namespace elements as generic elements whose attributes are

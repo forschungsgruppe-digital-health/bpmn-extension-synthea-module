@@ -19,7 +19,7 @@
       <bpmn2:incoming>Flow_0yr1p8q</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0m9llqd</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_0e7nsaw" name="Patient gender?" default="Flow_1ovey1t">
+    <bpmn2:exclusiveGateway id="Gateway_0e7nsaw" name="Patient gender? (anemia diagnosis)" default="Flow_1ovey1t">
       <bpmn2:incoming>Flow_0m9llqd</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1iirpbd</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1ovey1t</bpmn2:outgoing>
@@ -33,12 +33,12 @@
       <bpmn2:outgoing>Flow_13yzahb</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0r3lwdr</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_11e1kl7" name="Severe anemia?" default="Flow_0k3wt2u">
+    <bpmn2:exclusiveGateway id="Gateway_11e1kl7" name="Severe anemia? (pregnant)" default="Flow_0k3wt2u">
       <bpmn2:incoming>Flow_13yzahb</bpmn2:incoming>
       <bpmn2:outgoing>Flow_14lbqcy</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0k3wt2u</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_0t9k9ce" name="Severe anemia?" default="Flow_0wjuj6o">
+    <bpmn2:exclusiveGateway id="Gateway_0t9k9ce" name="Severe anemia? (female, not pregnant)" default="Flow_0wjuj6o">
       <bpmn2:incoming>Flow_0r3lwdr</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0wjuj6o</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_00jy2p5</bpmn2:outgoing>
@@ -241,7 +241,7 @@
       <bpmn2:outgoing>Flow_001mmn1</bpmn2:outgoing>
       <bpmn2:timerEventDefinition id="TimerEventDefinition_1ipaz3m" />
     </bpmn2:intermediateCatchEvent>
-    <bpmn2:exclusiveGateway id="Gateway_0j9hc08" name="Patient gender?" default="Flow_1co6iv8">
+    <bpmn2:exclusiveGateway id="Gateway_0j9hc08" name="Patient gender? (routine blood panel)" default="Flow_1co6iv8">
       <bpmn2:incoming>Flow_001mmn1</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1ly2iqa</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1co6iv8</bpmn2:outgoing>
@@ -268,7 +268,7 @@
       <bpmn2:incoming>Flow_1co6iv8</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1dsdxrh</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_0hid3gc" name="Severe anemia?" default="Flow_0d66jrp">
+    <bpmn2:exclusiveGateway id="Gateway_0hid3gc" name="Severe anemia? (male)" default="Flow_0d66jrp">
       <bpmn2:incoming>Flow_1ovey1t</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0d66jrp</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1ney2yb</bpmn2:outgoing>

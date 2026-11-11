@@ -433,17 +433,17 @@
         <i18n:translation lang="de">else</i18n:translation>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
-    <bpmn2:exclusiveGateway id="Gateway_07j08mi" name="Survival" default="Flow_1inpm6t">
+    <bpmn2:exclusiveGateway id="Gateway_07j08mi" name="Survival (stage I)" default="Flow_1i8q7mi">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">Survival</i18n:translation>
+        <i18n:translation lang="de">Survival (stage I)</i18n:translation>
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1jrrxax_07j08mi</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1i8q7mi</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_1inpm6t</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_04i7102" name="Survival" default="Flow_02a5pgf">
+    <bpmn2:exclusiveGateway id="Gateway_04i7102" name="Survival (stage II)" default="Flow_02a5pgf">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">Survival</i18n:translation>
+        <i18n:translation lang="de">Survival (stage II)</i18n:translation>
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1fde72t_04i7102</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0lw2jfp</bpmn2:outgoing>
@@ -457,9 +457,9 @@
       <bpmn2:outgoing>Flow_1hv4tpx</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_0yraog6</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:exclusiveGateway id="Gateway_194erkw" name="Survival" default="Flow_1c3az9j">
+    <bpmn2:exclusiveGateway id="Gateway_194erkw" name="Survival (stage IV)" default="Flow_1c3az9j">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">Survival</i18n:translation>
+        <i18n:translation lang="de">Survival (stage IV)</i18n:translation>
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1jfcv2y_194erkw</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0zp0b6p</bpmn2:outgoing>
@@ -548,9 +548,6 @@
     <bpmn2:sequenceFlow id="Flow_1i8q7mi" name="Lung Cancer Type == NSCLC" sourceRef="Gateway_07j08mi" targetRef="Activity_0icv8wf">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
-        <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
-        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0lw2jfp" name="Lung Cancer Type == SCLC" sourceRef="Gateway_04i7102" targetRef="Activity_1vbbewj">
@@ -564,9 +561,6 @@
     <bpmn2:sequenceFlow id="Flow_02a5pgf" name="Lung Cancer Type == NSCLC" sourceRef="Gateway_04i7102" targetRef="Activity_0hmnan5">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
-        <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
-        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_1hv4tpx" name="Lung Cancer Type == SCLC" sourceRef="Gateway_06fku0u" targetRef="Activity_1rrsgkg">
@@ -580,9 +574,6 @@
     <bpmn2:sequenceFlow id="Flow_0yraog6" name="Lung Cancer Type == NSCLC" sourceRef="Gateway_06fku0u" targetRef="Activity_1jv64d0">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
-        <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
-        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0zp0b6p" name="Lung Cancer Type == SCLC" sourceRef="Gateway_194erkw" targetRef="Activity_1hn012p">
@@ -596,9 +587,6 @@
     <bpmn2:sequenceFlow id="Flow_1c3az9j" name="Lung Cancer Type == NSCLC" sourceRef="Gateway_194erkw" targetRef="Activity_01lw1we">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
-        <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
-        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0jx5cpp" sourceRef="Activity_0ttj8dz" targetRef="Gateway_0t93mpq" />
@@ -731,9 +719,9 @@
     <bpmn2:sequenceFlow id="Flow_1fde72t_04i7102" sourceRef="Event_1fde72t" targetRef="Gateway_04i7102" />
     <bpmn2:sequenceFlow id="Flow_1f3gqqv_06fku0u" sourceRef="Event_1f3gqqv" targetRef="Gateway_06fku0u" />
     <bpmn2:sequenceFlow id="Flow_1jfcv2y_194erkw" sourceRef="Event_1jfcv2y" targetRef="Gateway_194erkw" />
-    <bpmn2:endEvent id="Event_TreatmentCycle_End" name="Terminal">
+    <bpmn2:endEvent id="Event_TreatmentCycle_End" name="Terminal (after treatment cycle)">
       <bpmn2:extensionElements>
-        <i18n:translation lang="de">Terminal</i18n:translation>
+        <i18n:translation lang="de">Terminal (after treatment cycle)</i18n:translation>
         <synthea:stateTypeConfig stateType="Terminal" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_TreatmentCycle_End</bpmn2:incoming>

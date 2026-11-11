@@ -8,18 +8,37 @@
   <body>
     <header class="toolbar">
       <strong>synthea</strong>
-      <span class="hint">Select an element → edit its <code>synthea:</code> properties groups (e.g. <code>State type</code>, <code>Encounter Context</code>) → Download to see the XML.</span>
+      <span class="hint">Select an element → edit its <code>synthea:</code> properties groups (e.g. <code>State type</code>, <code>Encounter Context</code>) → Download to see the XML, or <strong>Convert to Synthea</strong> to see the module it becomes.</span>
       <span class="spacer"></span>
       <label for="pathway-select" class="pathway-label">Pathway</label>
       <select id="pathway-select"></select>
       <button id="load-example" type="button">Reload</button>
       <button id="new-diagram" type="button">New</button>
       <button id="download" type="button">Download .bpmn</button>
+      <button id="convert" type="button" class="primary">Convert to Synthea</button>
+      <a id="converter-result" href="modules/" class="hint">Converter result</a>
     </header>
     <main class="content">
       <div id="canvas"></div>
       <div id="properties"></div>
     </main>
+    <section id="converter-panel" hidden>
+      <header class="cp-head">
+        <strong>Synthea module</strong>
+        <select id="cp-module"></select>
+        <nav id="cp-tabs">
+          <button type="button" data-tab="graph" class="active">Graph</button>
+          <button type="button" data-tab="json">JSON</button>
+          <button type="button" data-tab="messages">Messages</button>
+        </nav>
+        <span id="cp-summary" class="hint"></span>
+        <span class="spacer"></span>
+        <span id="cp-graph-tools"><button id="cp-zoom-out" type="button">&minus;</button><button id="cp-zoom-in" type="button">+</button><button id="cp-fit" type="button">Fit</button></span>
+        <button id="cp-download" type="button">Download JSON</button>
+        <button id="cp-close" type="button">Close</button>
+      </header>
+      <div id="cp-body"></div>
+    </section>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

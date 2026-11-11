@@ -196,8 +196,11 @@ attribute (e.g. "lung cancer", `probability_of_lung_cancer`) must come
 **before** the catch-all branch ("no lung cancer"). Put it the other way round
 and the attribute is silently ignored: the first branch takes its default, the
 event branch takes the remainder, and every patient gets the default risk. The
-order is the order of the sequence flows in the file (the converter prints a
-note naming the branch that receives the remainder). Found by running the
+order is the order of the sequence flows in the file. The converter prints a
+note (`DISTRIBUTION_REMAINDER`) when the last branch has a probability of its own,
+because Synthea never uses that value: it names the branch that receives the
+remainder and the value that is not used. Leave the value off the last branch to
+make it the remainder by design. Found by running the
 converted lung cancer module in Synthea: it had 13 instead of 1 diagnosis in
 400 patients until the two flows were swapped.
 
