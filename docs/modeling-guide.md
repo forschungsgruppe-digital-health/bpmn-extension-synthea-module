@@ -12,7 +12,7 @@ fields?" Read top to bottom once, then use it as a lookup.
 ## 0. Setup
 
 ```bash
-git clone -b feat/bpmn2gmf <repo-url>   # the converter is on this branch, not yet on dev or main
+git clone -b dev <repo-url>   # the converter is on dev, not yet on main
 npm install
 npm run demo
 ```
