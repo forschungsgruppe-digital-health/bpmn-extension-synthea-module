@@ -466,9 +466,9 @@ test('a Death end event continues to the module\'s Terminal state, or gets one',
 
 test('Observation, Symptom and DiagnosticReport report the fields the extension cannot carry yet', async () => {
   const obs = await clinical('Observation', coding(LOINC, '72514-3', 'Pain severity'));
-  assert.match(obs.module.json.states.clin.remarks[0], /category, unit, one of exact \| range/);
+  assert.match(obs.module.json.states.clin.remarks[0], /category, one of unit \| value_code, one of exact \| range \| distribution/);
   const sym = await clinical('Symptom', '');
-  assert.match(sym.module.json.states.clin.remarks[0], /symptom, one of exact \| range/);
+  assert.match(sym.module.json.states.clin.remarks[0], /symptom, one of exact \| range \| distribution/);
   const rep = await clinical('DiagnosticReport', coding(LOINC, '58410-2', 'CBC panel'));
   assert.match(rep.module.json.states.clin.remarks[0], /observations/);
 });
