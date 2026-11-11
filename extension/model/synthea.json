@@ -30,13 +30,16 @@
       { "name": "gender", "type": "String", "isAttr": true },
       { "name": "race", "type": "String", "isAttr": true },
       { "name": "category", "type": "String", "isAttr": true },
-      { "name": "quantity", "type": "Float", "isAttr": true },
+      { "name": "quantity", "type": "Real", "isAttr": true },
       { "name": "unit", "type": "String", "isAttr": true },
       { "name": "year", "type": "Integer", "isAttr": true },
       { "name": "month", "type": "Integer", "isAttr": true },
       { "name": "symptom", "type": "String", "isAttr": true },
       { "name": "vitalSign", "type": "String", "isAttr": true },
       { "name": "referencedAttribute", "type": "String", "isAttr": true },
+      { "name": "codeSystem", "type": "String", "isAttr": true },
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true },
       { "name": "priorStateName", "type": "String", "isAttr": true },
       { "name": "since", "type": "String", "isAttr": true },
       { "name": "minimum", "type": "Integer", "isAttr": true },
@@ -49,20 +52,35 @@
     { "name": "SubmoduleConfig", "superClass": ["Element"], "properties": [
       { "name": "submodule", "type": "String", "isAttr": true }
     ]},
+    { "name": "DocumentationOnly", "superClass": ["Element"], "properties": [] },
+    { "name": "ProbabilityKind", "isEnum": true, "literalValues": [
+      {"name": "FIXED"}, {"name": "ATTRIBUTE"}
+    ]},
     { "name": "ProbabilityConfig", "superClass": ["Element"], "properties": [
-      { "name": "probability", "type": "Float", "isAttr": true },
+      { "name": "probabilityKind", "type": "ProbabilityKind", "isAttr": true },
+      { "name": "probability", "type": "Real", "isAttr": true },
       { "name": "probabilityAttribute", "type": "String", "isAttr": true },
-      { "name": "probabilityDefault", "type": "Float", "isAttr": true }
+      { "name": "probabilityDefault", "type": "Real", "isAttr": true }
     ]},
     { "name": "EncounterClass", "isEnum": true, "literalValues": [
-      {"name": "wellness"}, {"name": "ambulatory"}, {"name": "emergency"}, {"name": "urgentcare"}, {"name": "inpatient"}, {"name": "outpatient"}
+      {"name": "wellness"}, {"name": "ambulatory"}, {"name": "emergency"}, {"name": "urgentcare"}, {"name": "inpatient"}, {"name": "outpatient"},
+      {"name": "hospice"}, {"name": "home"}, {"name": "snf"}, {"name": "virtual"}
+    ]},
+    { "name": "TelemedicinePossibility", "isEnum": true, "literalValues": [
+      {"name": "none"}, {"name": "possible"}, {"name": "always"}
     ]},
     { "name": "EncounterContext", "superClass": ["Element"], "properties": [
       { "name": "requiresEncounterContext", "type": "Boolean", "isAttr": true, "default": false },
       { "name": "encounterId", "type": "String", "isAttr": true },
       { "name": "wellness", "type": "Boolean", "isAttr": true, "default": false },
       { "name": "encounterClass", "type": "EncounterClass", "isAttr": true },
-      { "name": "reason", "type": "String", "isAttr": true }
+      { "name": "reason", "type": "String", "isAttr": true },
+      { "name": "telemedicinePossibility", "type": "TelemedicinePossibility", "isAttr": true },
+      { "name": "dischargeCode", "type": "String", "isAttr": true },
+      { "name": "dischargeDisplay", "type": "String", "isAttr": true },
+      { "name": "encounterCodeSystem", "type": "String", "isAttr": true },
+      { "name": "encounterCode", "type": "String", "isAttr": true },
+      { "name": "encounterCodeDisplay", "type": "String", "isAttr": true }
     ]},
     { "name": "EncounterReference", "superClass": ["Element"], "properties": [
       { "name": "targetEncounter", "type": "String", "isAttr": true }
@@ -73,11 +91,28 @@
     { "name": "CounterConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true },
       { "name": "action", "type": "CounterAction", "isAttr": true },
-      { "name": "amount", "type": "Float", "isAttr": true }
+      { "name": "amount", "type": "Real", "isAttr": true }
+    ]},
+    { "name": "SetAttributeValueKind", "isEnum": true, "literalValues": [
+      {"name": "VALUE"}, {"name": "ATTRIBUTE"}, {"name": "DISTRIBUTION"}
+    ]},
+    { "name": "DistributionKind", "isEnum": true, "literalValues": [
+      {"name": "EXACT"}, {"name": "UNIFORM"}, {"name": "GAUSSIAN"}, {"name": "EXPONENTIAL"}
     ]},
     { "name": "SetAttributeConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true },
-      { "name": "value", "type": "String", "isAttr": true }
+      { "name": "valueKind", "type": "SetAttributeValueKind", "isAttr": true },
+      { "name": "value", "type": "String", "isAttr": true },
+      { "name": "valueAttribute", "type": "String", "isAttr": true },
+      { "name": "distribution", "type": "DistributionKind", "isAttr": true },
+      { "name": "distributionRound", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "distributionValue", "type": "Real", "isAttr": true },
+      { "name": "distributionMean", "type": "Real", "isAttr": true },
+      { "name": "distributionStandardDeviation", "type": "Real", "isAttr": true },
+      { "name": "distributionMin", "type": "Real", "isAttr": true },
+      { "name": "distributionMax", "type": "Real", "isAttr": true },
+      { "name": "distributionLow", "type": "Real", "isAttr": true },
+      { "name": "distributionHigh", "type": "Real", "isAttr": true }
     ]},
     { "name": "AssignToAttributeConfig", "superClass": ["Element"], "properties": [
       { "name": "attribute", "type": "String", "isAttr": true }
@@ -93,10 +128,105 @@
       { "name": "CarePlanStart" }, { "name": "CarePlanEnd" }, { "name": "Procedure" }, { "name": "ImagingStudy" },
       { "name": "Device" }, { "name": "DeviceEnd" }, { "name": "SupplyList" }, { "name": "VitalSign" },
       { "name": "Observation" }, { "name": "MultiObservation" }, { "name": "DiagnosticReport" }, { "name": "Symptom" },
-      { "name": "Death" }, { "name": "Physiology" }
+      { "name": "Death" }, { "name": "Physiology" }, { "name": "Vaccine" }
     ]},
     { "name": "StateTypeConfig", "superClass": ["Element"], "properties": [
-      { "name": "stateType", "type": "StateType", "isAttr": true }
+      { "name": "stateType", "type": "StateType", "isAttr": true },
+      { "name": "codeSystem", "type": "String", "isAttr": true },
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
+    ]},
+    { "name": "SymptomConfig", "superClass": ["Element"], "properties": [
+      { "name": "symptom", "type": "String", "isAttr": true }
+    ]},
+    { "name": "ObservationCategory", "isEnum": true, "literalValues": [
+      {"name": "vital-signs"}, {"name": "laboratory"}, {"name": "procedure"}, {"name": "imaging"},
+      {"name": "survey"}, {"name": "exam"}, {"name": "therapy"}, {"name": "social-history"}
+    ]},
+    { "name": "ObservationConfig", "superClass": ["Element"], "properties": [
+      { "name": "category", "type": "ObservationCategory", "isAttr": true }
+    ]},
+    { "name": "ValueShape", "isEnum": true, "literalValues": [
+      {"name": "EXACT"}, {"name": "RANGE"}
+    ]},
+    { "name": "ValueConfig", "superClass": ["Element"], "properties": [
+      { "name": "valueShape", "type": "ValueShape", "isAttr": true },
+      { "name": "value", "type": "Real", "isAttr": true },
+      { "name": "valueHigh", "type": "Real", "isAttr": true },
+      { "name": "unit", "type": "String", "isAttr": true },
+      { "name": "decimals", "type": "Integer", "isAttr": true }
+    ]},
+    { "name": "MedicationConfig", "superClass": ["Element"], "properties": [
+      { "name": "administration", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "chronic", "type": "Boolean", "isAttr": true, "default": false }
+    ]},
+    { "name": "PrescriptionConfig", "superClass": ["Element"], "properties": [
+      { "name": "refills", "type": "Integer", "isAttr": true },
+      { "name": "asNeeded", "type": "Boolean", "isAttr": true, "default": false },
+      { "name": "dosageAmount", "type": "Real", "isAttr": true },
+      { "name": "dosageFrequency", "type": "Real", "isAttr": true },
+      { "name": "dosagePeriod", "type": "Real", "isAttr": true },
+      { "name": "dosageUnit", "type": "String", "isAttr": true },
+      { "name": "durationQuantity", "type": "Real", "isAttr": true },
+      { "name": "durationUnit", "type": "String", "isAttr": true }
+    ]},
+    { "name": "PrescriptionInstruction", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
+    ]},
+    { "name": "AllergyType", "isEnum": true, "literalValues": [ {"name": "allergy"}, {"name": "intolerance"} ]},
+    { "name": "AllergyCategory", "isEnum": true, "literalValues": [ {"name": "medication"}, {"name": "food"}, {"name": "environment"} ]},
+    { "name": "AllergyConfig", "superClass": ["Element"], "properties": [
+      { "name": "allergyType", "type": "AllergyType", "isAttr": true },
+      { "name": "category", "type": "AllergyCategory", "isAttr": true }
+    ]},
+    { "name": "AllergyReaction", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true },
+      { "name": "severityNone", "type": "Real", "isAttr": true },
+      { "name": "severityMild", "type": "Real", "isAttr": true },
+      { "name": "severityModerate", "type": "Real", "isAttr": true },
+      { "name": "severitySevere", "type": "Real", "isAttr": true }
+    ]},
+    { "name": "VitalSignConfig", "superClass": ["Element"], "properties": [
+      { "name": "vitalSign", "type": "String", "isAttr": true }
+    ]},
+    { "name": "SupplyItem", "superClass": ["Element"], "properties": [
+      { "name": "quantity", "type": "Integer", "isAttr": true },
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
+    ]},
+    { "name": "VaccineConfig", "superClass": ["Element"], "properties": [
+      { "name": "series", "type": "Integer", "isAttr": true }
+    ]},
+    { "name": "CarePlanActivity", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true }
+    ]},
+    { "name": "ImagingStudySeries", "superClass": ["Element"], "properties": [
+      { "name": "bodySiteCode", "type": "String", "isAttr": true },
+      { "name": "bodySiteDisplay", "type": "String", "isAttr": true },
+      { "name": "modalityCode", "type": "String", "isAttr": true },
+      { "name": "modalityDisplay", "type": "String", "isAttr": true },
+      { "name": "instanceTitle", "type": "String", "isAttr": true },
+      { "name": "sopClassCode", "type": "String", "isAttr": true },
+      { "name": "sopClassDisplay", "type": "String", "isAttr": true },
+      { "name": "minInstances", "type": "Integer", "isAttr": true },
+      { "name": "maxInstances", "type": "Integer", "isAttr": true }
+    ]},
+    { "name": "ReportObservation", "superClass": ["Element"], "properties": [
+      { "name": "code", "type": "String", "isAttr": true },
+      { "name": "codeDisplay", "type": "String", "isAttr": true },
+      { "name": "category", "type": "ObservationCategory", "isAttr": true },
+      { "name": "unit", "type": "String", "isAttr": true },
+      { "name": "valueShape", "type": "ValueShape", "isAttr": true },
+      { "name": "value", "type": "Real", "isAttr": true },
+      { "name": "valueHigh", "type": "Real", "isAttr": true },
+      { "name": "decimals", "type": "Integer", "isAttr": true },
+      { "name": "valueCodeSystem", "type": "String", "isAttr": true },
+      { "name": "valueCode", "type": "String", "isAttr": true },
+      { "name": "valueCodeDisplay", "type": "String", "isAttr": true },
+      { "name": "vitalSign", "type": "String", "isAttr": true }
     ]},
     { "name": "ConditionConfig", "superClass": ["Element"], "properties": [
       { "name": "condition", "type": "Condition" }

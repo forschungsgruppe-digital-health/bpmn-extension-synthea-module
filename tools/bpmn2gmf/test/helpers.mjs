@@ -1,0 +1,76 @@
+import { convert } from '../convert.mjs';
+
+const NS =
+  'xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +
+  'xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"';
+
+export const wrap = (body, name = 'Test Module') =>
+  `<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions ${NS} id="d" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn2:process id="P" name="${name}">${body}</bpmn2:process>
+</bpmn2:definitions>`;
+
+// coding() leaves a marker; the first one becomes codeSystem/code/codeDisplay on the stateTypeConfig
+// (a state has one code, and it sits on the state type).
+const CODING_MARKER = /<!--CODING ([^|]*)\|([^|]*)\|(.*?)-->/g;
+const ext = (inner) => {
+  if (!inner) return '';
+  const first = [...inner.matchAll(CODING_MARKER)][0];
+  let out = inner.replace(CODING_MARKER, '');
+  if (first) {
+    out = out.replace('<synthea:stateTypeConfig ', `<synthea:stateTypeConfig codeSystem="${first[1]}" code="${first[2]}" codeDisplay="${first[3]}" `);
+  }
+  return `<bpmn2:extensionElements>${out}</bpmn2:extensionElements>`;
+};
+
+export const start = (id = 'S') => `<bpmn2:startEvent id="${id}" name="Initial"/>`;
+export const end = (id = 'E', name = 'Terminal') => `<bpmn2:endEvent id="${id}" name="${name}"/>`;
+export const task = (id, name, inner) => `<bpmn2:task id="${id}" name="${name}">${ext(inner)}</bpmn2:task>`;
+export const gateway = (id, name, def) =>
+  `<bpmn2:exclusiveGateway id="${id}" name="${name}"${def ? ` default="${def}"` : ''}/>`;
+export const timer = (id, name, inner) =>
+  `<bpmn2:intermediateCatchEvent id="${id}" name="${name}">${ext(inner)}<bpmn2:timerEventDefinition/></bpmn2:intermediateCatchEvent>`;
+export const call = (id, name, submodule) =>
+  `<bpmn2:callActivity id="${id}" name="${name}">${ext(`<synthea:submoduleConfig submodule="${submodule}"/>`)}</bpmn2:callActivity>`;
+export const flow = (id, from, to, inner) =>
+  `<bpmn2:sequenceFlow id="${id}" sourceRef="${from}" targetRef="${to}">${ext(inner)}</bpmn2:sequenceFlow>`;
+
+export const stateType = (t) => `<synthea:stateTypeConfig stateType="${t}"/>`;
+export const setAttr = (attribute, value) =>
+  `${stateType('SetAttribute')}<synthea:setAttributeConfig attribute="${attribute}" value="${value}"/>`;
+export const prob = (p) => `<synthea:probabilityConfig probability="${p}"/>`;
+export const cond = (inner) => `<synthea:conditionConfig>${inner}</synthea:conditionConfig>`;
+export const attrCond = (attribute, operator, value, extra = '') =>
+  `<synthea:condition conditionType="Attribute" attribute="${attribute}" operator="${operator}"${value === undefined ? '' : ` value="${value}"`}${extra}/>`;
+
+export const coding = (system, code, display) => `<!--CODING ${system}|${code}|${display}-->`;
+export const SNOMED = 'http://snomed.info/sct';
+export const LOINC = 'http://loinc.org';
+export const RXNORM = 'http://www.nlm.nih.gov/research/umls/rxnorm';
+
+// A clinical task that belongs to encounter `encId` (or to none).
+export const enc = (id, extra = '') =>
+  `<synthea:encounterContext requiresEncounterContext="true" encounterId="${id}" encounterClass="ambulatory" ${extra}/>`;
+export const procedure = (id, name, encId, encExtra = '') =>
+  task(id, name, stateType('Procedure') + coding(SNOMED, `code-${id}`, name) + (encId ? enc(encId, encExtra) : ''));
+export const order = (id, name, encId) =>
+  task(id, name, stateType('MedicationOrder') + coding(RXNORM, `rx-${id}`, name) + (encId ? enc(encId) : ''));
+export const delay = (id, name, value, unit) =>
+  timer(id, name, `<synthea:delayConfig delayShape="EXACT" delayValue="${value}" delayUnit="${unit}"/>`);
+
+// The state names visited from Initial, following direct transitions only.
+export function walk(states) {
+  const out = [];
+  let name = 'Initial';
+  while (name && states[name] && !out.includes(name)) {
+    out.push(name);
+    name = states[name].direct_transition;
+  }
+  return out;
+}
+
+// Converts one diagram; returns the single module result and all diagnostics.
+export async function run(body, { path = 'test.bpmn', name, strict = false, fuse = false } = {}) {
+  const { modules, diagnostics } = await convert([{ path, xml: wrap(body, name) }], { strict, fuse });
+  return { module: modules[0], diagnostics, codes: diagnostics.items.map((i) => i.code) };
+}

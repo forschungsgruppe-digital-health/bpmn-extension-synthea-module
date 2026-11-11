@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" xmlns:fhirmap="https://forschungsgruppe-digital-health.github.io/schema/fhirmap/1.0" xmlns:term="https://forschungsgruppe-digital-health.github.io/schema/term/1.0" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0" xmlns:i18n="http://www.omg.org/spec/BPMN/non-normative/extensions/i18n/1.0" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
   <bpmn2:process id="Process_LungCancerTreatmentCycle" name="Lung Cancer Treatment Cycle" isExecutable="false">
     <bpmn2:startEvent id="Event_TreatmentCycleStart" name="Initial">
       <bpmn2:extensionElements>
@@ -7,65 +7,58 @@
       </bpmn2:extensionElements>
       <bpmn2:outgoing>Flow_TreatmentCycleStart</bpmn2:outgoing>
     </bpmn2:startEvent>
-    <bpmn2:task id="Activity_1iqsz2x" name="Procedure: MRI Brain">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Procedure: MRI Brain</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="698354004" display="Magnetic resonance imaging for measurement of brain volume (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="Diagnosis_Encounter_IV" encounterClass="outpatient" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_126huj4</bpmn2:outgoing>
-    </bpmn2:task>
-    <bpmn2:exclusiveGateway id="Gateway_0iu5rc0" default="Flow_045p3wr">
-      <bpmn2:incoming>Flow_126huj4</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0jhspua</bpmn2:outgoing>
-      <bpmn2:outgoing>Flow_045p3wr</bpmn2:outgoing>
-    </bpmn2:exclusiveGateway>
-    <bpmn2:scriptTask id="Activity_0xuk3ku" name="Stem Cells Set bone_marrow = True">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">Stem Cells Set bone_marrow = True</i18n:translation>
-        <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="bone_marrow" value="true" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_0jhspua</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0p8q6xn</bpmn2:outgoing>
-    </bpmn2:scriptTask>
     <bpmn2:exclusiveGateway id="Gateway_130sh5c">
-      <bpmn2:incoming>Flow_0p8q6xn</bpmn2:incoming>
-      <bpmn2:incoming>Flow_045p3wr</bpmn2:incoming>
+      <bpmn2:incoming>Flow_TreatmentCycleStart</bpmn2:incoming>
       <bpmn2:outgoing>Flow_gw130_to_careplan</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:task id="Activity_CarePlan_SCLC" name="CarePlanStart: SCLC Treatment Plan">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">CarePlanStart: SCLC Treatment Plan</i18n:translation>
-        <synthea:stateTypeConfig stateType="CarePlanStart" />
-        <fhirmap:resourceMapping resourceType="CarePlan" />
-        <term:coding system="http://snomed.info/sct" code="182964004" display="Terminal care (regime/therapy)" />
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_gw130_to_careplan</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_careplan_to_recordcmp</bpmn2:outgoing>
-    </bpmn2:task>
     <bpmn2:task id="Activity_11vsro0" name="Diagnostic Area: Record_CMP">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CMP</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
-        <fhirmap:resourceMapping resourceType="Observation" />
-        <term:coding system="http://loinc.org" code="24323-8" display="Comprehensive metabolic 2000 panel Serum or Plasma" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="24323-8" codeDisplay="Comprehensive metabolic 2000 panel - Serum or Plasma" />
+        <synthea:reportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />
+        <synthea:reportObservation code="6299-2" codeDisplay="Urea nitrogen [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Urea Nitrogen" />
+        <synthea:reportObservation code="38483-4" codeDisplay="Creatinine [Mass/volume] in Blood" category="laboratory" unit="mg/dL" valueShape="RANGE" value="2.5" valueHigh="3.5" />
+        <synthea:reportObservation code="49765-1" codeDisplay="Calcium [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Calcium" />
+        <synthea:reportObservation code="2947-0" codeDisplay="Sodium [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Sodium" />
+        <synthea:reportObservation code="6298-4" codeDisplay="Potassium [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Potassium" />
+        <synthea:reportObservation code="2069-3" codeDisplay="Chloride [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Chloride" />
+        <synthea:reportObservation code="20565-8" codeDisplay="Carbon dioxide, total [Moles/volume] in Blood" category="laboratory" unit="mmol/L" vitalSign="Carbon Dioxide" />
+        <synthea:reportObservation code="33914-3" codeDisplay="Glomerular filtration rate [Volume Rate/Area] in Serum or Plasma by Creatinine-based formula (MDRD)/1.73 sq M" category="laboratory" unit="mL/min" valueShape="RANGE" value="4" valueHigh="29" />
+        <synthea:reportObservation code="2885-2" codeDisplay="Protein [Mass/volume] in Serum or Plasma" category="laboratory" unit="g/dL" valueShape="RANGE" value="6" valueHigh="8" />
+        <synthea:reportObservation code="1751-7" codeDisplay="Albumin [Mass/volume] in Serum or Plasma" category="laboratory" unit="g/dL" valueShape="RANGE" value="3.5" valueHigh="5.5" />
+        <synthea:reportObservation code="10834-0" codeDisplay="Globulin [Mass/volume] in Serum by calculation" category="laboratory" unit="g/dL" valueShape="RANGE" value="2" valueHigh="3.5" />
+        <synthea:reportObservation code="1975-2" codeDisplay="Bilirubin.total [Mass/volume] in Serum or Plasma" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0.1" valueHigh="1.2" />
+        <synthea:reportObservation code="6768-6" codeDisplay="Alkaline phosphatase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="20" valueHigh="140" />
+        <synthea:reportObservation code="1742-6" codeDisplay="Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="20" valueHigh="60" />
+        <synthea:reportObservation code="1920-8" codeDisplay="Aspartate aminotransferase [Enzymatic activity/volume] in Serum or Plasma" category="laboratory" unit="U/L" valueShape="RANGE" value="6" valueHigh="40" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeB2_out</bpmn2:incoming>
-      <bpmn2:incoming>Flow_careplan_to_recordcmp</bpmn2:incoming>
+      <bpmn2:incoming>Flow_gw130_to_careplan</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1772ltf</bpmn2:outgoing>
     </bpmn2:task>
     <bpmn2:task id="Activity_1rbjl3t" name="Diagnostic Area: Record_Urinalysis">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_Urinalysis</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
-        <fhirmap:resourceMapping resourceType="Observation" />
-        <term:coding system="http://loinc.org" code="24357-6" display="Urinalysis macro (dipstick) panel Urine" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="24357-6" codeDisplay="Urinalysis macro (dipstick) panel - Urine" />
+        <synthea:reportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
+        <synthea:reportObservation code="34533-0" codeDisplay="Odor of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167248002" valueCodeDisplay="Urine smell ammoniacal (finding)" />
+        <synthea:reportObservation code="32167-9" codeDisplay="Clarity of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="300828005" valueCodeDisplay="Translucent (qualifier value)" />
+        <synthea:reportObservation code="5778-6" codeDisplay="Color of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="371254008" valueCodeDisplay="Brown color (qualifier value)" />
+        <synthea:reportObservation code="5792-7" codeDisplay="Glucose [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0.5" valueHigh="2.5" />
+        <synthea:reportObservation code="25428-4" codeDisplay="Glucose [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167265006" valueCodeDisplay="Urine glucose test = ++ (finding)" />
+        <synthea:reportObservation code="20505-4" codeDisplay="Bilirubin.total [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0.2" valueHigh="1.5" />
+        <synthea:reportObservation code="5770-3" codeDisplay="Bilirubin.total [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="275778006" valueCodeDisplay="Finding of bilirubin in urine (finding)" />
+        <synthea:reportObservation code="5797-6" codeDisplay="Ketones [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="0" valueHigh="20" />
+        <synthea:reportObservation code="2514-8" codeDisplay="Ketones [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167291007" valueCodeDisplay="Urine ketone test = +++ (finding)" />
+        <synthea:reportObservation code="5811-5" codeDisplay="Specific gravity of Urine by Test strip" category="laboratory" unit="{nominal}" valueShape="RANGE" value="1.001" valueHigh="1.039" />
+        <synthea:reportObservation code="5803-2" codeDisplay="pH of Urine by Test strip" category="laboratory" unit="pH" valueShape="RANGE" value="5" valueHigh="7" />
+        <synthea:reportObservation code="5804-0" codeDisplay="Protein [Mass/volume] in Urine by Test strip" category="laboratory" unit="mg/dL" valueShape="RANGE" value="250" valueHigh="450" />
+        <synthea:reportObservation code="20454-5" codeDisplay="Protein [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167277001" valueCodeDisplay="Urine protein test = +++ (finding)" />
+        <synthea:reportObservation code="5802-4" codeDisplay="Nitrite [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="314138001" valueCodeDisplay="Nitrite not detected in urine (finding)" />
+        <synthea:reportObservation code="5794-3" codeDisplay="Hemoglobin [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="167297006" valueCodeDisplay="Blood not detected in urine (finding)" />
+        <synthea:reportObservation code="5799-2" codeDisplay="Leukocyte esterase [Presence] in Urine by Test strip" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="394717006" valueCodeDisplay="Urine leukocytes not detected (finding)" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1772ltf</bpmn2:incoming>
       <bpmn2:outgoing>Flow_02g4inp</bpmn2:outgoing>
@@ -73,19 +66,28 @@
     <bpmn2:task id="Activity_0g6jkau" name="Diagnostic Area: Record_CBC_Panel">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Diagnostic Area: Record_CBC_Panel</i18n:translation>
-        <synthea:stateTypeConfig stateType="Observation" />
-        <fhirmap:resourceMapping resourceType="Observation" />
-        <term:coding system="http://loinc.org" code="58410-2" display="CBC panel Blood by Automated count" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="58410-2" codeDisplay="CBC panel - Blood by Automated count" />
+        <synthea:reportObservation code="6690-2" codeDisplay="Leukocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="0.5" valueHigh="5" />
+        <synthea:reportObservation code="789-8" codeDisplay="Erythrocytes [#/volume] in Blood by Automated count" category="laboratory" unit="10*6/uL" valueShape="RANGE" value="3.9" valueHigh="5.5" />
+        <synthea:reportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="12" valueHigh="17.5" />
+        <synthea:reportObservation code="4544-3" codeDisplay="Hematocrit [Volume Fraction] of Blood by Automated count" category="laboratory" unit="%" valueShape="RANGE" value="35" valueHigh="50" />
+        <synthea:reportObservation code="787-2" codeDisplay="MCV [Entitic mean volume] in Red Blood Cells by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="80" valueHigh="95" />
+        <synthea:reportObservation code="785-6" codeDisplay="MCH [Entitic mass] by Automated count" category="laboratory" unit="pg" valueShape="RANGE" value="27" valueHigh="33" />
+        <synthea:reportObservation code="786-4" codeDisplay="MCHC [Entitic Mass/volume] in Red Blood Cells by Automated count" category="laboratory" unit="g/dL" valueShape="RANGE" value="33" valueHigh="36" />
+        <synthea:reportObservation code="788-0" codeDisplay="Erythrocyte [DistWidth] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="39" valueHigh="46" />
+        <synthea:reportObservation code="777-3" codeDisplay="Platelets [#/volume] in Blood by Automated count" category="laboratory" unit="10*3/uL" valueShape="RANGE" value="150" valueHigh="450" />
+        <synthea:reportObservation code="32207-3" codeDisplay="Platelet distribution width [Entitic volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9" valueHigh="17" />
+        <synthea:reportObservation code="32623-1" codeDisplay="Platelet [Entitic mean volume] in Blood by Automated count" category="laboratory" unit="fL" valueShape="RANGE" value="9.4" valueHigh="12.3" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_02g4inp</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1wu1rz7</bpmn2:outgoing>
     </bpmn2:task>
-    <bpmn2:scriptTask id="Activity_01m9cy0" name="Set Mean (lung_cancer_los) = 3">
+    <bpmn2:scriptTask id="Activity_01m9cy0" name="Set lung_cancer_los (exponential, mean 3)">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Set Mean(lung_cancer_los) = 3</i18n:translation>
         <synthea:stateTypeConfig stateType="SetAttribute" />
-        <synthea:setAttributeConfig attribute="lung_cancer_los" value="3" />
+        <synthea:setAttributeConfig attribute="lung_cancer_los" valueKind="DISTRIBUTION" distribution="EXPONENTIAL" distributionRound="true" distributionMean="3" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1wu1rz7</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0l2qjq2</bpmn2:outgoing>
@@ -112,10 +114,9 @@
     <bpmn2:task id="Activity_0rdcvio" name="Procedure: Hearing_Test">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Hearing_Test</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="398171003" display="Hearing examination (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="398171003" codeDisplay="Hearing examination (procedure)" />
+        <synthea:valueConfig valueShape="EXACT" value="30" unit="minutes" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0vqvpbj</bpmn2:incoming>
       <bpmn2:outgoing>Flow_07eksao</bpmn2:outgoing>
@@ -123,11 +124,10 @@
     <bpmn2:task id="Activity_1j8wfnd" name="Medication Prescription: Chemotherapy I">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: Chemotherapy I</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" display="Cisplatin 50 MG Injection" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854" codeDisplay="Cisplatin 50 MG Injection" />
+        <synthea:medicationConfig administration="true" />
         <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_07eksao</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0azdu8w</bpmn2:outgoing>
@@ -136,9 +136,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Discontinue Medication: Chemotherapy IB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="chemotherapy_i_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0azdu8w</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1bb2p19</bpmn2:outgoing>
@@ -151,11 +150,10 @@
     <bpmn2:task id="Activity_1wt86vs" name="Medication Prescription: SCLC Chemotherapy II">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: SCLC Chemotherapy II</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" display="Etoposide 100mg Injection" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="226719" codeDisplay="etoposide 100 MG Injection [Etopophos]" />
+        <synthea:medicationConfig administration="true" />
         <synthea:assignToAttributeConfig attribute="sclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_sclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_04aexph</bpmn2:outgoing>
@@ -163,11 +161,10 @@
     <bpmn2:task id="Activity_11qamf8" name="Medication Prescription: NSCLC Chemotherapy II">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Medication Prescription: NSCLC Chemotherapy II</i18n:translation>
-        <synthea:stateTypeConfig stateType="MedicationOrder" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
-        <term:coding system="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" display="PACLitaxel 100mg Injection" />
+        <synthea:stateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="583214" codeDisplay="PACLitaxel 100 MG Injection" />
+        <synthea:medicationConfig administration="true" />
         <synthea:assignToAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA1_nsclc</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0a9d9nz</bpmn2:outgoing>
@@ -176,9 +173,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Discontinue Medication: SCLC Chemotherapy IIB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="sclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_04aexph</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1fvxegi</bpmn2:outgoing>
@@ -187,9 +183,8 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Discontinue Medication: NSCLC Chemotherapy IIB</i18n:translation>
         <synthea:stateTypeConfig stateType="MedicationEnd" />
-        <fhirmap:resourceMapping resourceType="MedicationRequest" />
         <synthea:referencedByAttributeConfig attribute="nsclc_chemotherapy_ii_order" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0a9d9nz</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeA2_nsclc</bpmn2:outgoing>
@@ -202,10 +197,9 @@
     <bpmn2:task id="Activity_04ktum8" name="Procedure: Radiation">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Procedure: Radiation</i18n:translation>
-        <synthea:stateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
-        <term:coding system="http://snomed.info/sct" code="703423002" display="Combined chemotherapy and radiation therapy (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="703423002" codeDisplay="Combined chemotherapy and radiation therapy (procedure)" />
+        <synthea:valueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_typeA2_out</bpmn2:incoming>
       <bpmn2:outgoing>Flow_1niwvy9</bpmn2:outgoing>
@@ -213,9 +207,10 @@
     <bpmn2:task id="Activity_1q2bpvc" name="Measurement: Pain_Vital">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Measurement: Pain_Vital</i18n:translation>
-        <synthea:stateTypeConfig stateType="VitalSign" />
-        <term:coding system="http://loinc.org" code="72514-3" display="Pain severity 0-10 verbal numeric rating Reported" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="Observation" codeSystem="http://loinc.org" code="72514-3" codeDisplay="Pain severity - 0-10 verbal numeric rating [Score] - Reported" />
+        <synthea:observationConfig category="vital-signs" />
+        <synthea:valueConfig valueShape="RANGE" value="4" valueHigh="10" unit="{score}" decimals="0" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1niwvy9</bpmn2:incoming>
       <bpmn2:outgoing>Flow_002ms2k</bpmn2:outgoing>
@@ -228,10 +223,9 @@
     <bpmn2:task id="Activity_1yh177y" name="Imaging: Chest_CT">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Imaging: Chest_CT</i18n:translation>
-        <synthea:stateTypeConfig stateType="ImagingStudy" />
-        <fhirmap:resourceMapping resourceType="ImagingStudy" />
-        <term:coding system="http://snomed.info/sct" code="16335031000119103" display="High resolution computed tomography of chest without contrast (procedure)" />
-        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" />
+        <synthea:stateTypeConfig stateType="ImagingStudy" codeSystem="http://snomed.info/sct" code="16335031000119103" codeDisplay="High resolution computed tomography of chest without contrast (procedure)" />
+        <synthea:imagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
+        <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter" encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct" encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_1qje2av</bpmn2:incoming>
       <bpmn2:outgoing>Flow_01o3k8p</bpmn2:outgoing>
@@ -288,23 +282,8 @@
       <bpmn2:incoming>Flow_1eee7nb</bpmn2:incoming>
       <bpmn2:outgoing>Flow_typeB2_out</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="Flow_TreatmentCycleStart" sourceRef="Event_TreatmentCycleStart" targetRef="Activity_1iqsz2x" />
-    <bpmn2:sequenceFlow id="Flow_126huj4" sourceRef="Activity_1iqsz2x" targetRef="Gateway_0iu5rc0" />
-    <bpmn2:sequenceFlow id="Flow_0jhspua" name="1%" sourceRef="Gateway_0iu5rc0" targetRef="Activity_0xuk3ku">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">1%</i18n:translation>
-        <synthea:probabilityConfig probability="0.01" />
-      </bpmn2:extensionElements>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_045p3wr" name="99%" sourceRef="Gateway_0iu5rc0" targetRef="Gateway_130sh5c">
-      <bpmn2:extensionElements>
-        <i18n:translation lang="de">99%</i18n:translation>
-        <synthea:probabilityConfig probability="0.99" />
-      </bpmn2:extensionElements>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_0p8q6xn" sourceRef="Activity_0xuk3ku" targetRef="Gateway_130sh5c" />
-    <bpmn2:sequenceFlow id="Flow_gw130_to_careplan" sourceRef="Gateway_130sh5c" targetRef="Activity_CarePlan_SCLC" />
-    <bpmn2:sequenceFlow id="Flow_careplan_to_recordcmp" sourceRef="Activity_CarePlan_SCLC" targetRef="Activity_11vsro0" />
+    <bpmn2:sequenceFlow id="Flow_TreatmentCycleStart" sourceRef="Event_TreatmentCycleStart" targetRef="Gateway_130sh5c" />
+    <bpmn2:sequenceFlow id="Flow_gw130_to_careplan" sourceRef="Gateway_130sh5c" targetRef="Activity_11vsro0" />
     <bpmn2:sequenceFlow id="Flow_1772ltf" sourceRef="Activity_11vsro0" targetRef="Activity_1rbjl3t" />
     <bpmn2:sequenceFlow id="Flow_02g4inp" sourceRef="Activity_1rbjl3t" targetRef="Activity_0g6jkau" />
     <bpmn2:sequenceFlow id="Flow_1wu1rz7" sourceRef="Activity_0g6jkau" targetRef="Activity_01m9cy0" />
@@ -318,7 +297,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == SCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="SCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="SCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -326,7 +305,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="NSCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -368,7 +347,7 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == SCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="SCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="SCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
@@ -376,19 +355,13 @@
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Lung Cancer Type == NSCLC</i18n:translation>
         <synthea:conditionConfig>
-          <synthea:condition conditionType="Attribute" attribute="Lung Cancer Type" operator="==" value="NSCLC" />
+          <synthea:condition conditionType="Attribute" attribute="lung_cancer_type" operator="==" value="NSCLC" />
         </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0t3aexs" sourceRef="Event_1rh9fit" targetRef="Gateway_typeB2" />
     <bpmn2:sequenceFlow id="Flow_1eee7nb" sourceRef="Event_1fph9zh" targetRef="Gateway_typeB2" />
     <bpmn2:sequenceFlow id="Flow_typeB2_out" sourceRef="Gateway_typeB2" targetRef="Activity_11vsro0" />
-    <bpmn2:textAnnotation id="TextAnnotation_0se7hom">
-      <bpmn2:extensionElements>
-        <i18n:translation target="@text" lang="de">SNOMED-CT: 698354004 - Magnetic resonance imaging for measurement of brain volume (procedure)</i18n:translation>
-      </bpmn2:extensionElements>
-      <bpmn2:text>SNOMED-CT: 698354004 - Magnetic resonance imaging for measurement of brain volume (procedure)</bpmn2:text>
-    </bpmn2:textAnnotation>
     <bpmn2:textAnnotation id="TextAnnotation_0d4bef3">
       <bpmn2:extensionElements>
         <i18n:translation target="@text" lang="de">LOINC: 24323-8 - Comprehensive metabolic 2000 panel - Serum or Plasma</i18n:translation>
@@ -421,15 +394,15 @@
     </bpmn2:textAnnotation>
     <bpmn2:textAnnotation id="TextAnnotation_1plfojx">
       <bpmn2:extensionElements>
-        <i18n:translation target="@text" lang="de">RxNorm: 226719 - Etoposide 100mg Injection</i18n:translation>
+        <i18n:translation target="@text" lang="de">RxNorm: 226719 - etoposide 100 MG Injection [Etopophos]</i18n:translation>
       </bpmn2:extensionElements>
-      <bpmn2:text>RxNorm: 226719 - Etoposide 100mg Injection</bpmn2:text>
+      <bpmn2:text>RxNorm: 226719 - etoposide 100 MG Injection [Etopophos]</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:textAnnotation id="TextAnnotation_09aikim">
       <bpmn2:extensionElements>
-        <i18n:translation target="@text" lang="de">RxNorm: 583214 - PACLitaxel 100mg Injection</i18n:translation>
+        <i18n:translation target="@text" lang="de">RxNorm: 583214 - PACLitaxel 100 MG Injection</i18n:translation>
       </bpmn2:extensionElements>
-      <bpmn2:text>RxNorm: 583214 - PACLitaxel 100mg Injection</bpmn2:text>
+      <bpmn2:text>RxNorm: 583214 - PACLitaxel 100 MG Injection</bpmn2:text>
     </bpmn2:textAnnotation>
     <bpmn2:textAnnotation id="TextAnnotation_1858nwf">
       <bpmn2:extensionElements>
@@ -437,7 +410,6 @@
       </bpmn2:extensionElements>
       <bpmn2:text>SNOMED-CT: 703423002 - Combined chemotherapy and radiation therapy (procedure)</bpmn2:text>
     </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_0jceiwm" associationDirection="None" sourceRef="Activity_1iqsz2x" targetRef="TextAnnotation_0se7hom" />
     <bpmn2:association id="Association_0osjc86" associationDirection="None" sourceRef="Activity_11vsro0" targetRef="TextAnnotation_0d4bef3" />
     <bpmn2:association id="Association_0r9jkez" associationDirection="None" sourceRef="Activity_1rbjl3t" targetRef="TextAnnotation_1813nxy" />
     <bpmn2:association id="Association_12hbbth" associationDirection="None" sourceRef="Activity_0g6jkau" targetRef="TextAnnotation_1gjwey3" />
@@ -446,14 +418,10 @@
     <bpmn2:association id="Association_0s8tz8a" associationDirection="None" sourceRef="Activity_1wt86vs" targetRef="TextAnnotation_1plfojx" />
     <bpmn2:association id="Association_0xca2tl" associationDirection="None" sourceRef="Activity_11qamf8" targetRef="TextAnnotation_09aikim" />
     <bpmn2:association id="Association_0eaf2yh" associationDirection="None" sourceRef="Activity_04ktum8" targetRef="TextAnnotation_1858nwf" />
-    <bpmn2:textAnnotation id="TextAnnotation_1m96ltu">
-      <bpmn2:text>End Encounter: End_Diagnosis_Encounter_IV</bpmn2:text>
-    </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_0lk2kks" associationDirection="None" sourceRef="Flow_045p3wr" targetRef="TextAnnotation_1m96ltu" />
     <bpmn2:textAnnotation id="TextAnnotation_1s5cihb">
       <bpmn2:text>SNOMED-CT: 185347001 - Encounter for problem (procedure)</bpmn2:text>
     </bpmn2:textAnnotation>
-    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Activity_CarePlan_SCLC" targetRef="TextAnnotation_1s5cihb" />
+    <bpmn2:association id="Association_047472w" associationDirection="None" sourceRef="Activity_11vsro0" targetRef="TextAnnotation_1s5cihb" />
     <bpmn2:textAnnotation id="TextAnnotation_15dhow8">
       <bpmn2:text>End Encounter: End_SCLC_Treatment_Encounter</bpmn2:text>
     </bpmn2:textAnnotation>
@@ -481,23 +449,8 @@
           <dc:Bounds x="8673" y="336" width="30" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1iqsz2x_di" bpmnElement="Activity_1iqsz2x">
-        <dc:Bounds x="8820" y="273" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0iu5rc0_di" bpmnElement="Gateway_0iu5rc0" isMarkerVisible="true">
-        <dc:Bounds x="9075" y="288" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0xuk3ku_di" bpmnElement="Activity_0xuk3ku">
-        <dc:Bounds x="9240" y="110" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_130sh5c_di" bpmnElement="Gateway_130sh5c" isMarkerVisible="true">
         <dc:Bounds x="9445" y="288" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_CarePlan_SCLC_di" bpmnElement="Activity_CarePlan_SCLC">
-        <dc:Bounds x="9538" y="273" width="100" height="80" />
-        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_11vsro0_di" bpmnElement="Activity_11vsro0">
         <dc:Bounds x="9680" y="273" width="100" height="80" />
@@ -599,10 +552,6 @@
       <bpmndi:BPMNShape id="Gateway_typeB2_di" bpmnElement="Gateway_typeB2" isMarkerVisible="true">
         <dc:Bounds x="13945" y="288" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_047472w_di" bpmnElement="Association_047472w">
-        <di:waypoint x="9588" y="270" />
-        <di:waypoint x="9572" y="179" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0j1dz42_di" bpmnElement="Association_0j1dz42">
         <di:waypoint x="12856" y="273" />
         <di:waypoint x="12862" y="229" />
@@ -611,10 +560,6 @@
         <di:waypoint x="13510" y="313" />
         <di:waypoint x="13514" y="244" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_0se7hom_di" bpmnElement="TextAnnotation_0se7hom">
-        <dc:Bounds x="8834" y="180" width="200" height="72" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0d4bef3_di" bpmnElement="TextAnnotation_0d4bef3">
         <dc:Bounds x="9760" y="187" width="230" height="57" />
         <bpmndi:BPMNLabel />
@@ -647,9 +592,6 @@
         <dc:Bounds x="12590" y="187" width="180" height="57" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1m96ltu_di" bpmnElement="TextAnnotation_1m96ltu">
-        <dc:Bounds x="9235" y="150" width="102" height="57" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0p94u3s_di" bpmnElement="TextAnnotation_0p94u3s">
         <dc:Bounds x="13130" y="20" width="108" height="57" />
       </bpmndi:BPMNShape>
@@ -658,38 +600,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_TreatmentCycleStart_di" bpmnElement="Flow_TreatmentCycleStart">
         <di:waypoint x="8706" y="313" />
-        <di:waypoint x="8820" y="313" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_126huj4_di" bpmnElement="Flow_126huj4">
-        <di:waypoint x="8920" y="313" />
-        <di:waypoint x="9075" y="313" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0jhspua_di" bpmnElement="Flow_0jhspua">
-        <di:waypoint x="9100" y="288" />
-        <di:waypoint x="9100" y="150" />
-        <di:waypoint x="9240" y="150" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="9107" y="221" width="16" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_045p3wr_di" bpmnElement="Flow_045p3wr">
-        <di:waypoint x="9125" y="313" />
         <di:waypoint x="9445" y="313" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="9189" y="293" width="23" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0p8q6xn_di" bpmnElement="Flow_0p8q6xn">
-        <di:waypoint x="9340" y="150" />
-        <di:waypoint x="9470" y="150" />
-        <di:waypoint x="9470" y="288" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_gw130_to_careplan_di" bpmnElement="Flow_gw130_to_careplan">
         <di:waypoint x="9495" y="313" />
-        <di:waypoint x="9538" y="313" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_careplan_to_recordcmp_di" bpmnElement="Flow_careplan_to_recordcmp">
-        <di:waypoint x="9638" y="313" />
         <di:waypoint x="9680" y="313" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1772ltf_di" bpmnElement="Flow_1772ltf">
@@ -846,10 +760,6 @@
         <di:waypoint x="9730" y="-240" />
         <di:waypoint x="9730" y="273" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0jceiwm_di" bpmnElement="Association_0jceiwm">
-        <di:waypoint x="8870" y="273" />
-        <di:waypoint x="8870" y="252" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0osjc86_di" bpmnElement="Association_0osjc86">
         <di:waypoint x="9763" y="273" />
         <di:waypoint x="9788" y="244" />
@@ -882,10 +792,6 @@
         <di:waypoint x="12655" y="273" />
         <di:waypoint x="12644" y="244" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0lk2kks_di" bpmnElement="Association_0lk2kks">
-        <di:waypoint x="9285" y="313" />
-        <di:waypoint x="9286" y="207" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_15y26as_di" bpmnElement="Association_15y26as">
         <di:waypoint x="13220" y="100" />
         <di:waypoint x="13205" y="77" />
@@ -898,6 +804,10 @@
         <dc:Bounds x="9560" y="107" width="141.27313337587748" height="72" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_047472w_di" bpmnElement="Association_047472w">
+        <di:waypoint x="9700" y="273" />
+        <di:waypoint x="9690" y="179" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="TextAnnotation_1axtv0b_di" bpmnElement="TextAnnotation_1axtv0b">
         <dc:Bounds x="12830" y="129" width="135" height="100" />
         <bpmndi:BPMNLabel />

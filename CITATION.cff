@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using the metadata from this file.
+title: bpmn-extension-synthea-module
+abstract: >-
+  Extension for bpmn.io to model patient pathways in BPMN and generate Synthea
+  modules for synthetic patient population simulation.
+type: software
+authors:
+  - family-names: Abdulazizi
+    given-names: Benjamin
+    affiliation: Technische Universität Dresden, Forschungsgruppe Digital Health
+    website: https://github.com/BenjaminAbdulazizi
+  - family-names: Susky
+    given-names: Marcel
+    affiliation: Technische Universität Dresden, Forschungsgruppe Digital Health
+    website: https://github.com/msusky
+license: MIT
+repository-code: >-
+  https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module
+url: https://tu-dresden.de/bu/wirtschaft/winf/digital-health
+keywords:
+  - BPMN
+  - bpmn-js
+  - moddle
+  - Synthea
+  - synthetic patient data
+  - patient pathway
+  - healthcare
+  - clinical processes
+  - MII
+  - Medizininformatik-Initiative
+references:
+  - type: grant
+    title: >-
+      MiHUB – Medical Informatics Hub – Teilprojekt TU Dresden:
+      Projektkoordination und Infrastruktur
+    number: 01ZZ2506A
+    authors:
+      - name: Bundesministerium für Forschung, Technologie und Raumfahrt (BMFTR)
+        website: https://www.bmftr.bund.de
+    institution:
+      name: Technische Universität Dresden
+      website: https://tu-dresden.de
+    url: >-
+      https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=view&fkz=01ZZ2506A
+    notes: >-
+      Verbundvorhaben "MiHUB – Digitaler FortschrittsHub Gesundheit" der
+      Medizininformatik-Initiative, Laufzeit 2026-01-01 bis 2029-12-31,
+      Projektträger DLR (PT-DLR).
+    year: 2026

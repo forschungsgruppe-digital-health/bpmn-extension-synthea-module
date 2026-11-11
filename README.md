@@ -1,338 +1,227 @@
-# BPMN Extension Template
+# BPMN Extension Synthea Module
 
-A GitHub template repository for building, validating, and publishing your own
-**custom BPMN 2.0 / [bpmn.io](https://bpmn.io) extension**. It ships a working
-example extension, positive and negative validation fixtures, deterministic
-check tools, agent skills, and CI workflows so that conformance is enforced
-automatically from the first commit.
+**Model a patient pathway in BPMN and turn it into a runnable [Synthea](https://github.com/synthetichealth/synthea) module.**
 
-> Use this repo as a GitHub template (green **Use this template** button), then
-> rename the placeholder extension (`synthea` / `Synthea`) to your own.
->
-> **New to bpmn.io?** Read [`docs/concepts.md`](docs/concepts.md) first — it
-> explains what a BPMN extension *is*, what each library (bpmn-js, bpmn-moddle,
-> bpmnlint, diagram-js) does, and how the XSD and the moddle descriptor divide
-> the work. The rest of this README assumes those terms.
+> **Status: under development — research prototype.**
+> The moddle schema, the properties panel and the converter may change without notice.
+> Use it with **synthetic data only**; it is not meant to process real patient data.
 
-**Where to start:** [`docs/concepts.md`](docs/concepts.md) (what a BPMN extension
-*is* & how the libraries fit) → [Using the template](#using-the-template) (how to
-build one) → [Modeling playground](#modeling-playground-demo) (see it run) →
-[`extension/`](extension/) (where your code goes).
+BPMN has no probabilities, no Synthea state types and no encounter groups. This repository adds
+them as a [bpmn.io](https://bpmn.io) extension in the namespace `synthea:`, without changing the BPMN
+standard, and ships a converter that writes the result as Synthea Generic Module Framework (GMF)
+JSON. A pathway stays readable for people; the extension carries what the machine needs.
 
-**Modeling a pathway with this extension?** Skip straight to
-[`docs/modeling-guide.md`](docs/modeling-guide.md) — task-by-task instructions
-for every `synthea:` type, not a conceptual intro.
+## Funding
 
----
+This work is part of **MiHUB – Medical Informatics Hub**, a Digital Progress Hub
+(Digitaler FortschrittsHub Gesundheit) of the German Medical Informatics
+Initiative (MII).
 
-## Anatomy of a BPMN extension
+MiHUB is funded by the German Federal Ministry of Research, Technology and Space
+(Bundesministerium für Forschung, Technologie und Raumfahrt, BMFTR) under grant
+number **01ZZ2506A** (01/2026 – 12/2029). The responsibility for the content of
+this publication lies with the authors.
 
-A bpmn.io extension is made of a few independent parts. Only the first is
-strictly required; the rest are added as your use case needs them.
+- Project: <https://mihubx.de/mihub/>
+- Funding record: [Förderkatalog des Bundes, FKZ 01ZZ2506A](https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=view&fkz=01ZZ2506A)
+- Funder: BMFTR ([ROR 04pz7b180](https://ror.org/04pz7b180))
 
-| Part | Required? | Location | What it does |
-|------|-----------|----------|--------------|
-| **Moddle model descriptor** | Yes | `extension/model/*.json` | Declares the data your extension stores in the BPMN XML (a namespace, prefix, and typed properties). This is what makes your custom data readable and writable. |
-| **Lint plugin** | Recommended | `extension/lint/bpmnlint-plugin-synthea/` | Custom [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that enforce the *semantics* of your data — constraints the XSD cannot express. |
-| **bpmn-js modules** | Optional | `extension/src/` | Editor/viewer behaviour: custom renderer, palette entries, context-pad actions, modeling rules, properties-panel groups. Injected via `additionalModules`. Ships a sample properties-panel provider you can run in the [demo](#modeling-playground-demo). |
-| **Examples** | Recommended | `examples/` | Abstract diagrams that exercise the extension, used as test fixtures. |
+<details>
+<summary>Förderhinweis (deutsch)</summary>
 
-### How the pieces fit together
+Das diesem Repository zugrunde liegende Vorhaben wurde mit Mitteln des
+Bundesministeriums für Forschung, Technologie und Raumfahrt (BMFTR) unter dem
+Förderkennzeichen 01ZZ2506A gefördert. Die Verantwortung für den Inhalt dieser
+Veröffentlichung liegt bei den Autor:innen.
 
-Your three authored parts each teach a different layer of the toolchain about
-your data, and the validation tools each cover a different slice of the file.
-The crux: the **moddle descriptor** defines the *shape* of your data, the
-**lint plugin** enforces its *semantics*, and the **BPMN20.xsd never touches it
-at all** (it validates the `bpmn:` core only). For the per-library background
-behind this picture, see [`docs/concepts.md`](docs/concepts.md).
+</details>
 
-```mermaid
-flowchart TB
-  subgraph AUTHOR["What you author — extension/"]
-    M["Moddle descriptor<br/>model/*.json (required)"]
-    L["bpmnlint plugin<br/>lint/ (recommended)"]
-    S["bpmn-js modules<br/>src/ (optional)"]
-  end
+## Table of contents
 
-  subgraph FILE["A .bpmn diagram"]
-    C["BPMN core elements<br/>bpmn: namespace"]
-    E["Your data under extensionElements<br/>synthea: namespace"]
-  end
+- [Funding](#funding)
+- [What is in the repository](#what-is-in-the-repository)
+- [Quick start](#quick-start)
+- [What the XML looks like](#what-the-xml-looks-like)
+- [From BPMN to Synthea](#from-bpmn-to-synthea)
+- [What is supported and what is not](#what-is-supported-and-what-is-not)
+- [Where do I change what?](#where-do-i-change-what)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Citation](#citation)
+- [License](#license)
 
-  M -->|"defines the shape of"| E
-  L -->|"validates semantics of"| E
-  S -->|"renders / edits"| E
+## What is in the repository
 
-  C -->|"checked by"| XSD["BPMN20.xsd<br/>(core only)"]
-  E -.->|"NOT covered — processContents=lax"| XSD
-  E -->|"checked by"| RT["moddle round-trip"]
-```
+| Part | Where | What it does |
+|---|---|---|
+| **Moddle descriptor** | `extension/model/synthea.json` | The 20 `synthea:` types (and 10 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
+| **Properties panel** | `extension/src/` | One group "Synthea" in the bpmn-js properties panel, one collapsible section per type, showing only what fits the chosen State Type and what the converter accepts. |
+| **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 23 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. See [docs/lint-rules.md](docs/lint-rules.md). |
+| **Converter** | `tools/bpmn2gmf/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
+| **Example pathway** | `lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
+| **Demo** | `demo/` | A bpmn-js modeler with the extension, for trying it by hand. Not published. |
+| **Documentation** | `docs/` | Modeling guide, mapping rules, converter concept, extension matrix, architecture decisions. |
 
-### How the data lives in the XML
+## Quick start
 
-Custom data is attached under the standard `bpmn:extensionElements` of any
-element, in **your own namespace** — never the `bpmn:` namespace. The example
-descriptor defines an `Annotation` element with a `category` attribute and
-nested `note` children:
-
-```xml
-<bpmn:task id="Task_1" name="Reviewed task">
-  <bpmn:extensionElements>
-    <synthea:annotation category="quality" reviewed="true">
-      <synthea:note author="example">Looks good.</synthea:note>
-    </synthea:annotation>
-  </bpmn:extensionElements>
-</bpmn:task>
-```
-
-The matching moddle descriptor (`extension/model/synthea.json`):
-
-```json
-{
-  "name": "Synthea",
-  "uri": "http://example.com/schema/my-extension/1.0",
-  "prefix": "synthea",
-  "types": [
-    {
-      "name": "Annotation",
-      "superClass": ["Element"],
-      "properties": [
-        { "name": "category", "type": "String", "isAttr": true },
-        { "name": "reviewed", "type": "Boolean", "isAttr": true, "default": false },
-        { "name": "note", "type": "Note", "isMany": true }
-      ]
-    }
-  ]
-}
-```
-
-Key descriptor conventions: types that hang off `extensionElements` use
-`"superClass": ["Element"]`; XML attributes use `"isAttr": true`; repeatable
-children use `"isMany": true`; element text uses `"isBody": true`.
-
----
-
-## Repository layout
-
-```
-.
-├── AGENTS.md                  # canonical agent context (read by 30+ tools)
-├── CLAUDE.md                  # imports AGENTS.md
-├── CONTRIBUTING.md            # dev workflow + Conventional Commits + releases
-├── LICENSE                    # MIT
-├── .bpmnlintrc                # lint config: recommended + your plugin + moddle ext
-├── package.json               # validation scripts + conventions
-├── release-please-config.json # SemVer release automation (Release Please v4)
-├── .release-please-manifest.json
-├── docs/
-│   ├── concepts.md            # primer: what an extension is + how the libs fit
-│   ├── synthea.md             # primer: Synthea GMF concepts, for this project
-│   ├── modeling-guide.md      # task-by-task guide to modeling with synthea:
-│   ├── implicit-rules.md      # full BPMN -> Synthea mapping reference
-│   └── adr/                   # architecture decision records (TEMPLATE.md)
-├── extension/                 # >>> YOUR extension goes here <<<
-│   ├── model/
-│   │   ├── synthea.json    # moddle descriptor (rename me) — source of truth
-│   │   └── synthea.xsd     # generated from the descriptor (npm run xsd:gen)
-│   ├── lint/
-│   │   └── bpmnlint-plugin-synthea/
-│   │       ├── index.js
-│   │       └── rules/annotation-requires-category.js
-│   └── src/                    # optional bpmn-js modules
-│       ├── index.js            # the additionalModules entry
-│       └── SyntheaPropertiesProvider.js  # sample properties-panel group
-├── demo/                       # interactive modeler playground (private, not published)
-│   ├── index.html
-│   ├── vite.config.js          # base path comes from $BASE_PATH (for Pages)
-│   └── src/main.js             # Modeler wired to the descriptor + src module
-├── examples/
-│   ├── valid/                  # positive fixtures — must pass lint
-│   └── invalid/                # negative fixtures — must fail lint
-├── tools/
-│   ├── validate-xsd.sh         # BPMN-core XSD validation (xmllint)
-│   ├── moddle-roundtrip.mjs    # fromXML -> toXML with extension registered
-│   ├── moddle-to-xsd.mjs       # generate extension XSD from the descriptor
-│   ├── validate-xsd-ext.mjs    # validate examples vs BPMN core + extension XSD
-│   └── check-package-conventions.mjs
-├── skills/                     # agent skills (vendor-neutral)
-│   ├── bpmn-conformance/
-│   ├── moddle-extension-review/
-│   ├── bpmn-naming-publishing/
-│   └── architecture-review/
-├── .devcontainer/             # reproducible dev env / Codespaces (modeler preinstalled)
-└── .github/workflows/
-    ├── validate.yml            # runs all checks on push / PR
-    ├── pages.yml               # builds demo/ → GitHub Pages
-    └── release-please.yml      # SemVer release PR + npm publish on merge
-```
-
----
-
-## Using the template
-
-1. **Create your repo** from this template and clone it.
-2. **Install dependencies:** `npm install` (Node 22+; an `engines` field enforces
-   this). It also pulls the bpmn-js UI stack and Vite via the `demo/` workspace —
-   that is expected, not bloat (the published package ships only `extension/`).
-3. **Rename the placeholder** everywhere: `synthea` → your prefix,
-   `Synthea` → your name, and rename
-   `extension/lint/bpmnlint-plugin-synthea/` accordingly. Set a stable, owned
-   `uri` in the descriptor.
-4. **Model your data** in `extension/model/<your>.json`.
-5. **Write rules** in the lint plugin for any constraint the XSD cannot check.
-6. **Add fixtures:** a positive diagram in `examples/valid/` and a deliberately
-   broken one in `examples/invalid/` for every rule you add.
-7. **Run the full check:** `npm run validate`.
-8. *(Optional)* add bpmn-js modules under `extension/src/` for editor behaviour.
-9. *(Optional)* `npm run xsd:gen` to emit `extension/model/<name>.xsd` for
-   XSD-native consumers, and `npm run xsd:ext` to validate the examples against
-   BPMN core **and** that extension XSD.
-
----
-
-## Modeling playground (demo)
-
-`demo/` is an interactive bpmn-js modeler for trying the extension **by hand**:
-open a diagram, select an element, edit its `synthea:` properties groups (e.g.
-`State type`, `Encounter Context`) in the properties panel, and download the
-XML to see your custom data. It wires the
-**real** descriptor (`moddleExtensions` — the *data* layer) and the sample
-`extension/src/` module (`additionalModules` — the *UI* layer), so it exercises
-your actual artifacts, not copies. See [`docs/concepts.md`](docs/concepts.md) for
-what each slot does.
+Requires Node.js 22 or newer.
 
 ```bash
-npm install     # installs the demo too (it is a workspace)
-npm run demo    # vite dev server → http://localhost:5173
+git clone https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module.git
+cd bpmn-extension-synthea-module
+npm install
+
+npm run demo        # the modeler with the extension, in the browser
+npm run validate    # all checks (lint, round trip, XSD, tests, converter)
 ```
 
-Three surfaces, one `demo/` build:
+The demo lists the five pathway files of `lung-cancer/` in a dropdown. Click an element and open the
+group "Synthea" in the properties panel. A change in the panel stays in the browser (**Reload** brings
+the original back); **Download .bpmn** saves it.
 
-| Surface | How | Good for |
-|---------|-----|----------|
-| **Local** | `npm run demo` | day-to-day authoring |
-| **Dev container / Codespaces** | open in a container — `.devcontainer/` installs deps and auto-starts the modeler on a forwarded port | zero-setup contribution / live walkthrough |
-| **GitHub Pages** | `.github/workflows/pages.yml` builds `demo/` and publishes a static site; enable **Settings → Pages → Source: GitHub Actions** | a permanent public "try it" link |
+To use the extension in your own bpmn-js modeler, register the module and the moddle descriptor
+(this is what `demo/src/main.js` does):
 
-The playground is a **private, non-published** workspace (excluded from the npm
-package) and is **not** a pass/fail gate — the deterministic checks remain the
-source of truth. Its bundle is public when deployed, so keep only
-abstract/synthetic diagrams in `examples/`.
+```js
+import BpmnModeler from 'bpmn-js/lib/Modeler';
+import { BpmnPropertiesPanelModule, BpmnPropertiesProviderModule } from 'bpmn-js-properties-panel';
+import syntheaModule from './extension/src/index.js';
+import syntheaModdle from './extension/model/synthea.json';
 
----
+const modeler = new BpmnModeler({
+  container: '#canvas',
+  propertiesPanel: { parent: '#properties' },
+  additionalModules: [BpmnPropertiesPanelModule, BpmnPropertiesProviderModule, syntheaModule],
+  moddleExtensions: { synthea: syntheaModdle }
+});
+```
 
-## Validation pipeline
+## What the XML looks like
 
-| Stage | Command | What it proves |
-|-------|---------|----------------|
-| Lint (positive) | `npm run lint:valid` | Valid diagrams satisfy `bpmnlint:recommended` + your rules. |
-| Lint (negative) | `npm run lint:invalid` | Broken diagrams **are** rejected — proves your rules fire. CI inverts the exit code. |
-| Round-trip | `npm run roundtrip` | Custom extension data parses and serialises through `bpmn-moddle` without warnings or loss. |
-| XSD core | `npm run xsd` | The standard BPMN structure validates against the official `BPMN20.xsd`. |
-| Conventions | `npm run conventions` | `package.json` follows bpmn.io naming/publishing rules. |
-| XSD extension *(opt-in)* | `npm run xsd:ext` | Example diagrams validate against `BPMN20.xsd` **and** a generated extension XSD — the **structure** of your custom data. |
+Everything is stored as standard BPMN `extensionElements`. Tools that do not know the extension keep the
+model unchanged. A task that orders a medication, taken from the lung cancer treatment submodule:
 
-`npm run validate` chains the common subset. `xsd:ext` is **not** in that chain
-(it needs the generated XSD and only checks structure); run it on its own when
-you want XSD-level validation of the extension data.
+```xml
+<bpmn2:task id="Activity_1j8wfnd" name="Medication Prescription: Chemotherapy I">
+  <bpmn2:extensionElements>
+    <synthea:stateTypeConfig stateType="MedicationOrder"
+        codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854"
+        codeDisplay="Cisplatin 50 MG Injection" />
+    <synthea:medicationConfig administration="true" />
+    <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
+    <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter"
+        encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct"
+        encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
+  </bpmn2:extensionElements>
+</bpmn2:task>
+```
 
-> **Important scope boundary.** Out of the box the XSD step validates the **BPMN
-> core only**. Elements under `<extensionElements>` are parsed with
-> `processContents="lax"`, so a stock validator does **not** check your custom
-> data, and there is no official, freely runnable OMG conformance CLI. Your
-> extension's correctness is established by the **round-trip** and the **lint
-> plugin** — never read "XSD core passed" as "extension valid".
->
-> **Optional extension XSD.** If you (or your consumers) want XSD-native
-> validation of the custom data too, `npm run xsd:gen` derives an XSD from the
-> moddle descriptor (`extension/model/<name>.xsd`) and `npm run xsd:ext`
-> validates the examples against `BPMN20.xsd` + that XSD in one pass (via a
-> driver schema; `BPMN20.xsd` is never patched). It is **generated from the
-> descriptor** — the single source of truth — so the two cannot drift, and a
-> built-in self-check fails loudly if the `lax` wildcard ever skips your schema.
-> It still only covers **structure**; required attributes and cross-element
-> rules stay in the lint plugin. See [`docs/concepts.md`](docs/concepts.md).
+- `stateTypeConfig` says which Synthea state the task is, and which clinical code it carries (one code per state).
+- Probabilities and conditions sit on the **sequence flows** (`synthea:probabilityConfig`, `synthea:conditionConfig`), not on the gateway.
+- Encounters are **not drawn**: all states of one visit carry the same `encounterId`, and the converter creates the `Encounter` and `EncounterEnd` states.
+- `assignToAttributeConfig` and `referencedByAttributeConfig` link a start state to its end state through an attribute name (for example which medication is discontinued).
 
-The tools are the source of truth: the pass/fail decision is deterministic and
-made by `bpmnlint`, `bpmn-moddle`, and `xmllint` — not by a language model. The
-agent skills only orchestrate and explain them, which keeps the workflow
-reliable and independent of any particular agent or model.
+## From BPMN to Synthea
 
----
+```bash
+npm run bpmn2gmf -- lung-cancer --out-dir out/modules --fuse-gateways
+```
 
-## Continuous integration
+This writes `synthea_lung_cancer.json` and, in a folder of the same name, the four submodules (Synthea runs
+every file in the modules directory as a module of its own and treats only files in a subfolder as
+submodules). Useful options:
 
-- **`validate.yml`** runs on every push to `main` and every pull request:
-  installs deps and `xmllint`, then runs the positive lint, the negative lint
-  (asserting failure), the round-trip, the XSD core check, the extension-XSD
-  drift guard (`xsd:gen:check`) and dual conformance (`xsd:ext`), and the
-  conventions check.
-- **`pages.yml`** builds the `demo/` playground (`vite build`) and deploys it to
-  GitHub Pages on every push to `main`. Enable it once under
-  **Settings → Pages → Source: GitHub Actions**; it is independent of the
-  validation and release workflows.
-- **`release-please.yml`** runs on every push to `main`: it maintains a release
-  PR from your Conventional Commits and, once that PR is merged, tags the
-  release and publishes to npm with provenance. Add an `NPM_TOKEN` secret first.
+| Option | Effect |
+|---|---|
+| `--strict` | A field Synthea requires and the model lacks is an error, not a warning (`npm run convert:check` uses it). |
+| `--fuse-gateways` | Merges the helper states that exist only because of a gateway, and folds a condition followed by probabilities into one `complex_transition`. |
+| `--check` | Converts and checks without writing files. |
 
----
+The converted modules run in Synthea v4.0.0 (needs Java and `synthea-with-dependencies.jar`, not part of `validate`):
 
-## Versioning & publishing
+```bash
+npm run synthea:smoke -- <path to synthea-with-dependencies.jar>
+npm run synthea:smoke -- <path to the jar> --force-diagnosis   # every patient takes the disease and treatment path
+npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules   # shows which submodules were entered
+npm run compare:upstream      # compares the result with Synthea's own lung cancer module by content
+npm run compare:structure     # compares every state and transition (conditions, probabilities, their order)
+```
 
-Versioning follows [SemVer](https://semver.org/) and is automated by
-[Release Please](https://github.com/googleapis/release-please) (manifest config
-in `release-please-config.json` + `.release-please-manifest.json`). You do not
-bump versions by hand — your **commit types** drive the next version:
+## What is supported and what is not
 
-| Commit | Release effect |
-|--------|----------------|
-| `fix:` | PATCH |
-| `feat:` | MINOR |
-| `feat!:` / `BREAKING CHANGE:` | MAJOR (MINOR while pre-1.0) |
+- **Gateways:** exclusive gateways pick one path (conditions or probabilities on the flows). A **parallel** or **inclusive** split with its join is rewritten into a sequence: parallel branches run one after the other in the order of the flows, and each inclusive branch is decided on its own by the condition or probability on its flow. Both only as a structured block (every branch a region with one way in and one way out, ending in one join of the same kind; see `docs/extension-matrix.md`). Complex and event-based gateways are an error (`COMPLEX_GATEWAY_UNSUPPORTED`, `EVENT_BASED_GATEWAY_UNSUPPORTED`), and the menus do not offer them.
+- **Events:** start, end (`Terminal` or `Death`), timer (`Delay`) and other intermediate events with an explicit state type. A link throw and the link catch event with the same name become one direct flow. Boundary events are an error.
+- **Sub-processes:** what is drawn inside a sub-process becomes a module of its own (`<file>_<sub-process name>.json`, a submodule), and the sub-process becomes the `CallSubmodule` state that calls it; nested ones likewise. An empty sub-process names a module of a file of its own (`synthea:submoduleConfig`), like a call activity. An encounter cannot span the boundary (example: `examples/valid/sub-process.bpmn`). Event sub-processes, ad-hoc sub-processes and transactions are an error. A **call activity** becomes a `CallSubmodule`.
+- **Transitions:** direct, distributed, conditional and complex. `lookup_table_transition` and `type_of_care_transition` have no BPMN pattern.
+- **Codes:** one code per state, SNOMED CT, LOINC, RxNorm or (for `Vaccine`) CVX, depending on the state type. The discharge disposition of an encounter is a NUBC code with a fixed system.
+- **Documentation only:** a task, an exclusive gateway or an intermediate event marked `synthea:documentationOnly` stays in the diagram but gets no state; the flows around it are joined.
+- **Pools:** each pool becomes a module of its own; message flows between pools are reported (`MESSAGE_FLOWS_IGNORED`), not converted.
+- **Rejected with their own error code:** event, ad-hoc sub-processes and transactions, complex and event-based gateways, loop and multi-instance markers, and the `Physiology` state. `docs/extension-matrix.md` has the codes and the reasons.
+- **Other:** text annotations and data objects are ignored; the direction GMF → BPMN does not exist.
 
-The flow: merge Conventional Commits → Release Please opens a release PR
-(bumping `package.json` + manifest, writing `CHANGELOG.md`) → merge it → the
-release is tagged and published. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for
-the commit convention and the rationale behind in-workflow publishing.
+`docs/extension-matrix.md` lists, per BPMN element, which `synthea:` type the panel offers and the converter reads.
 
-One release bumps **all** of the extension's artifacts to the same version — via
-`extra-files` in `release-please-config.json` it updates the lint-plugin
-`package.json`, the moddle descriptor's `version`, and the generated XSD,
-alongside the root `package.json`. The namespace `uri` (`…/1.0`) is **not**
-bumped: it is the *data-format contract* version, changed by hand only when you
-intentionally break the format. See
-[ADR-0001](docs/adr/0001-versioning-and-release-please.md).
+## Where do I change what?
 
-Follow bpmn.io naming conventions so the ecosystem can discover your package
-(enforced by `npm run conventions`):
+| I want to … | Change | Then run |
+|---|---|---|
+| add a field or a type | `extension/model/synthea.json` | `npm run xsd:gen`, `npm run roundtrip` |
+| show it in the panel | `extension/src/SyntheaPropertiesProvider.js` (`getGroups`, a `create…Group` function, an entry from `makeTextEntry` / `makeSelecetEntry` / `makeCheckboxEntry`) | `npm run demo` |
+| add a lint rule | a file in `extension/lint/bpmnlint-plugin-synthea/rules/`, an entry in its `index.js` (in `rules` **and** `configs.all.rules`), a fixture in `examples/valid/` and `examples/invalid/` | `npm run lint:valid`, `npm run lint:invalid` |
+| write the field into the JSON | `tools/bpmn2gmf/emit.mjs` (per state type), `required-fields.mjs`, a test in `tools/bpmn2gmf/test/convert.test.mjs` | `npm run test:bpmn2gmf`, `npm run convert:check` |
+| change how a BPMN element maps to a state | `docs/implicit-rules.md`, `tools/bpmn2gmf/resolve.mjs`, `transitions.mjs` | `npm run test:bpmn2gmf` |
+| offer another pathway in the demo | `PATHWAYS` in `demo/src/main.js` | `npm run demo` |
 
-- bpmn-js modules: name starts with **`bpmn-js-`**.
-- lint plugins: name starts with **`bpmnlint-plugin-`**.
-- Declare `bpmn-js` / `diagram-js` as **`peerDependencies`**, never hard deps.
-- If `extension/src/` uses the properties panel, also declare
-  `@bpmn-io/properties-panel` and `bpmn-js-properties-panel` as **optional**
-  peers (this template's `package.json` shows the pattern).
-- Ship **ES modules** (`"type": "module"`), set a `license`.
+`npm run validate` runs the whole gate: the positive fixtures must lint clean, the round trip and the XSD
+must pass, the generated XSD must match the descriptor, the converter tests and the strict conversion of
+the lung cancer files must pass. `npm run lint:invalid` is **expected to fail**: the diagrams in
+`examples/invalid/` prove that the rules fire.
 
----
+## Documentation
 
-## Agent skills
+| Document | Content |
+|---|---|
+| [docs/modeling-guide.md](docs/modeling-guide.md) | How to model a pathway so it converts: what to draw, what to set in the panel |
+| [docs/implicit-rules.md](docs/implicit-rules.md) | The mapping rules BPMN → Synthea: nodes, edges, gateway chains |
+| [docs/bpmn2gmf-concept.md](docs/bpmn2gmf-concept.md) | The converter: pipeline, decisions, comparison with Synthea's lung cancer module |
+| [docs/converter-overview.md](docs/converter-overview.md) | What the converter does: options, the stages of the pipeline, the comparison with Synthea's modules |
+| [docs/validator-overview.md](docs/validator-overview.md) | What the validator does: the checks that `npm run validate` runs, in order |
+| [docs/lint-rules.md](docs/lint-rules.md) | The 23 lint rules in one table: ID, severity and what each one checks |
+| [docs/extension-matrix.md](docs/extension-matrix.md) | Which `synthea:` type sits on which BPMN element (panel and converter) |
+| [docs/synthea.md](docs/synthea.md) | Background: Synthea and its Generic Module Framework |
+| [docs/concepts.md](docs/concepts.md) | Background: what a BPMN extension is and how the pieces fit |
+| [docs/adr/](docs/adr/) | Architecture decisions (versioning, encounter scope) |
+| [lung-cancer/README.md](lung-cancer/README.md) | The example pathway and how it converts |
+| [CONTRIBUTING.md](CONTRIBUTING.md), [AGENTS.md](AGENTS.md) | Contributing, and the rules for AI coding agents |
 
-The `skills/` directory contains portable `SKILL.md` capabilities that work
-across compatible coding agents (Claude Code, Codex, Cursor, and others). Each
-skill wraps the deterministic tools above:
+## Contributing
 
-- **bpmn-conformance** — run the full conformance pipeline and report per stage.
-- **moddle-extension-review** — review a model descriptor for structure and namespace hygiene.
-- **bpmn-naming-publishing** — check packaging/naming before release.
-- **architecture-review** — multi-axis code & architecture review (correctness, readability, architecture, security, performance), vendored from [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) (MIT).
+```bash
+npm install
+npm run validate
+```
 
-`AGENTS.md` is the single source of project context; `CLAUDE.md` imports it (and
-other agents — Cursor, Codex — can be pointed at the same file), so you maintain
-guidance once.
+Run `npm run validate` before a commit or pull request. Commits follow
+[Conventional Commits](https://www.conventionalcommits.org/): `fix:` makes a patch, `feat:` a minor
+version (a patch while below 1.0.0), `feat!:` a major one (a minor while below 1.0.0). [Release Please](https://github.com/googleapis/release-please) turns them
+into a release pull request; do not change the version by hand. The namespace `uri` and `prefix` of the
+extension must not change, or diagrams already in the wild break. See [CONTRIBUTING.md](CONTRIBUTING.md)
+and [AGENTS.md](AGENTS.md).
 
----
+## Citation
+
+If you use this software, please cite it using the metadata in [CITATION.cff](CITATION.cff).
 
 ## License
 
-MIT. Replace the placeholder in `LICENSE` with your name and year.
+[MIT](LICENSE).
+
+The hand-written Synthea modules used as test references in `tools/bpmn2gmf/test/upstream/` are
+Apache-2.0 licensed (Copyright The MITRE Corporation and the Synthea contributors); the license text and
+Synthea's notices on RxNorm, LOINC and SNOMED CT are in `LICENSE` and `NOTICE.md` there. The pathway
+models in `lung-cancer/` and the files in `tools/bpmn2gmf/test/golden/` are modeled after and generated
+from these Synthea modules, so the same notices apply to them.
+
+The demo uses [bpmn-js](https://github.com/bpmn-io/bpmn-js), which is MIT licensed with one additional
+condition: the bpmn.io watermark must not be removed or hidden in any application that uses it. See
+<https://bpmn.io/license/>.

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 //
-// Round-trip every example diagram through bpmn-moddle with the custom
+// Round-trip every example diagram and every real pathway (lung-cancer/) through bpmn-moddle with the custom
 // extension registered: fromXML -> toXML.
 //
 // This verifies that custom extension data is understood by the moddle model
@@ -17,7 +17,7 @@ const descriptor = JSON.parse(
 
 const moddle = new BpmnModdle({ synthea: descriptor });
 
-const files = globSync('examples/**/*.bpmn');
+const files = [...globSync('examples/**/*.bpmn'), ...globSync('lung-cancer/**/*.bpmn')];
 let failed = 0;
 
 for (const file of files) {

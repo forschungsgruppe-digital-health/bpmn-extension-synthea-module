@@ -1,7 +1,9 @@
 # Lung cancer pathway (real content)
 
 The five `.bpmn` files in this folder are the real Synthea lung-cancer patient
-pathway — not test fixtures. `synthea-lung-cancer.bpmn` is the top-level
+pathway — not test fixtures. They are modeled after the Synthea modules
+(Apache-2.0, Copyright The MITRE Corporation and the Synthea contributors; license and notices in
+[`tools/bpmn2gmf/test/upstream/`](../tools/bpmn2gmf/test/upstream/NOTICE.md)). `synthea-lung-cancer.bpmn` is the top-level
 module; the other four are its submodules, called via `bpmn:callActivity`
 (`calledElement` pointing at each file's own process id):
 
@@ -14,33 +16,52 @@ module; the other four are its submodules, called via `bpmn:callActivity`
 
 The demo app's Pathway dropdown loads all five directly from here.
 
-## ⚠️ Submodule path placeholder (needs confirming before `tools/bpmn2gmf`)
+## Converting to Synthea and running it
 
-`calledElement` above is a BPMN-internal reference (the target process id,
-resolved within this file set) and needs no further decision. But each
-`callActivity` also carries a `synthea:submoduleConfig submodule="..."`
-value, which is the field that matters for the *actual* Synthea export:
+`tools/bpmn2gmf` turns these files into Synthea GMF JSON (concept and decisions:
+[`docs/bpmn2gmf-concept.md`](../docs/bpmn2gmf-concept.md)):
 
-| File | `synthea:submoduleConfig submodule="..."` |
-|---|---|
-| `lung-cancer-probabilities-submodule.bpmn` | `lung_cancer_probabilities_submodule` |
-| `lung-cancer-treatment-submodule.bpmn` | `lung_cancer_treatment_submodule` |
-| `symptom-check-submodule.bpmn` | `symptom_check_submodule` |
-| `anemia-submodule.bpmn` | `anemia_submodule` |
+    npm run convert:check                                   # all five convert, strict, no warning (part of `npm run validate`)
+    npm run bpmn2gmf -- lung-cancer --out-dir out/modules   # write the modules (add --fuse-gateways for fewer Simple states)
 
-In real Synthea GMF, a `CallSubmodule` state's `submodule` field is a file
-path relative to Synthea's `modules/` directory (e.g.
-`"submodule": "medications/otc_pain_reliever"` → Synthea looks for
-`modules/medications/otc_pain_reliever.json`). These four values are a
-plausible guess (each source file's basename in snake_case, no folder
-prefix) — not a confirmed convention, since `tools/bpmn2gmf` doesn't exist
-yet and hasn't decided how/where it will name its output JSON files.
+Every `callActivity` carries a `synthea:submoduleConfig submodule="..."` with the
+bare name of the called file, written with underscores (`anemia_submodule`,
+`lung_cancer_probabilities_submodule`, `lung_cancer_treatment_submodule`,
+`symptom_check_submodule`). The value has to match the file name
+(`anemia-submodule.bpmn` → `anemia_submodule`); the converter checks this and
+rejects a name that no file in the run has.
 
-**Before relying on these for a real export:** confirm (or change) these
-four strings so they match whatever `tools/bpmn2gmf` actually names/places
-the generated submodule JSON files as. If they don't match, Synthea will
-fail to find the submodule at simulation time even though everything here
-validates cleanly.
+Synthea runs every file directly in its modules directory as a module of its
+own and treats only files in a **subdirectory** as submodules. The converter
+therefore writes the top-level module to `synthea_lung_cancer.json` and the four
+called modules to `synthea_lung_cancer/<name>.json`, and turns the bare name
+into that path in the `CallSubmodule` states (`"submodule":
+"synthea_lung_cancer/anemia_submodule"`). Nothing has to be changed in the
+diagrams for this.
+
+The converted modules run in Synthea v4.0.0:
+
+    npm run synthea:smoke -- <synthea-with-dependencies.jar>   # needs Java and the release jar, not part of `validate`
+
+`anemia-submodule.bpmn` is not a one-to-one copy of Synthea's `anemia/anemia_sub`:
+the original starts with an `EncounterEnd` because other modules (colorectal cancer,
+pregnancy, COPD, …) call it, ours leaves it out because the only caller,
+`synthea-lung-cancer.bpmn`, ends the visit before the call. Do not call it from
+another pathway without ending the encounter first. The tests in
+`tools/bpmn2gmf/test/structure.test.mjs` check this and that the treatment cycle
+never returns.
+
+The comparison with the hand-written lung cancer module of the Synthea project
+and the result of the runs (equal stay length, medication category, care plan
+activities, symptom behavior; what is left over) are in section 12 of the
+concept.
+
+## Clinical codes
+
+- The 44 clinical codes (SNOMED CT, LOINC, RxNorm) sit on the element's `synthea:stateTypeConfig` as `codeSystem`, `code` and `codeDisplay`. The converter writes them into `codes`; the properties panel has a "Code" section for the state types that carry one.
+- Every state-bearing element has an explicit `synthea:stateTypeConfig` (or an inferable element kind).
+- The Encounter codes are part of `synthea:encounterContext`.
+- `npm run convert:check` runs with `--strict` and passes; the comparison with the upstream module includes the codes.
 
 ## BPMN conformance class (SYN-1)
 
@@ -54,9 +75,9 @@ which requires the BPMN conformance sub-class to be declared (SYN-1, *Muss*).
 
 - Not **Descriptive** — that subclass excludes boundary events, timer
   intermediate events, call activities and differentiated task types
-  (`scriptTask` etc.), all of which these files use (e.g. the treatment
-  cycle's `boundaryEvent` "Survival Time elapsed", the `Delay` states'
-  `timerEventDefinition`, the four `callActivity` submodule invocations).
+  (`scriptTask` etc.), all of which these files use (the `Delay` states'
+  `timerEventDefinition`, the four `callActivity` submodule invocations, the
+  `scriptTask` markers).
 - Not **Common Executable** — every process has `isExecutable="false"`, and
   the `scriptTask` elements (used only as a stylistic marker for
   `SetAttribute`/`Counter` states, mirroring Synthea's own state names) carry
@@ -64,5 +85,5 @@ which requires the BPMN conformance sub-class to be declared (SYN-1, *Muss*).
 - **Analytic** fits: a broader element vocabulary for detailed, analyzable
   modeling, explicitly not intended for execution. These diagrams are
   authored for clinical/domain review and as the source that
-  `tools/bpmn2gmf` (planned) will translate into Synthea GMF JSON — not to
+  `tools/bpmn2gmf` translates into Synthea GMF JSON — not to
   be run by a BPMN engine directly.

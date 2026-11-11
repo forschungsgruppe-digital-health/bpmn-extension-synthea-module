@@ -11,31 +11,50 @@
   <xsd:element name="delayShape" type="synthea:tDelayShape"/>
   <xsd:complexType name="tDelayShape"/>
 
-  <xsd:element name="delayDistributionKind" type="synthea:tDelayDistributionKind"/>
-  <xsd:complexType name="tDelayDistributionKind"/>
-
   <xsd:element name="delayConfig" type="synthea:tDelayConfig"/>
   <xsd:complexType name="tDelayConfig">
     <xsd:attribute name="delayShape" type="xsd:string"/>
     <xsd:attribute name="delayValue" type="xsd:string"/>
     <xsd:attribute name="delayValueHigh" type="xsd:string"/>
     <xsd:attribute name="delayUnit" type="xsd:string"/>
-    <xsd:attribute name="distributionKind" type="xsd:string"/>
   </xsd:complexType>
+
+  <xsd:element name="conditionType" type="synthea:tConditionType"/>
+  <xsd:complexType name="tConditionType"/>
 
   <xsd:element name="condition" type="synthea:tCondition"/>
   <xsd:complexType name="tCondition">
+    <xsd:sequence>
+      <xsd:element name="conditions" type="synthea:tCondition" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
     <xsd:attribute name="conditionType" type="xsd:string"/>
     <xsd:attribute name="attribute" type="xsd:string"/>
     <xsd:attribute name="operator" type="xsd:string"/>
     <xsd:attribute name="value" type="xsd:string"/>
     <xsd:attribute name="negate" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="gender" type="xsd:string"/>
+    <xsd:attribute name="race" type="xsd:string"/>
+    <xsd:attribute name="category" type="xsd:string"/>
+    <xsd:attribute name="quantity" type="xsd:double"/>
+    <xsd:attribute name="unit" type="xsd:string"/>
+    <xsd:attribute name="year" type="xsd:int"/>
+    <xsd:attribute name="month" type="xsd:int"/>
+    <xsd:attribute name="symptom" type="xsd:string"/>
+    <xsd:attribute name="vitalSign" type="xsd:string"/>
+    <xsd:attribute name="referencedAttribute" type="xsd:string"/>
+    <xsd:attribute name="codeSystem" type="xsd:string"/>
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+    <xsd:attribute name="priorStateName" type="xsd:string"/>
+    <xsd:attribute name="since" type="xsd:string"/>
+    <xsd:attribute name="minimum" type="xsd:int"/>
+    <xsd:attribute name="maximum" type="xsd:int"/>
   </xsd:complexType>
 
   <xsd:element name="guardConfig" type="synthea:tGuardConfig"/>
   <xsd:complexType name="tGuardConfig">
     <xsd:sequence>
-      <xsd:element ref="synthea:condition" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="allow" type="synthea:tCondition" minOccurs="0" maxOccurs="1"/>
     </xsd:sequence>
   </xsd:complexType>
 
@@ -44,19 +63,39 @@
     <xsd:attribute name="submodule" type="xsd:string"/>
   </xsd:complexType>
 
+  <xsd:element name="documentationOnly" type="synthea:tDocumentationOnly"/>
+  <xsd:complexType name="tDocumentationOnly"/>
+
+  <xsd:element name="probabilityKind" type="synthea:tProbabilityKind"/>
+  <xsd:complexType name="tProbabilityKind"/>
+
   <xsd:element name="probabilityConfig" type="synthea:tProbabilityConfig"/>
   <xsd:complexType name="tProbabilityConfig">
-    <xsd:attribute name="probability" type="xsd:string"/>
+    <xsd:attribute name="probabilityKind" type="xsd:string"/>
+    <xsd:attribute name="probability" type="xsd:double"/>
     <xsd:attribute name="probabilityAttribute" type="xsd:string"/>
-    <xsd:attribute name="probabilityDefault" type="xsd:string"/>
+    <xsd:attribute name="probabilityDefault" type="xsd:double"/>
   </xsd:complexType>
+
+  <xsd:element name="encounterClass" type="synthea:tEncounterClass"/>
+  <xsd:complexType name="tEncounterClass"/>
+
+  <xsd:element name="telemedicinePossibility" type="synthea:tTelemedicinePossibility"/>
+  <xsd:complexType name="tTelemedicinePossibility"/>
 
   <xsd:element name="encounterContext" type="synthea:tEncounterContext"/>
   <xsd:complexType name="tEncounterContext">
     <xsd:attribute name="requiresEncounterContext" type="xsd:boolean" default="false"/>
     <xsd:attribute name="encounterId" type="xsd:string"/>
     <xsd:attribute name="wellness" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="encounterClass" type="xsd:string"/>
     <xsd:attribute name="reason" type="xsd:string"/>
+    <xsd:attribute name="telemedicinePossibility" type="xsd:string"/>
+    <xsd:attribute name="dischargeCode" type="xsd:string"/>
+    <xsd:attribute name="dischargeDisplay" type="xsd:string"/>
+    <xsd:attribute name="encounterCodeSystem" type="xsd:string"/>
+    <xsd:attribute name="encounterCode" type="xsd:string"/>
+    <xsd:attribute name="encounterCodeDisplay" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="encounterReference" type="synthea:tEncounterReference"/>
@@ -71,12 +110,30 @@
   <xsd:complexType name="tCounterConfig">
     <xsd:attribute name="attribute" type="xsd:string"/>
     <xsd:attribute name="action" type="xsd:string"/>
-    <xsd:attribute name="amount" type="xsd:string"/>
+    <xsd:attribute name="amount" type="xsd:double"/>
   </xsd:complexType>
+
+  <xsd:element name="setAttributeValueKind" type="synthea:tSetAttributeValueKind"/>
+  <xsd:complexType name="tSetAttributeValueKind"/>
+
+  <xsd:element name="distributionKind" type="synthea:tDistributionKind"/>
+  <xsd:complexType name="tDistributionKind"/>
 
   <xsd:element name="setAttributeConfig" type="synthea:tSetAttributeConfig"/>
   <xsd:complexType name="tSetAttributeConfig">
     <xsd:attribute name="attribute" type="xsd:string"/>
+    <xsd:attribute name="valueKind" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:string"/>
+    <xsd:attribute name="valueAttribute" type="xsd:string"/>
+    <xsd:attribute name="distribution" type="xsd:string"/>
+    <xsd:attribute name="distributionRound" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="distributionValue" type="xsd:double"/>
+    <xsd:attribute name="distributionMean" type="xsd:double"/>
+    <xsd:attribute name="distributionStandardDeviation" type="xsd:double"/>
+    <xsd:attribute name="distributionMin" type="xsd:double"/>
+    <xsd:attribute name="distributionMax" type="xsd:double"/>
+    <xsd:attribute name="distributionLow" type="xsd:double"/>
+    <xsd:attribute name="distributionHigh" type="xsd:double"/>
   </xsd:complexType>
 
   <xsd:element name="assignToAttributeConfig" type="synthea:tAssignToAttributeConfig"/>
@@ -95,6 +152,132 @@
   <xsd:element name="stateTypeConfig" type="synthea:tStateTypeConfig"/>
   <xsd:complexType name="tStateTypeConfig">
     <xsd:attribute name="stateType" type="xsd:string"/>
+    <xsd:attribute name="codeSystem" type="xsd:string"/>
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="symptomConfig" type="synthea:tSymptomConfig"/>
+  <xsd:complexType name="tSymptomConfig">
+    <xsd:attribute name="symptom" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="observationCategory" type="synthea:tObservationCategory"/>
+  <xsd:complexType name="tObservationCategory"/>
+
+  <xsd:element name="observationConfig" type="synthea:tObservationConfig"/>
+  <xsd:complexType name="tObservationConfig">
+    <xsd:attribute name="category" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="valueShape" type="synthea:tValueShape"/>
+  <xsd:complexType name="tValueShape"/>
+
+  <xsd:element name="valueConfig" type="synthea:tValueConfig"/>
+  <xsd:complexType name="tValueConfig">
+    <xsd:attribute name="valueShape" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:double"/>
+    <xsd:attribute name="valueHigh" type="xsd:double"/>
+    <xsd:attribute name="unit" type="xsd:string"/>
+    <xsd:attribute name="decimals" type="xsd:int"/>
+  </xsd:complexType>
+
+  <xsd:element name="medicationConfig" type="synthea:tMedicationConfig"/>
+  <xsd:complexType name="tMedicationConfig">
+    <xsd:attribute name="administration" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="chronic" type="xsd:boolean" default="false"/>
+  </xsd:complexType>
+
+  <xsd:element name="prescriptionConfig" type="synthea:tPrescriptionConfig"/>
+  <xsd:complexType name="tPrescriptionConfig">
+    <xsd:attribute name="refills" type="xsd:int"/>
+    <xsd:attribute name="asNeeded" type="xsd:boolean" default="false"/>
+    <xsd:attribute name="dosageAmount" type="xsd:double"/>
+    <xsd:attribute name="dosageFrequency" type="xsd:double"/>
+    <xsd:attribute name="dosagePeriod" type="xsd:double"/>
+    <xsd:attribute name="dosageUnit" type="xsd:string"/>
+    <xsd:attribute name="durationQuantity" type="xsd:double"/>
+    <xsd:attribute name="durationUnit" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="prescriptionInstruction" type="synthea:tPrescriptionInstruction"/>
+  <xsd:complexType name="tPrescriptionInstruction">
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="allergyType" type="synthea:tAllergyType"/>
+  <xsd:complexType name="tAllergyType"/>
+
+  <xsd:element name="allergyCategory" type="synthea:tAllergyCategory"/>
+  <xsd:complexType name="tAllergyCategory"/>
+
+  <xsd:element name="allergyConfig" type="synthea:tAllergyConfig"/>
+  <xsd:complexType name="tAllergyConfig">
+    <xsd:attribute name="allergyType" type="xsd:string"/>
+    <xsd:attribute name="category" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="allergyReaction" type="synthea:tAllergyReaction"/>
+  <xsd:complexType name="tAllergyReaction">
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+    <xsd:attribute name="severityNone" type="xsd:double"/>
+    <xsd:attribute name="severityMild" type="xsd:double"/>
+    <xsd:attribute name="severityModerate" type="xsd:double"/>
+    <xsd:attribute name="severitySevere" type="xsd:double"/>
+  </xsd:complexType>
+
+  <xsd:element name="vitalSignConfig" type="synthea:tVitalSignConfig"/>
+  <xsd:complexType name="tVitalSignConfig">
+    <xsd:attribute name="vitalSign" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="supplyItem" type="synthea:tSupplyItem"/>
+  <xsd:complexType name="tSupplyItem">
+    <xsd:attribute name="quantity" type="xsd:int"/>
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="vaccineConfig" type="synthea:tVaccineConfig"/>
+  <xsd:complexType name="tVaccineConfig">
+    <xsd:attribute name="series" type="xsd:int"/>
+  </xsd:complexType>
+
+  <xsd:element name="carePlanActivity" type="synthea:tCarePlanActivity"/>
+  <xsd:complexType name="tCarePlanActivity">
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+  </xsd:complexType>
+
+  <xsd:element name="imagingStudySeries" type="synthea:tImagingStudySeries"/>
+  <xsd:complexType name="tImagingStudySeries">
+    <xsd:attribute name="bodySiteCode" type="xsd:string"/>
+    <xsd:attribute name="bodySiteDisplay" type="xsd:string"/>
+    <xsd:attribute name="modalityCode" type="xsd:string"/>
+    <xsd:attribute name="modalityDisplay" type="xsd:string"/>
+    <xsd:attribute name="instanceTitle" type="xsd:string"/>
+    <xsd:attribute name="sopClassCode" type="xsd:string"/>
+    <xsd:attribute name="sopClassDisplay" type="xsd:string"/>
+    <xsd:attribute name="minInstances" type="xsd:int"/>
+    <xsd:attribute name="maxInstances" type="xsd:int"/>
+  </xsd:complexType>
+
+  <xsd:element name="reportObservation" type="synthea:tReportObservation"/>
+  <xsd:complexType name="tReportObservation">
+    <xsd:attribute name="code" type="xsd:string"/>
+    <xsd:attribute name="codeDisplay" type="xsd:string"/>
+    <xsd:attribute name="category" type="xsd:string"/>
+    <xsd:attribute name="unit" type="xsd:string"/>
+    <xsd:attribute name="valueShape" type="xsd:string"/>
+    <xsd:attribute name="value" type="xsd:double"/>
+    <xsd:attribute name="valueHigh" type="xsd:double"/>
+    <xsd:attribute name="decimals" type="xsd:int"/>
+    <xsd:attribute name="valueCodeSystem" type="xsd:string"/>
+    <xsd:attribute name="valueCode" type="xsd:string"/>
+    <xsd:attribute name="valueCodeDisplay" type="xsd:string"/>
+    <xsd:attribute name="vitalSign" type="xsd:string"/>
   </xsd:complexType>
 
   <xsd:element name="conditionConfig" type="synthea:tConditionConfig"/>

@@ -1,0 +1,102 @@
+{
+  "name": "Symptom Check",
+  "states": {
+    "Symptom: Cough": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 50,
+        "high": 100
+      },
+      "direct_transition": "Symptom: Bloody Cough"
+    },
+    "Symptom: Bloody Cough": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 100,
+        "high": 350
+      },
+      "direct_transition": "Symptom: Shortness of Breath"
+    },
+    "Symptom: Shortness of Breath": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 100,
+        "high": 350
+      },
+      "direct_transition": "Symptom: Fever"
+    },
+    "Symptom: Fever": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 50,
+        "high": 250
+      },
+      "direct_transition": "Symptom: Head and neck swelling"
+    },
+    "Symptom: Sweats": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 50,
+        "high": 250
+      },
+      "direct_transition": "Symptom: Fatigue"
+    },
+    "Symptom: Decrease in appetite": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 50,
+        "high": 100
+      },
+      "direct_transition": "Symptom: Decrease in weight"
+    },
+    "Symptom: Head and neck swelling": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 50,
+        "high": 250
+      },
+      "direct_transition": "Symptom: Sweats"
+    },
+    "Symptom: Decrease in weight": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 50,
+        "high": 100
+      },
+      "direct_transition": "Symptom: Chest Pain"
+    },
+    "Symptom: Fatigue": {
+      "type": "Symptom",
+      "symptom": "Cough",
+      "range": {
+        "low": 50,
+        "high": 250
+      },
+      "direct_transition": "Symptom: Decrease in appetite"
+    },
+    "Symptom: Chest Pain": {
+      "type": "Symptom",
+      "symptom": "Chest Pain",
+      "range": {
+        "low": 50,
+        "high": 250
+      },
+      "direct_transition": "Terminal"
+    },
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Symptom: Cough"
+    },
+    "Terminal": {
+      "type": "Terminal"
+    }
+  }
+}

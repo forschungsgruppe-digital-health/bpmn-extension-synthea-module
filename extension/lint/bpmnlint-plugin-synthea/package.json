@@ -1,7 +1,7 @@
 {
   "name": "bpmnlint-plugin-synthea",
   "version": "0.1.0",
-  "description": "bpmnlint plugin for the synthea: BPMN extension, covering ProbabilityConfig, Condition/ConditionConfig, StateTypeConfig, DelayConfig, GuardConfig, SubmoduleConfig, EncounterContext, EncounterReference, CounterConfig, SetAttributeConfig, AssignToAttributeConfig and ReferencedByAttributeConfig.",
+  "description": "bpmnlint plugin for the synthea: BPMN extension, covering the configuration elements of the extension (state type and code, delays, guards, conditions and probabilities, submodules, encounters, attributes, values and report observations).",
   "main": "index.js",
   "license": "MIT",
   "private": true,

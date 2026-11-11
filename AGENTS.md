@@ -5,12 +5,13 @@ files (e.g. `CLAUDE.md`) import this file; point other agents (Cursor, Codex, �
 at it too.
 
 ## Project
-A template for a custom BPMN 2.0 / bpmn.io extension with automated conformance
-checks. Node 22, ES modules.
+A custom BPMN 2.0 / bpmn.io extension (`synthea:`) with a converter from BPMN to
+Synthea modules (`tools/bpmn2gmf`) and automated conformance checks. Node 22, ES modules.
 
 - `extension/` — the custom extension you author (moddle model descriptor, lint plugin, optional bpmn-js modules).
 - `examples/valid/` and `examples/invalid/` — abstract diagrams used as positive and negative validation fixtures.
-- `tools/` — deterministic checkers; their exit code is the source of truth for pass/fail.
+- `tools/` — deterministic checkers and the converter `tools/bpmn2gmf`; their exit code is the source of truth for pass/fail.
+- `lung-cancer/` — the real pathways (main pathway and four submodules) that the converter is checked against.
 - `skills/` — agent skills that orchestrate the checkers.
 - `demo/` — private (non-published) bpmn-js modeler playground for trying the extension by hand; an npm workspace. NOT a pass/fail gate.
 - `.devcontainer/` + `.github/workflows/pages.yml` — reproducible dev/Codespaces env and the GitHub Pages deploy for `demo/`.
@@ -28,18 +29,19 @@ checks. Node 22, ES modules.
 ## Never do
 - Never report "XSD passed" as "extension valid" — the XSD does not cover `<extensionElements>`.
 - Never hand-edit the version in `package.json` or `.release-please-manifest.json`; Release Please owns it.
-- Never publish manually or outside the release workflow without an explicit request.
+- Never publish the package anywhere (it is `private`) without an explicit request.
 
 ## Commits & releases
 Use [Conventional Commits](https://www.conventionalcommits.org/): `fix:` → patch,
-`feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major. Release Please turns these
-into a release PR and publishes on merge. See `CONTRIBUTING.md`.
+`feat:` → minor, `feat!:`/`BREAKING CHANGE:` → major (one level lower while below 1.0.0, see `CONTRIBUTING.md`). Release Please turns these
+into a release PR; merging it tags a release. Nothing is published to npm. See `CONTRIBUTING.md`.
 
 ## Commands
 - Full check: `npm run validate`
-- Lint, valid (must pass): `npm run lint:valid`
+- Lint, valid (must pass; covers `examples/valid/` and `lung-cancer/`): `npm run lint:valid`
 - Lint, invalid (must fail): `npm run lint:invalid`
 - Round-trip: `npm run roundtrip`
 - XSD core: `npm run xsd`
 - Extension XSD (optional, structure-only): generate `npm run xsd:gen`, drift-guard `npm run xsd:gen:check`, validate `npm run xsd:ext`
 - Conventions: `npm run conventions`
+- BPMN → Synthea converter (`docs/bpmn2gmf-concept.md`): tests `npm run test:bpmn2gmf`; convert the real pathways (must pass, strict) `npm run convert:check`; write the modules `npm run bpmn2gmf -- lung-cancer --out-dir out/modules` (`--fuse-gateways` for fewer Simple states, `--strict` to refuse incomplete modules); compare with the hand-written upstream modules by content `npm run compare:upstream` and state by state, transition by transition `npm run compare:structure` (part of `validate`); run them in a real Synthea (needs Java + the release jar, not part of `validate`) `npm run synthea:smoke -- <synthea-with-dependencies.jar>`

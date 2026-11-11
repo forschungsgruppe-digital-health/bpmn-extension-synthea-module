@@ -16,6 +16,11 @@ const { is } = require('../lib/utils');
 
 const LOWER_SNAKE_CASE = /^[a-z][a-z0-9_]*$/;
 
+// Attributes that Synthea itself defines (not ours to rename) and that don't
+// follow the convention. Conditions read them, so the name has to match
+// Synthea's exactly. Verified against upstream modules (lung_cancer_probabilities.json).
+const SYNTHEA_BUILT_IN_ATTRIBUTES = new Set(['quit smoking age']);
+
 const ATTRIBUTE_PROPERTIES_BY_TYPE = [
   { type: 'synthea:SetAttributeConfig', property: 'attribute' },
   { type: 'synthea:CounterConfig', property: 'attribute' },
@@ -37,7 +42,7 @@ module.exports = function() {
 
     const value = node[match.property];
 
-    if (!value || LOWER_SNAKE_CASE.test(value)) {
+    if (!value || LOWER_SNAKE_CASE.test(value) || SYNTHEA_BUILT_IN_ATTRIBUTES.has(value)) {
       return;
     }
 

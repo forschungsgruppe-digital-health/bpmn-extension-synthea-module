@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
+                   id="Definitions_subprocess" targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="Process_SubProcess" name="Sub-process example" isExecutable="false">
+
+    <bpmn:startEvent id="StartEvent_Main" name="Initial">
+      <bpmn:outgoing>Flow_Main_1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:task id="Task_Before" name="Set group">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="group" valueKind="VALUE" value="1" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Main_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_Main_2</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- The content of the sub-process becomes a module of its own (<file>_diagnostic_work_up), and the
+         sub-process becomes the CallSubmodule state that calls it. -->
+    <bpmn:subProcess id="SubProcess_WorkUp" name="Diagnostic work-up">
+      <bpmn:incoming>Flow_Main_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_Main_3</bpmn:outgoing>
+
+      <bpmn:startEvent id="StartEvent_Inner" name="Initial">
+        <bpmn:outgoing>Flow_Inner_1</bpmn:outgoing>
+      </bpmn:startEvent>
+
+      <bpmn:task id="Task_Inner" name="Set risk">
+        <bpmn:extensionElements>
+          <synthea:StateTypeConfig stateType="SetAttribute" />
+          <synthea:SetAttributeConfig attribute="risk" valueKind="DISTRIBUTION" distribution="UNIFORM" distributionLow="0.1" distributionHigh="0.4" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_Inner_1</bpmn:incoming>
+        <bpmn:outgoing>Flow_Inner_2</bpmn:outgoing>
+      </bpmn:task>
+
+      <bpmn:endEvent id="EndEvent_Inner" name="Terminal">
+        <bpmn:incoming>Flow_Inner_2</bpmn:incoming>
+      </bpmn:endEvent>
+
+      <bpmn:sequenceFlow id="Flow_Inner_1" sourceRef="StartEvent_Inner" targetRef="Task_Inner" />
+      <bpmn:sequenceFlow id="Flow_Inner_2" sourceRef="Task_Inner" targetRef="EndEvent_Inner" />
+    </bpmn:subProcess>
+
+    <bpmn:endEvent id="EndEvent_Main" name="Terminal">
+      <bpmn:incoming>Flow_Main_3</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_Main_1" sourceRef="StartEvent_Main" targetRef="Task_Before" />
+    <bpmn:sequenceFlow id="Flow_Main_2" sourceRef="Task_Before" targetRef="SubProcess_WorkUp" />
+    <bpmn:sequenceFlow id="Flow_Main_3" sourceRef="SubProcess_WorkUp" targetRef="EndEvent_Main" />
+
+  </bpmn:process>
+</bpmn:definitions>

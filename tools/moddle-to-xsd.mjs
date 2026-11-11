@@ -17,7 +17,8 @@
 //   - types with "superClass": ["Element"] (top-level extension elements)
 //   - isAttr properties        -> XSD attributes (optional; "required" is a lint concern)
 //   - isBody property          -> simpleContent text (or mixed content if combined with children)
-//   - typed child properties   -> element refs to the referenced type's global element
+//   - typed child properties   -> element refs to the referenced type's global element, or a local element named like
+//                                 the property when that name differs from the type's tag
 //   - isMany                   -> maxOccurs="unbounded"
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -80,7 +81,12 @@ export function generateXsd(descriptor) {
   const childLine = (owner, p) => {
     const maxOccurs = p.isMany ? 'unbounded' : '1';
     if (declared.has(p.type)) {
-      return `      <xsd:element ref="${prefix}:${declared.get(p.type)}" minOccurs="0" maxOccurs="${maxOccurs}"/>`;
+      // moddle writes a typed child under the name of the property; only when that is also the type's own tag can
+      // the global element be referenced (GuardConfig.allow and Condition.conditions are Conditions written as <allow>, <conditions>)
+      if (p.name === declared.get(p.type)) {
+        return `      <xsd:element ref="${prefix}:${declared.get(p.type)}" minOccurs="0" maxOccurs="${maxOccurs}"/>`;
+      }
+      return `      <xsd:element name="${p.name}" type="${prefix}:t${p.type}" minOccurs="0" maxOccurs="${maxOccurs}"/>`;
     }
     if (PRIMITIVES[p.type]) {
       // primitive-valued child element (text content under its own tag)

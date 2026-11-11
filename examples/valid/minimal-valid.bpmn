@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
                    xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
-                   xmlns:fhirmap="https://forschungsgruppe-digital-health.github.io/schema/fhirmap/1.0"
                    id="Definitions_valid" targetNamespace="http://bpmn.io/schema/bpmn">
 
   <bpmn:process id="Process_1" isExecutable="false">
@@ -20,18 +19,16 @@
       <bpmn:outgoing>Flow_P2</bpmn:outgoing>
     </bpmn:task>
 
-    <!-- state-type-fhirmap-consistent: stateType="Procedure" matches fhirmap:resourceType="Procedure" -->
+    <!-- state-code-complete: a code with system, code and display text, in a system the state type accepts -->
     <bpmn:task id="Task_A" name="A">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
+        <synthea:StateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="399208008" codeDisplay="Plain X-ray of chest (procedure)" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_P1</bpmn:incoming>
       <bpmn:outgoing>Flow_A_Out</bpmn:outgoing>
     </bpmn:task>
 
-    <!-- state-type-fhirmap-consistent: stateType="SetAttribute" allows an absent resourceType;
-         set-attribute-requires-attribute: SetAttributeConfig has an attribute name -->
+    <!-- set-attribute-requires-attribute: SetAttributeConfig has an attribute name -->
     <bpmn:task id="Task_B" name="B">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
@@ -158,7 +155,6 @@
     <bpmn:intermediateCatchEvent id="ConditionOnset_Good" name="Condition onset (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMapping resourceType="Condition" />
         <synthea:EncounterReference targetEncounter="Encounter_1" />
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
@@ -249,7 +245,6 @@
     <bpmn:intermediateCatchEvent id="ConditionOnset_AssignGood" name="Condition onset with assign (good)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionOnset" />
-        <fhirmap:resourceMapping resourceType="Condition" />
         <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
@@ -270,6 +265,69 @@
         <synthea:ReferencedByAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:endEvent>
+
+    <!-- symptom-config / observation-config / value-config / imaging-study-series / encounter code: a complete example of each -->
+    <bpmn:task id="Symptom_Good" name="Symptom (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Symptom" />
+        <synthea:SymptomConfig symptom="Cough" />
+        <synthea:ValueConfig valueShape="RANGE" value="50" valueHigh="100" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="Observation_Good" name="Observation (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Observation" />
+        <synthea:ObservationConfig category="vital-signs" />
+        <synthea:ValueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_CodeGood" wellness="false" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="Imaging_Good" name="Imaging study with series (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ImagingStudy" />
+        <synthea:ImagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="Procedure_Duration_Good" name="Procedure with duration (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+        <synthea:ValueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="MedicationOrder_Administration_Good" name="Administered medication (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="MedicationOrder" />
+        <synthea:MedicationConfig administration="true" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="CarePlan_Activities_Good" name="Care plan with activities (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="CarePlanStart" />
+        <synthea:CarePlanActivity code="133918004" codeDisplay="Comfort measures (regime/therapy)" />
+        <synthea:CarePlanActivity code="243072006" codeDisplay="Cancer education (procedure)" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:task id="DiagnosticReport_Good" name="Lab panel with contained observations (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="DiagnosticReport" />
+        <synthea:ReportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
+        <synthea:ReportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
+        <synthea:ReportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <bpmn:intermediateThrowEvent id="Death_TimeSpanGood" name="Death with a time span (good)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Death" />
+        <synthea:ValueConfig valueShape="RANGE" value="2" valueHigh="6" unit="years" />
+      </bpmn:extensionElements>
+    </bpmn:intermediateThrowEvent>
 
   </bpmn:process>
 </bpmn:definitions>

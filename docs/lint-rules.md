@@ -1,0 +1,35 @@
+# Lint rules
+
+The `synthea:` extension is checked by 23 lint rules. They catch what the BPMN XSD cannot: the XSD does not cover `<extensionElements>`, so a state without its configuration, a probability sum over 1 or a half-filled code is valid XML and still a broken pathway. All checks that run in `npm run validate` are listed in [validator-overview.md](validator-overview.md); the mapping the rules protect is in [implicit-rules.md](implicit-rules.md).
+
+- **Where:** `extension/lint/bpmnlint-plugin-synthea/rules/`, one file per rule. The comment at the top of each file is the long explanation.
+- **Enabled by:** `.bpmnlintrc` extends `plugin:synthea/all`. The severity of each rule is set in the plugin's `index.js` (`configs.all.rules`).
+- **Run:** `npm run lint:valid` (the fixtures in `examples/valid/` and `lung-cancer/` must pass) and `npm run lint:invalid` (`examples/invalid/` must keep failing, so the rules are proven to fire).
+- **Severity:** an **error** fails the lint and so `validate`; a **warning** is reported but does not change the exit code. Warnings are used where the diagram only suggests a mistake.
+- **Add a rule:** a file in `rules/`, an entry in `index.js` in `rules` **and** in `configs.all.rules`, a fixture in `examples/valid/` and a case in `examples/invalid/`.
+
+| ID | Rule | Severity | Group | What it checks |
+|---|---|---|---|---|
+| SYN-13 | `guard-state-requires-guard-config` | error | Required fields | a `Guard` state has a `synthea:GuardConfig`; without it there is nothing to wait for |
+| SYN-14 | `guard-allow-requires-condition` | error | Required fields | the `allow` condition of a `GuardConfig` is not empty (`conditionType` set; And, Or, At Least and At Most also need a non-empty list of conditions) |
+| SYN-15 | `callsubmodule-requires-submodule-config` | error | Required fields | a `CallSubmodule` state has a `synthea:SubmoduleConfig` with a non-empty submodule, otherwise the call has no target |
+| SYN-17 | `delay-requires-shape` | error | Required fields | a `Delay` state has a `synthea:DelayConfig` with a shape: exact, range or distribution |
+| SYN-23 | `delay-range-requires-high-value` | error | Required fields | a delay of shape `RANGE` has `delayValueHigh` next to `delayValue` |
+| SYN-20 | `counter-requires-action` | error | Required fields | a `Counter` state has a `synthea:CounterConfig` with attribute and action (increment or decrement); the amount is optional, default 1 |
+| SYN-21 | `set-attribute-requires-attribute` | error | Required fields | a `SetAttribute` state has a `synthea:SetAttributeConfig` with an attribute name; the value is optional |
+| SYN-29 | `value-range-requires-high-value` | warning | Required fields | a `synthea:ValueConfig` of shape `RANGE` has `valueHigh`; an `EXACT` value has none (Observation, Symptom, Death) |
+| SYN-30 | `careplan-activity-requires-code-and-display` | warning | Required fields | each activity of a `CarePlanStart` has a SNOMED code and its display text; the system is fixed to SNOMED-CT |
+| SYN-31 | `state-code-complete` | warning | Required fields | a clinical code (`codeSystem`, `code`, `codeDisplay` on `synthea:StateTypeConfig`) is complete once one part is set, and in a system the state type accepts (`tools/bpmn2gmf/codes.mjs`); otherwise the converter drops it and the state lacks the `codes` Synthea requires |
+| SYN-12 | `negate-requires-condition` | error | Conditions and gateways | `negate="true"` sits on a condition with a `conditionType`. Synthea has no negate flag; the converter writes a `Not` condition around it ([implicit-rules.md](implicit-rules.md), section A) |
+| SYN-16 | `probability-sum-valid` | error | Conditions and gateways | fixed probabilities on the outgoing flows of one gateway sum to at most 1, and at most one flow omits its probability (it takes the remainder); flows with a probability attribute count as neither |
+| SYN-27 | `gateway-branches-require-condition-or-probability` | warning | Conditions and gateways | on an exclusive gateway with several outgoing flows each flow has a `synthea:conditionConfig` or a `synthea:probabilityConfig`; the BPMN `name` and `conditionExpression` are only labels. At most one flow has neither: the fallback (default flow) or the probability remainder |
+| – | `inclusive-branches-require-condition-or-probability` | warning | Conditions and gateways | every branch of an inclusive gateway has its own condition or probability, because each branch is decided on its own (`tools/bpmn2gmf/gateways.mjs`); unlike the exclusive gateway there is no fallback branch |
+| SYN-32 | `alternatives-not-mixed` | warning | Conditions and gateways | fields that are alternatives are not mixed (the panel clears the other field, this catches hand-edited files): fixed probability with probability attribute; more than one of value, value attribute and distribution on `SetAttribute`; `delayValueHigh` on an exact delay; `valueHigh` on an exact value; wellness with an encounter class; a code with a `referencedByAttributeConfig` |
+| SYN-19 | `wellness-consistent-within-encounter` | error | Encounter | `wellness` is the same on every member of an encounter group (same `encounterId` within one process) |
+| SYN-25 | `encounter-class-consistent-within-encounter` | warning | Encounter | the encounter class is the same on every member of the group and set for every non-wellness encounter |
+| SYN-28 | `encounter-code-complete-and-consistent` | warning | Encounter | `encounterCodeSystem`, `encounterCode` and `encounterCodeDisplay` come together or not at all, and every member of the group agrees; Synthea requires `codes` on every non-wellness encounter |
+| SYN-18 | `encounter-reference-requires-condition-or-allergy-context` | warning | Encounter | `targetEncounter` of a `synthea:EncounterReference` is used only on `ConditionOnset` and `AllergyOnset` |
+| SYN-26 | `attribute-name-lower-snake-case` | warning | Attributes | attribute names are `lower_snake_case`; format only, not uniqueness across files (the lung cancer files share names on purpose; `npm run check:attributes` lists them) |
+| SYN-22 | `assign-to-attribute-requires-valid-state` | warning | Attributes | `assign_to_attribute` sits only on `ConditionOnset`, `AllergyOnset`, `MedicationOrder`, `CarePlanStart` and `Device` |
+| SYN-33 | `referenced-by-attribute-requires-valid-state` | warning | Attributes | `referenced_by_attribute` sits only on `ConditionEnd`, `AllergyEnd`, `MedicationEnd`, `CarePlanEnd`, `DeviceEnd` and `Death` |
+| SYN-24 | `referenced-by-attribute-matches-assign` | warning | Attributes | a referenced attribute is assigned somewhere in the same process (presence only, not order in the flow); an end state finds its onset through the shared name, so a typo breaks the link silently |

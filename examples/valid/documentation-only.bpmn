@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
+                   id="Definitions_documentation_only" targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:process id="Process_DocumentationOnly" name="Documentation-only example" isExecutable="false">
+
+    <bpmn:startEvent id="StartEvent_1" name="Initial">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Stays in the diagram for the people who read it; the converter creates no state for it
+         and joins the flows around it. -->
+    <bpmn:task id="Task_Coordination" name="Treatment coordination">
+      <bpmn:extensionElements>
+        <synthea:DocumentationOnly />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_SetGroup" name="Set group">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="group" valueKind="VALUE" value="1" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:endEvent id="EndEvent_1" name="Terminal">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_Coordination" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Coordination" targetRef="Task_SetGroup" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_SetGroup" targetRef="EndEvent_1" />
+
+  </bpmn:process>
+</bpmn:definitions>

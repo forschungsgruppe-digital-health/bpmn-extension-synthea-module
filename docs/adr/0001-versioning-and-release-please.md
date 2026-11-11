@@ -16,7 +16,7 @@ single version so a consumer can tell which release a file came from:
 - the generated XSD (`extension/model/synthea.xsd`).
 
 There is a trap: the moddle descriptor's namespace `uri`
-(`http://example.com/schema/my-extension/1.0`) embeds a version, but that is the
+(`https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0`) embeds a version, but that is the
 **data-format contract** version. Auto-bumping it on every release would change
 the XML namespace and break every diagram already in the wild (AGENTS.md lists
 changing the `uri` under "ask first"). So the release SemVer and the namespace
@@ -56,5 +56,5 @@ the XSD, applied automatically by Release Please — and we leave the namespace
   a silent miss would leave the XSD stale. The annotated comment + drift guard is
   more robust.
 - **Separate Release Please components with the `linked-versions` plugin** —
-  rejected as heavier (multiple changelogs/tags) than this template needs; one
+  rejected as heavier (multiple changelogs/tags) than this repository needs; one
   component with `extra-files` keeps a single version, changelog, and tag.

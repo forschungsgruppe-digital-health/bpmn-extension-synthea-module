@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
                    xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
-                   xmlns:fhirmap="https://forschungsgruppe-digital-health.github.io/schema/fhirmap/1.0"
                    id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
 
   <bpmn:process id="Process_1" isExecutable="false">
@@ -86,14 +85,6 @@
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
 
-    <!-- state-type-fhirmap-consistent: stateType="Procedure" but
-         fhirmap:resourceType is absent -->
-    <bpmn:task id="Task_Procedure_Bad" name="Bad procedure mapping">
-      <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Procedure" />
-      </bpmn:extensionElements>
-    </bpmn:task>
-
     <!-- guard-state-requires-guard-config: stateType="Guard" with no GuardConfig at all -->
     <bpmn:exclusiveGateway id="Gateway_Guard_NoConfig" name="Guard (missing GuardConfig)">
       <bpmn:extensionElements>
@@ -141,7 +132,6 @@
     <bpmn:intermediateCatchEvent id="ConditionEnd_BadReference" name="Condition end (bad reference)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionEnd" />
-        <fhirmap:resourceMapping resourceType="Condition" />
         <synthea:EncounterReference targetEncounter="Encounter_1" />
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
@@ -209,7 +199,6 @@
     <bpmn:task id="Procedure_AssignBad" name="Procedure with assign (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
         <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -228,7 +217,6 @@
     <bpmn:task id="Procedure_ReferencedBad" name="Procedure with referenced-by (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Procedure" />
-        <fhirmap:resourceMapping resourceType="Procedure" />
         <synthea:ReferencedByAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:task>
@@ -239,10 +227,102 @@
     <bpmn:endEvent id="ConditionEnd_ReferencedUnmatched" name="Condition end with unmatched referenced-by (bad)">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="ConditionEnd" />
-        <fhirmap:resourceMapping resourceType="Condition" />
         <synthea:ReferencedByAttributeConfig attribute="never_assigned_attribute" />
       </bpmn:extensionElements>
     </bpmn:endEvent>
 
+    <!-- encounter-code-complete-and-consistent: encounterCode without system and display -->
+    <bpmn:task id="Task_EncounterCodePartial" name="Encounter code incomplete (bad)">
+      <bpmn:extensionElements>
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_CodePartial" wellness="false" encounterClass="inpatient" encounterCode="185347001" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- value-range-requires-high-value: RANGE without valueHigh -->
+    <bpmn:task id="Task_ValueRangeNoHigh" name="Observation range without high (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Observation" />
+        <synthea:ValueConfig valueShape="RANGE" value="4" unit="{score}" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- careplan-activity-requires-code-and-display: activity with a code but no display -->
+    <bpmn:task id="Task_CarePlanActivityPartial" name="Care plan activity incomplete (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="CarePlanStart" />
+        <synthea:CarePlanActivity code="133918004" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- state-code-complete: a code with no codeSystem and no codeDisplay -->
+    <bpmn:task id="Task_CodeIncomplete" name="Code incomplete (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" code="399208008" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- state-code-complete: a Procedure with a LOINC code (a procedure takes SNOMED CT) -->
+    <bpmn:task id="Task_CodeWrongSystem" name="Code in the wrong system (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" codeSystem="http://loinc.org" code="1234-5" codeDisplay="x" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- gateway-branches-require-condition-or-probability: two outgoing flows, neither has a
+         synthea:conditionConfig or synthea:probabilityConfig -->
+    <bpmn:exclusiveGateway id="Gateway_BranchesNoConfig" name="Branches (no condition)" />
+    <bpmn:sequenceFlow id="Flow_BranchNoConfig_A" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_Counter_NoConfig" />
+    <bpmn:sequenceFlow id="Flow_BranchNoConfig_B" sourceRef="Gateway_BranchesNoConfig" targetRef="Task_SetAttribute_NoConfig" />
+
+    <!-- inclusive-branches-require-condition-or-probability: every branch is decided on its own, so the
+         second flow needs a condition or probability too (unlike an exclusive gateway there is no fallback) -->
+    <bpmn:inclusiveGateway id="Gateway_InclusiveNoConfig" name="Inclusive (branch without probability)" />
+    <bpmn:sequenceFlow id="Flow_InclusiveNoConfig_A" sourceRef="Gateway_InclusiveNoConfig" targetRef="Task_Counter_NoConfig">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probabilityKind="FIXED" probability="0.4" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_InclusiveNoConfig_B" sourceRef="Gateway_InclusiveNoConfig" targetRef="Task_SetAttribute_NoConfig" />
+
+  
+    <!-- alternatives-not-mixed: a fixed value and a copy of another attribute on one Set Attribute -->
+    <bpmn:task id="Task_SetTwoWays" name="Set two ways (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="x" value="3" valueAttribute="y" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- alternatives-not-mixed: wellness together with an encounter class -->
+    <bpmn:task id="Task_WellnessAndClass" name="Wellness and class (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Procedure" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="E_mixed" wellness="true" encounterClass="inpatient" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+  
+    <!-- alternatives-not-mixed: delayValueHigh on an exact delay -->
+    <bpmn:intermediateCatchEvent id="Event_DelayHighOnExact" name="Delay high on exact (bad)">
+      <bpmn:extensionElements>
+        <synthea:DelayConfig delayShape="EXACT" delayValue="1" delayValueHigh="3" delayUnit="days" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- alternatives-not-mixed: valueHigh on an exact value -->
+    <bpmn:task id="Task_ValueHighOnExact" name="Value high on exact (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Observation" />
+        <synthea:ValueConfig valueShape="EXACT" value="1" valueHigh="3" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+
+    <!-- alternatives-not-mixed: an end state with a code and a reference to an attribute -->
+    <bpmn:task id="Task_ReferenceAndCode" name="Reference and code (bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="ConditionEnd" codeSystem="http://snomed.info/sct" code="1" codeDisplay="x" />
+        <synthea:ReferencedByAttributeConfig attribute="dx" />
+      </bpmn:extensionElements>
+    </bpmn:task>
   </bpmn:process>
 </bpmn:definitions>

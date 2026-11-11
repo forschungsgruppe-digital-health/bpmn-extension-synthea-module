@@ -1,5 +1,5 @@
 {
-  "name": "bpmn-extension-template",
+  "name": "bpmn-extension-synthea-module",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
 
   // Install xmllint (for the xsd / xsd:ext checks) and all workspace deps.

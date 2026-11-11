@@ -102,6 +102,9 @@
     <bpmn2:sequenceFlow id="Flow_0ihpj3f" name="Gender = F" sourceRef="Gateway_09abq9b" targetRef="Gateway_1je2c8j">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">Gender = F</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Gender" gender="F" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_1l6hu1u" name="Gender = M" sourceRef="Gateway_09abq9b" targetRef="Gateway_08b83gc">
@@ -112,11 +115,17 @@
     <bpmn2:sequenceFlow id="Flow_069pe3f" name="smoker == true" sourceRef="Gateway_1je2c8j" targetRef="Activity_1o5nfvn">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">smoker == true</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Attribute" attribute="smoker" operator="==" value="true" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_11ty117" name="quit smoking age is not nil" sourceRef="Gateway_1je2c8j" targetRef="Activity_18nznbf">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">quit smoking age is not nil</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Attribute" attribute="quit smoking age" operator="is not nil" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_03pipu1" name="else" sourceRef="Gateway_1je2c8j" targetRef="Activity_0y6jkzv">
@@ -127,11 +136,17 @@
     <bpmn2:sequenceFlow id="Flow_05fwd47" name="smoker == true" sourceRef="Gateway_08b83gc" targetRef="Activity_0hjtqu7">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">smoker == true</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Attribute" attribute="smoker" operator="==" value="true" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_029pq7p" name="quit smoking age is not nil" sourceRef="Gateway_08b83gc" targetRef="Activity_0mz0jlo">
       <bpmn2:extensionElements>
         <i18n:translation lang="de">quit smoking age is not nil</i18n:translation>
+        <synthea:conditionConfig>
+          <synthea:condition conditionType="Attribute" attribute="quit smoking age" operator="is not nil" />
+        </synthea:conditionConfig>
       </bpmn2:extensionElements>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="Flow_0bzbjwr" name="else" sourceRef="Gateway_08b83gc" targetRef="Activity_1kfjgrn">

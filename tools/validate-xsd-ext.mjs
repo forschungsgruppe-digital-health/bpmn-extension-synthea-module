@@ -101,7 +101,7 @@ if (probe) {
   console.log(`self-check OK: structural errors in <${descriptor.prefix}:${probe}> are rejected`);
 }
 
-const files = globSync('examples/**/*.bpmn');
+const files = [...globSync('examples/**/*.bpmn'), ...globSync('lung-cancer/**/*.bpmn')];
 if (!files.length) {
   console.error('No example diagrams found under examples/.');
   process.exit(1);
