@@ -7,6 +7,7 @@ import { synthesizeEncounters } from './encounters.mjs';
 import { buildTransition } from './transitions.mjs';
 import { emitState } from './emit.mjs';
 import { verifyModule, verifySubmodules } from './verify.mjs';
+import { verifyFlow } from './verify-flow.mjs';
 import { missingFields } from './required-fields.mjs';
 import { fuseGateways, fuseComplexTransitions } from './fuse.mjs';
 import { assignPaths } from './layout.mjs';
@@ -62,6 +63,7 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
 
   checkEncountersAcrossSubprocesses(modules, diag);
   verifySubmodules(modules, diag);
+  verifyFlow(modules, diag);
   assignPaths(modules);
 
   const results = modules.map((m) => ({
