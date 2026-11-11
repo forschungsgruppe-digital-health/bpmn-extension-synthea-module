@@ -7,7 +7,7 @@ name: deploy-demo
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   workflow_dispatch:
 
 # Least-privilege token scopes required by actions/deploy-pages.
