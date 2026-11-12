@@ -1,0 +1,15 @@
+# `docker compose up` builds the image and serves the modeler on http://localhost:5173
+#
+# Convert a model to Synthea modules with the converter in the same image:
+#   docker compose run --rm app npm run bpmn2gmf -- lung-cancer --out-dir out/modules
+services:
+  app:
+    build: .
+    ports:
+      - "5173:5173"
+    volumes:
+      # Edit files on the host and see them in the modeler (hot reload).
+      - .:/app
+      # Keep the installed dependencies of the image.
+      - /app/node_modules
+      - /app/demo/node_modules

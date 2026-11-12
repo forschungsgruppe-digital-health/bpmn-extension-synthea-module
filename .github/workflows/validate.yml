@@ -34,3 +34,48 @@ jobs:
           else
             echo "invalid examples correctly rejected"
           fi
+
+  # Installability: pack the package, install it into examples/consumer, build, run the converter bin.
+  consumer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Pack, install into the consumer example, build (npm run test:consumer)
+        run: npm run test:consumer
+
+  # The Docker setup: the image builds and serves the modeler.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build and start (docker compose up)
+        run: docker compose up --build --detach
+
+      - name: Wait for the modeler on port 5173
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:5173/ | grep -q "BPMN Extension Demo"; then
+              echo "modeler is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs
+          echo "::error::modeler did not come up on port 5173"
+          exit 1
+
+      - name: Converter is in the image
+        run: docker compose exec -T app npm run convert:check
+
+      - name: Stop
+        if: always()
+        run: docker compose down

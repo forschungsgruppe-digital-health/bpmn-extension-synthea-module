@@ -85,8 +85,43 @@ comes with an explanation and what to do), with a download of the JSON. On the p
 (GitHub Pages, rebuilt on every merge into `dev`) the link **Converter result** opens the modules and
 the report that the converter made from `lung-cancer/` at that merge, with the commit they come from.
 
+### With Docker
+
+```bash
+docker compose up    # builds the image, serves the modeler on http://localhost:5173
+```
+
+The image has the demo, the converter and `xmllint`. To run the converter in it:
+
+```bash
+docker compose run --rm app npm run bpmn2gmf -- lung-cancer --out-dir out/modules
+```
+
+### As a dependency in your own project
+
+The package resolves through `exports`, so a project that has the repository checked out (or a
+tarball from `npm pack`) can depend on it as a file:
+
+```json
+{ "dependencies": { "bpmn-js-synthea-extension": "file:../bpmn-extension-synthea-module" } }
+```
+
+| Import | What it is |
+|---|---|
+| `bpmn-js-synthea-extension` | the bpmn-js module |
+| `bpmn-js-synthea-extension/model` | the moddle descriptor |
+| `bpmn-js-synthea-extension/xsd` | the XSD file |
+| `bpmn-js-synthea-extension/converter` | the converter as a function |
+| `npx bpmn2gmf <files>` | the converter on the command line |
+
+The properties panel packages (`@bpmn-io/properties-panel`, `bpmn-js-properties-panel`) and `bpmn-js`
+are peer dependencies; the project installs them itself. A working project is in
+[`examples/consumer/`](examples/consumer/); `npm run test:consumer` packs the package, installs it
+there and builds it.
+
 To use the extension in your own bpmn-js modeler, register the module and the moddle descriptor
-(this is what `demo/src/main.js` does):
+(this is what `demo/src/main.js` does; with the package, import from `bpmn-js-synthea-extension`
+and `bpmn-js-synthea-extension/model`):
 
 ```js
 import BpmnModeler from 'bpmn-js/lib/Modeler';
