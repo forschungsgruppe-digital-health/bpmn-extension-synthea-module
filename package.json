@@ -10,9 +10,19 @@
   "bugs": {
     "url": "https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module/issues"
   },
-  "private": true,
   "type": "module",
   "license": "MIT",
+  "main": "./extension/src/index.js",
+  "exports": {
+    ".": "./extension/src/index.js",
+    "./model": "./extension/model/synthea.json",
+    "./xsd": "./extension/model/synthea.xsd",
+    "./converter": "./tools/bpmn2gmf/convert.mjs",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "bpmn2gmf": "./tools/bpmn2gmf/cli.mjs"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -21,7 +31,11 @@
     "demo"
   ],
   "files": [
-    "extension"
+    "extension/src",
+    "extension/model",
+    "extension/README.md",
+    "tools/bpmn2gmf/*.mjs",
+    "tools/bpmn2gmf/module.schema.json"
   ],
   "scripts": {
     "lint:valid": "bpmnlint \"examples/valid/**/*.bpmn\" \"lung-cancer/*.bpmn\"",
@@ -32,6 +46,7 @@
     "xsd:gen:check": "node tools/moddle-to-xsd.mjs --check",
     "xsd:ext": "node tools/validate-xsd-ext.mjs",
     "conventions": "node tools/check-package-conventions.mjs",
+    "test:consumer": "node tools/test-consumer.mjs",
     "check:attributes": "node tools/check-attribute-usage.mjs",
     "bpmn2gmf": "node tools/bpmn2gmf/cli.mjs",
     "test:bpmn2gmf": "node --test \"tools/bpmn2gmf/test/*.test.mjs\"",
@@ -54,14 +69,20 @@
     "bpmn-js-properties-panel": ">=5"
   },
   "peerDependenciesMeta": {
-    "@bpmn-io/properties-panel": { "optional": true },
-    "bpmn-js-properties-panel": { "optional": true }
+    "@bpmn-io/properties-panel": {
+      "optional": true
+    },
+    "bpmn-js-properties-panel": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "ajv": "^8.20.0",
-    "bpmn-moddle": "^9.0.1",
     "esbuild": "^0.25.12",
     "bpmnlint": "^11.0.0",
     "bpmn-js-properties-panel": "^5.30.0"
+  },
+  "dependencies": {
+    "bpmn-moddle": "^9.0.1"
   }
 }

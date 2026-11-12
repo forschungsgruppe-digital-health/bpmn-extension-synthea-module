@@ -1,0 +1,21 @@
+{
+  "name": "synthea-extension-consumer-example",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Minimal project that uses bpmn-js-synthea-extension as a file-based dependency.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "convert": "bpmn2gmf diagram.bpmn --out-dir modules"
+  },
+  "dependencies": {
+    "@bpmn-io/properties-panel": "^3.24.1",
+    "bpmn-js": "^18.0.0",
+    "bpmn-js-properties-panel": "^5.30.0",
+    "bpmn-js-synthea-extension": "file:../.."
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}
