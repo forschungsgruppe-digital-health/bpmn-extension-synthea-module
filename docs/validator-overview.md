@@ -39,7 +39,7 @@ The converter checks its own output while it converts (`verify.mjs`, `verify-flo
 
 ## Structure of a module: the JSON Schema
 
-`tools/bpmn2gmf/module.schema.json` is generated, never edited by hand (`npm run schema:gen` rewrites it). It is a second statement of the rules in `required-fields.mjs`, not an independent check; it exists so people who write or edit Synthea JSON without our converter can validate it (editors read a JSON Schema for completion and errors).
+`tools/bpmn2gmf/module.schema.json` is generated, never edited by hand (`npm run schema:gen` rewrites it). It is a second statement of the rules in `required-fields.mjs`, not an independent check; it exists so people who write or edit Synthea JSON without our converter can validate it (editors read a JSON Schema for completion and errors). `.vscode/settings.json` points VS Code at it for the modules in `tools/bpmn2gmf/test/golden/` and `tools/bpmn2gmf/test/upstream/`: opening one underlines a missing field and offers the state types while typing. This happens in the editor only; it changes no file and is no part of `validate`. For your own modules, add their path to `fileMatch`.
 
 | In the schema | Left to the converter's checks (`verify.mjs`, `verify-flow.mjs`, `codes.mjs`) |
 |---|---|

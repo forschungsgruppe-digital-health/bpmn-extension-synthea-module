@@ -1,0 +1,11 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "tools/bpmn2gmf/test/golden/*.json",
+        "tools/bpmn2gmf/test/upstream/*.json"
+      ],
+      "url": "./tools/bpmn2gmf/module.schema.json"
+    }
+  ]
+}
