@@ -42,6 +42,9 @@ const modeler = new BpmnModeler({
 // The converter gets all entries, so a main pathway finds the submodules it calls.
 // ---------------------------------------------------------------------------------------------
 const $ = (sel) => document.querySelector(sel);
+// Examples: the real lung cancer pathway of this repository, loaded only when asked for (one chunk
+// per file, so nothing is downloaded up front). Everything else in the modeler is the user's own.
+const exampleLoaders = import.meta.glob('../../lung-cancer/*.bpmn', { query: '?raw', import: 'default' });
 const SESSION_KEY = 'synthea-modeler-session-v1';
 const files = []; // open entries, in the order they were opened
 let current = null; // the entry shown on the canvas
@@ -371,6 +374,52 @@ $('#open-folder').addEventListener('click', pick($('#folder-input')));
 $('#welcome-folder').addEventListener('click', pick($('#folder-input')));
 $('#file-input').addEventListener('change', (e) => addFiles(fromFileList(e.target.files)));
 $('#folder-input').addEventListener('change', (e) => addFiles(fromFileList(e.target.files)));
+// Examples menu.
+const EXAMPLE_LABELS = {
+  'synthea-lung-cancer.bpmn': 'Main pathway (calls the four submodules)',
+  'lung-cancer-probabilities-submodule.bpmn': 'Probabilities (submodule)',
+  'lung-cancer-treatment-submodule.bpmn': 'Treatment cycle (submodule)',
+  'symptom-check-submodule.bpmn': 'Symptom check (submodule)',
+  'anemia-submodule.bpmn': 'Anemia (submodule)'
+};
+const exampleItems = Object.entries(exampleLoaders)
+  .map(([path, read]) => ({ path: `lung-cancer/${baseName(path)}`, read }))
+  .sort((a, b) => (a.path.includes('synthea-lung-cancer') ? -1 : b.path.includes('synthea-lung-cancer') ? 1 : a.path.localeCompare(b.path)));
+const examplesMenu = $('#examples-menu');
+function closeExamples() {
+  examplesMenu.hidden = true;
+  $('#examples').setAttribute('aria-expanded', 'false');
+}
+function addMenuItem(label, hint, onClick) {
+  const item = document.createElement('button');
+  item.type = 'button';
+  item.setAttribute('role', 'menuitem');
+  item.innerHTML = '<span></span><small></small>';
+  item.firstChild.textContent = label;
+  item.lastChild.textContent = hint;
+  item.addEventListener('click', () => { closeExamples(); onClick(); });
+  examplesMenu.appendChild(item);
+}
+if (exampleItems.length) {
+  addMenuItem('Lung cancer pathway: all five files', 'The main pathway with its submodules; opens like a folder.', () => addFiles(exampleItems));
+  const sep = document.createElement('hr');
+  examplesMenu.appendChild(sep);
+  for (const item of exampleItems) {
+    addMenuItem(EXAMPLE_LABELS[baseName(item.path)] ?? baseName(item.path), baseName(item.path), () => addFiles([item]));
+  }
+} else {
+  $('#examples').hidden = true;
+  $('#welcome-example').hidden = true;
+}
+$('#examples').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const open = examplesMenu.hidden;
+  examplesMenu.hidden = !open;
+  $('#examples').setAttribute('aria-expanded', String(open));
+});
+document.addEventListener('click', (e) => { if (!examplesMenu.contains(e.target)) closeExamples(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeExamples(); });
+$('#welcome-example').addEventListener('click', () => addFiles(exampleItems));
 $('#new-diagram').addEventListener('click', newDiagram);
 $('#welcome-new').addEventListener('click', newDiagram);
 $('#download').addEventListener('click', saveCurrent);

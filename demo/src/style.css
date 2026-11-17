@@ -351,3 +351,34 @@ button.link { border: 0; background: none; color: var(--accent); cursor: pointer
 
 body:not(.has-files) #files-toggle { display: none; }
 body:not(.has-files) #properties { display: none; }
+
+/* ---- Examples menu ---- */
+.menu-wrap { position: relative; }
+#examples-menu {
+  position: absolute;
+  z-index: 300;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 320px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-raised);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+#examples-menu[hidden] { display: none; }
+#examples-menu hr { border: 0; border-top: 1px solid var(--border); margin: 6px 0; }
+.toolbar #examples-menu button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  gap: 2px;
+  padding: 7px 10px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  white-space: normal;
+}
+.toolbar #examples-menu button:hover { background: var(--accent-low); }
+#examples-menu small { color: var(--text-muted); font-size: 11px; }

@@ -36,6 +36,10 @@
         <button id="open-files" type="button" title="Open one or more BPMN files (.bpmn or .xml) from your computer">Open files…</button>
         <button id="open-folder" type="button" title="Open all BPMN files (.bpmn or .xml) in a folder, including subfolders">Open folder…</button>
         <button id="new-diagram" type="button" title="Start an empty diagram">New</button>
+        <span class="menu-wrap">
+          <button id="examples" type="button" aria-haspopup="true" aria-expanded="false" title="Open the real lung cancer pathway as an example">Examples ▾</button>
+          <div id="examples-menu" role="menu" hidden></div>
+        </span>
         <span class="divider"></span>
         <span id="current-name" class="current-name" hidden></span>
         <span class="spacer"></span>
@@ -70,15 +74,16 @@
               <div class="drop-actions">
                 <button id="welcome-files" type="button" class="primary">Open files…</button>
                 <button id="welcome-folder" type="button">Open folder…</button>
+                <button id="welcome-example" type="button">Try the lung cancer example</button>
                 <button id="welcome-new" type="button">Start a new diagram</button>
               </div>
             </div>
             <ol class="steps">
-              <li><strong>Open</strong> one file or a whole folder. A main pathway that calls submodules needs the submodule files open too, so open the folder.</li>
+              <li><strong>Open</strong> one file or a whole folder, or try the real lung cancer pathway from <strong>Examples</strong>. A main pathway that calls submodules needs the submodule files open too, so open the folder.</li>
               <li><strong>Edit</strong>: click an element and set its Synthea properties in the panel on the right.</li>
               <li><strong>Convert</strong> to see the Synthea module, with messages that explain what to fix.</li>
             </ol>
-            <p class="small">New to this? Follow the <a href="../start/quickstart/">Quickstart</a>, which also has example files to download. Reading <a href="../start/basics/">Basics</a> first helps.</p>
+            <p class="small">New to this? Follow the <a href="../start/quickstart/">Quickstart</a>, which uses the examples. Reading <a href="../start/basics/">Basics</a> first helps.</p>
           </div>
         </section>
         <div id="drop-overlay" hidden><span>Drop to open</span></div>

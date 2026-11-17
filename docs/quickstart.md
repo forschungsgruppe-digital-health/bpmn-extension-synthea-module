@@ -4,9 +4,11 @@ About ten minutes. You need a browser and nothing else: the modeler on this site
 
 ## 1. Open an example
 
-The modeler has no diagrams of its own: you open your files, which stay in your browser and are never uploaded. For this tutorial, download the smallest real example, [lung-cancer-probabilities-submodule.bpmn](/examples/lung-cancer-probabilities-submodule.bpmn) (right-click, save link as). Then open the [modeler](/modeler/) and drag the file onto the page, or press **Open files…** and choose it. The file appears in the list on the left and as a diagram on the canvas: circles, boxes and diamonds connected by arrows. If you are not sure what they mean, read [Basics](basics.md) first.
+The modeler has no diagrams of its own: you open your files, which stay in your browser and are never uploaded. To follow this tutorial, open the **Examples** menu in the toolbar (or press **Try the lung cancer example** on the start screen) and choose **Probabilities (submodule)**, the smallest real example. The file appears in the list on the left and as a diagram on the canvas: circles, boxes and diamonds connected by arrows. If you are not sure what they mean, read [Basics](basics.md) first.
 
-More examples, all from the lung cancer pathway: [main pathway](/examples/synthea-lung-cancer.bpmn), [treatment cycle](/examples/lung-cancer-treatment-submodule.bpmn), [symptom check](/examples/symptom-check-submodule.bpmn) and [anemia](/examples/anemia-submodule.bpmn). The main pathway calls the four others, so to open it with its submodules put all five files in one folder and use **Open folder…**.
+You can also download the file, [lung-cancer-probabilities-submodule.bpmn](/examples/lung-cancer-probabilities-submodule.bpmn) (right-click, save link as), and drag it onto the page or press **Open files…**. That is how you open your own files later.
+
+The other examples, all from the lung cancer pathway, as downloads: [main pathway](/examples/synthea-lung-cancer.bpmn), [treatment cycle](/examples/lung-cancer-treatment-submodule.bpmn), [symptom check](/examples/symptom-check-submodule.bpmn) and [anemia](/examples/anemia-submodule.bpmn). The main pathway calls the four others, so open it together with them: **Lung cancer pathway: all five files** in the Examples menu does that, and for downloaded files put all five in one folder and use **Open folder…**.
 
 ## 2. Look at one element
 
