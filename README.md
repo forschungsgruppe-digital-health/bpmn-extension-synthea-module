@@ -6,6 +6,9 @@
 > The moddle schema, the properties panel and the converter may change without notice.
 > Use it with **synthetic data only**; it is not meant to process real patient data.
 
+**Live preview:** <https://forschungsgruppe-digital-health.github.io/bpmn-extension-synthea-module/>
+(the modeler with the extension and the converter result for the lung cancer pathway).
+
 BPMN has no probabilities, no Synthea state types and no encounter groups. This repository adds
 them as a [bpmn.io](https://bpmn.io) extension in the namespace `synthea:`, without changing the BPMN
 standard, and ships a converter that writes the result as Synthea Generic Module Framework (GMF)
