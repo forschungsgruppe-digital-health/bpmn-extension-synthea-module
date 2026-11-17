@@ -33,8 +33,8 @@
 
       <div class="toolbar" role="toolbar" aria-label="Diagram actions">
         <button id="files-toggle" type="button" class="ghost" title="Show or hide the list of open files">Files</button>
-        <button id="open-files" type="button" title="Open one or more .bpmn files from your computer">Open files…</button>
-        <button id="open-folder" type="button" title="Open all .bpmn files in a folder (including subfolders)">Open folder…</button>
+        <button id="open-files" type="button" title="Open one or more BPMN files (.bpmn or .xml) from your computer">Open files…</button>
+        <button id="open-folder" type="button" title="Open all BPMN files (.bpmn or .xml) in a folder, including subfolders">Open folder…</button>
         <button id="new-diagram" type="button" title="Start an empty diagram">New</button>
         <span class="divider"></span>
         <span id="current-name" class="current-name" hidden></span>
@@ -55,7 +55,7 @@
           <button id="close-all" type="button" class="link" title="Close all files and forget this session">Close all</button>
         </div>
         <ul id="file-list"></ul>
-        <p class="files-foot">Drop more files or a folder anywhere on this page. Your files stay in this browser; nothing is uploaded.</p>
+        <p class="files-foot">Drop more files or a folder anywhere on this page (<code>.bpmn</code> or <code>.xml</code>). Your files stay in this browser; nothing is uploaded.</p>
       </aside>
 
       <div class="stage">
@@ -63,9 +63,9 @@
         <section id="welcome" aria-label="Get started">
           <div class="welcome-card">
             <h1>Bring your own pathway</h1>
-            <p>Open your BPMN files to edit them with the Synthea settings and see the Synthea module they become. Everything runs in your browser; nothing is uploaded.</p>
+            <p>Open your BPMN files (<code>.bpmn</code> or <code>.xml</code>) to edit them with the Synthea settings and see the Synthea module they become. Everything runs in your browser; nothing is uploaded.</p>
             <div class="drop">
-              <strong>Drop <code>.bpmn</code> files or a folder here</strong>
+              <strong>Drop <code>.bpmn</code> or <code>.xml</code> files, or a folder, here</strong>
               <span>or choose</span>
               <div class="drop-actions">
                 <button id="welcome-files" type="button" class="primary">Open files…</button>

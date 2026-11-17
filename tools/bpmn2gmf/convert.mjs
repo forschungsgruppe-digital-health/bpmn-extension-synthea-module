@@ -15,14 +15,14 @@ import { fuseGateways, fuseComplexTransitions } from './fuse.mjs';
 import { assignPaths } from './layout.mjs';
 
 /**
- * The module name of a file: its name without extension and with `-` written as `_`. It is also
- * what CallSubmodule refers to until layout.mjs turns it into a path.
+ * The module name of a file: its name without extension (`.bpmn` or `.xml`) and with `-` written
+ * as `_`. It is also what CallSubmodule refers to until layout.mjs turns it into a path.
  *
- * @param {string} path the path of a .bpmn file
+ * @param {string} path the path of a .bpmn or .xml file
  * @returns {string} e.g. `anemia_submodule` for `lung-cancer/anemia-submodule.bpmn`
  */
 export const fileBaseFor = (path) =>
-  path.split('/').pop().replace(/\.bpmn$/i, '').replace(/-/g, '_');
+  path.split('/').pop().replace(/\.(bpmn|xml)$/i, '').replace(/-/g, '_');
 
 /**
  * The whole pipeline: BPMN XML in, Synthea modules and messages out. Pure: it reads and writes no

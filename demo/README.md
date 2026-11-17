@@ -16,7 +16,7 @@ It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copi
 
 - `moddleExtensions: { synthea: <descriptor> }` — `../extension/model/synthea.json`
 - `additionalModules: [ …, syntheaModule ]` — `../extension/src/index.js` (the sample properties-panel provider)
-- your own diagrams — the modeler ships **no diagrams**. Open `.bpmn` files, a whole folder or drop
+- your own diagrams — the modeler ships **no diagrams**. Open `.bpmn` or `.xml` files (BPMN XML), a whole folder or drop
   them on the page; the open files are listed on the left. Everything stays in the browser (the
   session is kept in `localStorage`, nothing is uploaded). A main pathway whose `CallSubmodule` states
   (`bpmn:callActivity`, `calledElement` = the submodule's process id) point to other files needs those

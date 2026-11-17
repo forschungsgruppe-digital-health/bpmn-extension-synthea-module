@@ -78,7 +78,7 @@ npm run demo        # the modeler with the extension, in the browser
 npm run validate    # all checks (lint, round trip, XSD, tests, converter)
 ```
 
-The modeler ships no diagrams: open your own `.bpmn` files or a whole folder (button, or drop them on
+The modeler ships no diagrams: open your own `.bpmn` or `.xml` files or a whole folder (button, or drop them on
 the page). The five real pathway files of `lung-cancer/` are good to try (open that folder). Click an
 element and open the group "Synthea" in the properties panel. Your files and changes stay in the
 browser (nothing is uploaded); **Save .bpmn** downloads the open diagram.

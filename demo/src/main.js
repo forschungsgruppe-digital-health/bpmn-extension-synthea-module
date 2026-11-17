@@ -242,7 +242,7 @@ function addFiles(items) {
     const bpmn = items.filter((i) => /\.(bpmn|xml)$/i.test(i.path));
     const skipped = items.length - bpmn.length;
     if (!bpmn.length) {
-      toast(items.length ? 'No .bpmn files found there.' : 'Nothing to open.', 'error');
+      toast(items.length ? 'No .bpmn or .xml files found there.' : 'Nothing to open.', 'error');
       return;
     }
     await syncCurrent();

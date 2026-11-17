@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { convert } from '../convert.mjs';
+import { convert, fileBaseFor } from '../convert.mjs';
 import {
   wrap, run, start, end, task, gateway, timer, call, flow,
   stateType, setAttr, prob, cond, attrCond, coding, SNOMED, LOINC, RXNORM,
@@ -1680,4 +1680,10 @@ test('Physiology is rejected with its own code, not as "not implemented"', async
   const { diagnostics } = await run(start() + task('PH', 'Sim', stateType('Physiology')) + end() + flow('f1', 'S', 'PH') + flow('f2', 'PH', 'E'));
   assert.ok(errorCodes(diagnostics).includes('PHYSIOLOGY_UNSUPPORTED'));
   assert.ok(!errorCodes(diagnostics).includes('STATE_TYPE_NOT_IMPLEMENTED'));
+});
+
+test('fileBaseFor: .bpmn and .xml files get the same module name, folders are dropped', () => {
+  assert.equal(fileBaseFor('lung-cancer/anemia-submodule.bpmn'), 'anemia_submodule');
+  assert.equal(fileBaseFor('lung-cancer/anemia-submodule.xml'), 'anemia_submodule');
+  assert.equal(fileBaseFor('Anemia-Submodule.XML'), 'Anemia_Submodule');
 });
