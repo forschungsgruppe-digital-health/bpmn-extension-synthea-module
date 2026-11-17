@@ -207,15 +207,17 @@ npm run compare:structure     # compares every state and transition (conditions,
 | I want to … | Change | Then run |
 |---|---|---|
 | add a field or a type | `extension/model/synthea.json` | `npm run xsd:gen`, `npm run roundtrip` |
-| show it in the panel | `extension/src/SyntheaPropertiesProvider.js` (`getGroups`, a `create…Group` function, an entry from `makeTextEntry` / `makeSelecetEntry` / `makeCheckboxEntry`) | `npm run demo` |
+| show it in the panel | `extension/src/SyntheaPropertiesProvider.js` (`getGroups`, a `create…Group` function, an entry from `makeTextEntry` / `makeSelectEntry` / `makeCheckboxEntry`) | `npm run demo` |
 | add a lint rule | a file in `extension/lint/bpmnlint-plugin-synthea/rules/`, an entry in its `index.js` (in `rules` **and** `configs.all.rules`), a fixture in `examples/valid/` and `examples/invalid/` | `npm run lint:valid`, `npm run lint:invalid` |
 | write the field into the JSON | `tools/bpmn2gmf/emit.mjs` (per state type), `required-fields.mjs`, a test in `tools/bpmn2gmf/test/convert.test.mjs` | `npm run test:bpmn2gmf`, `npm run convert:check` |
 | change how a BPMN element maps to a state | `docs/implicit-rules.md`, `tools/bpmn2gmf/resolve.mjs`, `transitions.mjs` | `npm run test:bpmn2gmf` |
 | offer another pathway in the demo | `PATHWAYS` in `demo/src/main.js` | `npm run demo` |
 
-`npm run validate` runs the whole gate: the positive fixtures must lint clean, the round trip and the XSD
-must pass, the generated XSD must match the descriptor, the converter tests and the strict conversion of
-the lung cancer files must pass. `npm run lint:invalid` is **expected to fail**: the diagrams in
+`npm run validate` runs the whole gate in two stages: `validate:diagram` (is the BPMN a valid input: the
+positive fixtures must lint clean, including the converter's own checks and the values in the fields, the
+round trip and both XSDs must pass, the generated XSD must match the descriptor) and `validate:convert` (the
+converter tests, the strict conversion of the lung cancer files and the comparison with Synthea's own module
+must pass). `npm run lint:invalid` is **expected to fail**: the diagrams in
 `examples/invalid/` prove that the rules fire.
 
 ## Documentation
@@ -227,7 +229,7 @@ the lung cancer files must pass. `npm run lint:invalid` is **expected to fail**:
 | [docs/bpmn2gmf-concept.md](docs/bpmn2gmf-concept.md) | The converter: pipeline, decisions, comparison with Synthea's lung cancer module |
 | [docs/converter-overview.md](docs/converter-overview.md) | What the converter does: options, the stages of the pipeline, the comparison with Synthea's modules |
 | [docs/validator-overview.md](docs/validator-overview.md) | What the validator does: the checks that `npm run validate` runs, in order |
-| [docs/lint-rules.md](docs/lint-rules.md) | The 25 lint rules in one table: ID, severity and what each one checks |
+| [docs/lint-rules.md](docs/lint-rules.md) | The 33 lint rules in one table: ID, severity and what each one checks |
 | [docs/extension-matrix.md](docs/extension-matrix.md) | Which `synthea:` type sits on which BPMN element (panel and converter) |
 | [docs/synthea.md](docs/synthea.md) | Background: Synthea and its Generic Module Framework |
 | [docs/concepts.md](docs/concepts.md) | Background: what a BPMN extension is and how the pieces fit |

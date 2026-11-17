@@ -20,7 +20,10 @@
 //   - typed child properties   -> element refs to the referenced type's global element, or a local element named like
 //                                 the property when that name differs from the type's tag
 //   - isMany                   -> maxOccurs="unbounded"
-import { readFileSync, writeFileSync } from 'node:fs';
+//   - isEnum types             -> xsd:simpleType with one enumeration per literal; attributes of that type use it
+//   - <descriptor>.values.json -> optional: lists of allowed values for fields that are free text in the model,
+//                                 applied as restrictions (see extension/model/synthea.values.json)
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const XSD_NS = 'http://www.w3.org/2001/XMLSchema';
@@ -33,6 +36,13 @@ const PRIMITIVES = {
   Real: 'xsd:double'
 };
 
+/** The values file next to a descriptor (synthea.json -> synthea.values.json), or {} when there is none. */
+export function loadValues(descriptorPath) {
+  const path = descriptorPath.replace(/\.json$/, '.values.json');
+  return existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
+}
+
+const upperFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
 const tagName = (name, tagAlias) => (tagAlias === 'lowerCase' ? lowerFirst(name) : name);
 
@@ -55,7 +65,7 @@ const xmlEscapeAttr = (v) =>
  * Build an XSD string for the given moddle descriptor.
  * @returns {{ xsd: string, warnings: string[] }}
  */
-export function generateXsd(descriptor) {
+export function generateXsd(descriptor, values = {}) {
   const { uri, prefix, types = [], xml = {}, version } = descriptor;
   if (!uri || !prefix) {
     throw new Error('descriptor must define "uri" and "prefix"');
@@ -63,12 +73,30 @@ export function generateXsd(descriptor) {
   const tagAlias = xml.tagAlias;
   const warnings = [];
 
-  // declared extension types: moddle type name -> serialized XML tag
-  const declared = new Map(types.map((t) => [t.name, tagName(t.name, tagAlias)]));
+  // enumerations are types of their own in the descriptor; they are not elements
+  const enums = types.filter((t) => t.isEnum);
+  const elementTypes = types.filter((t) => !t.isEnum);
+  const enumNames = new Set(enums.map((t) => t.name));
 
-  const attrLine = (p, indent) => {
-    const type = PRIMITIVES[p.type] || 'xsd:string';
-    if (!PRIMITIVES[p.type] && !p.isReference) {
+  // lists of allowed values for free-text fields: "Type.attribute" -> list name -> simple type "s<ListName>"
+  const lists = values.lists || {};
+  const restricted = values.xsd || {};
+  const usedLists = [...new Set(Object.values(restricted))];
+  for (const [field, list] of Object.entries(restricted)) {
+    if (!lists[list]) warnings.push(`values: ${field} names the list "${list}", which does not exist`);
+  }
+
+  // declared extension types: moddle type name -> serialized XML tag
+  const declared = new Map(elementTypes.map((t) => [t.name, tagName(t.name, tagAlias)]));
+
+  const attrLine = (p, indent, owner) => {
+    let type = PRIMITIVES[p.type] || 'xsd:string';
+    const list = restricted[`${owner}.${p.name}`];
+    if (enumNames.has(p.type)) {
+      type = `${prefix}:s${p.type}`;
+    } else if (list && lists[list]) {
+      type = `${prefix}:s${upperFirst(list)}`;
+    } else if (!PRIMITIVES[p.type] && !p.isReference) {
       warnings.push(`attribute ${p.name}: non-primitive type "${p.type}" mapped to xsd:string`);
     }
     let s = `${indent}<xsd:attribute name="${p.name}" type="${type}"`;
@@ -99,7 +127,8 @@ export function generateXsd(descriptor) {
   const out = [];
   out.push('<?xml version="1.0" encoding="UTF-8"?>');
   out.push('<!-- GENERATED from the moddle descriptor by tools/moddle-to-xsd.mjs. Do not edit by hand. -->');
-  out.push('<!-- Scope: STRUCTURE only. Semantic rules (e.g. required attributes) live in the bpmnlint plugin. -->');
+  out.push('<!-- Scope: structure, plus the allowed values of fixed-choice fields (enumerations of the model and');
+  out.push('     extension/model/synthea.values.json). Semantic rules (required attributes, rules across elements) live in the bpmnlint plugin. -->');
   if (version) {
     // Package SemVer (NOT the namespace `uri`, which is the contract version and
     // must not auto-bump). Release Please keeps this line in sync via the
@@ -113,7 +142,23 @@ export function generateXsd(descriptor) {
   out.push('            attributeFormDefault="unqualified">');
   out.push('');
 
-  for (const t of types) {
+  for (const e of enums) {
+    out.push(`  <xsd:simpleType name="s${e.name}">`);
+    out.push('    <xsd:restriction base="xsd:string">');
+    for (const lit of e.literalValues || []) out.push(`      <xsd:enumeration value="${xmlEscapeAttr(lit.name)}"/>`);
+    out.push('    </xsd:restriction>');
+    out.push('  </xsd:simpleType>');
+  }
+  for (const list of usedLists.filter((l) => lists[l])) {
+    out.push(`  <xsd:simpleType name="s${upperFirst(list)}">`);
+    out.push('    <xsd:restriction base="xsd:string">');
+    for (const v of lists[list]) out.push(`      <xsd:enumeration value="${xmlEscapeAttr(v)}"/>`);
+    out.push('    </xsd:restriction>');
+    out.push('  </xsd:simpleType>');
+  }
+  if (enums.length || usedLists.length) out.push('');
+
+  for (const t of elementTypes) {
     const supers = t.superClass || [];
     const unknownSupers = supers.filter((s) => s !== 'Element' && declared.has(s));
     if (unknownSupers.length) {
@@ -139,7 +184,7 @@ export function generateXsd(descriptor) {
       out.push('    <xsd:sequence>');
       for (const c of children) out.push(childLine(t.name, c));
       out.push('    </xsd:sequence>');
-      for (const a of attrs) out.push(attrLine(a, '    '));
+      for (const a of attrs) out.push(attrLine(a, '    ', t.name));
       out.push('  </xsd:complexType>');
     } else if (body) {
       // text content + attributes -> simpleContent
@@ -147,7 +192,7 @@ export function generateXsd(descriptor) {
       out.push(`  <xsd:complexType name="t${t.name}">`);
       out.push('    <xsd:simpleContent>');
       out.push(`      <xsd:extension base="${base}">`);
-      for (const a of attrs) out.push(attrLine(a, '        '));
+      for (const a of attrs) out.push(attrLine(a, '        ', t.name));
       out.push('      </xsd:extension>');
       out.push('    </xsd:simpleContent>');
       out.push('  </xsd:complexType>');
@@ -157,13 +202,13 @@ export function generateXsd(descriptor) {
       out.push('    <xsd:sequence>');
       for (const c of children) out.push(childLine(t.name, c));
       out.push('    </xsd:sequence>');
-      for (const a of attrs) out.push(attrLine(a, '    '));
+      for (const a of attrs) out.push(attrLine(a, '    ', t.name));
       out.push('  </xsd:complexType>');
     } else {
       // attributes only (or empty)
       if (attrs.length) {
         out.push(`  <xsd:complexType name="t${t.name}">`);
-        for (const a of attrs) out.push(attrLine(a, '    '));
+        for (const a of attrs) out.push(attrLine(a, '    ', t.name));
         out.push('  </xsd:complexType>');
       } else {
         out.push(`  <xsd:complexType name="t${t.name}"/>`);
@@ -188,7 +233,7 @@ if (isMain) {
       : fileURLToPath(new URL('../extension/model/synthea.json', import.meta.url));
 
   const descriptor = JSON.parse(readFileSync(descriptorPath, 'utf8'));
-  const { xsd, warnings } = generateXsd(descriptor);
+  const { xsd, warnings } = generateXsd(descriptor, loadValues(descriptorPath));
   warnings.forEach((w) => console.error(`warning: ${w}`));
 
   const outPath = descriptorPath.replace(/\.json$/, '.xsd');

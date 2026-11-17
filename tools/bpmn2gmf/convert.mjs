@@ -32,33 +32,7 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
     }
     for (const w of parsed.warnings) diag.error('PARSE_WARNING', w, { module: fileBase });
 
-    for (const module of buildModules(parsed.definitions, fileBase, diag)) {
-      resolveStates(module, diag);
-      synthesizeEncounters(module, diag);
-      const states = {};
-      for (const node of module.nodes.values()) {
-        if (!node.stateName) continue;
-        const state = emitState(node, module, diag);
-        if (!state) continue;
-        const transition = buildTransition(node, module, diag);
-        states[node.stateName] = { ...state, ...transition };
-      }
-      terminateDeaths(module, states, diag);
-      if (fuse) {
-        const gateways = [...module.nodes.values()].filter((n) => n.kind === 'gateway' && n.stateType === 'Simple').map((n) => n.stateName);
-        const removed = fuseGateways(states, gateways);
-        if (removed) diag.note('GATEWAYS_FUSED', `${removed} gateway state(s) merged into their neighbours.`, { module: module.fileBase });
-        const folded = fuseComplexTransitions(states, gateways);
-        if (folded) diag.note('COMPLEX_TRANSITION', `${folded} probability gateway(s) folded into a complex_transition of the conditional state before them.`, { module: module.fileBase });
-      }
-      // Structural checks are meaningless on a partial module (cascading noise).
-      if (diag.forModule(module.fileBase).every((i) => i.level !== 'error')) {
-        verifyModule(module, states, diag, { strict });
-        markIncomplete(states);
-      }
-      module.states = states;
-      modules.push(module);
-    }
+    convertDefinitions(parsed.definitions, fileBase, diag, modules, { strict, fuse });
   }
 
   checkEncountersAcrossSubprocesses(modules, diag);
@@ -73,6 +47,53 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
     json: { name: m.name, states: m.states }
   }));
   return { modules: results, diagnostics: diag };
+}
+
+// Everything that happens to one parsed file, up to the finished (or incomplete) modules. Shared by
+// `convert` and by `checkDefinitions`, which the lint uses on the moddle tree it already has.
+export function convertDefinitions(definitions, fileBase, diag, modules, { strict = false, fuse = false } = {}) {
+  for (const module of buildModules(definitions, fileBase, diag)) {
+    resolveStates(module, diag);
+    synthesizeEncounters(module, diag);
+    const states = {};
+    for (const node of module.nodes.values()) {
+      if (!node.stateName) continue;
+      const state = emitState(node, module, diag);
+      if (!state) continue;
+      const transition = buildTransition(node, module, diag);
+      states[node.stateName] = { ...state, ...transition };
+    }
+    terminateDeaths(module, states, diag);
+    if (fuse) {
+      const gateways = [...module.nodes.values()].filter((n) => n.kind === 'gateway' && n.stateType === 'Simple').map((n) => n.stateName);
+      const removed = fuseGateways(states, gateways);
+      if (removed) diag.note('GATEWAYS_FUSED', `${removed} gateway state(s) merged into their neighbours.`, { module: module.fileBase });
+      const folded = fuseComplexTransitions(states, gateways);
+      if (folded) diag.note('COMPLEX_TRANSITION', `${folded} probability gateway(s) folded into a complex_transition of the conditional state before them.`, { module: module.fileBase });
+    }
+    // Structural checks are meaningless on a partial module (cascading noise).
+    if (diag.forModule(module.fileBase).every((i) => i.level !== 'error')) {
+      verifyModule(module, states, diag, { strict });
+      markIncomplete(states);
+    }
+    module.states = states;
+    modules.push(module);
+
+  }
+}
+
+// Synchronous check of one parsed diagram, for the lint (tools/bpmn2gmf is the single source of what
+// the converter can and cannot convert). Returns the converter's diagnostics for the diagram.
+// Strict, like `npm run convert:check` and the validation: a field Synthea requires that is missing
+// is an error, where a plain conversion only marks the state as incomplete.
+// Not run here: the check that sub-modules exist (they are other files) and the writing of paths.
+export function checkDefinitions(definitions, fileBase = 'diagram') {
+  const diag = new Diagnostics();
+  const modules = [];
+  convertDefinitions(definitions, fileBase, diag, modules, { strict: true });
+  checkEncountersAcrossSubprocesses(modules, diag);
+  verifyFlow(modules, diag);
+  return diag.items;
 }
 
 // An encounter is synthesized per module, so an encounterId must not be used both in a module and

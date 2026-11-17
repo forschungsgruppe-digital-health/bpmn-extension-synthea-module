@@ -23,6 +23,7 @@
     <bpmn:task id="Task_A" name="A">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="399208008" codeDisplay="Plain X-ray of chest (procedure)" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_ProcA" wellness="true" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_P1</bpmn:incoming>
       <bpmn:outgoing>Flow_A_Out</bpmn:outgoing>
@@ -43,35 +44,78 @@
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Terminal" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_A_Out</bpmn:incoming>
+      <bpmn:incoming>Flow_Chain_21</bpmn:incoming>
     </bpmn:endEvent>
 
     <bpmn:endEvent id="EndEvent_B">
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="Terminal" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_B_Out</bpmn:incoming>
+      <bpmn:incoming>Flow_Onset_2</bpmn:incoming>
     </bpmn:endEvent>
 
     <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_Branch" />
 
     <bpmn:sequenceFlow id="Flow_P1" sourceRef="Task_Branch" targetRef="Task_A">
       <bpmn:extensionElements>
-        <synthea:ProbabilityConfig probability="0.6" />
+        <synthea:ProbabilityConfig probability="0.4" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
 
     <bpmn:sequenceFlow id="Flow_P2" sourceRef="Task_Branch" targetRef="Task_B">
       <bpmn:extensionElements>
-        <synthea:ProbabilityConfig probability="0.4" />
+        <synthea:ProbabilityConfig probability="0.3" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <!-- The two branch showcases below hang on the same split, so every element of this diagram is
+         reached from Initial: 0.4 + 0.3 + 0.2 + 0.1 = 1.0 (probability-sum-valid). -->
+    <bpmn:sequenceFlow id="Flow_P3" sourceRef="Task_Branch" targetRef="Task_GenderBranch_Good">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probability="0.2" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <bpmn:sequenceFlow id="Flow_P4" sourceRef="Task_Branch" targetRef="Task_AttrBranch_Good">
+      <bpmn:extensionElements>
+        <synthea:ProbabilityConfig probability="0.1" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <!-- The showcase elements above are strung together so the diagram converts as a whole: a "valid"
+         example has to be accepted by the converter too (lint rule converter-errors). -->
+    <bpmn:sequenceFlow id="Flow_A_Out" sourceRef="Task_A" targetRef="Gateway_Guard_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_1" sourceRef="Gateway_Guard_Good" targetRef="Gateway_AgeGuard_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_2" sourceRef="Gateway_AgeGuard_Good" targetRef="Gateway_AndGuard_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_3" sourceRef="Gateway_AndGuard_Good" targetRef="CallActivity_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_4" sourceRef="CallActivity_Good" targetRef="Delay_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_5" sourceRef="Delay_Good" targetRef="Delay_Range_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_6" sourceRef="Delay_Range_Good" targetRef="Task_Counter_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_7" sourceRef="Task_Counter_Good" targetRef="EncounterA_Member1_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_8" sourceRef="EncounterA_Member1_Good" targetRef="EncounterA_Member2_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_9" sourceRef="EncounterA_Member2_Good" targetRef="EncounterC_Member1_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_10" sourceRef="EncounterC_Member1_Good" targetRef="EncounterC_Member2_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_11" sourceRef="EncounterC_Member2_Good" targetRef="ConditionOnset_AssignGood" />
+    <bpmn:sequenceFlow id="Flow_Chain_12" sourceRef="ConditionOnset_AssignGood" targetRef="Symptom_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_13" sourceRef="Symptom_Good" targetRef="Observation_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_14" sourceRef="Observation_Good" targetRef="Imaging_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_15" sourceRef="Imaging_Good" targetRef="Procedure_Duration_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_16" sourceRef="Procedure_Duration_Good" targetRef="MedicationOrder_Administration_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_17" sourceRef="MedicationOrder_Administration_Good" targetRef="CarePlan_Activities_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_18" sourceRef="CarePlan_Activities_Good" targetRef="DiagnosticReport_Good" />
+    <bpmn:sequenceFlow id="Flow_Chain_19" sourceRef="DiagnosticReport_Good" targetRef="Death_ReferencedGood" />
+    <bpmn:sequenceFlow id="Flow_Chain_20" sourceRef="Death_ReferencedGood" targetRef="Death_TimeSpanGood" />
+    <bpmn:sequenceFlow id="Flow_Chain_21" sourceRef="Death_TimeSpanGood" targetRef="EndEvent_A" />
+    <!-- negate-requires-condition: negate="true" with conditionType/operator set is valid. The condition
+         sits on a flow of its own: a flow cannot carry a probability and a condition at once, the
+         converter rejects the mix (TRANSITION_MIXED). -->
+    <bpmn:sequenceFlow id="Flow_B_Out" sourceRef="Task_B" targetRef="Encounter_Onset">
+      <bpmn:extensionElements>
         <synthea:ConditionConfig>
           <synthea:condition conditionType="Attribute" attribute="lung_cancer" operator="==" value="true" negate="true" />
         </synthea:ConditionConfig>
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-
-    <bpmn:sequenceFlow id="Flow_A_Out" sourceRef="Task_A" targetRef="EndEvent_A" />
-    <bpmn:sequenceFlow id="Flow_B_Out" sourceRef="Task_B" targetRef="EndEvent_B" />
 
     <!-- guard-state-requires-guard-config + guard-allow-requires-condition:
          stateType="Guard" with a complete GuardConfig.allow -->
@@ -152,12 +196,26 @@
 
     <!-- encounter-reference-requires-condition-or-allergy-context: targetEncounter
          on a ConditionOnset state -->
+    <!-- The encounter it points to has to exist in the flow, so a state of that group comes first. -->
+    <bpmn:task id="Encounter_Onset" name="Encounter for the onset">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="SetAttribute" />
+        <synthea:SetAttributeConfig attribute="last_encounter_note" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_Onset" wellness="true" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_B_Out</bpmn:incoming>
+      <bpmn:outgoing>Flow_Onset_1</bpmn:outgoing>
+    </bpmn:task>
     <bpmn:intermediateCatchEvent id="ConditionOnset_Good" name="Condition onset (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="ConditionOnset" />
-        <synthea:EncounterReference targetEncounter="Encounter_1" />
+        <synthea:StateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="254637007" codeDisplay="Non-small cell lung cancer (disorder)" />
+        <synthea:EncounterReference targetEncounter="Encounter_Onset" />
       </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Onset_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_Onset_2</bpmn:outgoing>
     </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_Onset_1" sourceRef="Encounter_Onset" targetRef="ConditionOnset_Good" />
+    <bpmn:sequenceFlow id="Flow_Onset_2" sourceRef="ConditionOnset_Good" targetRef="EndEvent_B" />
 
     <!-- wellness-consistent-within-encounter: two states sharing one encounterId
          agree on wellness (ADR-0003: encounter scope derived from EncounterContext,
@@ -184,7 +242,7 @@
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
         <synthea:SetAttributeConfig attribute="last_encounter_note" />
-        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_C" wellness="false" encounterClass="emergency" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_C" wellness="false" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn:extensionElements>
     </bpmn:task>
 
@@ -192,7 +250,7 @@
       <bpmn:extensionElements>
         <synthea:StateTypeConfig stateType="SetAttribute" />
         <synthea:SetAttributeConfig attribute="last_encounter_note" />
-        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_C" wellness="false" encounterClass="emergency" />
+        <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_C" wellness="false" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
       </bpmn:extensionElements>
     </bpmn:task>
 
@@ -244,7 +302,7 @@
     <!-- assign-to-attribute-requires-valid-state: attribute set on a ConditionOnset state -->
     <bpmn:intermediateCatchEvent id="ConditionOnset_AssignGood" name="Condition onset with assign (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="ConditionOnset" />
+        <synthea:StateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct" code="254637007" codeDisplay="Non-small cell lung cancer (disorder)" />
         <synthea:AssignToAttributeConfig attribute="lung_cancer_diagnosis_date" />
       </bpmn:extensionElements>
     </bpmn:intermediateCatchEvent>
@@ -277,7 +335,7 @@
 
     <bpmn:task id="Observation_Good" name="Observation (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Observation" />
+        <synthea:StateTypeConfig stateType="Observation" codeSystem="http://loinc.org" code="8480-6" codeDisplay="Systolic blood pressure" />
         <synthea:ObservationConfig category="vital-signs" />
         <synthea:ValueConfig valueShape="RANGE" value="4" valueHigh="8" unit="{score}" decimals="0" />
         <synthea:EncounterContext requiresEncounterContext="true" encounterId="Encounter_CodeGood" wellness="false" encounterClass="emergency" encounterCodeSystem="http://snomed.info/sct" encounterCode="50849002" encounterCodeDisplay="Emergency room admission (procedure)" />
@@ -286,28 +344,28 @@
 
     <bpmn:task id="Imaging_Good" name="Imaging study with series (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="ImagingStudy" />
+        <synthea:StateTypeConfig stateType="ImagingStudy" codeSystem="http://snomed.info/sct" code="399208008" codeDisplay="Plain X-ray of chest (procedure)" />
         <synthea:ImagingStudySeries bodySiteCode="51185008" bodySiteDisplay="Thoracic structure (body structure)" modalityCode="CT" modalityDisplay="Computed Tomography" instanceTitle="CT Image Storage" sopClassCode="1.2.840.10008.5.1.4.1.1.2" sopClassDisplay="CT Image Storage" minInstances="300" maxInstances="500" />
       </bpmn:extensionElements>
     </bpmn:task>
 
     <bpmn:task id="Procedure_Duration_Good" name="Procedure with duration (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="Procedure" />
+        <synthea:StateTypeConfig stateType="Procedure" codeSystem="http://snomed.info/sct" code="399208008" codeDisplay="Plain X-ray of chest (procedure)" />
         <synthea:ValueConfig valueShape="RANGE" value="0.5" valueHigh="4" unit="hours" />
       </bpmn:extensionElements>
     </bpmn:task>
 
     <bpmn:task id="MedicationOrder_Administration_Good" name="Administered medication (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="MedicationOrder" />
+        <synthea:StateTypeConfig stateType="MedicationOrder" codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="1049630" codeDisplay="Diazepam 2 MG Oral Tablet" />
         <synthea:MedicationConfig administration="true" />
       </bpmn:extensionElements>
     </bpmn:task>
 
     <bpmn:task id="CarePlan_Activities_Good" name="Care plan with activities (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="CarePlanStart" />
+        <synthea:StateTypeConfig stateType="CarePlanStart" codeSystem="http://snomed.info/sct" code="734163000" codeDisplay="Care plan (record artifact)" />
         <synthea:CarePlanActivity code="133918004" codeDisplay="Comfort measures (regime/therapy)" />
         <synthea:CarePlanActivity code="243072006" codeDisplay="Cancer education (procedure)" />
       </bpmn:extensionElements>
@@ -315,7 +373,7 @@
 
     <bpmn:task id="DiagnosticReport_Good" name="Lab panel with contained observations (good)">
       <bpmn:extensionElements>
-        <synthea:StateTypeConfig stateType="DiagnosticReport" />
+        <synthea:StateTypeConfig stateType="DiagnosticReport" codeSystem="http://loinc.org" code="58410-2" codeDisplay="CBC panel - Blood by Automated count" />
         <synthea:ReportObservation code="718-7" codeDisplay="Hemoglobin [Mass/volume] in Blood" category="laboratory" unit="g/dL" valueShape="RANGE" value="10" valueHigh="11.9" />
         <synthea:ReportObservation code="5767-9" codeDisplay="Appearance of Urine" category="laboratory" unit="{nominal}" valueCodeSystem="http://snomed.info/sct" valueCode="7766007" valueCodeDisplay="Cloudy urine (finding)" />
         <synthea:ReportObservation code="2339-0" codeDisplay="Glucose [Mass/volume] in Blood" category="laboratory" unit="mg/dL" vitalSign="Glucose" />

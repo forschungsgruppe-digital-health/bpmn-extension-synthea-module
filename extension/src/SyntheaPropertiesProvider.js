@@ -1000,7 +1000,7 @@ function makeKindSelectEntry(type, kindProp, label, options, fieldsByKind, fallb
 
 // `clears` maps a chosen value to the fields of the same config that no longer apply and are
 // cleared with it (a high value on an exact value, for example).
-function makeSelecetEntry(type, prop, label, values, clears = {}) {
+function makeSelectEntry(type, prop, label, values, clears = {}) {
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -1034,7 +1034,7 @@ function makeSelecetEntry(type, prop, label, values, clears = {}) {
   };
 }
 
-const DelayShapeEntry = makeSelecetEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES, { EXACT: ['delayValueHigh'], '': ['delayValueHigh'] });
+const DelayShapeEntry = makeSelectEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES, { EXACT: ['delayValueHigh'], '': ['delayValueHigh'] });
 const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value (exact value, or range low)');
 const DelayValueHighEntry = makeTextEntry(DELAY_TYPE, 'delayValueHigh', 'Delay value, high (range high, only for RANGE)');
 const DelayUnitEntry = makeTextEntry(DELAY_TYPE, 'delayUnit', 'Delay unit');
@@ -1090,24 +1090,24 @@ const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'require
 const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
 const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter',
   ['encounterClass', 'encounterCodeSystem', 'encounterCode', 'encounterCodeDisplay']);
-const EncounterTelemedicineEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'telemedicinePossibility', 'Telemedicine possibility (optional)', TELEMEDICINE_VALUES);
+const EncounterTelemedicineEntry = makeSelectEntry(ENCOUNTER_CONTEXT_TYPE, 'telemedicinePossibility', 'Telemedicine possibility (optional)', TELEMEDICINE_VALUES);
 const EncounterDischargeCodeEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'dischargeCode', 'Discharge disposition: NUBC code (optional)');
 const EncounterDischargeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'dischargeDisplay', 'Discharge disposition: display text');
-const EncounterClassEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterClass', 'Encounter class (required for non-wellness encounters)', ENCOUNTER_CLASS_VALUES);
+const EncounterClassEntry = makeSelectEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterClass', 'Encounter class (required for non-wellness encounters)', ENCOUNTER_CLASS_VALUES);
 const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Reason (attribute name or State_Name)');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
 const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
-const CounterActionEntry = makeSelecetEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
-const CodeSystemEntry = makeSelecetEntry(STATE_TYPE, 'codeSystem', 'Code system', STATE_CODE_SYSTEM_OPTIONS);
+const CounterActionEntry = makeSelectEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
+const CodeSystemEntry = makeSelectEntry(STATE_TYPE, 'codeSystem', 'Code system', STATE_CODE_SYSTEM_OPTIONS);
 const CodeValueEntry = makeTextEntry(STATE_TYPE, 'code', 'Code');
 const CodeDisplayEntry = makeTextEntry(STATE_TYPE, 'codeDisplay', 'Display text');
-const EncounterCodeSystemEntry = makeSelecetEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeSystem', 'Encounter code system (e.g. SNOMED CT)', CODE_SYSTEM_OPTIONS);
+const EncounterCodeSystemEntry = makeSelectEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeSystem', 'Encounter code system (e.g. SNOMED CT)', CODE_SYSTEM_OPTIONS);
 const EncounterCodeEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCode', 'Encounter code (e.g. 185347001)');
 const EncounterCodeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeDisplay', 'Encounter code display text');
 
 const SymptomNameEntry = makeTextEntry(SYMPTOM_TYPE, 'symptom', 'Symptom name (e.g. Cough)');
-const ObservationCategoryEntry = makeSelecetEntry(OBSERVATION_TYPE, 'category', 'Observation category', OBSERVATION_CATEGORY_VALUES);
-const ValueShapeEntry = makeSelecetEntry(VALUE_TYPE, 'valueShape', 'Value: exact or range', ['EXACT', 'RANGE'], { EXACT: ['valueHigh'], '': ['valueHigh'] });
+const ObservationCategoryEntry = makeSelectEntry(OBSERVATION_TYPE, 'category', 'Observation category', OBSERVATION_CATEGORY_VALUES);
+const ValueShapeEntry = makeSelectEntry(VALUE_TYPE, 'valueShape', 'Value: exact or range', ['EXACT', 'RANGE'], { EXACT: ['valueHigh'], '': ['valueHigh'] });
 const ValueEntry = makeTextEntry(VALUE_TYPE, 'value', 'Value (EXACT) / lowest value (RANGE)', { parse: parseFloat });
 const ValueHighEntry = makeTextEntry(VALUE_TYPE, 'valueHigh', 'Highest value (RANGE only)', { parse: parseFloat });
 const ValueDecimalsEntry = makeTextEntry(VALUE_TYPE, 'decimals', 'Decimals (optional)', { parse: parseInt });
@@ -1142,8 +1142,8 @@ const VitalSignNameEntry = makeTextEntry(VITAL_SIGN_TYPE, 'vitalSign', 'Vital si
 const SupplyQuantityEntry = makeTextEntry(SUPPLY_TYPE, 'quantity', 'Quantity', { parse: parseInt });
 const SupplyCodeEntry = makeTextEntry(SUPPLY_TYPE, 'code', 'SNOMED code of the supply');
 const SupplyDisplayEntry = makeTextEntry(SUPPLY_TYPE, 'codeDisplay', 'Display text of the supply');
-const AllergyTypeEntry = makeSelecetEntry(ALLERGY_TYPE, 'allergyType', 'Allergy type (required)', ALLERGY_TYPE_VALUES);
-const AllergyCategoryEntry = makeSelecetEntry(ALLERGY_TYPE, 'category', 'Category (required)', ALLERGY_CATEGORY_VALUES);
+const AllergyTypeEntry = makeSelectEntry(ALLERGY_TYPE, 'allergyType', 'Allergy type (required)', ALLERGY_TYPE_VALUES);
+const AllergyCategoryEntry = makeSelectEntry(ALLERGY_TYPE, 'category', 'Category (required)', ALLERGY_CATEGORY_VALUES);
 const ReactionCodeEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'code', 'SNOMED code of the reaction');
 const ReactionDisplayEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'codeDisplay', 'Display text of the reaction');
 const ReactionNoneEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityNone', 'Probability: no reaction', { parse: parseFloat });
@@ -1161,7 +1161,7 @@ const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attrib
 const SetAttributeValueEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'value', 'Value (number, true/false or text)');
 const SetAttributeValueAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'valueAttribute', 'Attribute to copy the value from');
 
-const DistributionKindEntry = makeSelecetEntry(SET_ATTRIBUTE_TYPE, 'distribution', 'Distribution', DISTRIBUTION_KINDS);
+const DistributionKindEntry = makeSelectEntry(SET_ATTRIBUTE_TYPE, 'distribution', 'Distribution', DISTRIBUTION_KINDS);
 const DistributionRoundEntry = makeCheckboxEntry(SET_ATTRIBUTE_TYPE, 'distributionRound', 'Round to a whole number');
 const distributionParameter = (prop, label) => makeTextEntry(SET_ATTRIBUTE_TYPE, prop, label, { parse: parseFloat });
 const DISTRIBUTION_PARAMETER_ENTRIES = {

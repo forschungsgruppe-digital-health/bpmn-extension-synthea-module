@@ -1,0 +1,20 @@
+{
+  "_about": "The values the Synthea wiki fixes for fields that are free text in the model (Generic Module Framework: Basics, Logic). One source for two readers: tools/moddle-to-xsd.mjs turns the lists in `xsd` into restrictions of the extension XSD, and the lint rules (lib/values.js) read the same lists. Fields whose valid values depend on another field (the operator per condition type, units of measurement) are checked by the lint only.",
+  "lists": {
+    "timeUnits": ["years", "months", "weeks", "days", "hours", "minutes", "seconds"],
+    "comparisonOperators": ["==", "!=", "<", ">", "<=", ">="],
+    "allOperators": ["==", "!=", "<", ">", "<=", ">=", "is nil", "is not nil"],
+    "gender": ["M", "F"],
+    "race": ["White", "Native", "Hispanic", "Black", "Asian", "Other"],
+    "socioeconomicStatus": ["High", "Middle", "Low"]
+  },
+  "xsd": {
+    "DelayConfig.delayUnit": "timeUnits",
+    "PrescriptionConfig.dosageUnit": "timeUnits",
+    "PrescriptionConfig.durationUnit": "timeUnits",
+    "Condition.unit": "timeUnits",
+    "Condition.operator": "allOperators",
+    "Condition.gender": "gender",
+    "Condition.race": "race"
+  }
+}

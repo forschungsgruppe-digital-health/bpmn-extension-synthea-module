@@ -4,8 +4,9 @@ The BPMN extension for Synthea modules (prefix `synthea`). The parts:
 
 - `model/` — the moddle descriptor (JSON) that defines the data the extension
   persists into the BPMN XML. This is the **required** core and the single
-  source of truth. (`model/*.xsd` is *generated* from it by `npm run xsd:gen`
-  for optional XSD-native validation — never hand-edit it.)
+  source of truth. (`model/synthea.xsd` is *generated* from it and from
+  `model/synthea.values.json` (the fixed value lists the Synthea wiki gives) by `npm run xsd:gen`
+  for XSD-native validation of structure and fixed choices — never hand-edit it.)
 - `lint/bpmnlint-plugin-synthea/` — custom bpmnlint rules that enforce the
   semantics of the extension data.
 - `src/` — *optional* bpmn-js modules (custom renderer, palette entries,

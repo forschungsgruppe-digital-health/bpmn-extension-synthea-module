@@ -3,6 +3,7 @@ import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
+import 'bpmn-js-bpmnlint/dist/assets/css/bpmn-js-bpmnlint.css';
 
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import {
@@ -10,7 +11,12 @@ import {
   BpmnPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 
+import lintModule from 'bpmn-js-bpmnlint';
+
 import { initConverterPanel } from './converter-panel.js';
+import { initLiveCheck } from './live-check.js';
+// Generated from .bpmnlintrc and the lint plugin by tools/pack-lint-config.mjs (npm run dev / build).
+import bpmnlintConfig from './generated/lint-config.js';
 import syntheaModule from '../../extension/src/index.js';
 import syntheaModdle from '../../extension/model/synthea.json';
 
@@ -33,10 +39,13 @@ let currentPathway = PATHWAYS[0];
 const modeler = new BpmnModeler({
   container: '#canvas',
   propertiesPanel: { parent: '#properties' },
+  // The same lint rules as `npm run lint:valid`, live: problems show on the element while modeling.
+  linting: { bpmnlint: bpmnlintConfig, active: true },
   additionalModules: [
     BpmnPropertiesPanelModule,
     BpmnPropertiesProviderModule,
-    syntheaModule
+    syntheaModule,
+    lintModule
   ],
   moddleExtensions: {
     synthea: syntheaModdle
@@ -142,7 +151,7 @@ document.querySelector('#download').addEventListener('click', async () => {
 
 openDiagram(currentPathway.xml);
 
-initConverterPanel({
+const converterPanel = initConverterPanel({
   getXml: async () => (await modeler.saveXML({ format: true })).xml,
   getCurrent: () => currentPathway,
   pathways: PATHWAYS
@@ -150,3 +159,10 @@ initConverterPanel({
 
 // The static converter result (modules/) only exists in the built site, not under `vite dev`.
 if (import.meta.env.DEV) document.querySelector('#converter-result').hidden = true;
+
+initLiveCheck({
+  modeler,
+  compute: converterPanel.compute,
+  getCurrent: () => currentPathway,
+  showMessages: () => converterPanel.show('messages')
+});

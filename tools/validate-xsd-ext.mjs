@@ -21,7 +21,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { generateXsd, extensionTags } from './moddle-to-xsd.mjs';
+import { generateXsd, extensionTags, loadValues } from './moddle-to-xsd.mjs';
 
 const BPMN_NS = 'http://www.omg.org/spec/BPMN/20100524/MODEL';
 
@@ -43,7 +43,7 @@ try {
 const descriptor = JSON.parse(
   readFileSync(new URL('../extension/model/synthea.json', import.meta.url), 'utf8')
 );
-const { xsd, warnings } = generateXsd(descriptor);
+const { xsd, warnings } = generateXsd(descriptor, loadValues(fileURLToPath(new URL('../extension/model/synthea.json', import.meta.url))));
 warnings.forEach((w) => console.error(`warning: ${w}`));
 
 // write the generated extension XSD + a driver schema importing both schemas

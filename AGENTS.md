@@ -37,7 +37,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/): `fix:` → pat
 into a release PR; merging it tags a release. Nothing is published to npm. See `CONTRIBUTING.md`.
 
 ## Commands
-- Full check: `npm run validate`
+- Full check: `npm run validate` (two stages: `npm run validate:diagram`, then `npm run validate:convert`)
 - Lint, valid (must pass; covers `examples/valid/` and `lung-cancer/`): `npm run lint:valid`
 - Lint, invalid (must fail): `npm run lint:invalid`
 - Round-trip: `npm run roundtrip`

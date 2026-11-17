@@ -25,6 +25,26 @@ It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copi
 
 So whatever you change in `extension/` is reflected here on the next reload.
 
+`npm run demo:build` builds the static site (the same build the GitHub Pages workflow runs).
+
+## Problems while you draw
+
+Two checks run live, so a mistake shows while you model it, and they are shown apart:
+
+- **Lint** (the same rules as `npm run lint:valid`, through `bpmn-js-bpmnlint`): an icon on the
+  element and the count at the bottom of the canvas. This includes the converter's own checks, run
+  before the conversion (rule `converter-errors`), and the checks of the values in the fields (time
+  units, operators, ranges, code shapes). The rules are bundled for the browser from `.bpmnlintrc`
+  by `tools/pack-lint-config.mjs`, which `npm run dev` and `build` run first; after changing a rule,
+  restart the dev server.
+- **Converter** (`src/live-check.js`): half a second after each change the open diagram is converted
+  in the background. A problem gets a dashed outline and a **C** badge on the element (the message
+  on hover), and the toolbar shows the count; a click opens the Messages tab with an explanation of
+  each code. Unlike the lint this is the plain conversion together with the example pathways, so it
+  also sees a missing sub-module.
+
+Red is an error, orange a warning. The decision is still the one from `npm run validate`.
+
 The two slots are the whole mental model: **`moddleExtensions` is the data layer**
 (parse/serialise — required, or your `synthea:` data is dropped on save) and
 **`additionalModules` is the UI layer** (the editing controls — optional). See

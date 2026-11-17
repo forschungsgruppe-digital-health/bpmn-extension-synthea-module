@@ -13,17 +13,18 @@ pass/fail decision comes from the tools, never from your own reading.
 3. `npm run roundtrip` — moddle `fromXML`/`toXML` with the custom extension registered. Confirms extension data parses and serialises without warnings or loss.
 4. `npm run xsd` — validates the BPMN **core** against the official BPMN20.xsd.
 
-`npm run validate` chains 1, 3, 4, the generated-XSD checks (5), the conventions check and the converter checks (`npm run test:bpmn2gmf`, `convert:check`, `compare:structure`) for the common case; step 2 and `npm run synthea:smoke` run on their own.
+`npm run validate` chains 1, 3, 4, the generated-XSD checks (5), the conventions check and the converter checks (`npm run test:bpmn2gmf`, `convert:check`, `compare:structure`) for the common case, in two stages: `npm run validate:diagram` (is the BPMN a valid input) and `npm run validate:convert` (does the conversion work). Step 2 and `npm run synthea:smoke` run on their own.
 
-5. *(Optional)* `npm run xsd:ext` — validates the examples against the BPMN core XSD **and** an extension XSD generated from the moddle descriptor, so structural errors in the custom data are caught too. Run `npm run xsd:gen:check` first to confirm the committed XSD is not stale. Still structure-only; semantics stay in step 1.
+5. `npm run xsd:gen:check` and `npm run xsd:ext` — the extension XSD is generated from the moddle descriptor and `extension/model/synthea.values.json`; `xsd:gen:check` confirms the committed copy matches, `xsd:ext` validates the examples against the BPMN core XSD **and** the extension XSD. Both are part of `npm run validate`.
 
 ## Scope boundary — state this in every report
 The plain XSD step (4) checks the BPMN core only. Data under
 `<extensionElements>` is parsed with `processContents="lax"` and is NOT covered
-by it. The optional `xsd:ext` step (5) adds *structural* validation of the
-extension data but never its *semantics*. Extension correctness is established
-by steps 1 and 3 (and, structurally, 5). Never report "XSD passed" as
-"the extension is valid".
+by it. The extension XSD (5) adds validation of the extension data's *structure*
+and of its fixed choices (state type, time unit, operator, gender, race), but
+never of rules across fields or elements. Those are the lint (1), which also runs
+the converter's own checks before the conversion, and the round trip (3). Never
+report "XSD passed" as "the extension is valid".
 
 ## On failure
 Summarise each failing stage, quote the tool's own message, and propose a

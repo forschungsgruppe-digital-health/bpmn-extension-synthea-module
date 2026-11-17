@@ -22,13 +22,20 @@ export function initConverterPanel({ getXml, getCurrent, pathways }) {
   let scale = 1;
   let graph = null;
 
-  async function run() {
+  // Converts the open diagram together with the example pathways (the main one calls the
+  // submodules). The live check uses this too and only reads the diagnostics.
+  async function compute() {
     const current = getCurrent();
     const xml = await getXml();
     const inputs = pathways.map((p) => ({ path: `lung-cancer/${p.file}`, xml: p.file === current.file ? xml : p.xml }));
     // A new, unsaved diagram is not one of the example files: convert it on its own.
     if (!pathways.some((p) => p.file === current.file)) inputs.splice(0, inputs.length, { path: current.file, xml });
-    result = await convert(inputs);
+    return convert(inputs);
+  }
+
+  async function run(openTab) {
+    const current = getCurrent();
+    result = await compute();
     const own = fileBaseFor(current.file);
     select.innerHTML = '';
     for (const m of result.modules) {
@@ -39,7 +46,7 @@ export function initConverterPanel({ getXml, getCurrent, pathways }) {
     }
     select.value = result.modules.some((m) => m.fileBase === own) ? own : result.modules[0]?.fileBase ?? '';
     // A module with errors has no graph or JSON: open on the messages that say what is wrong.
-    tab = selected()?.ok === false ? 'messages' : 'graph';
+    tab = openTab ?? (selected()?.ok === false ? 'messages' : 'graph');
     panel.style.top = `${$('.toolbar').offsetHeight}px`;
     panel.hidden = false;
     render();
@@ -159,4 +166,6 @@ export function initConverterPanel({ getXml, getCurrent, pathways }) {
     link.click();
     URL.revokeObjectURL(link.href);
   });
+
+  return { compute, show: run };
 }

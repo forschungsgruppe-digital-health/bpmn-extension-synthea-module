@@ -26,7 +26,21 @@ module.exports = {
         'synthea/alternatives-not-mixed': 'warn',
         'synthea/inclusive-branches-require-condition-or-probability': 'warn',
         'synthea/unique-element-names': 'error',
-        'synthea/exclusive-gateway-requires-default-flow': 'error'
+        'synthea/exclusive-gateway-requires-default-flow': 'error',
+        'synthea/time-unit-valid': 'error',
+        'synthea/condition-values-valid': 'error',
+        'synthea/number-ranges-plausible': 'warn',
+        'synthea/code-format-plausible': 'warn',
+        'synthea/no-delay-after-death': 'warn',
+        'synthea/observation-condition-needs-observation': 'warn'
+      }
+    },
+    // The converter's own checks (tools/bpmn2gmf), as lint. Needs this repository, so it is a config
+    // of its own and not part of `all`; `.bpmnlintrc` here extends both.
+    converter: {
+      rules: {
+        'synthea/converter-errors': 'error',
+        'synthea/converter-warnings': 'warn'
       }
     }
   },
@@ -55,6 +69,14 @@ module.exports = {
     'alternatives-not-mixed': './rules/alternatives-not-mixed',
     'inclusive-branches-require-condition-or-probability': './rules/inclusive-branches-require-condition-or-probability',
     'unique-element-names': './rules/unique-element-names',
-    'exclusive-gateway-requires-default-flow': './rules/exclusive-gateway-requires-default-flow'
+    'exclusive-gateway-requires-default-flow': './rules/exclusive-gateway-requires-default-flow',
+    'time-unit-valid': './rules/time-unit-valid',
+    'condition-values-valid': './rules/condition-values-valid',
+    'number-ranges-plausible': './rules/number-ranges-plausible',
+    'code-format-plausible': './rules/code-format-plausible',
+    'no-delay-after-death': './rules/no-delay-after-death',
+    'observation-condition-needs-observation': './rules/observation-condition-needs-observation',
+    'converter-errors': './rules/converter-errors',
+    'converter-warnings': './rules/converter-warnings'
   }
 };

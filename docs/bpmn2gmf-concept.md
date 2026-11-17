@@ -66,7 +66,7 @@ A pipeline of small, pure stages. Each stage takes plain data and returns plain 
  modules/<name>.json   +  diagnostics report (errors / warnings / "unmodeled field" notes)
 ```
 
-Proposed layout (all under `tools/bpmn2gmf/`, no `package.json` of its own):
+Layout (all under `tools/bpmn2gmf/`, no `package.json` of its own; the list is the first plan, the files that came later are named below it):
 
 ```
 cli.mjs            argument parsing, file I/O, exit code
@@ -76,11 +76,13 @@ resolve.mjs        stage 3
 encounters.mjs     stage 4a (Encounter synthesis)
 transitions.mjs    stage 4b/5 (Table C)
 conditions.mjs     synthea:Condition → GMF condition (recursion, negate → Not, value typing)
-emit/<StateType>.mjs  or one emit.mjs with a table: StateType → emitter
+emit.mjs           one table: StateType → emitter
 codes.mjs          code system URI → Synthea system name
 verify.mjs         stage 6
 test/              node:test unit tests + golden files
 ```
+
+Added later: `convert.mjs` (the pipeline as a function, also used by the lint), `gateways.mjs`, `links.mjs`, `documentation.mjs`, `fuse.mjs`, `layout.mjs`, `write.mjs`, `diagnostics.mjs`, `explanations.mjs`, `required-fields.mjs`, `verify-flow.mjs`, `gen-schema.mjs` and `module.schema.json`, and the comparisons `compare.mjs`, `compare-upstream.mjs`, `compare-structure.mjs` with `structure.mjs`.
 
 CLI: `node tools/bpmn2gmf/cli.mjs lung-cancer/ --out-dir out/modules` (a directory so that submodule references can be resolved across files; a single file is allowed when it calls no submodule). npm script `bpmn2gmf`, plus `test:bpmn2gmf` added to `validate`.
 
@@ -189,7 +191,7 @@ Comparing our BPMN files with the real `lung_cancer.json` and with the Synthea S
 
 **Finding (fixed) — our two `Pain_Vital` states were modeled as the wrong type.** Both carry a LOINC code, but GMF `VitalSign` has no `codes` (it only *sets* a value and is not recorded in the chart). In the real `lung_cancer.json` all three `Pain_Vital*` states are `Observation` (`category: vital-signs`, `unit: {score}`, `range` 4–8). The fix was a model correction (`stateType="VitalSign"` → `Observation`, done in both files; the state type was never derived from a resource type), not an extension change — so **no `VitalSign` fields are needed** for the current pathways.
 
-Until a decision is made the converter must not silently produce invalid JSON. The proposed default behavior is described in Decision 1.
+The converter does not silently produce invalid JSON: a state with a required field missing is reported (`REQUIRED_FIELD_MISSING`, an error in strict mode and in the lint) and carries a remark in the output, and it never guesses a value (Decision 1). The gaps this section lists were closed by the additions in §9.
 
 ---
 
@@ -204,7 +206,7 @@ Cheap structural checks that run on every conversion:
 5. each state carries all required fields from a table derived from the wiki (§5) — missing ones are reported as *"unmodeled field"* notes (warning by default, error with `--strict`);
 6. `CallSubmodule` targets exist in the run.
 
-These are our own checks (a small required-fields table in `verify.mjs`), not a replacement for loading the module in Synthea.
+These are our own checks (a small required-fields table in `required-fields.mjs`), not a replacement for loading the module in Synthea.
 
 ---
 
@@ -272,7 +274,7 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 | `lung_cancer_probabilities_submodule` | `lung_cancer_probabilities.json` | **same content** |
 | main + treatment + symptom-check | `lung_cancer.json` | **nothing clinical exists only on our side** (encounters, procedures, diagnoses, symptoms, the four `Death` states with their cause, lab values, length of stay, hospice reason); upstream has second copies of the SCLC/NSCLC treatment |
 
-Differences from upstream in the main pathway. Four were found by the first comparison and are **resolved**; the converter and extension grew for them:
+Differences from upstream in the main pathway. Five were found by the first comparison and are **resolved**; the converter and extension grew for them:
 
 | What | Before | Now |
 |---|---|---|

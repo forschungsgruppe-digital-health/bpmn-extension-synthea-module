@@ -4,18 +4,27 @@
 
 The checks follow the three levels of Kramer et al. 2025 ("Leveraging Generative AI to Enhance Synthea Module Development", arXiv:2507.21123): Level 1 is the structure and order of a module, Level 2 its clinical content against the source, Level 3 the simulated population. Everything described here is Level 1; the last section says what is not automated.
 
+## Two stages: the diagram, then the conversion
+
+`npm run validate` is two stages with a clear hand-over between them:
+
+1. **`npm run validate:diagram`**: is the BPMN a valid input for the conversion? XML structure and the allowed values (BPMN core XSD and the extension XSD, which also fixes the choices of fields such as state type, time unit, operator), the semantic rules (lint, including the converter's own checks run before the conversion, see [lint-rules.md](lint-rules.md#converter-checks-as-lint)), and the round trip. The conversion has no say here, and nothing is written.
+2. **`npm run validate:convert`**: does the conversion do the right thing with a valid diagram? The schema of the module JSON, the converter tests, the strict conversion of `lung-cancer/`, the comparison with Synthea's own module.
+
+The contract between the two is the first stage: a diagram that passes it converts without an error (`tools/bpmn2gmf/test/lint-contract.test.mjs` tests this for the errors of the converter). The same first-stage checks run live in the modeler demo, so the author sees a problem while drawing.
+
 ## The steps
 
-`npm run validate` runs these in order. Steps 1 to 5 check the extension and the diagrams, steps 6 to 9 the Synthea modules the converter generates from them.
+`npm run validate` runs these in order. Steps 1 to 5 check the extension and the diagrams (stage one, plus the package conventions), steps 6 to 9 the Synthea modules the converter generates from them (stage two).
 
 ### Extension and diagrams
 
 | # | Check | Command and files | What it covers |
 |---|---|---|---|
-| 1 | Lint | `lint:valid`: `extension/lint/bpmnlint-plugin-synthea/` (`index.js`, `lib/utils.js`, `rules/*.js`), configured by `.bpmnlintrc`, reads the descriptor `extension/model/synthea.json` | the 25 semantic rules for the `synthea:` data in `examples/valid/` and `lung-cancer/`; every rule is in [lint-rules.md](lint-rules.md) |
+| 1 | Lint | `lint:valid`: `extension/lint/bpmnlint-plugin-synthea/` (`index.js`, `lib/utils.js`, `rules/*.js`), configured by `.bpmnlintrc`, reads the descriptor `extension/model/synthea.json` | the 33 semantic rules for the `synthea:` data in `examples/valid/` and `lung-cancer/`: the extension's own, the checks of the values in the fields (units of time, operators, ranges, code shapes), and the converter's checks run before the conversion (SYN-36, SYN-37, see [lint-rules.md](lint-rules.md#converter-checks-as-lint)). The same rules run live in the modeler demo |
 | 2 | Round trip | `roundtrip`: `tools/moddle-roundtrip.mjs` | every example goes through `bpmn-moddle` and back; nothing may be lost and no warning may appear. This is the check that really covers `<extensionElements>` |
 | 3 | XSD, core | `xsd`: `tools/validate-xsd.sh` | BPMN structure against the official BPMN 2.0 schema. Extension elements are not covered |
-| 4 | XSD, extension | `xsd:gen:check`: `tools/moddle-to-xsd.mjs --check` (generates `extension/model/synthea.xsd`); `xsd:ext`: `tools/validate-xsd-ext.mjs` | a schema generated from the moddle descriptor (the single source); `--check` fails if the stored schema has drifted. Structure only, the lint covers meaning |
+| 4 | XSD, extension | `xsd:gen:check`: `tools/moddle-to-xsd.mjs --check` (generates `extension/model/synthea.xsd`); `xsd:ext`: `tools/validate-xsd-ext.mjs` | a schema generated from the moddle descriptor and the value lists in `extension/model/synthea.values.json` (the single sources); `--check` fails if the stored schema has drifted. Structure, the enumerations of the model (state type, condition type, encounter class, ...) and the fixed value lists (time units, operators, gender, race); the lint covers meaning and everything that depends on another field |
 | 5 | Conventions | `conventions`: `tools/check-package-conventions.mjs` | package names (`bpmn-js-*`, `bpmnlint-plugin-*`), `bpmn-js` only as a peer dependency |
 
 "XSD passed" never means "extension valid": the XSD does not cover `<extensionElements>`. Checks 2 and 4 plus the lint do.

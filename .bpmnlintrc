@@ -6,6 +6,7 @@
     "synthea": "./extension/model/synthea.json"
   },
   "extends": [
-    "plugin:synthea/all"
+    "plugin:synthea/all",
+    "plugin:synthea/converter"
   ]
 }

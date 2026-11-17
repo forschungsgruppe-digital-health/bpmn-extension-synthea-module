@@ -123,3 +123,28 @@ body {
 .cp-messages dd { margin: 0; }
 .cp-messages ul { margin: 6px 0 0; padding-left: 18px; color: #444; font: 12px/1.5 ui-monospace, monospace; }
 .cp-note { padding: 14px; }
+
+/* Live converter check: status in the toolbar and problems on the elements. */
+.toolbar .live-status { background: #757575; border-color: #757575; min-width: 110px; white-space: nowrap; }
+.toolbar .live-status.ok { background: #2e7d32; border-color: #2e7d32; }
+.toolbar .live-status.has-warnings { background: #ef6c00; border-color: #ef6c00; }
+.toolbar .live-status.has-errors { background: #c62828; border-color: #c62828; }
+
+.synthea-converter-error:not(.djs-connection) .djs-visual > :nth-child(1) { stroke: #c62828 !important; stroke-width: 3px !important; stroke-dasharray: 7 4 !important; }
+.synthea-converter-warning:not(.djs-connection) .djs-visual > :nth-child(1) { stroke: #ef6c00 !important; stroke-width: 3px !important; stroke-dasharray: 7 4 !important; }
+.synthea-converter-error.djs-connection .djs-visual > path { stroke: #c62828 !important; }
+.synthea-converter-warning.djs-connection .djs-visual > path { stroke: #ef6c00 !important; }
+
+.synthea-issue-badge {
+  min-width: 24px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  color: #fff;
+  font: 600 11px/18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-align: center;
+  cursor: pointer;
+}
+.synthea-issue-badge.error { background: #c62828; }
+.synthea-issue-badge.warning { background: #ef6c00; }
