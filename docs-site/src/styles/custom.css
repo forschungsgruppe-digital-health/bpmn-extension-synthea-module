@@ -1,0 +1,17 @@
+/* Accent derived from the bpmn.io diagram palette rather than Starlight's default. */
+:root {
+  --sl-color-accent-low: #10243f;
+  --sl-color-accent: #2f5aa8;
+  --sl-color-accent-high: #b9cdf0;
+}
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d3e0f6;
+  --sl-color-accent: #27478c;
+  --sl-color-accent-high: #16284d;
+}
+
+/* Wide reference tables are common in the converted guides. */
+.sl-markdown-content table {
+  display: block;
+  overflow-x: auto;
+}

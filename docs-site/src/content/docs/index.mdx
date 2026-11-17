@@ -1,0 +1,125 @@
+---
+title: Draw a patient pathway. Get a Synthea module.
+description: An extension for bpmn.io that turns BPMN patient pathways into Synthea modules for synthetic patient populations.
+---
+
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+An extension for [bpmn.io](https://bpmn.io) that lets you model clinical patient pathways in BPMN
+and convert them into [Synthea](https://github.com/synthetichealth/synthea) modules, so you can
+simulate synthetic patient populations that follow your pathway.
+
+<LinkButton href={`${import.meta.env.BASE_URL}modeler/`} icon="right-arrow">Open the modeler</LinkButton>{' '}
+<LinkButton href={`${import.meta.env.BASE_URL}modeling/modeling-guide/`} variant="secondary">Modeling guide</LinkButton>
+
+## What it is
+
+Synthea describes a disease course as a JSON state machine. That is precise, but hard for clinicians
+to read and review. Here the diagram stays the source: you model the pathway in BPMN, attach the
+Synthea settings to each element, and the converter produces the JSON. The settings live only in
+`extensionElements` under their own `synthea:` namespace, so the BPMN itself stays standard.
+
+In the BPMN file:
+
+```xml
+<bpmn:task id="Task_Wait" name="Wait until age 45–65">
+  <bpmn:extensionElements>
+    <synthea:stateTypeConfig stateType="Delay" />
+    <synthea:delayConfig delayShape="RANGE"
+      delayValue="45" delayValueHigh="65"
+      delayUnit="years" />
+  </bpmn:extensionElements>
+</bpmn:task>
+```
+
+It becomes this Synthea state:
+
+```json
+"Wait until age 45–65": {
+  "type": "Delay",
+  "range": { "low": 45, "high": 65, "unit": "years" }
+}
+```
+
+## How it works
+
+Four steps, each with a tool that checks the result.
+
+1. **Model.** Draw the pathway in the bpmn-js modeler and fill in the `synthea:` properties panel.
+2. **Validate.** bpmnlint rules check the Synthea semantics that the BPMN schema cannot express
+   ([lint rules](/modeling/lint-rules/)).
+3. **Convert.** The converter writes Synthea modules. It runs in the browser or on the command line
+   ([converter overview](/reference/converter-overview/)).
+4. **Simulate.** Run the modules in Synthea to generate synthetic patients.
+
+## What you can use it for
+
+<CardGrid>
+  <Card title="Synthetic cohorts along a pathway" icon="seti:json">
+    Generate patient populations that follow a modeled clinical pathway, such as lung cancer, for tests
+    and demos without real patient data.
+  </Card>
+  <Card title="Reviewable pathway models" icon="open-book">
+    Let clinicians read and discuss the pathway as a diagram, while the JSON is produced from it
+    instead of written by hand.
+  </Card>
+  <Card title="Automatic model checks" icon="approve-check">
+    Find missing fields, broken branches and unsupported constructs before Synthea runs, with an
+    explanation for each message.
+  </Card>
+  <Card title="A pattern for your own extension" icon="puzzle">
+    The repository is also a template for custom BPMN extensions: model descriptor, lint plugin,
+    editor module and checks. See [Concepts](/start/concepts/).
+  </Card>
+</CardGrid>
+
+## Is it a good fit?
+
+| You want to… | Fit |
+|---|---|
+| Create Synthea modules from a BPMN pathway | **Yes**, this is the core use case |
+| Edit Synthea settings in a bpmn-js properties panel | **Yes** |
+| Check a pathway model before running Synthea | **Yes** |
+| Convert a Synthea module back into BPMN | Not included |
+| Execute or simulate the BPMN process itself | No, Synthea does the simulation |
+| Produce data about real patients | No, the output is synthetic |
+
+This is research software under active development. Check the
+[issues](https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module/issues) before
+you depend on it.
+
+## Live examples
+
+The lung cancer pathway is modeled as one main module and four submodules. Each opens in the modeler;
+there, **Convert to Synthea** shows the module it becomes.
+
+- [Lung cancer (main pathway)](/modeler/?pathway=main), which calls the four submodules
+- [Probabilities](/modeler/?pathway=probabilities)
+- [Treatment cycle](/modeler/?pathway=treatment)
+- [Symptom check](/modeler/?pathway=symptom-check)
+- [Anemia](/modeler/?pathway=anemia)
+- [Converter result](/modules/): the JSON modules and the report built from these pathways at the latest merge
+
+## Where to start
+
+<CardGrid>
+  <Card title="I model pathways" icon="pencil">
+    Task-by-task instructions for every `synthea:` type: [Modeling guide](/modeling/modeling-guide/).
+  </Card>
+  <Card title="I develop or integrate" icon="setting">
+    How the converter works and which rules apply: [Converter overview](/reference/converter-overview/),
+    [Conversion rules](/reference/implicit-rules/).
+  </Card>
+  <Card title="I want my own extension" icon="rocket">
+    Use the repository as a template and replace the placeholder extension with yours. Start with
+    [Concepts](/start/concepts/).
+  </Card>
+</CardGrid>
+
+## Part of a family of extensions
+
+Other bpmn.io extensions from the Forschungsgruppe Digital Health:
+
+- [Medical terminology](https://forschungsgruppe-digital-health.github.io/bpmn-extension-medical-terminology/): annotate BPMN elements with codes such as SNOMED CT and LOINC
+- [Clinical semantics](https://forschungsgruppe-digital-health.github.io/bpmn-js-clinical-semantics/): earlier extension for clinical semantics and FHIR resource mapping
+- [Extension template](https://forschungsgruppe-digital-health.github.io/bpmn-extension-template/): template repository for custom BPMN extensions

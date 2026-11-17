@@ -20,28 +20,40 @@ const fail = (msg) => problems.push(msg);
 const read = (p) => readFileSync(join(dist, p), 'utf8');
 const refs = (html) => [...html.matchAll(/\b(?:src|href)="([^"#?]+)[^"]*"/g)].map((m) => m[1]);
 
-// 1. The overview page (index.html) and the modeler (modeler/index.html): absolute asset
-// paths carry the base path and point at real files; both link to the converter result.
-for (const [page, modulesLink] of [['index.html', 'modules/'], ['modeler/index.html', '../modules/']]) {
-  if (!existsSync(join(dist, page))) {
-    fail(`${page} is missing`);
-    continue;
+// 1. The site: every page and the modeler link only to files that exist; absolute paths carry
+// the base path (project Pages serve from /<repo>/); the overview and the modeler both reach the
+// converter result.
+const pages = [];
+const walk = (dir) => {
+  for (const e of readdirSync(join(dist, dir), { withFileTypes: true })) {
+    const rel = join(dir, e.name);
+    if (e.isDirectory()) {
+      if (!['modules', 'pagefind'].includes(e.name)) walk(rel);
+    } else if (e.name.endsWith('.html') && e.name !== '404.html') pages.push(rel);
   }
-  const html = read(page);
-  const all = refs(html);
-  for (const r of all.filter((x) => x.startsWith('/'))) {
-    if (!r.startsWith(base)) fail(`${page}: "${r}" does not start with the base path ${base}`);
-    else if (!existsSync(join(dist, r.slice(base.length)))) fail(`${page}: "${r}" does not exist in ${dist}`);
-  }
-  if (page === 'modeler/index.html' && !all.some((r) => r.startsWith('/'))) fail(`${page} references no built assets`);
-  if (!all.includes(modulesLink)) fail(`${page} has no relative link to ${modulesLink}`);
+};
+if (existsSync(dist)) walk('.');
+for (const need of ['index.html', 'modeler/index.html', 'start/concepts/index.html', 'modeling/modeling-guide/index.html']) {
+  if (!pages.includes(need)) fail(`${need} is missing`);
 }
-if (existsSync(join(dist, 'index.html'))) {
-  const html = read('index.html');
-  // Every relative link of the overview must exist (query string stripped by refs()).
-  for (const r of refs(html).filter((x) => !x.startsWith('/') && !x.startsWith('http') && !x.startsWith('#'))) {
-    if (!existsSync(join(dist, r))) fail(`index.html: relative link "${r}" does not exist in ${dist}`);
+const exists = (rel) => existsSync(join(dist, rel)) || existsSync(join(dist, rel, 'index.html'));
+for (const page of pages) {
+  const html = read(page);
+  for (const r of refs(html)) {
+    if (/^(https?:|mailto:|data:)/.test(r)) continue;
+    if (r.startsWith('/')) {
+      if (!r.startsWith(base)) fail(`${page}: "${r}" does not start with the base path ${base}`);
+      else if (!exists(r.slice(base.length))) fail(`${page}: "${r}" does not exist in ${dist}`);
+    } else if (!exists(join(page, '..', r))) {
+      fail(`${page}: relative link "${r}" does not exist in ${dist}`);
+    }
   }
+}
+const links = (page) => refs(read(page)).map((r) => (r.startsWith(base) ? r.slice(base.length) : r));
+if (pages.includes('index.html') && !links('index.html').some((r) => r === 'modules/')) fail('index.html has no link to modules/');
+if (pages.includes('modeler/index.html')) {
+  if (!links('modeler/index.html').includes('../modules/')) fail('modeler/index.html has no relative link to ../modules/');
+  if (!refs(read('modeler/index.html')).some((r) => r.startsWith('/'))) fail('modeler/index.html references no built assets');
 }
 
 // 2. The converter result: index page, report and every linked module exist; no conversion errors.

@@ -38,6 +38,7 @@
     "tools/bpmn2gmf/module.schema.json"
   ],
   "scripts": {
+    "site": "node tools/build-site.mjs / site",
     "lint:valid": "bpmnlint \"examples/valid/**/*.bpmn\" \"lung-cancer/*.bpmn\"",
     "lint:invalid": "bpmnlint \"examples/invalid/**/*.bpmn\"",
     "roundtrip": "node tools/moddle-roundtrip.mjs",
