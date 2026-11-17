@@ -38,7 +38,10 @@ const modeler = new BpmnModeler({
 
 // ---------------------------------------------------------------------------------------------
 // Files. The modeler ships no diagrams: people open their own (files, a folder, drag and drop).
-// Every open file is an entry { file, xml, dirty }; `file` is its path inside the opened folder.
+// Every open file is an entry { file, xml, dirty, savedAt }; `file` is its path inside the opened folder.
+// `savedAt` is the position in the undo history that equals the file on disk (-1 right after opening,
+// the current position after saving; null when unknown, e.g. a new or restored unsaved diagram). An
+// entry is dirty only while the history is somewhere else, so undoing every change takes the mark away.
 // The converter gets all entries, so a main pathway finds the submodules it calls.
 // ---------------------------------------------------------------------------------------------
 const $ = (sel) => document.querySelector(sel);
@@ -181,6 +184,9 @@ function persistSoon() {
   }, 800);
 }
 
+// Position in the undo history; importing a diagram starts a fresh one at -1.
+const historyPosition = () => modeler.get('commandStack')._stackIdx;
+
 async function showEntry(entry) {
   try {
     await modeler.importXML(entry.xml);
@@ -192,6 +198,7 @@ async function showEntry(entry) {
     return false;
   }
   current = entry;
+  entry.savedAt = entry.dirty ? null : historyPosition();
   renderChrome();
   fitViewport(); // not awaited: a hidden tab paints late and must not hold up the next step
   return true;
@@ -349,6 +356,7 @@ async function saveCurrent() {
     URL.revokeObjectURL(link.href);
     current.xml = xml;
     current.dirty = false;
+    current.savedAt = historyPosition();
     renderChrome();
     persistSoon();
   } catch (err) {
@@ -359,9 +367,12 @@ async function saveCurrent() {
 
 // Marks the open file as changed.
 modeler.get('eventBus').on('commandStack.changed', () => {
-  if (current && !current.dirty) {
-    current.dirty = true;
-    renderChrome();
+  if (current) {
+    const dirty = current.savedAt == null || historyPosition() !== current.savedAt;
+    if (dirty !== current.dirty) {
+      current.dirty = dirty;
+      renderChrome();
+    }
   }
   persistSoon();
 });
