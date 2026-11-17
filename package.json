@@ -1,6 +1,6 @@
 {
   "name": "bpmn-js-my-extension",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Template for a custom BPMN 2.0 / bpmn.io extension with automated conformance checks.",
   "type": "module",
   "license": "MIT",
@@ -34,8 +34,12 @@
     "bpmn-js-properties-panel": ">=5"
   },
   "peerDependenciesMeta": {
-    "@bpmn-io/properties-panel": { "optional": true },
-    "bpmn-js-properties-panel": { "optional": true }
+    "@bpmn-io/properties-panel": {
+      "optional": true
+    },
+    "bpmn-js-properties-panel": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "bpmn-moddle": "^9.0.1",
