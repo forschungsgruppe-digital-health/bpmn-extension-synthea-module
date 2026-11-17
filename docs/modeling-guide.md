@@ -143,8 +143,9 @@ before opening the properties panel for the first time.
 ## 3. Making the patient wait — `DelayConfig`
 
 **Element:** Intermediate event with a **Timer** event definition (click the
-event, then set its type to Timer in the "Timer" group — this alone is the
-unambiguous signal that the state is `Delay`, nothing else needs a timer).
+event, click the wrench (**Change element**) and choose **Timer intermediate
+catch event**; the properties panel then shows the BPMN "Timer" group — this alone
+is the unambiguous signal that the state is `Delay`, nothing else needs a timer).
 
 **Group:** "Delay" → `delayShape` (`EXACT` or `RANGE`), `delayValue`, and —
 only shown when `delayShape="RANGE"` — `delayValueHigh`, plus `delayUnit`.

@@ -185,6 +185,8 @@ button.link { border: 0; background: none; color: var(--accent); cursor: pointer
   flex: 1;
   min-width: 0;
   background: #fff;
+  color: #17181c;
+  color-scheme: light;
 }
 
 #properties {
@@ -192,6 +194,10 @@ button.link { border: 0; background: none; color: var(--accent); cursor: pointer
   border-left: 1px solid var(--border);
   overflow: auto;
   background: #fff;
+  /* Always the light palette: the properties panel switches to light text under a dark color-scheme
+     and its fields would turn unreadable on the white background. */
+  color: #17181c;
+  color-scheme: light;
 }
 
 /* ---- Welcome (no file open) ---- */

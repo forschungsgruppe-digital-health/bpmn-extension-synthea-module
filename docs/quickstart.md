@@ -12,11 +12,11 @@ The other examples, all from the lung cancer pathway, as downloads: [main pathwa
 
 ## 2. Look at one element
 
-Click any box. On the right, the **properties panel** shows what you can set. The groups that start with the Synthea settings are the new part: the **State type** says what the box becomes in Synthea (for example a condition, a procedure or a delay), and further groups appear depending on that type. Click a few other elements and watch the groups change.
+Click any box. On the right, the **properties panel** shows what you can set. The group called **Synthea** is the new part. Its **State type** says what the box becomes in Synthea (for example a condition, a procedure, a delay or a set attribute), and further groups below it appear depending on that type: for a box that sets an attribute, **Set Attribute** holds the attribute name and its value. Click a few other elements and watch the groups change.
 
 ## 3. Change something and convert
 
-Change a value in a group, for example a number. Then press **Convert to Synthea** in the toolbar. A panel opens with the Synthea module the diagram becomes, in three tabs:
+Open a group that holds a number (for example **Set Attribute**, field **Value**) and change it. Then press **Convert to Synthea** in the toolbar. A panel opens with the Synthea module the diagram becomes, in three tabs:
 
 - **Graph**: the module as a state graph.
 - **JSON**: the file Synthea runs. **Download JSON** saves it.
@@ -29,9 +29,10 @@ Your changes stay in your browser, and the modeler restores your files when you 
 Press **New** in the toolbar for an empty diagram. Then:
 
 1. The empty diagram already contains a start event. It becomes the `Initial` state; there is nothing to configure.
-2. Add an intermediate event after it and set its type to **Timer** (click the event, then set its type to Timer in the Timer group of the properties panel). In its **Delay** group choose a shape, a value and a unit, for example an exact value of 3 years.
-3. Add an end event after the timer and connect the three elements with arrows.
-4. Press **Convert to Synthea**. The result has three states: `Initial`, your delay and `Terminal`.
+2. Click the start event. Next to it a small menu appears; click its double circle (intermediate event). The new event is placed after the start event and connected to it. Click the wrench in the same menu (**Change element**) and choose **Timer intermediate catch event**.
+3. With the timer selected, open the group **Synthea**, then **Delay** in the properties panel: choose the shape **EXACT**, enter the value `3` and the unit `years`.
+4. In the small menu next to the timer click the bold circle (end event). It is appended and connected as well, so all three elements are joined by arrows.
+5. Press **Convert to Synthea**. The result has three states: `Initial`, your delay (3 years) and `Terminal`. On the JSON tab you see them as the file Synthea runs.
 
 This is the smallest working module. More steps (conditions, branches, visits) follow the same pattern: one BPMN element, one state type, a few fields. The [modeling guide](modeling-guide.md) shows each of them.
 
