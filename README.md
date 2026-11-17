@@ -57,9 +57,9 @@ Veröffentlichung liegt bei den Autor:innen.
 
 | Part | Where | What it does |
 |---|---|---|
-| **Moddle descriptor** | `extension/model/synthea.json` | The 20 `synthea:` types (and 10 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
+| **Moddle descriptor** | `extension/model/synthea.json` | The 28 `synthea:` types (and 13 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
 | **Properties panel** | `extension/src/` | One group "Synthea" in the bpmn-js properties panel, one collapsible section per type, showing only what fits the chosen State Type and what the converter accepts. |
-| **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 23 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. See [docs/lint-rules.md](docs/lint-rules.md). |
+| **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 33 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. See [docs/lint-rules.md](docs/lint-rules.md). |
 | **Converter** | `tools/bpmn2gmf/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
 | **Example pathway** | `lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
 | **Demo** | `demo/` | A bpmn-js modeler with the extension, for trying it by hand. Not published. |
@@ -85,7 +85,7 @@ the original back); **Download .bpmn** saves it.
 **Convert to Synthea** runs the converter in the browser on the diagram that is open, with the edits
 you made, and shows the Synthea module as a graph, as JSON and as messages (each kind of message
 comes with an explanation and what to do), with a download of the JSON. On the published site
-(GitHub Pages, rebuilt on every merge into `dev`) the site root is the overview and the guides (from `docs/`, built by `docs-site/`), the modeler lives under `modeler/`, and the link **Converter result** opens the modules and
+(GitHub Pages, built from the `dev` branch) the site root is the overview and the guides (from `docs/`, built by `docs-site/`), the modeler lives under `modeler/`, and the link **Converter result** opens the modules and
 the report that the converter made from `lung-cancer/` at that merge, with the commit they come from.
 
 ### First steps in the modeler
