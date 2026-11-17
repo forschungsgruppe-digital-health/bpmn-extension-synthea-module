@@ -274,6 +274,8 @@ must pass). `npm run lint:invalid` is **expected to fail**: the diagrams in
 | [docs/converter-overview.md](docs/converter-overview.md) | What the converter does: options, the stages of the pipeline, the comparison with Synthea's modules |
 | [docs/validator-overview.md](docs/validator-overview.md) | What the validator does: the checks that `npm run validate` runs, in order |
 | [docs/lint-rules.md](docs/lint-rules.md) | The 33 lint rules in one table: ID, severity and what each one checks |
+| [docs/extension-api.md](docs/extension-api.md) | The extension API: register it in bpmn-js, read the data in Node, what the XSD checks |
+| [docs/extension-api-types.md](docs/extension-api-types.md) | The `synthea:` types, attributes and enumerations (generated from the moddle descriptor) |
 | [docs/extension-matrix.md](docs/extension-matrix.md) | Which `synthea:` type sits on which BPMN element (panel and converter) |
 | [docs/synthea.md](docs/synthea.md) | Background: Synthea and its Generic Module Framework |
 | [docs/concepts.md](docs/concepts.md) | Background: what a BPMN extension is and how the pieces fit |
