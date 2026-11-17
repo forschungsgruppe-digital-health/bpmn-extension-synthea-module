@@ -20,17 +20,28 @@ const fail = (msg) => problems.push(msg);
 const read = (p) => readFileSync(join(dist, p), 'utf8');
 const refs = (html) => [...html.matchAll(/\b(?:src|href)="([^"#?]+)[^"]*"/g)].map((m) => m[1]);
 
-// 1. The modeler page: absolute asset paths carry the base path and point at real files.
-if (!existsSync(join(dist, 'index.html'))) fail('index.html is missing');
-else {
-  const html = read('index.html');
-  const assets = refs(html).filter((r) => r.startsWith('/'));
-  if (!assets.length) fail('index.html references no built assets');
-  for (const r of assets) {
-    if (!r.startsWith(base)) fail(`index.html: "${r}" does not start with the base path ${base}`);
-    else if (!existsSync(join(dist, r.slice(base.length)))) fail(`index.html: "${r}" does not exist in ${dist}`);
+// 1. The overview page (index.html) and the modeler (modeler/index.html): absolute asset
+// paths carry the base path and point at real files; both link to the converter result.
+for (const [page, modulesLink] of [['index.html', 'modules/'], ['modeler/index.html', '../modules/']]) {
+  if (!existsSync(join(dist, page))) {
+    fail(`${page} is missing`);
+    continue;
   }
-  if (!refs(html).includes('modules/')) fail('index.html has no relative link to modules/');
+  const html = read(page);
+  const all = refs(html);
+  for (const r of all.filter((x) => x.startsWith('/'))) {
+    if (!r.startsWith(base)) fail(`${page}: "${r}" does not start with the base path ${base}`);
+    else if (!existsSync(join(dist, r.slice(base.length)))) fail(`${page}: "${r}" does not exist in ${dist}`);
+  }
+  if (page === 'modeler/index.html' && !all.some((r) => r.startsWith('/'))) fail(`${page} references no built assets`);
+  if (!all.includes(modulesLink)) fail(`${page} has no relative link to ${modulesLink}`);
+}
+if (existsSync(join(dist, 'index.html'))) {
+  const html = read('index.html');
+  // Every relative link of the overview must exist (query string stripped by refs()).
+  for (const r of refs(html).filter((x) => !x.startsWith('/') && !x.startsWith('http') && !x.startsWith('#'))) {
+    if (!existsSync(join(dist, r))) fail(`index.html: relative link "${r}" does not exist in ${dist}`);
+  }
 }
 
 // 2. The converter result: index page, report and every linked module exist; no conversion errors.

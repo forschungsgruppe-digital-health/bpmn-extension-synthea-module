@@ -148,3 +148,5 @@ body {
 }
 .synthea-issue-badge.error { background: #c62828; }
 .synthea-issue-badge.warning { background: #ef6c00; }
+
+.toolbar a.home { color: inherit; text-decoration: none; }

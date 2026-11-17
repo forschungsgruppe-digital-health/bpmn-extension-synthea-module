@@ -34,7 +34,9 @@ const PATHWAYS = [
   { key: 'anemia', label: 'Anemia (submodule)', file: 'anemia-submodule.bpmn', xml: anemiaXML }
 ];
 
-let currentPathway = PATHWAYS[0];
+// Deep link from the overview page: modeler/?pathway=treatment
+const requested = new URLSearchParams(location.search).get('pathway');
+let currentPathway = PATHWAYS.find((p) => p.key === requested) || PATHWAYS[0];
 
 const modeler = new BpmnModeler({
   container: '#canvas',

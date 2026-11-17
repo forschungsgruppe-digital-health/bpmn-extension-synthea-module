@@ -85,7 +85,7 @@ the original back); **Download .bpmn** saves it.
 **Convert to Synthea** runs the converter in the browser on the diagram that is open, with the edits
 you made, and shows the Synthea module as a graph, as JSON and as messages (each kind of message
 comes with an explanation and what to do), with a download of the JSON. On the published site
-(GitHub Pages, rebuilt on every merge into `dev`) the link **Converter result** opens the modules and
+(GitHub Pages, rebuilt on every merge into `dev`) the overview page introduces the project, the modeler lives under `modeler/`, and the link **Converter result** opens the modules and
 the report that the converter made from `lung-cancer/` at that merge, with the commit they come from.
 
 ### With Docker
