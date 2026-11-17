@@ -91,7 +91,7 @@ the report that the converter made from `lung-cancer/` at that merge, with the c
 ### With Docker
 
 ```bash
-docker compose up    # builds the image, serves the modeler on http://localhost:5173
+docker compose up    # builds the image, serves the modeler on http://localhost:5173/modeler/
 ```
 
 The image has the demo, the converter and `xmllint`. To run the converter in it:

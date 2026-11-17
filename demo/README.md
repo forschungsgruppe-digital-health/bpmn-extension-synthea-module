@@ -62,7 +62,7 @@ From the repo root (deps are installed once via the workspace):
 
 ```bash
 npm install        # installs this demo too (it is an npm workspace)
-npm run demo       # vite dev server → http://localhost:5173
+npm run demo       # vite dev server → http://localhost:5173/modeler/
 ```
 
 Or from here: `npm run dev` / `npm run build` / `npm run preview`.

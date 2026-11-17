@@ -9,7 +9,7 @@ convention.
 ```bash
 npm install        # Node 22+; sets up the workspaces (lint plugin + demo)
 npm run validate   # lint, round-trip, XSD, conventions, converter tests, convert and structure checks
-npm run demo       # optional: interactive modeler playground at http://localhost:5173
+npm run demo       # optional: interactive modeler playground at http://localhost:5173/modeler/
 ```
 
 `npm run validate` chains the **positive** lint, round-trip, XSD core, the

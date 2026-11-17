@@ -63,7 +63,7 @@ jobs:
       - name: Wait for the modeler on port 5173
         run: |
           for i in $(seq 1 60); do
-            if curl -fsS http://localhost:5173/ | grep -q "BPMN Extension Demo"; then
+            if curl -fsS http://localhost:5173/modeler/ | grep -q "Modeler — synthea"; then
               echo "modeler is up"
               exit 0
             fi
