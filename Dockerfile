@@ -1,10 +1,14 @@
 # Modeler demo (bpmn.io + synthea extension) and the converter, in one image.
 # xmllint (libxml2-utils) is included so `npm run validate` also works inside.
+# A Java runtime and curl are included so scripts/generate-testdata.sh can run Synthea.
 FROM node:22-bookworm-slim
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libxml2-utils \
+ && apt-get install -y --no-install-recommends libxml2-utils openjdk-17-jre-headless curl ca-certificates \
  && rm -rf /var/lib/apt/lists/*
+
+# UTF-8 locale: Synthea writes patient files with accented names (María, Hernán); in the POSIX locale Java cannot create them.
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 WORKDIR /app
 

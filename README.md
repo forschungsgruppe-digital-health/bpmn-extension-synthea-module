@@ -181,6 +181,17 @@ submodules). Useful options:
 | `--fuse-gateways` | Merges the helper states that exist only because of a gateway, and folds a condition followed by probabilities into one `complex_transition`. |
 | `--check` | Converts and checks without writing files. |
 
+**Test data set.** To generate synthetic FHIR patients from a pathway folder, run the script (needs Java and Node; it downloads the pinned Synthea v4.0.0 jar, about 200 MB, once into `~/.cache/bpmn-extension-synthea` and checks its SHA-256):
+
+```bash
+scripts/generate-testdata.sh out                                   # lung-cancer/, 1000 patients, seed 7, ages 45-65
+scripts/generate-testdata.sh out --dir lung-cancer --population 1000 --seed 3 --age 45-65
+scripts/generate-testdata.sh out --force-diagnosis                 # only for the lung cancer module: every patient is diagnosed
+docker compose run --rm testdata                                   # the same in Docker, writes to ./out
+```
+
+The FHIR bundles are in `out/out/fhir`, the converted modules in `out/modules`. `SYNTHEA_JAR=<path>` uses a jar you already have. With the same options it produces the same patients on every machine and in Docker (the script fixes the time zone to UTC; without that, the host time zone shifts the simulated dates). The file contents differ only in time stamps. The script is a thin wrapper around the lower-level command below, which it calls with `--keep`.
+
 The converted modules run in Synthea v4.0.0 (needs Java and `synthea-with-dependencies.jar`, not part of `validate`):
 
 ```bash

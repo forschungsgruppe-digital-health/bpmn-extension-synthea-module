@@ -2,6 +2,10 @@
 #
 # Convert a model to Synthea modules with the converter in the same image:
 #   docker compose run --rm app npm run bpmn2gmf -- lung-cancer --out-dir out/modules
+#
+# Generate a FHIR test data set into ./out (the Synthea jar is downloaded once and cached in a volume):
+#   docker compose run --rm testdata
+#   docker compose run --rm testdata /out --population 1000 --seed 3
 services:
   app:
     build: .
@@ -13,3 +17,18 @@ services:
       # Keep the installed dependencies of the image.
       - /app/node_modules
       - /app/demo/node_modules
+
+  # Not started by `docker compose up` (profile); run it with `docker compose run --rm testdata`.
+  testdata:
+    build: .
+    profiles: ["tools"]
+    entrypoint: ["scripts/generate-testdata.sh"]
+    command: ["/out"]
+    environment:
+      SYNTHEA_CACHE_DIR: /cache
+    volumes:
+      - ./out:/out
+      - synthea-cache:/cache
+
+volumes:
+  synthea-cache:
