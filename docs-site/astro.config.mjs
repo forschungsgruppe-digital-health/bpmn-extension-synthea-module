@@ -88,6 +88,16 @@ export default defineConfig({
         {
           label: '5. For developers',
           items: [{ label: 'Concepts: how a BPMN extension works', link: '/developers/concepts/' }]
+        },
+        {
+          label: 'Project & help',
+          collapsed: true,
+          items: [
+            { label: 'Contributing', link: '/project/contributing/' },
+            { label: 'Report a problem or ask a question', link: `${REPO}/issues` },
+            { label: 'Releases and changelog', link: `${REPO}/releases` },
+            { label: 'Design decisions (ADRs)', link: `${REPO}/tree/dev/docs/adr` }
+          ]
         }
       ]
     })

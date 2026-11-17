@@ -30,9 +30,11 @@ const PAGES = {
   // 4. Background
   'synthea.md': 'background',
   // 5. For developers
-  'concepts.md': 'developers'
+  'concepts.md': 'developers',
+  // Project & help. '../' marks a file at the repository root instead of docs/.
+  '../CONTRIBUTING.md': 'project'
 };
-const slug = (src) => posix.basename(src, '.md');
+const slug = (src) => posix.basename(src, '.md').toLowerCase();
 const urlOf = (src) => `/${PAGES[src]}/${slug(src)}/`;
 
 // Pages for contributors (design concept, decision records) stay on GitHub and are not part of
@@ -90,7 +92,7 @@ for (const [src, section] of Object.entries(PAGES)) {
 
   const front = ['---', `title: ${yamlString(title)}`];
   if (description) front.push(`description: ${yamlString(description)}`);
-  front.push(`editUrl: ${REPO}/edit/dev/docs/${src}`, '---', '');
+  front.push(`editUrl: ${REPO}/edit/dev/${posix.normalize(posix.join('docs', src))}`, '---', '');
   const out = join(outRoot, section, `${slug(src)}.md`);
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, front.join('\n') + '\n' + body);
