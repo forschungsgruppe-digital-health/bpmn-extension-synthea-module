@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-// Usage: node tools/bpmn2gmf/cli.mjs <file.bpmn|dir> [...] [--out-dir <dir>] [--check] [--strict] [--fuse-gateways]
-//   --fuse-gateways  merge the Simple states that only exist for gateways (closer to hand-written modules)
-//   --strict  required fields the extension cannot express yet are errors (module is not written)
-//
-// Converts every given .bpmn file (directories are scanned non-recursively) to
-// a Synthea GMF module. Modules that no other module calls are written to the
-// output directory, the ones they call into a subdirectory named after the caller
-// (Synthea only treats files in a subdirectory as submodules). Modules with errors are not written. Exit code 1 if
-// any error was found.
+/**
+ * Usage: node tools/bpmn2gmf/cli.mjs <file.bpmn|dir> [...] [--out-dir <dir>] [--check] [--strict] [--fuse-gateways]
+ *   --fuse-gateways  merge the Simple states that only exist for gateways (closer to hand-written modules)
+ *   --strict  required fields the extension cannot express yet are errors (module is not written)
+ *
+ * Converts every given .bpmn file (directories are scanned non-recursively) to
+ * a Synthea GMF module. Modules that no other module calls are written to the
+ * output directory, the ones they call into a subdirectory named after the caller
+ * (Synthea only treats files in a subdirectory as submodules). Modules with errors are not written. Exit code 1 if
+ * any error was found.
+ */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { writeModules } from './write.mjs';

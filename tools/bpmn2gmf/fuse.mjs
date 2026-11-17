@@ -1,21 +1,23 @@
-// Optional output pass (--fuse-gateways): removes the Simple states that only
-// exist because the diagram has a gateway. Always correct without it (every
-// gateway is a Simple state that carries a transition, implicit-rules Section D),
-// but upstream modules put the branching on the clinical state itself and have
-// few Simple states, so the fused output is closer to hand-written modules.
-//
-//   pass-through  a gateway that only continues to one state (a join): every
-//                 transition to it goes to its target instead
-//   branching     a gateway that is entered from exactly one state through a
-//                 direct transition: that state takes over its conditional /
-//                 distributed transition
-//
-// A second pass (fuseComplexTransitions) folds a conditional state whose branches lead
-// into probability gateways into one complex_transition (see there).
-//
-// Kept as they are: states the modeler drew as a Simple task, gateways with
-// several predecessors (they would lose a branch), and gateways a PriorState
-// condition refers to by name.
+/**
+ * Optional output pass (--fuse-gateways): removes the Simple states that only
+ * exist because the diagram has a gateway. Always correct without it (every
+ * gateway is a Simple state that carries a transition, implicit-rules Section D),
+ * but upstream modules put the branching on the clinical state itself and have
+ * few Simple states, so the fused output is closer to hand-written modules.
+ *
+ *   pass-through  a gateway that only continues to one state (a join): every
+ *                 transition to it goes to its target instead
+ *   branching     a gateway that is entered from exactly one state through a
+ *                 direct transition: that state takes over its conditional /
+ *                 distributed transition
+ *
+ * A second pass (fuseComplexTransitions) folds a conditional state whose branches lead
+ * into probability gateways into one complex_transition (see there).
+ *
+ * Kept as they are: states the modeler drew as a Simple task, gateways with
+ * several predecessors (they would lose a branch), and gateways a PriorState
+ * condition refers to by name.
+ */
 const TRANSITIONS = ['direct_transition', 'distributed_transition', 'conditional_transition', 'complex_transition'];
 const transitionKey = (state) => TRANSITIONS.find((k) => k in state);
 
@@ -53,8 +55,14 @@ function referencedByCondition(states, name) {
   );
 }
 
-// `candidates`: names of the Simple states that come from BPMN gateways.
-// Returns how many states were removed.
+/**
+ * Removes the Simple states that exist only because the diagram has a gateway, by pointing the
+ * states before them to what follows. Changes `states` in place.
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @param {string[]} candidates the names of the Simple states that come from BPMN gateways
+ * @returns {number} how many states were removed
+ */
 export function fuseGateways(states, candidates) {
   let removed = 0;
   let changed = true;
@@ -103,7 +111,14 @@ export function fuseGateways(states, candidates) {
 // The gateway is absorbed only if this state is its single predecessor, it is a plain
 // gateway (no remarks, not named by a PriorState condition, not drawn as a Simple task:
 // `candidates` are the gateway-born Simple states), and the state branches to it once.
-// Returns how many gateway states were removed.
+/**
+ * Folds a probability gateway into the conditional state before it, so that the state gets one
+ * `complex_transition` (see the rules above). Changes `states` in place.
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @param {string[]} candidates the names of the Simple states that come from BPMN gateways
+ * @returns {number} how many gateway states were removed
+ */
 export function fuseComplexTransitions(states, candidates) {
   let removed = 0;
   const gateways = new Set(candidates);

@@ -1,3 +1,8 @@
+/**
+ * The properties panel of the extension: one group "Synthea" with a collapsible section per
+ * `synthea:` type, showing only the fields that fit the chosen state type and that the converter
+ * accepts. The short explanations under the fields are in descriptions.js.
+ */
 import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import {
   CollapsibleEntry,
@@ -211,6 +216,14 @@ function rememberToggles(injector) {
   eventBus.on('import.done', () => openSections.clear());
 }
 
+/**
+ * Registers the provider with the properties panel. Its `getGroups` adds the group "Synthea" for
+ * the selected element; which sections it holds depends on the BPMN type of the element and on the
+ * state type that is already set.
+ *
+ * @param {object} propertiesPanel the properties panel service (injected)
+ * @param {object} injector the bpmn-js injector (injected); used to remember which sections are open
+ */
 export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector) {
   rememberToggles(injector);
 

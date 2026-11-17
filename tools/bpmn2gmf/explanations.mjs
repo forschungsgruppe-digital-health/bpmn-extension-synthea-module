@@ -1,9 +1,16 @@
-// Plain-language explanations for the converter's notes and warnings, shown next
-// to the messages in the demo and on the converter result page. Errors are not
-// listed: their message already says what is wrong and what to change.
-//
-// { what: what the converter found or did, why: what it means for the module, fix: what to do in the model }
+/**
+ * Plain-language explanations for the converter's notes and warnings, shown next
+ * to the messages in the demo and on the converter result page. Errors are not
+ * listed: their message already says what is wrong and what to change.
+ *
+ * { what: what the converter found or did, why: what it means for the module, fix: what to do in the model }
+ */
 
+/**
+ * The explanation of each note and warning code, shown next to the message.
+ *
+ * @type {Record<string, {what: string, why: string, fix?: string}>}
+ */
 export const EXPLANATIONS = {
   STATE_NAME_DUPLICATE: {
     what: 'Two BPMN elements have the same name. Synthea needs a unique name for every state, so the converter renamed the later ones by appending the element id.',
@@ -132,4 +139,10 @@ export const EXPLANATIONS = {
   }
 };
 
+/**
+ * The explanation of a message code.
+ *
+ * @param {string} code the code of a message, e.g. `CONFIG_IGNORED`
+ * @returns {{what: string, why: string, fix?: string}|null} the explanation, null for a code that has none (errors)
+ */
 export const explain = (code) => EXPLANATIONS[code] ?? null;

@@ -1,21 +1,24 @@
 #!/usr/bin/env node
-// Generates a JSON Schema for a Synthea module (the JSON the converter writes) FROM
-// `required-fields.mjs`, so the required fields exist in one place only.
-//
-// What the schema says: the shape of a module, the type of every state, the fields each type needs
-// (the same rule as `missingFields`), and exactly one transition per state (none on Terminal).
-// What it cannot say, and `verify.mjs` / `verify-flow.mjs` keep: that a transition target exists,
-// that a state is reachable from Initial, that probabilities sum to 1, the order of states.
-// Kramer et al. 2025 call Synthea JSON unsuitable for schemas; that is true of those cross-state
-// rules, not of the per-state fields.
-//
-// Usage:
-//   node tools/bpmn2gmf/gen-schema.mjs           write tools/bpmn2gmf/module.schema.json
-//   node tools/bpmn2gmf/gen-schema.mjs --check   exit 1 if the stored schema is stale (drift guard)
+/**
+ * Generates a JSON Schema for a Synthea module (the JSON the converter writes) FROM
+ * `required-fields.mjs`, so the required fields exist in one place only.
+ *
+ * What the schema says: the shape of a module, the type of every state, the fields each type needs
+ * (the same rule as `missingFields`), and exactly one transition per state (none on Terminal).
+ * What it cannot say, and `verify.mjs` / `verify-flow.mjs` keep: that a transition target exists,
+ * that a state is reachable from Initial, that probabilities sum to 1, the order of states.
+ * Kramer et al. 2025 call Synthea JSON unsuitable for schemas; that is true of those cross-state
+ * rules, not of the per-state fields.
+ *
+ * Usage:
+ *   node tools/bpmn2gmf/gen-schema.mjs           write tools/bpmn2gmf/module.schema.json
+ *   node tools/bpmn2gmf/gen-schema.mjs --check   exit 1 if the stored schema is stale (drift guard)
+ */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { REQUIRED_FIELDS } from './required-fields.mjs';
 
+/** Where the generated schema is stored: `module.schema.json` next to this file. */
 export const SCHEMA_PATH = fileURLToPath(new URL('./module.schema.json', import.meta.url));
 
 // State types that need no field of their own (Encounter has a rule of its own below).
@@ -44,6 +47,11 @@ const needs = (list) => {
 
 const ofType = (type) => ({ properties: { type: { const: type } }, required: ['type'] });
 
+/**
+ * Builds the JSON Schema of a Synthea module from the required fields (`required-fields.mjs`).
+ *
+ * @returns {object} the schema as a plain object
+ */
 export function buildSchema() {
   const types = [...new Set([...OTHER_TYPES, ...Object.keys(REQUIRED_FIELDS)])].sort();
   const perType = Object.entries(REQUIRED_FIELDS).map(([type, list]) => ({ if: ofType(type), then: needs(list) }));
@@ -96,6 +104,11 @@ export function buildSchema() {
   };
 }
 
+/**
+ * The schema as the text that is stored on disk.
+ *
+ * @returns {string} pretty-printed JSON ending with a newline
+ */
 export const render = () => `${JSON.stringify(buildSchema(), null, 2)}\n`;
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

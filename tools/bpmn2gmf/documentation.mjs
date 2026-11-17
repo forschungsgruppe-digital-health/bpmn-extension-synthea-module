@@ -1,10 +1,20 @@
-// Stage 2b: elements marked synthea:documentationOnly stay in the diagram but get no GMF state.
-// The element is removed from the IR and its incoming flows are joined to its outgoing flow, so
-// the surrounding states are connected as if it were not there.
+/**
+ * Stage 2b: elements marked synthea:documentationOnly stay in the diagram but get no GMF state.
+ * The element is removed from the IR and its incoming flows are joined to its outgoing flow, so
+ * the surrounding states are connected as if it were not there.
+ */
 import { first } from './ir.mjs';
 
 const BYPASSABLE = new Set(['task', 'gateway', 'event']);
 
+/**
+ * Removes the elements marked `synthea:documentationOnly` from the IR and joins their incoming flows
+ * to their outgoing flow. Changes `module` in place. A marked element that also has other
+ * `synthea:` settings, or has more than one way out, is reported instead of removed.
+ *
+ * @param {object} module the IR module (see ir.mjs)
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ */
 export function bypassDocumentationNodes(module, diag) {
   const where = (n) => ({ module: module.fileBase, element: n.id, label: n.label });
 

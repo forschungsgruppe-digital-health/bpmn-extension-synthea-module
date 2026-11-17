@@ -1,13 +1,15 @@
-// Stage 2d: parallel and inclusive gateways. GMF runs one state after the other and has neither
-// parallelism nor "any of these", so a split and its matching join are rewritten into a sequence:
-//
-//   parallel   the branches run one after the other, in the order of the split's outgoing flows.
-//   inclusive  each branch is taken or skipped on its own: a Simple state per branch decides with the
-//              condition or probability of the branch's flow, so any combination of branches can happen.
-//
-// Only structured blocks are supported: every branch is a region with one way in and one way out (it
-// may contain decisions, but no end event and no flow from or to the outside) and all branches meet in
-// one join of the same kind. Nested blocks are rewritten from the inside out.
+/**
+ * Stage 2d: parallel and inclusive gateways. GMF runs one state after the other and has neither
+ * parallelism nor "any of these", so a split and its matching join are rewritten into a sequence:
+ *
+ *   parallel   the branches run one after the other, in the order of the split's outgoing flows.
+ *   inclusive  each branch is taken or skipped on its own: a Simple state per branch decides with the
+ *              condition or probability of the branch's flow, so any combination of branches can happen.
+ *
+ * Only structured blocks are supported: every branch is a region with one way in and one way out (it
+ * may contain decisions, but no end event and no flow from or to the outside) and all branches meet in
+ * one join of the same kind. Nested blocks are rewritten from the inside out.
+ */
 const KINDS = new Set(['parallel', 'inclusive']);
 const hasConfig = (e) => !!(e.condition || e.probability);
 
@@ -45,6 +47,13 @@ function walkBranch(entry, split, owned) {
   return { entry, nodes, join, exits };
 }
 
+/**
+ * Stage 2d: rewrites each parallel or inclusive split with its matching join into a sequence. Changes
+ * `module` in place. A split that is not a structured block is an error.
+ *
+ * @param {object} module the IR module (see ir.mjs)
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ */
 export function linearizeGateways(module, diag) {
   const where = (n) => ({ module: module.fileBase, element: n.id, label: n.label });
   const node = (id) => module.nodes.get(id);

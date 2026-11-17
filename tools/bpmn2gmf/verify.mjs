@@ -1,6 +1,17 @@
-// Stage 6: structural checks on the generated modules.
+/**
+ * Stage 6: structural checks on the generated modules.
+ */
 import { missingFields } from './required-fields.mjs';
 
+/**
+ * Stage 6: structural checks on one generated module: every target exists, every state is reachable
+ * from `Initial`, probabilities sum to 1, every state has the fields Synthea requires.
+ *
+ * @param {object} module the IR module
+ * @param {Record<string, object>} states the GMF states of the module, by name
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ * @param {{strict?: boolean}} [options] `strict`: a missing required field is an error (otherwise a warning)
+ */
 export function verifyModule(module, states, diag, { strict = false } = {}) {
   const where = { module: module.fileBase };
   const names = Object.keys(states);
@@ -64,6 +75,13 @@ export function verifyModule(module, states, diag, { strict = false } = {}) {
 }
 
 // Cross-module: every CallSubmodule must name a module of the same run; no cycles.
+/**
+ * Stage 6a: the checks between modules. Every `CallSubmodule` names a module of the same run, and the
+ * calls form no cycle.
+ *
+ * @param {object[]} modules all modules of one run
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages (`SUBMODULE_NOT_FOUND`, `SUBMODULE_CYCLE`)
+ */
 export function verifySubmodules(modules, diag) {
   const byName = new Map(modules.map((m) => [m.fileBase, m]));
   const calls = new Map();

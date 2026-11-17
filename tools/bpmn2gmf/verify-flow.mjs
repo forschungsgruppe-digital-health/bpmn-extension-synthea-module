@@ -1,11 +1,19 @@
-// Stage 6b: checks on the order of states in a generated module (Level 1, structure, no simulation).
-// They work on the plain module JSON (`states`), so they also run on hand-written Synthea modules.
-// Everything here is a warning or a note: a graph cannot see that two branches exclude each other,
-// so a finding means "a path exists", not "Synthea will fail".
-//
-// Sources: States wiki (Encounter, EncounterEnd, the *End states) and Kramer et al. 2025 (Level 1:
-// temporal logic, care delivery sequence, event timing, attribute validity).
+/**
+ * Stage 6b: checks on the order of states in a generated module (Level 1, structure, no simulation).
+ * They work on the plain module JSON (`states`), so they also run on hand-written Synthea modules.
+ * Everything here is a warning or a note: a graph cannot see that two branches exclude each other,
+ * so a finding means "a path exists", not "Synthea will fail".
+ *
+ * Sources: States wiki (Encounter, EncounterEnd, the *End states) and Kramer et al. 2025 (Level 1:
+ * temporal logic, care delivery sequence, event timing, attribute validity).
+ */
 
+/**
+ * The names of the states a state leads to, whatever kind of transition it has.
+ *
+ * @param {object} s a GMF state
+ * @returns {string[]} the target state names, empty for a state without transition
+ */
 export const targetsOf = (s) => {
   if (s.direct_transition) return [s.direct_transition];
   if (s.distributed_transition) return s.distributed_transition.map((t) => t.transition);
@@ -16,12 +24,18 @@ export const targetsOf = (s) => {
 
 // The wiki says these "must occur during an Encounter"; without a current encounter the engine
 // raises an error. Vaccine is not on the wiki page but the converter treats it the same way.
+/** The state types that need a current encounter. */
 export const NEEDS_ENCOUNTER = new Set([
   'MedicationOrder', 'CarePlanStart', 'Procedure', 'ImagingStudy', 'Device', 'Vaccine',
   'SupplyList', 'Observation', 'MultiObservation', 'DiagnosticReport'
 ]);
 
 // End state -> the field that names its start state, and the type that start state must have.
+/**
+ * For each end state: the field that names its start state, and the type that start state must have.
+ *
+ * @type {Record<string, {field: string, start: string}>}
+ */
 export const END_STATES = {
   ConditionEnd: { field: 'condition_onset', start: 'ConditionOnset' },
   AllergyEnd: { field: 'allergy_onset', start: 'AllergyOnset' },
@@ -30,6 +44,13 @@ export const END_STATES = {
   DeviceEnd: { field: 'device', start: 'Device' }
 };
 
+/**
+ * The states that can be reached from a state, the state itself included.
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @param {string} from the name of the state to start from
+ * @returns {Set<string>} the names of the reachable states
+ */
 export function reachableFrom(states, from) {
   const seen = new Set([from]);
   const stack = [from];
@@ -51,6 +72,14 @@ export function reachableFrom(states, from) {
 // caller reaches it. Of the 97 shipped modules nobody calls, about half put a SetAttribute or Simple
 // in front of the Delay, which is why those are skipped.
 const PASS_THROUGH = new Set(['Simple', 'SetAttribute', 'Counter']);
+/**
+ * Reports a state that can run right after `Initial` without a Delay or Guard before it (see above). Adds
+ * a warning to `diag`.
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @param {{module: string}} where the module the messages belong to
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ */
 export function checkInitialWait(states, where, diag) {
   if (!states.Initial) return;
   const seen = new Set(['Initial']);
@@ -78,6 +107,16 @@ export function checkInitialWait(states, where, diag) {
 // Wiki, Encounter / Current Encounter: a clinical state needs a current_encounter, which an
 // Encounter state sets and an EncounterEnd clears. Follows every path and remembers whether an
 // encounter is closed, open or unknown (after a CallSubmodule, or at the start of a submodule).
+/**
+ * Reports a clinical state that can run when no encounter is open, and an `EncounterEnd` that can run when
+ * none is (see above).
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @param {{module: string}} where the module the messages belong to
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ * @param {{entry?: 'closed'|'open'|'unknown'}} [options] whether an encounter is open when the module starts: `closed`
+ *   for a module nobody calls, `unknown` for a submodule
+ */
 export function checkEncounterScope(states, where, diag, { entry = 'closed' } = {}) {
   if (!states.Initial) return;
   const at = new Map([['Initial', new Set([entry])]]);
@@ -124,6 +163,14 @@ export function checkEncounterScope(states, where, diag, { entry = 'closed' } = 
 
 // Kramer, event timing: an end state must come after its start state. The start is named by the
 // state's name or through an attribute the start state assigns.
+/**
+ * Reports an end state (`ConditionEnd`, `MedicationEnd`, ...) that can run before the state it ends, or that
+ * names no start state at all.
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @param {{module: string}} where the module the messages belong to
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ */
 export function checkStartEndOrder(states, where, diag) {
   for (const [name, s] of Object.entries(states)) {
     const rule = END_STATES[s.type];
@@ -161,6 +208,12 @@ function guardAttributes(condition, out = new Set()) {
   return out;
 }
 
+/**
+ * The attributes that the states of a module set: `SetAttribute`, `Counter` and `assign_to_attribute`.
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @returns {Set<string>} the attribute names
+ */
 export const attributesSetIn = (states) => {
   const set = new Set();
   for (const s of Object.values(states)) {
@@ -172,6 +225,14 @@ export const attributesSetIn = (states) => {
 
 // Kramer: attributes must be assigned before they are read. Synthea sets some itself and modules
 // share attributes, so this only reports a Guard whose attribute no module of the run sets.
+/**
+ * Notes a `Guard` that waits for an attribute that no module of the run sets.
+ *
+ * @param {Record<string, object>} states the GMF states of one module, by name
+ * @param {Set<string>} setSomewhere the attributes that any module of the run sets (see `attributesSetIn`)
+ * @param {{module: string}} where the module the messages belong to
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ */
 export function checkGuardAttributes(states, setSomewhere, where, diag) {
   for (const [name, s] of Object.entries(states)) {
     if (s.type !== 'Guard') continue;
@@ -188,6 +249,13 @@ export function checkGuardAttributes(states, setSomewhere, where, diag) {
 }
 
 // Whole run: the checks that need to know which modules are called by others.
+/**
+ * Stage 6b: runs the order checks on every module without an error, with what the whole run knows (which
+ * modules are called by others, which attributes any module sets).
+ *
+ * @param {{fileBase: string, states?: Record<string, object>}[]} modules all modules of one run
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages (warnings and notes, no errors)
+ */
 export function verifyFlow(modules, diag) {
   const usable = modules.filter((m) => m.states && diag.forModule(m.fileBase).every((i) => i.level !== 'error'));
   const called = new Set();

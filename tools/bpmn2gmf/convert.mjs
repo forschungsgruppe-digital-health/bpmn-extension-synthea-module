@@ -1,4 +1,6 @@
-// Pure pipeline: BPMN XML strings in, GMF module objects + diagnostics out.
+/**
+ * Pure pipeline: BPMN XML strings in, GMF module objects + diagnostics out.
+ */
 import { Diagnostics } from './diagnostics.mjs';
 import { parseBpmn } from './parse.mjs';
 import { buildModules, first } from './ir.mjs';
@@ -12,11 +14,26 @@ import { missingFields } from './required-fields.mjs';
 import { fuseGateways, fuseComplexTransitions } from './fuse.mjs';
 import { assignPaths } from './layout.mjs';
 
-// `fileBase` is the module file name without extension, e.g. "anemia_submodule";
-// it is also what CallSubmodule refers to until layout.mjs turns it into a path.
+/**
+ * The module name of a file: its name without extension and with `-` written as `_`. It is also
+ * what CallSubmodule refers to until layout.mjs turns it into a path.
+ *
+ * @param {string} path the path of a .bpmn file
+ * @returns {string} e.g. `anemia_submodule` for `lung-cancer/anemia-submodule.bpmn`
+ */
 export const fileBaseFor = (path) =>
   path.split('/').pop().replace(/\.bpmn$/i, '').replace(/-/g, '_');
 
+/**
+ * The whole pipeline: BPMN XML in, Synthea modules and messages out. Pure: it reads and writes no
+ * file (cli.mjs and write.mjs do), so it runs in the browser too.
+ *
+ * @param {{path: string, xml: string}[]} inputs the BPMN files of one pathway (a main module and its submodules)
+ * @param {{strict?: boolean, fuse?: boolean}} [options] `strict`: a required field the model lacks is an error;
+ *   `fuse`: merge the helper states that exist only because of a gateway
+ * @returns {Promise<{modules: {fileBase: string, path: string, ok: boolean, json: {name: string, states: object}}[], diagnostics: import('./diagnostics.mjs').Diagnostics}>}
+ *   the modules (`ok` is false when one of their messages is an error) and all messages
+ */
 export async function convert(inputs, { strict = false, fuse = false } = {}) {
   const diag = new Diagnostics();
   const modules = [];
@@ -49,8 +66,16 @@ export async function convert(inputs, { strict = false, fuse = false } = {}) {
   return { modules: results, diagnostics: diag };
 }
 
-// Everything that happens to one parsed file, up to the finished (or incomplete) modules. Shared by
-// `convert` and by `checkDefinitions`, which the lint uses on the moddle tree it already has.
+/**
+ * Everything that happens to one parsed file, up to the finished (or incomplete) modules. Shared by
+ * `convert` and by `checkDefinitions`, which the lint uses on the moddle tree it already has.
+ *
+ * @param {object} definitions the parsed `bpmn:Definitions`
+ * @param {string} fileBase the module name of the file (see `fileBaseFor`)
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ * @param {object[]} modules receives the finished modules (one per process in the file)
+ * @param {{strict?: boolean, fuse?: boolean}} [options] as for `convert`
+ */
 export function convertDefinitions(definitions, fileBase, diag, modules, { strict = false, fuse = false } = {}) {
   for (const module of buildModules(definitions, fileBase, diag)) {
     resolveStates(module, diag);
@@ -82,11 +107,17 @@ export function convertDefinitions(definitions, fileBase, diag, modules, { stric
   }
 }
 
-// Synchronous check of one parsed diagram, for the lint (tools/bpmn2gmf is the single source of what
-// the converter can and cannot convert). Returns the converter's diagnostics for the diagram.
-// Strict, like `npm run convert:check` and the validation: a field Synthea requires that is missing
-// is an error, where a plain conversion only marks the state as incomplete.
-// Not run here: the check that sub-modules exist (they are other files) and the writing of paths.
+/**
+ * Synchronous check of one parsed diagram, for the lint (tools/bpmn2gmf is the single source of what
+ * the converter can and cannot convert). Strict, like `npm run convert:check` and the validation: a
+ * field Synthea requires that is missing is an error, where a plain conversion only marks the state
+ * as incomplete. Not run here: the check that sub-modules exist (they are other files) and the
+ * writing of paths.
+ *
+ * @param {object} definitions the parsed `bpmn:Definitions`
+ * @param {string} [fileBase] the module name used in the messages
+ * @returns {object[]} the converter's messages for the diagram (see `Diagnostics#items`)
+ */
 export function checkDefinitions(definitions, fileBase = 'diagram') {
   const diag = new Diagnostics();
   const modules = [];

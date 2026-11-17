@@ -1,14 +1,22 @@
-// Where each module goes in Synthea's modules directory.
-//
-// Synthea runs every file directly in the modules directory as a module of its
-// own, for every patient. Only files in a *subdirectory* are submodules that are
-// loaded but never run by themselves (Module.walkModuleTree: submodule = the
-// file's parent is not the modules directory), and CallSubmodule names them by
-// path ("lung_cancer/lung_cancer_probabilities"). So:
-//   a module no other module calls     -> <name>.json
-//   a module that others call          -> <root>/<name>.json, where <root> is the first
-//                                         such module (in input order) that reaches it
-// and every CallSubmodule gets that path.
+/**
+ * Where each module goes in Synthea's modules directory.
+ *
+ * Synthea runs every file directly in the modules directory as a module of its
+ * own, for every patient. Only files in a *subdirectory* are submodules that are
+ * loaded but never run by themselves (Module.walkModuleTree: submodule = the
+ * file's parent is not the modules directory), and CallSubmodule names them by
+ * path ("lung_cancer/lung_cancer_probabilities"). So:
+ *   a module no other module calls     -> <name>.json
+ *   a module that others call          -> <root>/<name>.json, where <root> is the first
+ *                                         such module (in input order) that reaches it
+ * and every CallSubmodule gets that path.
+ */
+/**
+ * Sets `path` on every module and turns every `CallSubmodule` name into that path. Changes the
+ * modules in place.
+ *
+ * @param {{fileBase: string, states?: Record<string, object>, path?: string}[]} modules all modules of one run
+ */
 export function assignPaths(modules) {
   const calls = new Map(
     modules.map((m) => [

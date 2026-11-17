@@ -49,6 +49,7 @@
     "api:gen:check": "node tools/gen-extension-api.mjs --check",
     "xsd:ext": "node tools/validate-xsd-ext.mjs",
     "conventions": "node tools/check-package-conventions.mjs",
+    "jsdoc:check": "node tools/check-jsdoc.mjs",
     "test:consumer": "node tools/test-consumer.mjs",
     "check:attributes": "node tools/check-attribute-usage.mjs",
     "bpmn2gmf": "node tools/bpmn2gmf/cli.mjs",
@@ -62,7 +63,7 @@
     "schema:gen:check": "node tools/bpmn2gmf/gen-schema.mjs --check",
     "validate:diagram": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run xsd:gen:check && npm run xsd:ext && npm run api:gen:check",
     "validate:convert": "npm run schema:gen:check && npm run test:bpmn2gmf && npm run convert:check && npm run compare:structure",
-    "validate": "npm run validate:diagram && npm run conventions && npm run validate:convert",
+    "validate": "npm run validate:diagram && npm run conventions && npm run jsdoc:check && npm run validate:convert",
     "demo": "npm --prefix demo run dev",
     "check:pages": "BASE_PATH=/bpmn-extension-synthea-module/ npm --prefix demo run build && npm run convert:site && node tools/check-pages-build.mjs demo/dist /bpmn-extension-synthea-module/",
     "demo:build": "npm --prefix demo run build"

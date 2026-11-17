@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-// Usage: node tools/bpmn2gmf/compare-upstream.mjs
-//
-// Converts the real pathway files in lung-cancer/ and compares them with the
-// hand-written Synthea modules kept in test/upstream/ (see compare.mjs for what
-// "compare" means). Informational: prints the differences, exit code 0.
+/**
+ * Usage: node tools/bpmn2gmf/compare-upstream.mjs
+ *
+ * Converts the real pathway files in lung-cancer/ and compares them with the
+ * hand-written Synthea modules kept in test/upstream/ (see compare.mjs for what
+ * "compare" means). Informational: prints the differences, exit code 0.
+ */
 import { readFileSync } from 'node:fs';
 import { convert } from './convert.mjs';
 import { compare, merge, links } from './compare.mjs';

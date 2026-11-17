@@ -1,3 +1,8 @@
+/**
+ * Entry point of the extension: the bpmn-js module that wires the three parts together (the
+ * properties panel provider, the replace menu filter and the modeling rule that forbids boundary
+ * events). The moddle descriptor is a separate entry point (`bpmn-js-synthea-extension/model`).
+ */
 import SyntheaPropertiesProvider from './SyntheaPropertiesProvider.js';
 import SyntheaReplaceMenuFilter from './SyntheaReplaceMenuFilter.js';
 import SyntheaNoBoundaryRules from './SyntheaNoBoundaryRules.js';

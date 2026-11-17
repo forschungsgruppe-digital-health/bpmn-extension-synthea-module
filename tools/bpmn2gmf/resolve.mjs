@@ -1,4 +1,6 @@
-// Stage 3: decide each node's GMF state type and state name.
+/**
+ * Stage 3: decide each node's GMF state type and state name.
+ */
 import { descriptor } from './parse.mjs';
 import { first } from './ir.mjs';
 
@@ -27,6 +29,14 @@ function infer(node) {
   }
 }
 
+/**
+ * Stage 3: decides the GMF state type and the state name of every node. The state type is the one set
+ * in `synthea:stateTypeConfig`, or else inferred from the BPMN element (start event -> `Initial`, timer
+ * event -> `Delay`, ...). Sets `stateType` and `stateName` on the nodes of `module`.
+ *
+ * @param {object} module the IR module (see ir.mjs)
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages (an unknown or missing state type, a duplicate name)
+ */
 export function resolveStates(module, diag) {
   const where = (n) => ({ module: module.fileBase, element: n.id, label: n.label });
 

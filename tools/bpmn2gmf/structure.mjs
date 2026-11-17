@@ -1,25 +1,27 @@
-// Structural comparison of two Synthea modules (docs/bpmn2gmf-concept.md section 11).
-//
-// compare.mjs compares states by content (type, codes, values) as multisets. This file compares
-// the logic: it walks both state graphs from Initial at the same time and checks that
-//   - paired states have the same type and the same fields,
-//   - every transition has the same conditions, probabilities (in the same ORDER) and targets,
-// so a module that behaves like the other one has no difference, whatever its state names or
-// extra pass-through states are.
-//
-// What is left out on purpose:
-//   names, `remarks`, `reason` (only labels the output), `number_of_observations` (the engine
-//   never reads it), Simple states (pass-through; gateways are resolved into the transition tree),
-//   and attribute names as long as the renaming is consistent.
-// What is treated as the same on purpose (see norm() and tcmp()):
-//   a 1 day Delay as `exact` or as an EXACT distribution, a Counter without `amount` and with 1,
-//   codes as number or text, mutually exclusive tests of one attribute in another order,
-//   an explicit `Gender M` test and a default branch behind `Gender F`, likewise the second of two
-//   `attribute == value` tests of one attribute (lung cancer type SCLC / NSCLC).
-//
-// A state may be paired with several upstream states (upstream often writes the same logic twice,
-// we write it once behind a test of the attribute); conditions that a path already decided
-// (Attribute == value) are dropped on both sides before trees are compared.
+/**
+ * Structural comparison of two Synthea modules (docs/bpmn2gmf-concept.md section 11).
+ *
+ * compare.mjs compares states by content (type, codes, values) as multisets. This file compares
+ * the logic: it walks both state graphs from Initial at the same time and checks that
+ *   - paired states have the same type and the same fields,
+ *   - every transition has the same conditions, probabilities (in the same ORDER) and targets,
+ * so a module that behaves like the other one has no difference, whatever its state names or
+ * extra pass-through states are.
+ *
+ * What is left out on purpose:
+ *   names, `remarks`, `reason` (only labels the output), `number_of_observations` (the engine
+ *   never reads it), Simple states (pass-through; gateways are resolved into the transition tree),
+ *   and attribute names as long as the renaming is consistent.
+ * What is treated as the same on purpose (see norm() and tcmp()):
+ *   a 1 day Delay as `exact` or as an EXACT distribution, a Counter without `amount` and with 1,
+ *   codes as number or text, mutually exclusive tests of one attribute in another order,
+ *   an explicit `Gender M` test and a default branch behind `Gender F`, likewise the second of two
+ *   `attribute == value` tests of one attribute (lung cancer type SCLC / NSCLC).
+ *
+ * A state may be paired with several upstream states (upstream often writes the same logic twice,
+ * we write it once behind a test of the attribute); conditions that a path already decided
+ * (Attribute == value) are dropped on both sides before trees are compared.
+ */
 const TRANS = ['direct_transition', 'distributed_transition', 'conditional_transition', 'complex_transition'];
 const IGNORE = new Set([...TRANS, 'remarks', 'reason', 'name', 'target_encounter', 'number_of_observations']);
 const ATTR_KEYS = new Set(['attribute', 'assign_to_attribute', 'referenced_by_attribute', 'value_attribute']);
@@ -29,6 +31,14 @@ const isObj = (x) => x && typeof x === 'object' && !Array.isArray(x);
 const short = (x, n = 120) => JSON.stringify(x)?.slice(0, n) ?? 'undefined';
 
 // ---- graphs ---------------------------------------------------------------------------------------
+/**
+ * Copies the states of a module into a graph in which every name carries a prefix, so the states of
+ * several modules can live in one graph.
+ *
+ * @param {string} prefix the module, e.g. `u` (upstream) or `o` (ours)
+ * @param {Record<string, object>} states the GMF states of the module, by name
+ * @returns {Map<string, object>} the states by prefixed name (`o:Initial`), with their transitions pointing to prefixed names
+ */
 export function qualify(prefix, states) {
   const ref = (n) => `${prefix}:${n}`;
   const out = new Map();
@@ -46,8 +56,15 @@ export function qualify(prefix, states) {
   return out;
 }
 
-// `main` with the CallSubmodule states that point to one of `subs` replaced by the submodule's states
-// (upstream writes the symptom check and the treatment inline). subs: { fileBase: states }.
+/**
+ * A module with the `CallSubmodule` states that point to one of `subs` replaced by the states of that
+ * submodule (upstream writes the symptom check and the treatment inline).
+ *
+ * @param {string} prefix the module prefix, as for `qualify`
+ * @param {Record<string, object>} main the GMF states of the main module, by name
+ * @param {Record<string, Record<string, object>>} subs the states of the submodules to inline, by `fileBase`
+ * @returns {Map<string, object>} the states by prefixed name
+ */
 export function inline(prefix, main, subs) {
   const g = qualify(prefix, main);
   for (const [name, s] of [...g]) {
@@ -93,6 +110,17 @@ class Unifier {
   }
 }
 
+/**
+ * Walks two module graphs from `Initial` together and pairs their states: type, codes, values,
+ * conditions and probabilities, in order. The result lists what cannot be paired and what differs.
+ *
+ * @param {Map<string, object>} gu the upstream graph (see `qualify`)
+ * @param {Map<string, object>} go our graph
+ * @param {{bypassUpstream?: string[], callNames?: Record<string, string>, pairModules?: string[]}} [options] upstream
+ *   states to skip, upstream submodule names -> ours, and the two prefixes
+ * @returns {{problems: string[], unpairedUpstream: string[], unpairedOurs: string[], bypassed: string[], pairedUpstream: number, pairedOurs: number, renames: [string, string[]][], accepted: Record<string, number>, wasTerminal: (name: string) => boolean}}
+ *   the differences and the counts
+ */
 export function compareStructure(gu, go, { bypassUpstream = [], callNames = {}, pairModules = ['u', 'o'] } = {}) {
   const uni = new Unifier();
   const accepted = new Map();

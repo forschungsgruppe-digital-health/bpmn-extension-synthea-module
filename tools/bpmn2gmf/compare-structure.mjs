@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-// Usage: node tools/bpmn2gmf/compare-structure.mjs
-//
-// Converts the real pathway files in lung-cancer/ and compares them with the hand-written Synthea
-// modules in test/upstream/ state by state and transition by transition (see structure.mjs for what
-// is compared and what is left out). Exit code 1 if anything differs that is not listed as a known
-// difference below.
+/**
+ * Usage: node tools/bpmn2gmf/compare-structure.mjs
+ *
+ * Converts the real pathway files in lung-cancer/ and compares them with the hand-written Synthea
+ * modules in test/upstream/ state by state and transition by transition (see structure.mjs for what
+ * is compared and what is left out). Exit code 1 if anything differs that is not listed as a known
+ * difference below.
+ */
 import { readFileSync } from 'node:fs';
 import { convert } from './convert.mjs';
 import { compareStructure, inline, qualify } from './structure.mjs';
@@ -23,6 +25,13 @@ const KNOWN = {
   terminalAfterCall: 'a Terminal behind the call of the treatment cycle: the cycle never returns (it ends only with the death scheduled before it), the state only gives the call a target'
 };
 
+/**
+ * Converts the pathway in `lung-cancer/` and compares it, state by state, with the three upstream modules
+ * in `test/upstream/` (the main module and the anemia and probabilities submodules).
+ *
+ * @returns {Promise<[string, object, Map<string, object>?][]>} one entry per comparison: its title, the result of
+ *   `compareStructure` extended by `unexpectedOurs` and `knownOurs`, and the inlined graph of the main module
+ */
 export async function run() {
   const { modules } = await convert(FILES.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
   const ours = Object.fromEntries(modules.map((m) => [m.fileBase, m.json.states]));

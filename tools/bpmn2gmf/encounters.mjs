@@ -1,41 +1,45 @@
-// Encounter synthesis (ADR-0003, docs/bpmn2gmf-concept.md section 4.4).
-//
-// The diagram only tags states with synthea:encounterContext / encounterId.
-// Here the Encounter and EncounterEnd states are derived and spliced into the
-// flow of the IR, before transitions are built.
-//
-// Which part of the flow belongs to an encounter ("region"):
-//   span  the tagged states plus every node on a path between two of them
-//   tail  from the span on, untagged states keep the encounter open (a state
-//         left untagged inherits whatever encounter is open, modeling guide
-//         section 9) until the flow reaches a boundary: a long Delay, Terminal,
-//         Death, CallSubmodule, or a state of another encounter. The tail only
-//         reaches as far as the last state that uses the encounter (a clinical
-//         state, or a diagnosis without target_encounter): neutral
-//         states after it (gateways, SetAttribute, a hospice check) are
-//         outside, so the encounter ends right after the last clinical state,
-//         as upstream does (an open encounter there changed the random draws)
-// When a Delay ends the encounter depends on where it is:
-//   between two states of the same encounter (the modeler tagged both sides):
-//     a delay of a week or more ends it, shorter ones are part of the stay
-//   after the last tagged state: a delay of a day or more ends it
-// This reproduces upstream. Its inpatient stay is one encounter with a loop of
-// 1 day delays inside it (the length of stay), and the weeks between two
-// treatment cycles end it; the anemia module keeps a 1 hour delay inside the
-// visit and closes it before the 1 day delay that follows.
-//
-// Encounter     one per (encounter, entered state), on every edge that enters the span
-// EncounterEnd  on every edge that leaves all regions the edge started in;
-//               shared per successor, since EncounterEnd ends whichever
-//               encounter is current at runtime
+/**
+ * Encounter synthesis (ADR-0003, docs/bpmn2gmf-concept.md section 4.4).
+ *
+ * The diagram only tags states with synthea:encounterContext / encounterId.
+ * Here the Encounter and EncounterEnd states are derived and spliced into the
+ * flow of the IR, before transitions are built.
+ *
+ * Which part of the flow belongs to an encounter ("region"):
+ *   span  the tagged states plus every node on a path between two of them
+ *   tail  from the span on, untagged states keep the encounter open (a state
+ *         left untagged inherits whatever encounter is open, modeling guide
+ *         section 9) until the flow reaches a boundary: a long Delay, Terminal,
+ *         Death, CallSubmodule, or a state of another encounter. The tail only
+ *         reaches as far as the last state that uses the encounter (a clinical
+ *         state, or a diagnosis without target_encounter): neutral
+ *         states after it (gateways, SetAttribute, a hospice check) are
+ *         outside, so the encounter ends right after the last clinical state,
+ *         as upstream does (an open encounter there changed the random draws)
+ * When a Delay ends the encounter depends on where it is:
+ *   between two states of the same encounter (the modeler tagged both sides):
+ *     a delay of a week or more ends it, shorter ones are part of the stay
+ *   after the last tagged state: a delay of a day or more ends it
+ * This reproduces upstream. Its inpatient stay is one encounter with a loop of
+ * 1 day delays inside it (the length of stay), and the weeks between two
+ * treatment cycles end it; the anemia module keeps a 1 hour delay inside the
+ * visit and closes it before the 1 day delay that follows.
+ *
+ * Encounter     one per (encounter, entered state), on every edge that enters the span
+ * EncounterEnd  on every edge that leaves all regions the edge started in;
+ *               shared per successor, since EncounterEnd ends whichever
+ *               encounter is current at runtime
+ */
 import { first } from './ir.mjs';
 import { systemName } from './codes.mjs';
 
 const BOUNDARY = new Set(['Terminal', 'Death', 'CallSubmodule']);
 
 const DAYS_PER_UNIT = { seconds: 1 / 86400, minutes: 1 / 1440, hours: 1 / 24, days: 1, weeks: 7, months: 30, years: 365 };
-export const TAIL_DELAY_DAYS = 1; // after the last tagged state of an encounter
-export const SPAN_DELAY_DAYS = 7; // between tagged states of the same encounter
+/** Days of delay that follow the last tagged state of an encounter, before the encounter ends. */
+export const TAIL_DELAY_DAYS = 1;
+/** Days of delay between two tagged states of the same encounter, so they happen on different days. */
+export const SPAN_DELAY_DAYS = 7;
 
 // Is this a Delay of at least `days`? Its (upper) duration counts; one that cannot be
 // read counts as long, so the encounter is closed.
@@ -139,6 +143,14 @@ function checkEncounterCode(group, firstMember, diag, where) {
   group.codeSystem = system;
 }
 
+/**
+ * Builds the `Encounter` and `EncounterEnd` states of a module from the `synthea:encounterContext`
+ * groups of its states, and rewires the flow through them (ADR-0003). Changes `module` in place and
+ * sets `module.encounters` (encounterId -> names of its Encounter states).
+ *
+ * @param {object} module the IR module (see ir.mjs)
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages (an encounter without an id, a group that disagrees on its class, ...)
+ */
 export function synthesizeEncounters(module, diag) {
   const nodeOf = (id) => module.nodes.get(id);
   const where = (n) => ({ module: module.fileBase, element: n.id, label: n.label });

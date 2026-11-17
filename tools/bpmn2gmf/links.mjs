@@ -1,7 +1,16 @@
-// Stage 2c: link events. A link throw event and the link catch event with the same name are one
-// jump drawn in two pieces (a way to avoid long or crossing flows). GMF has no such event, so the pair
-// is removed and the flows into the throw event go straight to what follows the catch event.
+/**
+ * Stage 2c: link events. A link throw event and the link catch event with the same name are one
+ * jump drawn in two pieces (a way to avoid long or crossing flows). GMF has no such event, so the pair
+ * is removed and the flows into the throw event go straight to what follows the catch event.
+ */
 
+/**
+ * Removes the pairs of link events from the IR and joins the flows around them. Changes `module` in
+ * place. A throw event without a catch event of the same name (or the reverse) is an error.
+ *
+ * @param {object} module the IR module (see ir.mjs)
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ */
 export function resolveLinks(module, diag) {
   const where = (n) => ({ module: module.fileBase, element: n.id, label: n.label });
   const links = [...module.nodes.values()].filter((n) => n.link);

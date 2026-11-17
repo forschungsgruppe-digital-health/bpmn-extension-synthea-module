@@ -1,9 +1,20 @@
-// Table C of implicit-rules.md: outgoing sequence flows -> GMF transition.
+/**
+ * Table C of implicit-rules.md: outgoing sequence flows -> GMF transition.
+ */
 import { conditionToGmf, num } from './conditions.mjs';
 
 // 0.1 + 0.2 style float noise is not meaningful here.
 const round = (n) => Math.round(n * 1e9) / 1e9;
 
+/**
+ * Table C of implicit-rules.md: turns the outgoing flows of a node into the GMF transition of its
+ * state (`direct_transition`, `distributed_transition`, `conditional_transition`).
+ *
+ * @param {object} node the IR node
+ * @param {object} module the IR module the node belongs to
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages (flows that mix probabilities and conditions, a missing default)
+ * @returns {object|null} the transition fields to merge into the state, null when the node has no outgoing flow
+ */
 export function buildTransition(node, module, diag) {
   const where = { module: module.fileBase, element: node.id, label: node.label };
   const edges = node.outgoing;

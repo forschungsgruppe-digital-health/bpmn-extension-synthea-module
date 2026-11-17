@@ -1,9 +1,11 @@
-// What the converter does not accept (tools/bpmn2gmf/ir.mjs: REJECTED and
-// BOUNDARY_EVENT_UNSUPPORTED) is not offered in the replace menu: the complex and event-based
-// gateway, transactions, ad-hoc and event sub-processes, the boundary events, and the
-// loop / multi-instance markers (the converter reports them as LOOP_MARKER_UNSUPPORTED).
-// The parallel and the inclusive gateway are offered: a split and its join are rewritten
-// (tools/bpmn2gmf/gateways.mjs).
+/**
+ * Replace menu filter: takes out of the replace menu everything the converter does not accept
+ * (tools/bpmn2gmf/ir.mjs: REJECTED and BOUNDARY_EVENT_UNSUPPORTED): the complex and event-based
+ * gateway, transactions, ad-hoc and event sub-processes, the boundary events, and the
+ * loop / multi-instance markers (the converter reports them as LOOP_MARKER_UNSUPPORTED).
+ * The parallel and the inclusive gateway are offered: a split and its join are rewritten
+ * (tools/bpmn2gmf/gateways.mjs).
+ */
 const UNSUPPORTED_ENTRIES = [
   'replace-with-complex-gateway',
   'replace-with-event-based-gateway',
@@ -24,6 +26,12 @@ const UNSUPPORTED_HEADER_ENTRIES = ['toggle-parallel-mi', 'toggle-sequential-mi'
 // Below bpmn-js's own replace menu (default priority 1000), so its entries exist when this runs.
 const PRIORITY = 100;
 
+/**
+ * Registers the filter as a provider of the replace menu, after bpmn-js's own provider, so the
+ * entries it removes exist by then.
+ *
+ * @param {import('diagram-js/lib/features/popup-menu/PopupMenu').default} popupMenu the popup menu service (injected)
+ */
 export default function SyntheaReplaceMenuFilter(popupMenu) {
   popupMenu.registerProvider('bpmn-replace', PRIORITY, this);
 }

@@ -1,4 +1,6 @@
-// Stage 5: IR node -> GMF state object (without transition).
+/**
+ * Stage 5: IR node -> GMF state object (without transition).
+ */
 import { first } from './ir.mjs';
 import { conditionToGmf, typedValue, num } from './conditions.mjs';
 import { codesForState, systemName } from './codes.mjs';
@@ -552,6 +554,15 @@ const CONFIG_READ_BY = {
   'synthea:ReportObservation': ['DiagnosticReport', 'MultiObservation']
 };
 
+/**
+ * Stage 5: turns one IR node into its GMF state object, without the transition (transitions.mjs adds
+ * it). Warns about configurations the state type does not read.
+ *
+ * @param {object} node the IR node, with its `stateType` already resolved (resolve.mjs)
+ * @param {object} module the IR module the node belongs to
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ * @returns {object|null} the GMF state, or null when it could not be built (an error is recorded)
+ */
 export function emitState(node, module, diag) {
   const where = { module: module.fileBase, element: node.id, label: node.label };
   const emitter = EMITTERS[node.stateType];

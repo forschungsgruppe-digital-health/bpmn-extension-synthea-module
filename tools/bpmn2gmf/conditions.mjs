@@ -1,10 +1,18 @@
-// synthea:Condition -> GMF condition object.
+/**
+ * synthea:Condition -> GMF condition object.
+ */
 import { systemName } from './codes.mjs';
 
 const NUMERIC = /^-?\d+(\.\d+)?$/;
 
-// Our schema stores every value as a string; GMF distinguishes numbers,
-// booleans and strings (decision 6: numeric -> number, true/false -> boolean).
+/**
+ * Turns a value of the extension into the type GMF expects. The schema stores every value as a
+ * string; GMF distinguishes numbers, booleans and strings (decision 6: numeric -> number,
+ * true/false -> boolean).
+ *
+ * @param {string|undefined|null} raw the stored value
+ * @returns {number|boolean|string|undefined} the typed value, undefined when there is none
+ */
 export function typedValue(raw) {
   if (raw === undefined || raw === null) return undefined;
   if (NUMERIC.test(raw)) return Number(raw);
@@ -13,8 +21,13 @@ export function typedValue(raw) {
   return raw;
 }
 
-// Numeric attributes (`Real` in the schema) are read as numbers by moddle; this
-// stays tolerant of strings so hand-built or older models still convert.
+/**
+ * Reads a numeric attribute. Attributes of type `Real` come as numbers from moddle; this stays
+ * tolerant of strings so hand-built or older models still convert.
+ *
+ * @param {number|string|undefined|null} v the stored value
+ * @returns {number|undefined} the number, undefined for a missing or empty value
+ */
 export const num = (v) => (v === undefined || v === null || v === '' ? undefined : Number(v));
 
 const NIL_OPERATORS = new Set(['is nil', 'is not nil']);
@@ -57,7 +70,13 @@ function entityReference(c, report) {
   return {};
 }
 
-// report(message) records an error with the caller's context.
+/**
+ * Converts a `synthea:Condition` (nested ones included) to a GMF condition object.
+ *
+ * @param {object} c the condition element, with its `conditionType` and the fields of that type
+ * @param {(message: string) => void} report records an error together with the caller's context
+ * @returns {object|null} the GMF condition, or null when the condition has no `conditionType`
+ */
 export function conditionToGmf(c, report) {
   const type = c.conditionType;
   if (!type) {

@@ -1,8 +1,10 @@
-// Stage 2: moddle tree -> intermediate representation (IR).
-//
-// The IR only contains what the emitters need. Everything BPMN-specific that
-// does not matter for GMF (diagram interchange, annotations, associations,
-// i18n, BPMN4CP, data objects) is dropped here.
+/**
+ * Stage 2: moddle tree -> intermediate representation (IR).
+ *
+ * The IR only contains what the emitters need. Everything BPMN-specific that
+ * does not matter for GMF (diagram interchange, annotations, associations,
+ * i18n, BPMN4CP, data objects) is dropped here.
+ */
 
 import { bypassDocumentationNodes } from './documentation.mjs';
 import { resolveLinks } from './links.mjs';
@@ -38,6 +40,12 @@ const REJECTED = {
   }
 };
 
+/**
+ * Groups the `synthea:` (and other) extension elements of a BPMN element by their type.
+ *
+ * @param {object} element a moddle element, e.g. a task
+ * @returns {Record<string, object[]>} the extension elements, by `$type` (e.g. `synthea:StateTypeConfig`)
+ */
 export function extensionsOf(element) {
   const out = {};
   for (const value of element.extensionElements?.values ?? []) {
@@ -46,6 +54,13 @@ export function extensionsOf(element) {
   return out;
 }
 
+/**
+ * The first extension element of a type.
+ *
+ * @param {Record<string, object[]>} ext the extension elements of a node, by type (see `extensionsOf`)
+ * @param {string} type e.g. `synthea:GuardConfig`
+ * @returns {object|undefined} the element, undefined when there is none
+ */
 export const first = (ext, type) => ext[type]?.[0];
 
 function kindOf(el) {
@@ -74,6 +89,17 @@ function linkOf(el) {
   };
 }
 
+/**
+ * Stage 2: turns one process into an intermediate representation (IR): nodes, edges and what the
+ * stages after it need from the extension. Documentation-only elements, link events and gateways are
+ * resolved here (documentation.mjs, links.mjs, gateways.mjs). Elements the converter cannot handle are
+ * reported.
+ *
+ * @param {object} process a `bpmn:Process`, or a `bpmn:SubProcess` that becomes a module of its own
+ * @param {string} fileBase the module name
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ * @returns {object} the IR module: `fileBase`, `name`, `processId`, `nodes` (a Map), `edges` and `children`
+ */
 export function buildModule(process, fileBase, diag) {
   const module = {
     fileBase,
@@ -204,6 +230,15 @@ function expand(module, diag, used) {
   return result;
 }
 
+/**
+ * Builds the IR of every process in a file, and of every sub-process with content, which becomes a
+ * module of its own that the sub-process calls.
+ *
+ * @param {object} definitions the parsed `bpmn:Definitions`
+ * @param {string} fileBase the module name of the file
+ * @param {import('./diagnostics.mjs').Diagnostics} diag collects the messages
+ * @returns {object[]} the IR modules; a file with several pools gives several
+ */
 export function buildModules(definitions, fileBase, diag) {
   const processes = (definitions.rootElements ?? []).filter((e) => e.$type === 'bpmn:Process');
   if (processes.length === 0) {
