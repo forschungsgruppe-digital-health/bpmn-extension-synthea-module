@@ -285,7 +285,7 @@ function addFiles(items) {
     if (added) parts.push(`opened ${added} file${added === 1 ? '' : 's'}`);
     if (replaced) parts.push(`reloaded ${replaced}`);
     if (skipped) parts.push(`skipped ${skipped} that ${skipped === 1 ? 'is' : 'are'} not BPMN`);
-    if (bad.length) toast(`Could not read ${bad.join(', ')}: not a valid BPMN file. ${parts.length ? parts.join(', ') : ''}`, 'error');
+    if (bad.length) toast(`Could not read ${bad.join(', ')}: not a valid BPMN file.${parts.length ? ` Otherwise: ${parts.join(', ')}.` : ''}`, 'error');
     else if (parts.length) toast(parts.join(', ').replace(/^./, (c) => c.toUpperCase()) + '.');
   });
 }
@@ -461,8 +461,25 @@ $('#theme').addEventListener('click', () => {
   try { localStorage.setItem('starlight-theme', next); } catch { /* ignore */ }
 });
 
-// The links back to the site only exist in the built site, not under `vite dev`.
-if (import.meta.env.DEV) document.querySelector('.site-nav').hidden = true;
+// The site (overview, guides, converter result) only exists in the built Pages site, not under
+// `vite dev` or in the Docker container. There, the links lead to the same pages on GitHub, and the
+// ones without a counterpart are hidden: no link should end on a 404.
+if (import.meta.env.DEV) {
+  const repo = 'https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module';
+  const onGithub = {
+    '../': repo,
+    '../start/quickstart/': `${repo}/blob/dev/docs/quickstart.md`,
+    '../start/basics/': `${repo}/blob/dev/docs/basics.md`,
+    '../modeling/modeling-guide/': `${repo}/blob/dev/docs/modeling-guide.md`
+  };
+  for (const a of document.querySelectorAll('a[href^="../"]')) {
+    const target = onGithub[a.getAttribute('href')];
+    if (!target) { a.hidden = true; continue; }
+    a.href = target;
+    a.target = '_blank';
+    a.rel = 'noopener';
+  }
+}
 
 const converterPanel = initConverterPanel({
   getXml: async () => (await modeler.saveXML({ format: true })).xml,

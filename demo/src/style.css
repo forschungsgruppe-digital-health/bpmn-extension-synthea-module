@@ -382,3 +382,12 @@ body:not(.has-files) #properties { display: none; }
 }
 .toolbar #examples-menu button:hover { background: var(--accent-low); }
 #examples-menu small { color: var(--text-muted); font-size: 11px; }
+
+/* Phones: the properties panel goes below the diagram instead of covering it. */
+@media (max-width: 700px) {
+  .content { flex-direction: column; }
+  .stage { flex: 1 1 55%; min-height: 0; }
+  #properties { width: auto; flex: 0 0 40%; border-left: 0; border-top: 1px solid var(--border); }
+  #welcome { padding: 20px 12px; }
+  .welcome-card h1 { font-size: 22px; }
+}
