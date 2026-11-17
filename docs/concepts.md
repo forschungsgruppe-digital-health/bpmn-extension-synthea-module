@@ -162,20 +162,7 @@ semantic rules stay in the lint plugin.
 When a `.bpmn` file is loaded, edited, and saved, the data flows like this — and
 each validation tool inspects a different stage:
 
-```mermaid
-flowchart LR
-  XML[".bpmn file<br/>XML on disk"]
-  OBJ["In-memory model<br/>JS objects"]
-  UI["bpmn-js<br/>editor / viewer"]
-
-  XML -->|"fromXML — your descriptor registered"| OBJ
-  OBJ -->|"toXML"| XML
-  OBJ <-->|"render / edit"| UI
-
-  XSD["xmllint + BPMN20.xsd"] -. "checks core structure" .-> XML
-  RT["round-trip tool"] -. "checks your data parses + serialises" .-> OBJ
-  LINT["bpmnlint + your plugin"] -. "checks your data's semantics" .-> OBJ
-```
+![How a .bpmn file is loaded, edited and saved, and which tool checks which stage: the file becomes in-memory objects via fromXML and back via toXML, bpmn-js edits the objects, xmllint with the XSD checks the file's core structure, the round-trip tool and bpmnlint check the objects](img/runtime-flow.svg)
 
 - **bpmn-moddle** turns XML into objects and back. With your descriptor
   registered, your `synthea:` data survives the trip; without it, the data would

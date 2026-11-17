@@ -4,7 +4,7 @@
 // Per page: adds the front matter Starlight needs (title from the first heading, description
 // from the first paragraph), drops the heading (Starlight renders the title) and rewrites the
 // relative links between guides to site paths and all other relative links to GitHub.
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -71,6 +71,7 @@ for (const [src, section] of Object.entries(PAGES)) {
         const [path, hash = ''] = target.split('#');
         const resolved = posix.normalize(posix.join(fromDir, path));
         if (resolved in PAGES) return `](${urlOf(resolved)}${hash ? '#' + hash : ''})`;
+        if (resolved.startsWith('img/')) return `](/${resolved})`;
         if (resolved === 'demo' || resolved === 'demo/') return '](/modeler/)';
         const kind = /\.\w+$/.test(resolved) ? 'blob' : 'tree';
         return `](${REPO}/${kind}/dev/${resolved.replace(/\/$/, '')}${hash ? '#' + hash : ''})`;
@@ -84,5 +85,10 @@ for (const [src, section] of Object.entries(PAGES)) {
   const out = join(outRoot, section, `${slug(src)}.md`);
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, front.join('\n') + '\n' + body);
+}
+// Images referenced by the guides are served from the site's public folder.
+if (existsSync(join(docsDir, 'img'))) {
+  rmSync(join(here, '..', 'public', 'img'), { recursive: true, force: true });
+  cpSync(join(docsDir, 'img'), join(here, '..', 'public', 'img'), { recursive: true });
 }
 console.log(`sync-docs: ${Object.keys(PAGES).length} pages written to ${outRoot}`);
