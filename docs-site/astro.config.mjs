@@ -87,7 +87,11 @@ export default defineConfig({
         },
         {
           label: '5. For developers',
-          items: [{ label: 'Concepts: how a BPMN extension works', link: '/developers/concepts/' }]
+          items: [
+            { label: 'Concepts: how a BPMN extension works', link: '/developers/concepts/' },
+            { label: 'Extension API', link: '/developers/extension-api/' },
+            { label: 'Type reference', link: '/developers/extension-api-types/' }
+          ]
         },
         {
           label: 'Project & help',

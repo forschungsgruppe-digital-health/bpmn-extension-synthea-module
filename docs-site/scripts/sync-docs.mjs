@@ -31,6 +31,8 @@ const PAGES = {
   'synthea.md': 'background',
   // 5. For developers
   'concepts.md': 'developers',
+  'extension-api.md': 'developers',
+  'extension-api-types.md': 'developers',
   // Project & help. '../' marks a file at the repository root instead of docs/.
   '../CONTRIBUTING.md': 'project'
 };
