@@ -9,8 +9,22 @@ An extension for [bpmn.io](https://bpmn.io) that lets you model clinical patient
 and convert them into [Synthea](https://github.com/synthetichealth/synthea) modules, so you can
 simulate synthetic patient populations that follow your pathway.
 
-<LinkButton href={`${import.meta.env.BASE_URL}modeler/`} icon="right-arrow">Open the modeler</LinkButton>{' '}
-<LinkButton href={`${import.meta.env.BASE_URL}modeling/modeling-guide/`} variant="secondary">Modeling guide</LinkButton>
+<LinkButton href={`${import.meta.env.BASE_URL}start/basics/`} icon="right-arrow">Start with the basics</LinkButton>{' '}
+<LinkButton href={`${import.meta.env.BASE_URL}modeler/`} variant="secondary">Open the modeler</LinkButton>
+
+## Read in this order
+
+No prior knowledge of BPMN or Synthea is needed. The sidebar follows the same order, and every page ends with a link to the next one.
+
+<ol>
+  <li><strong><a href={`${import.meta.env.BASE_URL}start/basics/`}>Basics</a></strong>: what BPMN and Synthea are, in five minutes.</li>
+  <li><strong><a href={`${import.meta.env.BASE_URL}start/quickstart/`}>Quickstart</a></strong>: convert an example and draw a tiny pathway of your own, in the browser.</li>
+  <li><strong><a href={`${import.meta.env.BASE_URL}modeling/modeling-guide/`}>Modeling guide</a></strong>: how to draw each kind of step. Use it as a manual from here on.</li>
+  <li><strong><a href={`${import.meta.env.BASE_URL}convert/converter-overview/`}>Check and convert</a></strong>: what the checks and the converter do, and what their messages mean.</li>
+  <li><strong><a href={`${import.meta.env.BASE_URL}background/synthea/`}>Background</a></strong> and <strong><a href={`${import.meta.env.BASE_URL}developers/concepts/`}>For developers</a></strong>: Synthea in depth, and how a BPMN extension works if you want to build your own.</li>
+</ol>
+
+Stuck on a word? The [glossary](/start/glossary/) explains them all.
 
 ## What it is
 
@@ -47,9 +61,9 @@ Four steps, each with a tool that checks the result.
 
 1. **Model.** Draw the pathway in the bpmn-js modeler and fill in the `synthea:` properties panel.
 2. **Validate.** bpmnlint rules check the Synthea semantics that the BPMN schema cannot express
-   ([lint rules](/modeling/lint-rules/)).
+   ([lint rules](/convert/lint-rules/)).
 3. **Convert.** The converter writes Synthea modules. It runs in the browser or on the command line
-   ([converter overview](/reference/converter-overview/)).
+   ([converter overview](/convert/converter-overview/)).
 4. **Simulate.** Run the modules in Synthea to generate synthetic patients.
 
 ## What you can use it for
@@ -69,7 +83,7 @@ Four steps, each with a tool that checks the result.
   </Card>
   <Card title="A pattern for your own extension" icon="puzzle">
     The repository is also a template for custom BPMN extensions: model descriptor, lint plugin,
-    editor module and checks. See [Concepts](/start/concepts/).
+    editor module and checks. See [Concepts for developers](/developers/concepts/).
   </Card>
 </CardGrid>
 
@@ -99,22 +113,6 @@ there, **Convert to Synthea** shows the module it becomes.
 - [Symptom check](/modeler/?pathway=symptom-check)
 - [Anemia](/modeler/?pathway=anemia)
 - [Converter result](/modules/): the JSON modules and the report built from these pathways at the latest merge
-
-## Where to start
-
-<CardGrid>
-  <Card title="I model pathways" icon="pencil">
-    Task-by-task instructions for every `synthea:` type: [Modeling guide](/modeling/modeling-guide/).
-  </Card>
-  <Card title="I develop or integrate" icon="setting">
-    How the converter works and which rules apply: [Converter overview](/reference/converter-overview/),
-    [Conversion rules](/reference/implicit-rules/).
-  </Card>
-  <Card title="I want my own extension" icon="rocket">
-    Use the repository as a template and replace the placeholder extension with yours. Start with
-    [Concepts](/start/concepts/).
-  </Card>
-</CardGrid>
 
 ## Part of a family of extensions
 

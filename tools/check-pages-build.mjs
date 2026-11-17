@@ -33,7 +33,7 @@ const walk = (dir) => {
   }
 };
 if (existsSync(dist)) walk('.');
-for (const need of ['index.html', 'modeler/index.html', 'start/concepts/index.html', 'modeling/modeling-guide/index.html']) {
+for (const need of ['index.html', 'modeler/index.html', 'start/basics/index.html', 'start/quickstart/index.html', 'modeling/modeling-guide/index.html']) {
   if (!pages.includes(need)) fail(`${need} is missing`);
 }
 const exists = (rel) => existsSync(join(dist, rel)) || existsSync(join(dist, rel, 'index.html'));

@@ -54,40 +54,40 @@ export default defineConfig({
       lastUpdated: false,
       social: [{ icon: 'github', label: 'GitHub', href: REPO }],
       customCss: ['./src/styles/custom.css'],
+      // The order is the learning path: Starlight's previous/next links follow it.
       sidebar: [
         { label: 'Overview', items: [{ label: 'What it is and who it is for', link: '/' }] },
         {
-          label: 'Start here',
+          label: '1. Get started',
           items: [
-            { label: 'Concepts', link: '/start/concepts/' },
-            { label: 'Synthea and the lung cancer pathway', link: '/start/synthea/' }
+            { label: 'Basics: BPMN and Synthea', link: '/start/basics/' },
+            { label: 'Quickstart: your first module', link: '/start/quickstart/' },
+            { label: 'Glossary', link: '/start/glossary/' }
           ]
         },
         {
-          label: 'Modeling',
+          label: '2. Model a pathway',
           items: [
             { label: 'Modeling guide', link: '/modeling/modeling-guide/' },
-            { label: 'Which type on which element', link: '/modeling/extension-matrix/' },
-            { label: 'Lint rules', link: '/modeling/lint-rules/' }
+            { label: 'Which type on which element', link: '/modeling/extension-matrix/' }
           ]
         },
         {
-          label: 'Reference',
+          label: '3. Check and convert',
           items: [
-            { label: 'Conversion rules', link: '/reference/implicit-rules/' },
-            { label: 'Converter overview', link: '/reference/converter-overview/' },
-            { label: 'Validator overview', link: '/reference/validator-overview/' },
-            { label: 'Converter concept', link: '/reference/bpmn2gmf-concept/' }
+            { label: 'Lint rules', link: '/convert/lint-rules/' },
+            { label: 'Converter overview', link: '/convert/converter-overview/' },
+            { label: 'Validator overview', link: '/convert/validator-overview/' },
+            { label: 'Conversion rules', link: '/convert/implicit-rules/' }
           ]
         },
         {
-          label: 'Decisions',
-          collapsed: true,
-          items: [
-            { label: 'ADR-0001 Versioning', link: '/decisions/0001-versioning-and-release-please/' },
-            { label: 'ADR-0002 Encounter as flow node', link: '/decisions/0002-encounter-as-flow-node/' },
-            { label: 'ADR-0003 Encounter scope', link: '/decisions/0003-encounter-context-implicit-scoping/' }
-          ]
+          label: '4. Background',
+          items: [{ label: 'Synthea and the lung cancer pathway', link: '/background/synthea/' }]
+        },
+        {
+          label: '5. For developers',
+          items: [{ label: 'Concepts: how a BPMN extension works', link: '/developers/concepts/' }]
         }
       ]
     })
