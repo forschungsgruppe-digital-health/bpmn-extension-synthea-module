@@ -16,12 +16,12 @@ It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copi
 
 - `moddleExtensions: { synthea: <descriptor> }` — `../extension/model/synthea.json`
 - `additionalModules: [ …, syntheaModule ]` — `../extension/src/index.js` (the sample properties-panel provider)
-- pathways — all five real `../lung-cancer/*.bpmn` files (imported via `?raw`), switchable via the
-  **Pathway** dropdown in the toolbar: the main `synthea-lung-cancer.bpmn` module plus its four
-  submodules (`lung-cancer-probabilities-submodule.bpmn`, `lung-cancer-treatment-submodule.bpmn`,
-  `symptom-check-submodule.bpmn`, `anemia-submodule.bpmn`). The main module's four `CallSubmodule`
-  states are `bpmn:callActivity` elements (`calledElement` pointing at each submodule's process id)
-  — their actual content lives in these separate files, not inline.
+- your own diagrams — the modeler ships **no diagrams**. Open `.bpmn` files, a whole folder or drop
+  them on the page; the open files are listed on the left. Everything stays in the browser (the
+  session is kept in `localStorage`, nothing is uploaded). A main pathway whose `CallSubmodule` states
+  (`bpmn:callActivity`, `calledElement` = the submodule's process id) point to other files needs those
+  files open as well: open the folder. The real example files are in `../lung-cancer/` and are offered
+  for download in the Quickstart of the site.
 
 So whatever you change in `extension/` is reflected here on the next reload.
 

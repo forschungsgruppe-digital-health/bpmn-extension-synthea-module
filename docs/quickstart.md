@@ -4,7 +4,9 @@ About ten minutes. You need a browser and nothing else: the modeler on this site
 
 ## 1. Open an example
 
-Open the [modeler](/modeler/). At the top right, the **Pathway** dropdown lists the five real lung cancer files. Pick **Lung Cancer Probabilities (submodule)**; it is the smallest one. You see a diagram: circles, boxes and diamonds connected by arrows. If you are not sure what they mean, read [Basics](basics.md) first.
+The modeler has no diagrams of its own: you open your files, which stay in your browser and are never uploaded. For this tutorial, download the smallest real example, [lung-cancer-probabilities-submodule.bpmn](/examples/lung-cancer-probabilities-submodule.bpmn) (right-click, save link as). Then open the [modeler](/modeler/) and drag the file onto the page, or press **Open files…** and choose it. The file appears in the list on the left and as a diagram on the canvas: circles, boxes and diamonds connected by arrows. If you are not sure what they mean, read [Basics](basics.md) first.
+
+More examples, all from the lung cancer pathway: [main pathway](/examples/synthea-lung-cancer.bpmn), [treatment cycle](/examples/lung-cancer-treatment-submodule.bpmn), [symptom check](/examples/symptom-check-submodule.bpmn) and [anemia](/examples/anemia-submodule.bpmn). The main pathway calls the four others, so to open it with its submodules put all five files in one folder and use **Open folder…**.
 
 ## 2. Look at one element
 
@@ -18,11 +20,11 @@ Change a value in a group, for example a number. Then press **Convert to Synthea
 - **JSON**: the file Synthea runs. **Download JSON** saves it.
 - **Messages**: problems and hints the converter found. Each message comes with an explanation and what to do.
 
-Your changes live only in the browser. **Reload** brings the original back, **Download .bpmn** saves your diagram.
+Your changes stay in your browser, and the modeler restores your files when you come back. **Save .bpmn** (or Ctrl/Cmd+S) downloads your diagram; a dot next to a file name in the list marks unsaved changes.
 
 ## 4. Draw a tiny pathway
 
-Press **New** for an empty diagram. Then:
+Press **New** in the toolbar for an empty diagram. Then:
 
 1. The empty diagram already contains a start event. It becomes the `Initial` state; there is nothing to configure.
 2. Add an intermediate event after it and set its type to **Timer** (click the event, then set its type to Timer in the Timer group of the properties panel). In its **Delay** group choose a shape, a value and a unit, for example an exact value of 3 years.

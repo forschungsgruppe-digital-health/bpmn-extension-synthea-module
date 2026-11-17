@@ -4,25 +4,89 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modeler — synthea</title>
+    <script>
+      // Same theme as the docs site (Starlight keeps it under "starlight-theme"), set before first paint.
+      try {
+        const saved = localStorage.getItem('starlight-theme');
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch { document.documentElement.dataset.theme = 'light'; }
+    </script>
   </head>
   <body>
-    <header class="toolbar">
-      <a href="../" class="home" title="Overview"><strong>synthea</strong></a>
-      <span class="hint">Select an element → edit its <code>synthea:</code> properties groups (e.g. <code>State type</code>, <code>Encounter Context</code>) → Download to see the XML, or <strong>Convert to Synthea</strong> to see the module it becomes.</span>
-      <span class="spacer"></span>
-      <label for="pathway-select" class="pathway-label">Pathway</label>
-      <select id="pathway-select"></select>
-      <button id="load-example" type="button">Reload</button>
-      <button id="new-diagram" type="button">New</button>
-      <button id="download" type="button">Download .bpmn</button>
-      <button id="live-status" type="button" class="live-status" title="Converter check of this diagram">Converter: checking…</button>
-      <button id="convert" type="button" class="primary">Convert to Synthea</button>
-      <a id="converter-result" href="../modules/" class="hint">Converter result</a>
-    </header>
+    <div class="chrome">
+      <header class="site-header">
+        <a href="../" class="brand" title="Back to the overview">
+          <svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#27478c"/><circle cx="8" cy="16" r="3.5" fill="none" stroke="#fff" stroke-width="2"/><rect x="13" y="11" width="7" height="10" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M20 16h4M24 16l-2-2m2 2l-2 2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          <span>BPMN Extension for Synthea</span>
+          <span class="brand-sub">Modeler</span>
+        </a>
+        <nav class="site-nav" aria-label="Site">
+          <a href="../">Overview</a>
+          <a href="../start/quickstart/">Quickstart</a>
+          <a href="../modeling/modeling-guide/">Modeling guide</a>
+          <a id="converter-result" href="../modules/">Converter result</a>
+        </nav>
+        <span class="spacer"></span>
+        <button id="theme" type="button" class="icon" title="Switch between light and dark" aria-label="Switch between light and dark">◐</button>
+      </header>
+
+      <div class="toolbar" role="toolbar" aria-label="Diagram actions">
+        <button id="files-toggle" type="button" class="ghost" title="Show or hide the list of open files">Files</button>
+        <button id="open-files" type="button" title="Open one or more .bpmn files from your computer">Open files…</button>
+        <button id="open-folder" type="button" title="Open all .bpmn files in a folder (including subfolders)">Open folder…</button>
+        <button id="new-diagram" type="button" title="Start an empty diagram">New</button>
+        <span class="divider"></span>
+        <span id="current-name" class="current-name" hidden></span>
+        <span class="spacer"></span>
+        <button id="download" type="button" title="Save this diagram as a .bpmn file (Ctrl/Cmd+S)" disabled>Save .bpmn</button>
+        <button id="live-status" type="button" class="live-status" title="Converter check of this diagram" hidden>Converter: checking…</button>
+        <button id="convert" type="button" class="primary" title="Show the Synthea module this diagram becomes" disabled>Convert to Synthea</button>
+      </div>
+    </div>
+
+    <input id="file-input" type="file" accept=".bpmn,.xml" multiple hidden />
+    <input id="folder-input" type="file" webkitdirectory hidden />
+
     <main class="content">
-      <div id="canvas"></div>
+      <aside id="files" aria-label="Open files">
+        <div class="files-head">
+          <strong>Open files</strong>
+          <button id="close-all" type="button" class="link" title="Close all files and forget this session">Close all</button>
+        </div>
+        <ul id="file-list"></ul>
+        <p class="files-foot">Drop more files or a folder anywhere on this page. Your files stay in this browser; nothing is uploaded.</p>
+      </aside>
+
+      <div class="stage">
+        <div id="canvas"></div>
+        <section id="welcome" aria-label="Get started">
+          <div class="welcome-card">
+            <h1>Bring your own pathway</h1>
+            <p>Open your BPMN files to edit them with the Synthea settings and see the Synthea module they become. Everything runs in your browser; nothing is uploaded.</p>
+            <div class="drop">
+              <strong>Drop <code>.bpmn</code> files or a folder here</strong>
+              <span>or choose</span>
+              <div class="drop-actions">
+                <button id="welcome-files" type="button" class="primary">Open files…</button>
+                <button id="welcome-folder" type="button">Open folder…</button>
+                <button id="welcome-new" type="button">Start a new diagram</button>
+              </div>
+            </div>
+            <ol class="steps">
+              <li><strong>Open</strong> one file or a whole folder. A main pathway that calls submodules needs the submodule files open too, so open the folder.</li>
+              <li><strong>Edit</strong>: click an element and set its Synthea properties in the panel on the right.</li>
+              <li><strong>Convert</strong> to see the Synthea module, with messages that explain what to fix.</li>
+            </ol>
+            <p class="small">New to this? Follow the <a href="../start/quickstart/">Quickstart</a>, which also has example files to download. Reading <a href="../start/basics/">Basics</a> first helps.</p>
+          </div>
+        </section>
+        <div id="drop-overlay" hidden><span>Drop to open</span></div>
+      </div>
+
       <div id="properties"></div>
     </main>
+
     <section id="converter-panel" hidden>
       <header class="cp-head">
         <strong>Synthea module</strong>
@@ -40,6 +104,8 @@
       </header>
       <div id="cp-body"></div>
     </section>
+
+    <div id="toast" role="status" aria-live="polite" hidden></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

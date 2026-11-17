@@ -78,9 +78,10 @@ npm run demo        # the modeler with the extension, in the browser
 npm run validate    # all checks (lint, round trip, XSD, tests, converter)
 ```
 
-The demo lists the five pathway files of `lung-cancer/` in a dropdown. Click an element and open the
-group "Synthea" in the properties panel. A change in the panel stays in the browser (**Reload** brings
-the original back); **Download .bpmn** saves it.
+The modeler ships no diagrams: open your own `.bpmn` files or a whole folder (button, or drop them on
+the page). The five real pathway files of `lung-cancer/` are good to try (open that folder). Click an
+element and open the group "Synthea" in the properties panel. Your files and changes stay in the
+browser (nothing is uploaded); **Save .bpmn** downloads the open diagram.
 
 **Convert to Synthea** runs the converter in the browser on the diagram that is open, with the edits
 you made, and shows the Synthea module as a graph, as JSON and as messages (each kind of message

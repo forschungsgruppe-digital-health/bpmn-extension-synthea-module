@@ -9,10 +9,10 @@ const $ = (sel) => document.querySelector(sel);
 /**
  * @param {object} opts
  * @param {() => Promise<string>} opts.getXml        XML of the diagram that is open now
- * @param {() => {file: string}} opts.getCurrent     the selected pathway ({ file } or the "new" diagram)
- * @param {{file: string, xml: string}[]} opts.pathways  all example pathways (submodules are called by the main one)
+ * @param {() => {file: string}|null} opts.getCurrent  the open file ({ file } is its path)
+ * @param {() => {file: string, xml: string}[]} opts.getFiles  all files the user opened (submodules are called by the main one)
  */
-export function initConverterPanel({ getXml, getCurrent, pathways }) {
+export function initConverterPanel({ getXml, getCurrent, getFiles }) {
   const panel = $('#converter-panel');
   const select = $('#cp-module');
   const body = $('#cp-body');
@@ -22,19 +22,18 @@ export function initConverterPanel({ getXml, getCurrent, pathways }) {
   let scale = 1;
   let graph = null;
 
-  // Converts the open diagram together with the example pathways (the main one calls the
+  // Converts the open diagram together with the other opened files (the main pathway calls the
   // submodules). The live check uses this too and only reads the diagnostics.
   async function compute() {
     const current = getCurrent();
     const xml = await getXml();
-    const inputs = pathways.map((p) => ({ path: `lung-cancer/${p.file}`, xml: p.file === current.file ? xml : p.xml }));
-    // A new, unsaved diagram is not one of the example files: convert it on its own.
-    if (!pathways.some((p) => p.file === current.file)) inputs.splice(0, inputs.length, { path: current.file, xml });
+    const inputs = getFiles().map((f) => ({ path: f.file, xml: f.file === current.file ? xml : f.xml }));
     return convert(inputs);
   }
 
   async function run(openTab) {
     const current = getCurrent();
+    if (!current) return;
     result = await compute();
     const own = fileBaseFor(current.file);
     select.innerHTML = '';
@@ -47,7 +46,7 @@ export function initConverterPanel({ getXml, getCurrent, pathways }) {
     select.value = result.modules.some((m) => m.fileBase === own) ? own : result.modules[0]?.fileBase ?? '';
     // A module with errors has no graph or JSON: open on the messages that say what is wrong.
     tab = openTab ?? (selected()?.ok === false ? 'messages' : 'graph');
-    panel.style.top = `${$('.toolbar').offsetHeight}px`;
+    panel.style.top = `${$('.chrome').offsetHeight}px`;
     panel.hidden = false;
     render();
   }
