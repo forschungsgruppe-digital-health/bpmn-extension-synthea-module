@@ -8,6 +8,7 @@ import {
   SelectEntry
 } from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
+import { describe } from './descriptions.js';
 
 const LOW_PRIORITY = 500;
 
@@ -134,6 +135,12 @@ const CONDITION_FIELDS_BY_TYPE = {
 // (see docs/implicit-rules.md). Deeper nesting still round-trips correctly
 // if hand-authored in the XML; the panel just won't build it for you.
 const MAX_NESTED_CONDITIONS = 3;
+
+// The description of a field for the panel; undefined (no text) when there is none.
+function translateDescription(translate, label) {
+  const text = describe(label);
+  return text ? translate(text) : undefined;
+}
 
 function getRelevantConditionFields(conditionType) {
   return CONDITION_FIELDS_BY_TYPE[conditionType] || CONDITION_FIELDS_BY_TYPE['Attribute'];
@@ -707,7 +714,7 @@ function makeTextEntry(type, prop, label, options = {}) {
       modeling.updateModdleProperties(element, config, { [prop]: parsed });
     };
 
-    return TextFieldEntry({ element, id, label: translate(label), getValue, setValue, debounce });
+    return TextFieldEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, debounce });
   };
 }
 
@@ -748,7 +755,7 @@ function StateTypeEntry(props) {
     ];
   };
 
-  return SelectEntry({ element, id, label: translate('State Type'), getValue, setValue, getOptions });
+  return SelectEntry({ element, id, label: translate('State Type'), description: translateDescription(translate, 'State Type'), getValue, setValue, getOptions });
 }
 
 // --- Probability entries --------------------------------------------------
@@ -802,7 +809,7 @@ function makeNestedConditionTextEntry(getCondition, ensureCondition, prop, label
       modeling.updateModdleProperties(element, condition, { [prop]: parsed });
     };
 
-    return TextFieldEntry({ element, id, label: translate(label), getValue, setValue, debounce });
+    return TextFieldEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, debounce });
   };
 }
 
@@ -828,7 +835,7 @@ function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, lab
       ...values.map((v) => (typeof v === 'string' ? { value: v, label: v } : v))
     ];
 
-    return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
+    return SelectEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, getOptions });
   };
 }
 
@@ -849,7 +856,7 @@ function makeNestedConditionCheckboxEntry(getCondition, ensureCondition, prop, l
       modeling.updateModdleProperties(element, condition, { [prop]: !!value });
     };
 
-    return CheckboxEntry({ element, id, label: translate(label), getValue, setValue });
+    return CheckboxEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue });
   };
 }
 
@@ -994,7 +1001,7 @@ function makeKindSelectEntry(type, kindProp, label, options, fieldsByKind, fallb
 
     const getOptions = () => options.map((o) => ({ value: o.value, label: translate(o.label) }));
 
-    return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
+    return SelectEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, getOptions });
   };
 }
 
@@ -1030,7 +1037,7 @@ function makeSelectEntry(type, prop, label, values, clears = {}) {
       ...values.map((v) => (typeof v === 'string' ? { value: v, label: v } : v))
     ];
 
-    return SelectEntry({ element, id, label: translate(label), getValue, setValue, getOptions });
+    return SelectEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, getOptions });
   };
 }
 
@@ -1081,7 +1088,7 @@ function makeCheckboxEntry(type, prop, label, clearedWhenOn = []) {
       modeling.updateModdleProperties(element, config, { [prop]: !!value, ...cleared });
     };
 
-    return CheckboxEntry({ element, id, label: translate(label), getValue, setValue });
+    return CheckboxEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue });
   };
 }
 

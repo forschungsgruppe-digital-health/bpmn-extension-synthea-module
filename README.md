@@ -88,6 +88,36 @@ comes with an explanation and what to do), with a download of the JSON. On the p
 (GitHub Pages, rebuilt on every merge into `dev`) the site root is the overview and the guides (from `docs/`, built by `docs-site/`), the modeler lives under `modeler/`, and the link **Converter result** opens the modules and
 the report that the converter made from `lung-cancer/` at that merge, with the commit they come from.
 
+### First steps in the modeler
+
+1. Start the modeler (`npm run demo`, `docker compose up`, or open the live preview) and pick the pathway **Anemia (submodule)** in the dropdown.
+
+   ![The modeler with the anemia pathway](docs/images/quickstart-1-modeler.png)
+
+2. Click the task **Diagnosis: Anemia**. In the properties panel on the right open the group **Synthea**. **State Type** says `ConditionOnset`, the section **Code** holds the code system, the code and the display text. Fields that are easy to get wrong have a short explanation under them.
+
+   ![The Synthea group in the properties panel](docs/images/quickstart-2-panel.png)
+
+3. Click a flow that leaves a gateway: the group **Probability** holds its probability. The numbers of all flows of one gateway must add up to 1.0. Change one and the green **No Issues** at the bottom and the **Converter** button tell you what is wrong, while you work.
+
+4. Click **Convert to Synthea**. The result is the Synthea module as a graph, as JSON and as a list of messages, each with an explanation and what to do.
+
+   ![The converter result as a graph](docs/images/quickstart-3-convert.png)
+
+### Your own small pathway
+
+1. Click **New**. You get a diagram with one start event. Draw `start event → task → end event`. The start event becomes the state `Initial` and the end event the state `Terminal`, whatever their labels say.
+2. Click the task. Under **Synthea** choose a **State Type**, for example `ConditionOnset`, and fill in the section **Code** (system, code, display text). The panel shows only the fields that fit the state type you chose.
+3. **Download .bpmn** and put the file into a folder of its own: one folder is one pathway, and the files in it may call each other.
+4. Convert the folder (`--strict` makes a missing required field an error):
+
+   ```bash
+   npm run bpmn2gmf -- my-pathway --strict --out-dir out/modules
+   ```
+
+   The JSON lands in `out/modules`. An error names the element and says what to do. A warning is a hint: here it would tell you that a `ConditionOnset` right after `Initial` gives every patient the condition at birth, which is fine for a submodule that another module calls.
+5. Run the modules in Synthea as described under [From BPMN to Synthea](#from-bpmn-to-synthea). Which element needs which fields is in the [modeling guide](docs/modeling-guide.md), from section 1 on.
+
 ### With Docker
 
 ```bash
