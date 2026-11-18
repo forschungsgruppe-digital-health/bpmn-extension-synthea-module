@@ -37,7 +37,7 @@ a deliberately broken one in `examples/invalid/`.
 
 ## Pull requests
 
-- Branch from `main`; keep PRs focused.
+- Branch from `dev`; keep PRs focused.
 - `npm run validate` must pass locally before opening the PR.
 - CI (`.github/workflows/validate.yml`) re-runs every check on the PR.
 - Record non-obvious architectural decisions as an ADR under `docs/adr/`.
@@ -79,7 +79,7 @@ Release-As: 1.0.0
 
 ## How a release happens
 
-1. You merge Conventional Commits into `main`.
+1. You merge Conventional Commits into `dev`.
 2. Release Please opens (and keeps updating) a **release PR** that bumps the
    version in `package.json` and `.release-please-manifest.json` and writes the
    `CHANGELOG.md`.
