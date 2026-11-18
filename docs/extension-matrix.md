@@ -1,6 +1,7 @@
 # Which `synthea:` type belongs on which BPMN element
 
-A matrix of the 20 `synthea:` types against the BPMN elements they can sit on
+A matrix of the `synthea:` types (all 28 of them, with their fields, are listed in
+[extension-api-types.md](extension-api-types.md)) against the BPMN elements they can sit on
 (`Condition` shares a row with `ConditionConfig`, which holds it). It answers two questions: **where does the properties panel
 offer a type**, and **where does the converter (`tools/bpmn2gmf`) actually read it**.
 
