@@ -92,3 +92,18 @@ run one without an explicit decision, see `AGENTS.md`.)
 
 Never hand-edit the version in `package.json` or the manifest — let Release
 Please own it.
+
+### Release setup and known limits
+
+- **Branch:** Release Please runs on a push to `dev` (`.github/workflows/release-please.yml`)
+  and opens the release PR against `dev`. `main` carries no release workflow.
+- **Tags:** `v<version>` (`include-component-in-tag: false`). `0.1.0` was never tagged, so the
+  first release (`0.2.0`) lists every commit since the start and its compare link has no base.
+- **Checks on the release PR:** the PR is opened by `github-actions[bot]` with `GITHUB_TOKEN`, so
+  GitHub holds its `validate` run as *action required*. Approve the run in the PR before merging,
+  or let an admin add a token secret (a fine-grained PAT or a GitHub App token with contents and
+  pull-request write access) and pass it as `token:` to the action; runs then start by themselves.
+- **Versions kept in sync:** `package.json`, `package-lock.json`, the manifest and the
+  `extra-files` in `release-please-config.json` (lint plugin, descriptor, XSD). Generated files
+  must not repeat the version, or their drift check fails on the release PR.
+
