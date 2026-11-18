@@ -107,7 +107,7 @@ the report that the converter made from `lung-cancer/` at that merge, with the c
 
 ### Your own small pathway
 
-1. Click **New**. You get a diagram with one start event. Draw `start event → task → end event`. The start event becomes the state `Initial` and the end event the state `Terminal`, whatever their labels say.
+1. Click **New**. You get a start event joined to an end event; drag a task from the palette onto the arrow between them. The start event is the state `Initial` and the end event the state `Terminal`, whatever their labels say.
 2. Click the task. Under **Synthea** choose a **State Type**, for example `ConditionOnset`, and fill in the section **Code** (system, code, display text). The panel shows only the fields that fit the state type you chose.
 3. **Save .bpmn** and put the file into a folder of its own: one folder is one pathway, and the files in it may call each other.
 4. Convert the folder (`--strict` makes a missing required field an error):

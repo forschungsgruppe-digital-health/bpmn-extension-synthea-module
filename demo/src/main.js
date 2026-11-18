@@ -15,6 +15,7 @@ import lintModule from 'bpmn-js-bpmnlint';
 
 import { initConverterPanel } from './converter-panel.js';
 import { initLiveCheck } from './live-check.js';
+import { NEW_DIAGRAM_XML } from './new-diagram.js';
 // Generated from .bpmnlintrc and the lint plugin by tools/pack-lint-config.mjs (npm run dev / build).
 import bpmnlintConfig from './generated/lint-config.js';
 import syntheaModule from '../../extension/src/index.js';
@@ -329,9 +330,8 @@ function newDiagram() {
     while (used.has(n === 1 ? 'new-diagram.bpmn' : `new-diagram-${n}.bpmn`)) n += 1;
     const file = n === 1 ? 'new-diagram.bpmn' : `new-diagram-${n}.bpmn`;
     try {
-      await modeler.createDiagram();
-      const { xml } = await modeler.saveXML();
-      const entry = { file, xml, dirty: true };
+      const entry = { file, xml: NEW_DIAGRAM_XML, dirty: true };
+      await modeler.importXML(entry.xml);
       files.push(entry);
       current = entry;
       renderChrome();

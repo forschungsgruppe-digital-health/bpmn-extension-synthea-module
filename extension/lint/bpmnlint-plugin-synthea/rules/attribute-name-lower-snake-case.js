@@ -14,12 +14,15 @@ const { is } = require('../lib/utils');
  * rule should flag as a conflict.
  */
 
-const LOWER_SNAKE_CASE = /^[a-z][a-z0-9_]*$/;
+// The shape is in extension/model/synthea.values.json (`patterns`), which the properties panel reads as well.
+const { patterns } = require('../../../model/synthea.values.json');
+
+const LOWER_SNAKE_CASE = new RegExp(patterns.attributeName.pattern);
 
 // Attributes that Synthea itself defines (not ours to rename) and that don't
 // follow the convention. Conditions read them, so the name has to match
 // Synthea's exactly. Verified against upstream modules (lung_cancer_probabilities.json).
-const SYNTHEA_BUILT_IN_ATTRIBUTES = new Set(['quit smoking age']);
+const SYNTHEA_BUILT_IN_ATTRIBUTES = new Set(patterns.attributeName.builtIn);
 
 const ATTRIBUTE_PROPERTIES_BY_TYPE = [
   { type: 'synthea:SetAttributeConfig', property: 'attribute' },

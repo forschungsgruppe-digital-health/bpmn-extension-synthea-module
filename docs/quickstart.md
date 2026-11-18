@@ -26,13 +26,11 @@ Your changes stay in your browser, and the modeler restores your files when you 
 
 ## 4. Draw a tiny pathway
 
-Press **New** in the toolbar for an empty diagram. Then:
+Press **New** in the toolbar. You get the smallest complete module: a start event joined to an end event. The start event is the state `Initial`, the end event the state `Terminal`; there is nothing to configure, and the converter reports no problem. Now put a state in between:
 
-1. The empty diagram already contains a start event. It becomes the `Initial` state; there is nothing to configure.
-2. Click the start event. Next to it a small menu appears; click its double circle (intermediate event). The new event is placed after the start event and connected to it. Click the wrench in the same menu (**Change element**) and choose **Timer intermediate catch event**.
-3. With the timer selected, open the group **Synthea**, then **Delay** in the properties panel: choose the shape **EXACT**, enter the value `3` and the unit `years`.
-4. In the small menu next to the timer click the bold circle (end event). It is appended and connected as well, so all three elements are joined by arrows.
-5. Press **Convert to Synthea**. The result has three states: `Initial`, your delay (3 years) and `Terminal`. On the JSON tab you see them as the file Synthea runs.
+1. Drag the double circle (intermediate event) from the palette on the left onto the arrow between the two events. It is inserted into the flow. Click the wrench next to it (**Change element**) and choose **Timer intermediate catch event**.
+2. With the timer selected, open the group **Synthea**, then **Delay** in the properties panel: choose the shape **EXACT**, enter the value `3` and the unit `years`.
+3. Press **Convert to Synthea**. The result has three states: `Initial`, your delay (3 years) and `Terminal`. On the JSON tab you see them as the file Synthea runs.
 
 This is the smallest working module. More steps (conditions, branches, visits) follow the same pattern: one BPMN element, one state type, a few fields. The [modeling guide](modeling-guide.md) shows each of them.
 

@@ -14,12 +14,14 @@ const { nearestReportableId, isSet } = require('../lib/values');
  * condition (Condition), and the SNOMED codes of reactions, instructions, supplies and imaging
  * series (body site; a modality is a short DICOM code, a SOP class an object identifier).
  */
-const SYSTEMS = {
-  'http://snomed.info/sct': { name: 'SNOMED CT', pattern: /^\d{6,18}$/, shape: '6 to 18 digits' },
-  'http://loinc.org': { name: 'LOINC', pattern: /^\d{1,7}-\d$/, shape: 'digits, a hyphen and a check digit, e.g. 8480-6' },
-  'http://www.nlm.nih.gov/research/umls/rxnorm': { name: 'RxNorm', pattern: /^\d+$/, shape: 'digits only' },
-  'http://hl7.org/fhir/sid/cvx': { name: 'CVX', pattern: /^\d+$/, shape: 'digits only' }
-};
+// The shapes are in extension/model/synthea.values.json (`patterns`), which the properties panel reads as well.
+const { patterns } = require('../../../model/synthea.values.json');
+
+const SYSTEMS = Object.fromEntries(
+  Object.entries(patterns.codeSystems).map(([ uri, { name, pattern, shape } ]) => [ uri, { name, pattern: new RegExp(pattern), shape } ])
+);
+const MODALITY = patterns.dicomModality;
+const SOP_CLASS = patterns.sopClass;
 
 const SNOMED = SYSTEMS['http://snomed.info/sct'];
 
@@ -65,12 +67,12 @@ module.exports = function() {
     if (is(node, 'synthea:ImagingStudySeries')) {
       test(node.bodySiteCode, SNOMED, 'The body site code');
 
-      if (isSet(node.modalityCode) && !/^[A-Z]{2,4}$/.test(node.modalityCode)) {
-        reporter.report(id, `The modality code "${node.modalityCode}" does not look like a DICOM modality (2 to 4 capital letters, e.g. DX, MR).`);
+      if (isSet(node.modalityCode) && !new RegExp(MODALITY.pattern).test(node.modalityCode)) {
+        reporter.report(id, `The modality code "${node.modalityCode}" does not look like a DICOM modality (${MODALITY.shape}).`);
       }
 
-      if (isSet(node.sopClassCode) && !/^\d+(\.\d+)+$/.test(node.sopClassCode)) {
-        reporter.report(id, `The SOP class "${node.sopClassCode}" does not look like an object identifier (digits and dots, e.g. 1.2.840.10008.5.1.4.1.1.1.1).`);
+      if (isSet(node.sopClassCode) && !new RegExp(SOP_CLASS.pattern).test(node.sopClassCode)) {
+        reporter.report(id, `The SOP class "${node.sopClassCode}" does not look like an object identifier (${SOP_CLASS.shape}).`);
       }
     }
   }

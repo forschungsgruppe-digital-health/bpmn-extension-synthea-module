@@ -8,7 +8,7 @@ The package is `bpmn-js-synthea-extension`. Its entry points (the `exports` in `
 
 | Import | What it is |
 |---|---|
-| `bpmn-js-synthea-extension` | The bpmn-js editor module (properties panel groups, replace menu filter, modeling rules). Goes into `additionalModules`. |
+| `bpmn-js-synthea-extension` | The bpmn-js editor module (properties panel groups, replace menu and palette filter, `Initial` default for start events, modeling rules). Goes into `additionalModules`. |
 | `bpmn-js-synthea-extension/model` | The moddle descriptor (`extension/model/synthea.json`). Goes into `moddleExtensions` under the key `synthea`. |
 | `bpmn-js-synthea-extension/xsd` | The XML schema for the structure of the extension data (`extension/model/synthea.xsd`). |
 | `bpmn-js-synthea-extension/converter` | The converter as a function (`tools/bpmn2gmf/convert.mjs`). The command line is the binary `bpmn2gmf`. |

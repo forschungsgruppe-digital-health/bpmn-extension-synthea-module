@@ -12,8 +12,10 @@ import {
   CheckboxEntry,
   SelectEntry
 } from '@bpmn-io/properties-panel';
+import * as panelApi from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
 import { describe } from './descriptions.js';
+import { numberError, rangeError, codeError, patternError, attributeNameError } from './fieldValidation.js';
 
 const LOW_PRIORITY = 500;
 
@@ -183,6 +185,23 @@ function stateTypeValuesFor(element) {
   // end event, call activity, gateway, timer event); a task is none of them.
   if (is(element, 'bpmn:Task')) return STATE_TYPE_VALUES.filter((v) => !TASK_EXCLUDED_STATE_TYPES.includes(v));
   return STATE_TYPE_VALUES;
+}
+
+/**
+ * The state type the converter infers for an element that names none (tools/bpmn2gmf/resolve.mjs,
+ * `infer`): a start event is `Initial`, an end event `Terminal`, a call activity and a sub-process
+ * `CallSubmodule`, a timer event `Delay`. The panel shows it as the value, so nothing has to be chosen by hand.
+ *
+ * @param {object} element a diagram-js element
+ * @returns {string|undefined} the state type, undefined when the element has no fixed default
+ */
+export function defaultStateTypeFor(element) {
+  if (is(element, 'bpmn:StartEvent')) return 'Initial';
+  if (is(element, 'bpmn:EndEvent')) return 'Terminal';
+  if (is(element, 'bpmn:CallActivity') || is(element, 'bpmn:SubProcess')) return 'CallSubmodule';
+  if (is(element, 'bpmn:IntermediateCatchEvent')
+    && (getBusinessObject(element).get('eventDefinitions') || []).some((d) => is(d, 'bpmn:TimerEventDefinition'))) return 'Delay';
+  return undefined;
 }
 
 const STATE_TYPE_VALUES = [
@@ -705,9 +724,78 @@ function ReferencedByModeEntry(props) {
   return SelectEntry({ element, id, label: translate(death ? 'Cause of death by' : 'Names the ended entity by'), getValue, setValue, getOptions });
 }
 
+// --- field validation ---------------------------------------------------
+// A text field with `options.parse` holds a number; text that is none is marked and not stored (it
+// would become NaN). `options.check(value, config)` adds a message for an entry that is stored but
+// looks wrong (a probability above 1, a code of the wrong shape); see fieldValidation.js.
+
+const isIntegerParser = (options) => options.parse === parseInt;
+
+function isNotStorable(options, value) {
+  return !!options.parse && value !== '' && !!numberError(value, { integer: isIntegerParser(options) });
+}
+
+function fieldValidator(options, getConfig, element) {
+  return (value) => {
+    if (options.parse) {
+      const notNumber = numberError(value, { integer: isIntegerParser(options) });
+      if (notNumber) return notNumber;
+    }
+    if (options.required && options.required(element) && (value === undefined || value === null || String(value).trim() === '')) {
+      return soft(`Required for the state type ${stateTypeOf(element)}.`);
+    }
+    return soft(options.check && options.check(value, getConfig(), element));
+  };
+}
+
+// Newer versions of the panel (diagnostics) show a warning in orange and still keep the value; older ones
+// only know a message, which is shown as an error. The value is stored either way.
+const HAS_SEVERITY = typeof panelApi.useDiagnostics === 'function';
+const soft = (message) => (message ? (HAS_SEVERITY ? { severity: 'warning', message } : message) : null);
+
+// The panel runs the check again whenever `validate` is a new function, which would replace the message
+// of what was just typed (and not stored) by the one of the stored value. So the same function is handed
+// out for an element every time; it reads the current configuration when it is called.
+function stableValidator(cache, element, options, getConfig) {
+  // `dependsOn` names what else the check reads (the code system of a code); when that changes, the
+  // check is a new function on purpose, so the field is checked again.
+  const key = `${options.required ? stateTypeOf(element) : ''}|${options.dependsOn ? options.dependsOn(getConfig()) : ''}`;
+  const cached = cache.get(element);
+  if (cached && cached.key === key) return cached.validate;
+  const validate = fieldValidator(options, getConfig, element);
+  cache.set(element, { key, validate });
+  return validate;
+}
+
+// A field the converter needs for these state types (tools/bpmn2gmf/required-fields.mjs); it is marked
+// while it is empty. What is left to the converter and the lint: choices between fields, the lists
+// (series, supplies, report observations) and the encounter, whose requirements depend on the other
+// states of the same visit.
+const requiredFor = (...types) => (element) => types.includes(stateTypeOf(element));
+const CODE_REQUIRED_TYPES = [
+  'ConditionOnset', 'AllergyOnset', 'MedicationOrder', 'CarePlanStart', 'Procedure', 'Vaccine',
+  'Observation', 'MultiObservation', 'DiagnosticReport', 'Device', 'ImagingStudy'
+];
+
+// The code system of the owner of a code field (a state, an encounter, a condition).
+const codeOf = (systemProp) => (value, config) => codeError(value, config && config.get(systemProp));
+const systemOf = (systemProp) => (config) => (config && config.get(systemProp)) || '';
+
+// The code of a state needs its system, the code and the display text together (lint SYN-31).
+const STATE_CODE_FIELDS = ['codeSystem', 'code', 'codeDisplay'];
+const codeCompleteness = (value, config) => (
+  !value && config && STATE_CODE_FIELDS.some((field) => config.get(field))
+    ? 'A code needs its system, the code and the display text together.'
+    : null
+);
+const stateCodeKey = (config) => STATE_CODE_FIELDS.map((field) => (config && config.get(field)) || '').join('|');
+const snomedCode = (value) => codeError(value, 'http://snomed.info/sct');
+const probability = (value) => rangeError(value, { min: 0, max: 1 });
+
 // --- generic flat-extension entry factories -----------------------------
 
 function makeTextEntry(type, prop, label, options = {}) {
+  const validators = new WeakMap();
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -721,13 +809,16 @@ function makeTextEntry(type, prop, label, options = {}) {
       return value === undefined || value === null ? '' : String(value);
     };
 
+    const validate = stableValidator(validators, element, options, () => getExtension(element, type));
+
     const setValue = (value) => {
+      if (isNotStorable(options, value)) return; // not a number in a number field: the message shows, nothing is stored
       const config = ensureExtension(element, type, bpmnFactory, modeling, options.defaults);
       const parsed = options.parse && value !== '' ? options.parse(value) : (value === '' ? undefined : value);
       modeling.updateModdleProperties(element, config, { [prop]: parsed });
     };
 
-    return TextFieldEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, debounce });
+    return TextFieldEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, validate, debounce });
   };
 }
 
@@ -740,13 +831,16 @@ function StateTypeEntry(props) {
   const bpmnFactory = useService('bpmnFactory');
   const translate = useService('translate');
 
+  const fallback = defaultStateTypeFor(element);
+
   const getValue = () => {
     const config = getExtension(element, STATE_TYPE);
-    return config ? config.get('stateType') || '' : '';
+    return (config ? config.get('stateType') : '') || fallback || '';
   };
 
   const setValue = (value) => {
-    if (!value) {
+    // The default needs no entry of its own, except on a start event, which carries it explicitly.
+    if (!value || (value === fallback && !is(element, 'bpmn:StartEvent'))) {
       const config = getExtension(element, STATE_TYPE);
       if (config) {
         modeling.updateModdleProperties(element, config, { stateType: undefined });
@@ -761,9 +855,10 @@ function StateTypeEntry(props) {
     const values = stateTypeValuesFor(element);
     const current = getValue();
 
-    // a value that is already set stays selectable, even if the converter would reject it
+    // a value that is already set stays selectable, even if the converter would reject it;
+    // an element with a default has no empty choice: the default is what applies
     return [
-      { value: '', label: translate('<none — falls back to inferred signals>') },
+      ...(fallback ? [] : [{ value: '', label: translate('<none — falls back to inferred signals>') }]),
       ...(current && !values.includes(current) ? [current] : []).concat(values).map((v) => ({ value: v, label: v }))
     ];
   };
@@ -777,9 +872,9 @@ const ProbabilityKindEntry = makeKindSelectEntry(PROBABILITY_TYPE, 'probabilityK
   { value: 'FIXED', label: 'Fixed number' },
   { value: 'ATTRIBUTE', label: 'Value of a patient attribute' }
 ], PROBABILITY_KIND_FIELDS, 'FIXED');
-const ProbabilityEntry = makeTextEntry(PROBABILITY_TYPE, 'probability', 'Probability (0.0 - 1.0)', { parse: parseFloat });
-const ProbabilityAttributeEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityAttribute', 'Attribute that holds the probability');
-const ProbabilityDefaultEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityDefault', 'Default probability (used when the attribute is not set; required)', { parse: parseFloat });
+const ProbabilityEntry = makeTextEntry(PROBABILITY_TYPE, 'probability', 'Probability (0.0 - 1.0)', { parse: parseFloat, check: probability });
+const ProbabilityAttributeEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityAttribute', 'Attribute that holds the probability', { check: attributeNameError });
+const ProbabilityDefaultEntry = makeTextEntry(PROBABILITY_TYPE, 'probabilityDefault', 'Default probability (used when the attribute is not set; required)', { parse: parseFloat, check: probability });
 
 // --- Flow condition entries (synthea:ConditionConfig on sequence flows,
 //     for conditional_transition) -----------------------------------------
@@ -803,6 +898,7 @@ function ensureFlowCondition(element, bpmnFactory, modeling) {
 }
 
 function makeNestedConditionTextEntry(getCondition, ensureCondition, prop, label, options = {}) {
+  const validators = new WeakMap();
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -816,17 +912,21 @@ function makeNestedConditionTextEntry(getCondition, ensureCondition, prop, label
       return value === undefined || value === null ? '' : String(value);
     };
 
+    const validate = stableValidator(validators, element, options, () => getCondition(element));
+
     const setValue = (value) => {
+      if (isNotStorable(options, value)) return;
       const condition = ensureCondition(element, bpmnFactory, modeling);
       const parsed = options.parse && value !== '' ? options.parse(value) : (value === '' ? undefined : value);
       modeling.updateModdleProperties(element, condition, { [prop]: parsed });
     };
 
-    return TextFieldEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, debounce });
+    return TextFieldEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, validate, debounce });
   };
 }
 
-function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, label, values, noneLabel = '<none — falls back to inferred signals>') {
+function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, label, values, noneLabel = '<none — falls back to inferred signals>', options = {}) {
+  const validators = new WeakMap();
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -848,7 +948,9 @@ function makeNestedConditionSelectEntry(getCondition, ensureCondition, prop, lab
       ...values.map((v) => (typeof v === 'string' ? { value: v, label: v } : v))
     ];
 
-    return SelectEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, getOptions });
+    const validate = options.required ? stableValidator(validators, element, options, () => getCondition(element)) : undefined;
+
+    return SelectEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, getOptions, validate });
   };
 }
 
@@ -879,7 +981,7 @@ function makeNestedConditionCheckboxEntry(getCondition, ensureCondition, prop, l
 // combinator slots don't need their own hand-written field list.
 function buildConditionFieldEntries(getCondition, ensureCondition) {
   return {
-    attribute: makeNestedConditionTextEntry(getCondition, ensureCondition, 'attribute', 'Attribute name'),
+    attribute: makeNestedConditionTextEntry(getCondition, ensureCondition, 'attribute', 'Attribute name', { check: attributeNameError }),
     operator: makeNestedConditionTextEntry(getCondition, ensureCondition, 'operator', 'Operator (e.g. <=, ==, >)'),
     value: makeNestedConditionTextEntry(getCondition, ensureCondition, 'value', 'Value'),
     gender: makeNestedConditionTextEntry(getCondition, ensureCondition, 'gender', 'Gender (M/F)'),
@@ -893,7 +995,7 @@ function buildConditionFieldEntries(getCondition, ensureCondition) {
     vitalSign: makeNestedConditionTextEntry(getCondition, ensureCondition, 'vitalSign', 'Vital sign name'),
     referencedAttribute: makeNestedConditionTextEntry(getCondition, ensureCondition, 'referencedAttribute', 'Referenced attribute (entity to check)'),
     codeSystem: makeNestedConditionSelectEntry(getCondition, ensureCondition, 'codeSystem', 'Code system (alternative to attribute)', CODE_SYSTEM_OPTIONS, '<none>'),
-    code: makeNestedConditionTextEntry(getCondition, ensureCondition, 'code', 'Code (e.g. 20570-8)'),
+    code: makeNestedConditionTextEntry(getCondition, ensureCondition, 'code', 'Code (e.g. 20570-8)', { check: codeOf('codeSystem'), dependsOn: systemOf('codeSystem') }),
     codeDisplay: makeNestedConditionTextEntry(getCondition, ensureCondition, 'codeDisplay', 'Code display text (required with a code)'),
     priorStateName: makeNestedConditionTextEntry(getCondition, ensureCondition, 'priorStateName', 'Prior state name'),
     since: makeNestedConditionTextEntry(getCondition, ensureCondition, 'since', 'Since (State_Name, optional)'),
@@ -1020,7 +1122,8 @@ function makeKindSelectEntry(type, kindProp, label, options, fieldsByKind, fallb
 
 // `clears` maps a chosen value to the fields of the same config that no longer apply and are
 // cleared with it (a high value on an exact value, for example).
-function makeSelectEntry(type, prop, label, values, clears = {}) {
+function makeSelectEntry(type, prop, label, values, clears = {}, options = {}) {
+  const validators = new WeakMap();
   return function Entry(props) {
     const { element, id } = props;
     const modeling = useService('modeling');
@@ -1050,13 +1153,15 @@ function makeSelectEntry(type, prop, label, values, clears = {}) {
       ...values.map((v) => (typeof v === 'string' ? { value: v, label: v } : v))
     ];
 
-    return SelectEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, getOptions });
+    const validate = options.check || options.required ? stableValidator(validators, element, options, () => getExtension(element, type)) : undefined;
+
+    return SelectEntry({ element, id, label: translate(label), description: translateDescription(translate, label), getValue, setValue, getOptions, validate });
   };
 }
 
-const DelayShapeEntry = makeSelectEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES, { EXACT: ['delayValueHigh'], '': ['delayValueHigh'] });
-const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value (exact value, or range low)');
-const DelayValueHighEntry = makeTextEntry(DELAY_TYPE, 'delayValueHigh', 'Delay value, high (range high, only for RANGE)');
+const DelayShapeEntry = makeSelectEntry(DELAY_TYPE, 'delayShape', 'Delay shape', DELAY_SHAPE_VALUES, { EXACT: ['delayValueHigh'], '': ['delayValueHigh'] }, { required: requiredFor('Delay') });
+const DelayValueEntry = makeTextEntry(DELAY_TYPE, 'delayValue', 'Delay value (exact value, or range low)', { check: (v) => numberError(v), required: requiredFor('Delay') });
+const DelayValueHighEntry = makeTextEntry(DELAY_TYPE, 'delayValueHigh', 'Delay value, high (range high, only for RANGE)', { check: (v, config) => (!v && config && config.get('delayShape') === 'RANGE' ? 'A range needs its high value.' : numberError(v)), dependsOn: (config) => (config && config.get('delayShape')) || '' });
 const DelayUnitEntry = makeTextEntry(DELAY_TYPE, 'delayUnit', 'Delay unit');
 
 function getGuardCondition(element) {
@@ -1077,7 +1182,7 @@ function ensureGuardCondition(element, bpmnFactory, modeling) {
   return allow;
 }
 
-const GuardConditionTypeEntry = makeNestedConditionSelectEntry(getGuardCondition, ensureGuardCondition, 'conditionType', 'Condition type', CONDITION_TYPE_VALUES);
+const GuardConditionTypeEntry = makeNestedConditionSelectEntry(getGuardCondition, ensureGuardCondition, 'conditionType', 'Condition type', CONDITION_TYPE_VALUES, undefined, { required: requiredFor('Guard') });
 const GuardConditionNegateEntry = makeNestedConditionCheckboxEntry(getGuardCondition, ensureGuardCondition, 'negate', 'Negate (Not)');
 
 const GUARD_CONDITION_FIELD_ENTRIES = buildConditionFieldEntries(getGuardCondition, ensureGuardCondition);
@@ -1105,7 +1210,7 @@ function makeCheckboxEntry(type, prop, label, clearedWhenOn = []) {
   };
 }
 
-const SubmoduleEntry = makeTextEntry(SUBMODULE_TYPE, 'submodule', 'Submodule reference');
+const SubmoduleEntry = makeTextEntry(SUBMODULE_TYPE, 'submodule', 'Submodule reference', { required: requiredFor('CallSubmodule') });
 const EncounterContextEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'requiresEncounterContext', 'Encounter context');
 const EncounterIdEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterId', 'Encounter ID (groups states into one encounter)');
 const EncounterWellnessEntry = makeCheckboxEntry(ENCOUNTER_CONTEXT_TYPE, 'wellness', 'Wellness encounter',
@@ -1116,60 +1221,60 @@ const EncounterDischargeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'di
 const EncounterClassEntry = makeSelectEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterClass', 'Encounter class (required for non-wellness encounters)', ENCOUNTER_CLASS_VALUES);
 const EncounterReasonEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'reason', 'Reason (attribute name or State_Name)');
 const EncounterReferenceEntry = makeTextEntry(ENCOUNTER_REFERENCE_TYPE, 'targetEncounter', 'Encounter reference');
-const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name');
-const CounterActionEntry = makeSelectEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES);
-const CodeSystemEntry = makeSelectEntry(STATE_TYPE, 'codeSystem', 'Code system', STATE_CODE_SYSTEM_OPTIONS);
-const CodeValueEntry = makeTextEntry(STATE_TYPE, 'code', 'Code');
-const CodeDisplayEntry = makeTextEntry(STATE_TYPE, 'codeDisplay', 'Display text');
+const CounterAttributeEntry = makeTextEntry(COUNTER_TYPE, 'attribute', 'Attribute name', { check: attributeNameError, required: requiredFor('Counter') });
+const CounterActionEntry = makeSelectEntry(COUNTER_TYPE, 'action', 'Action', COUNTER_ACTION_VALUES, {}, { required: requiredFor('Counter') });
+const CodeSystemEntry = makeSelectEntry(STATE_TYPE, 'codeSystem', 'Code system', STATE_CODE_SYSTEM_OPTIONS, {}, { check: codeCompleteness, dependsOn: stateCodeKey, required: requiredFor(...CODE_REQUIRED_TYPES) });
+const CodeValueEntry = makeTextEntry(STATE_TYPE, 'code', 'Code', { check: (v, config) => codeOf('codeSystem')(v, config) || codeCompleteness(v, config), dependsOn: stateCodeKey, required: requiredFor(...CODE_REQUIRED_TYPES) });
+const CodeDisplayEntry = makeTextEntry(STATE_TYPE, 'codeDisplay', 'Display text', { check: codeCompleteness, dependsOn: stateCodeKey, required: requiredFor(...CODE_REQUIRED_TYPES) });
 const EncounterCodeSystemEntry = makeSelectEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeSystem', 'Encounter code system (e.g. SNOMED CT)', CODE_SYSTEM_OPTIONS);
-const EncounterCodeEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCode', 'Encounter code (e.g. 185347001)');
+const EncounterCodeEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCode', 'Encounter code (e.g. 185347001)', { check: codeOf('encounterCodeSystem'), dependsOn: systemOf('encounterCodeSystem') });
 const EncounterCodeDisplayEntry = makeTextEntry(ENCOUNTER_CONTEXT_TYPE, 'encounterCodeDisplay', 'Encounter code display text');
 
-const SymptomNameEntry = makeTextEntry(SYMPTOM_TYPE, 'symptom', 'Symptom name (e.g. Cough)');
-const ObservationCategoryEntry = makeSelectEntry(OBSERVATION_TYPE, 'category', 'Observation category', OBSERVATION_CATEGORY_VALUES);
-const ValueShapeEntry = makeSelectEntry(VALUE_TYPE, 'valueShape', 'Value: exact or range', ['EXACT', 'RANGE'], { EXACT: ['valueHigh'], '': ['valueHigh'] });
-const ValueEntry = makeTextEntry(VALUE_TYPE, 'value', 'Value (EXACT) / lowest value (RANGE)', { parse: parseFloat });
+const SymptomNameEntry = makeTextEntry(SYMPTOM_TYPE, 'symptom', 'Symptom name (e.g. Cough)', { required: requiredFor('Symptom') });
+const ObservationCategoryEntry = makeSelectEntry(OBSERVATION_TYPE, 'category', 'Observation category', OBSERVATION_CATEGORY_VALUES, {}, { required: requiredFor('Observation', 'MultiObservation') });
+const ValueShapeEntry = makeSelectEntry(VALUE_TYPE, 'valueShape', 'Value: exact or range', ['EXACT', 'RANGE'], { EXACT: ['valueHigh'], '': ['valueHigh'] }, { required: requiredFor('Symptom', 'VitalSign') });
+const ValueEntry = makeTextEntry(VALUE_TYPE, 'value', 'Value (EXACT) / lowest value (RANGE)', { parse: parseFloat, required: requiredFor('Symptom', 'VitalSign') });
 const ValueHighEntry = makeTextEntry(VALUE_TYPE, 'valueHigh', 'Highest value (RANGE only)', { parse: parseFloat });
 const ValueDecimalsEntry = makeTextEntry(VALUE_TYPE, 'decimals', 'Decimals (optional)', { parse: parseInt });
-const ValueUnitObservationEntry = makeTextEntry(VALUE_TYPE, 'unit', 'Unit (e.g. {score}, mg/dL)');
+const ValueUnitObservationEntry = makeTextEntry(VALUE_TYPE, 'unit', 'Unit (e.g. {score}, mg/dL)', { required: requiredFor('VitalSign') });
 const ValueUnitTimeEntry = makeTextEntry(VALUE_TYPE, 'unit', 'Unit of time (years, months, weeks, days, …)');
 
-const SeriesBodySiteCodeEntry = makeTextEntry(SERIES_TYPE, 'bodySiteCode', 'Body site code (SNOMED CT)');
+const SeriesBodySiteCodeEntry = makeTextEntry(SERIES_TYPE, 'bodySiteCode', 'Body site code (SNOMED CT)', { check: snomedCode });
 const SeriesBodySiteDisplayEntry = makeTextEntry(SERIES_TYPE, 'bodySiteDisplay', 'Body site display text');
-const SeriesModalityCodeEntry = makeTextEntry(SERIES_TYPE, 'modalityCode', 'Modality code (DICOM, e.g. CT)');
+const SeriesModalityCodeEntry = makeTextEntry(SERIES_TYPE, 'modalityCode', 'Modality code (DICOM, e.g. CT)', { check: (v) => patternError(v, 'dicomModality') });
 const SeriesModalityDisplayEntry = makeTextEntry(SERIES_TYPE, 'modalityDisplay', 'Modality display text');
 const SeriesInstanceTitleEntry = makeTextEntry(SERIES_TYPE, 'instanceTitle', 'Image title');
-const SeriesSopClassCodeEntry = makeTextEntry(SERIES_TYPE, 'sopClassCode', 'SOP class code (DICOM)');
+const SeriesSopClassCodeEntry = makeTextEntry(SERIES_TYPE, 'sopClassCode', 'SOP class code (DICOM)', { check: (v) => patternError(v, 'sopClass') });
 const SeriesSopClassDisplayEntry = makeTextEntry(SERIES_TYPE, 'sopClassDisplay', 'SOP class display text');
 const SeriesMinInstancesEntry = makeTextEntry(SERIES_TYPE, 'minInstances', 'Min. number of instances (optional)', { parse: parseInt });
 const MedicationAdministrationEntry = makeCheckboxEntry(MEDICATION_TYPE, 'administration', 'Administered during the encounter (inpatient), not only prescribed');
 const MedicationChronicEntry = makeCheckboxEntry(MEDICATION_TYPE, 'chronic', 'Chronic medication (Synthea plans wellness visits more often)');
-const PrescriptionRefillsEntry = makeTextEntry(PRESCRIPTION_TYPE, 'refills', 'Refills (default 0)', { parse: parseInt });
+const PrescriptionRefillsEntry = makeTextEntry(PRESCRIPTION_TYPE, 'refills', 'Refills (default 0)', { parse: parseInt, check: (v) => rangeError(v, { min: 0, integer: true }) });
 const PrescriptionAsNeededEntry = makeCheckboxEntry(PRESCRIPTION_TYPE, 'asNeeded', 'As needed (not on a schedule)');
-const PrescriptionDosageAmountEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageAmount', 'Dosage: doses at a time', { parse: parseFloat });
-const PrescriptionDosageFrequencyEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageFrequency', 'Dosage: times per period', { parse: parseFloat });
-const PrescriptionDosagePeriodEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosagePeriod', 'Dosage: length of a period', { parse: parseFloat });
+const PrescriptionDosageAmountEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageAmount', 'Dosage: doses at a time', { parse: parseFloat, check: (v) => rangeError(v, { above: 0 }) });
+const PrescriptionDosageFrequencyEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageFrequency', 'Dosage: times per period', { parse: parseFloat, check: (v) => rangeError(v, { above: 0 }) });
+const PrescriptionDosagePeriodEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosagePeriod', 'Dosage: length of a period', { parse: parseFloat, check: (v) => rangeError(v, { above: 0 }) });
 const PrescriptionDosageUnitEntry = makeTextEntry(PRESCRIPTION_TYPE, 'dosageUnit', 'Dosage: unit of the period (e.g. days)');
 const PrescriptionDurationQuantityEntry = makeTextEntry(PRESCRIPTION_TYPE, 'durationQuantity', 'Duration: how long', { parse: parseFloat });
 const PrescriptionDurationUnitEntry = makeTextEntry(PRESCRIPTION_TYPE, 'durationUnit', 'Duration: unit (e.g. weeks)');
-const PrescriptionInstructionCodeEntry = makeTextEntry(PRESCRIPTION_INSTRUCTION_TYPE, 'code', 'SNOMED code of the instruction');
+const PrescriptionInstructionCodeEntry = makeTextEntry(PRESCRIPTION_INSTRUCTION_TYPE, 'code', 'SNOMED code of the instruction', { check: snomedCode });
 const PrescriptionInstructionDisplayEntry = makeTextEntry(PRESCRIPTION_INSTRUCTION_TYPE, 'codeDisplay', 'Display text of the instruction');
 const ActivityCodeEntry = makeTextEntry(ACTIVITY_TYPE, 'code', 'SNOMED code of the activity');
 const ActivityDisplayEntry = makeTextEntry(ACTIVITY_TYPE, 'codeDisplay', 'Display text of the activity');
 const SeriesMaxInstancesEntry = makeTextEntry(SERIES_TYPE, 'maxInstances', 'Max. number of instances (optional)', { parse: parseInt });
 
-const VitalSignNameEntry = makeTextEntry(VITAL_SIGN_TYPE, 'vitalSign', 'Vital sign (a Synthea vital sign, e.g. Systolic Blood Pressure)');
+const VitalSignNameEntry = makeTextEntry(VITAL_SIGN_TYPE, 'vitalSign', 'Vital sign (a Synthea vital sign, e.g. Systolic Blood Pressure)', { required: requiredFor('VitalSign') });
 const SupplyQuantityEntry = makeTextEntry(SUPPLY_TYPE, 'quantity', 'Quantity', { parse: parseInt });
-const SupplyCodeEntry = makeTextEntry(SUPPLY_TYPE, 'code', 'SNOMED code of the supply');
+const SupplyCodeEntry = makeTextEntry(SUPPLY_TYPE, 'code', 'SNOMED code of the supply', { check: snomedCode });
 const SupplyDisplayEntry = makeTextEntry(SUPPLY_TYPE, 'codeDisplay', 'Display text of the supply');
-const AllergyTypeEntry = makeSelectEntry(ALLERGY_TYPE, 'allergyType', 'Allergy type (required)', ALLERGY_TYPE_VALUES);
-const AllergyCategoryEntry = makeSelectEntry(ALLERGY_TYPE, 'category', 'Category (required)', ALLERGY_CATEGORY_VALUES);
-const ReactionCodeEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'code', 'SNOMED code of the reaction');
+const AllergyTypeEntry = makeSelectEntry(ALLERGY_TYPE, 'allergyType', 'Allergy type (required)', ALLERGY_TYPE_VALUES, {}, { required: requiredFor('AllergyOnset') });
+const AllergyCategoryEntry = makeSelectEntry(ALLERGY_TYPE, 'category', 'Category (required)', ALLERGY_CATEGORY_VALUES, {}, { required: requiredFor('AllergyOnset') });
+const ReactionCodeEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'code', 'SNOMED code of the reaction', { check: snomedCode });
 const ReactionDisplayEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'codeDisplay', 'Display text of the reaction');
-const ReactionNoneEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityNone', 'Probability: no reaction', { parse: parseFloat });
-const ReactionMildEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityMild', 'Probability: mild', { parse: parseFloat });
-const ReactionModerateEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityModerate', 'Probability: moderate', { parse: parseFloat });
-const ReactionSevereEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severitySevere', 'Probability: severe', { parse: parseFloat });
+const ReactionNoneEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityNone', 'Probability: no reaction', { parse: parseFloat, check: probability });
+const ReactionMildEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityMild', 'Probability: mild', { parse: parseFloat, check: probability });
+const ReactionModerateEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severityModerate', 'Probability: moderate', { parse: parseFloat, check: probability });
+const ReactionSevereEntry = makeTextEntry(ALLERGY_REACTION_TYPE, 'severitySevere', 'Probability: severe', { parse: parseFloat, check: probability });
 const SeriesEntry = makeTextEntry(VACCINE_TYPE, 'series', 'Series (dose number, optional)', { parse: parseInt });
 const CounterAmountEntry = makeTextEntry(COUNTER_TYPE, 'amount', 'Amount (default 1)', { parse: parseFloat });
 const SetAttributeKindEntry = makeKindSelectEntry(SET_ATTRIBUTE_TYPE, 'valueKind', 'Value as', [
@@ -1177,7 +1282,7 @@ const SetAttributeKindEntry = makeKindSelectEntry(SET_ATTRIBUTE_TYPE, 'valueKind
   { value: 'ATTRIBUTE', label: 'Copy of another attribute' },
   { value: 'DISTRIBUTION', label: 'Drawn from a distribution' }
 ], SET_ATTRIBUTE_KIND_FIELDS, 'VALUE');
-const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name');
+const SetAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'attribute', 'Attribute name', { check: attributeNameError, required: requiredFor('SetAttribute') });
 const SetAttributeValueEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'value', 'Value (number, true/false or text)');
 const SetAttributeValueAttributeEntry = makeTextEntry(SET_ATTRIBUTE_TYPE, 'valueAttribute', 'Attribute to copy the value from');
 
@@ -1193,12 +1298,12 @@ const DISTRIBUTION_PARAMETER_ENTRIES = {
   low: distributionParameter('distributionLow', 'Lowest value'),
   high: distributionParameter('distributionHigh', 'Highest value')
 };
-const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribute', 'Assign result to attribute');
-const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute');
+const AssignToAttributeEntry = makeTextEntry(ASSIGN_TO_ATTRIBUTE_TYPE, 'attribute', 'Assign result to attribute', { check: attributeNameError });
+const ReferencedByAttributeEntry = makeTextEntry(REFERENCED_BY_ATTRIBUTE_TYPE, 'attribute', 'Reference the attribute set by an earlier Assign to Attribute', { check: attributeNameError });
 
 // --- moddle helpers --------------------------------------------------------
 
-const stateTypeOf = (element) => getExtension(element, STATE_TYPE)?.get('stateType');
+const stateTypeOf = (element) => getExtension(element, STATE_TYPE)?.get('stateType') || defaultStateTypeFor(element);
 
 // Groups for the fields only some state types have (Synthea requires them for
 // Symptom, Observation, ImagingStudy; Death may carry a time span).
