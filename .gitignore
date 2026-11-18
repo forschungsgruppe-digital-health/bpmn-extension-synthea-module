@@ -3,7 +3,6 @@ node_modules/
 *.log
 dist/
 .DS_Store
-package-lock.json
 demo/src/generated/
 site/
 

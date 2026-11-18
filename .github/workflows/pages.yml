@@ -32,7 +32,7 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies (workspaces incl. demo)
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Build the site (overview and guides, modeler, converter result) and check it
         # docs-site (Astro + Starlight) at /, the modeler at /modeler/, the converter result at

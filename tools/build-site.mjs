@@ -27,7 +27,7 @@ const run = (cmd, args, opts = {}) => {
 };
 
 // The docs site has its own dependency tree (it is not an npm workspace).
-if (!existsSync(join(root, 'docs-site', 'node_modules'))) run('npm', ['--prefix', 'docs-site', 'install', '--no-audit', '--no-fund']);
+if (!existsSync(join(root, 'docs-site', 'node_modules'))) run('npm', ['--prefix', 'docs-site', 'ci', '--no-audit', '--no-fund']);
 
 run('npm', ['--prefix', 'docs-site', 'run', 'build'], { env: { DOCS_BASE_PATH: base } });
 run('npm', ['--prefix', 'demo', 'run', 'build'], { env: { BASE_PATH: base } });
