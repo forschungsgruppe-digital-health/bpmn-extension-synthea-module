@@ -6,7 +6,7 @@
 //   <out>/index.html      links to every module and the report
 //   <out>/report.txt      conversion report as text (errors, warnings, notes)
 //   <out>/report.json     the same items as data
-//   <out>/build.json      which commit the result was built from (GITHUB_SHA in the workflow, else git)
+//   <out>/build.json      which commit the result was built from (the checked-out commit, else GITHUB_SHA)
 //   <out>/<module>.json   the generated Synthea modules (submodules in a subfolder)
 //
 // The Pages workflow calls it after the demo build with `--out-dir demo/dist/modules`.
@@ -36,8 +36,10 @@ const git = (...a) => {
   }
 };
 const build = {
-  commit: process.env.GITHUB_SHA || git('rev-parse', 'HEAD') || 'unknown',
-  ref: process.env.GITHUB_REF_NAME || git('branch', '--show-current') || 'unknown',
+  // The checked-out tree first: a workflow may check out another branch than the
+  // one that triggered it (GITHUB_SHA/GITHUB_REF_NAME name the trigger).
+  commit: git('rev-parse', 'HEAD') || process.env.GITHUB_SHA || 'unknown',
+  ref: git('branch', '--show-current') || process.env.GITHUB_REF_NAME || 'unknown',
   repository: process.env.GITHUB_REPOSITORY || '',
   date: new Date().toISOString()
 };
