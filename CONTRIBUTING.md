@@ -85,10 +85,10 @@ Release-As: 1.0.0
    `CHANGELOG.md`.
 3. When you merge that release PR, Release Please tags the commit and creates a
    GitHub Release.
-The release workflow does **not publish to npm**: it has no publish step and no npm
-token. A release is a tag and a GitHub Release with the generated `CHANGELOG.md`.
-(`package.json` is not `private`, so a manual `npm publish` would go through; do not
-run one without an explicit decision, see `AGENTS.md`.)
+The package is **not published to npm** (`"private": true` in `package.json`; the
+release workflow has no publish step). A release is a tag and a GitHub Release with the
+generated `CHANGELOG.md`. Consumers install it from git or as a file dependency
+(`npm run test:consumer` packs and installs it; `private` does not block that).
 
 Never hand-edit the version in `package.json` or the manifest — let Release
 Please own it.
