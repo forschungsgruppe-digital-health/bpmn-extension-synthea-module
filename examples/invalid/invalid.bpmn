@@ -324,5 +324,76 @@
         <synthea:ReferencedByAttributeConfig attribute="dx" />
       </bpmn:extensionElements>
     </bpmn:task>
+
+    <!-- condition-values-valid: a Date condition with both year and month (it takes exactly one) -->
+    <bpmn:exclusiveGateway id="Gateway_Guard_DateBoth" name="Guard (date with year and month)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+        <synthea:GuardConfig>
+          <synthea:allow conditionType="Date" year="2020" month="3" operator="&gt;" />
+        </synthea:GuardConfig>
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
+    <!-- observation-condition-needs-observation: reads an observation that no state of this diagram records -->
+    <bpmn:exclusiveGateway id="Gateway_Guard_UnknownObservation" name="Guard (observation never recorded)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Guard" />
+        <synthea:GuardConfig>
+          <synthea:allow conditionType="Observation" codeSystem="http://loinc.org" code="9999-9" operator="&gt;" value="3" />
+        </synthea:GuardConfig>
+      </bpmn:extensionElements>
+    </bpmn:exclusiveGateway>
+
+    <!-- exclusive-gateway-requires-default-flow: conditional branches and no default flow -->
+    <bpmn:exclusiveGateway id="Gateway_NoDefaultFlow" name="Branches without default flow" />
+    <bpmn:sequenceFlow id="Flow_NoDefault_A" sourceRef="Gateway_NoDefaultFlow" targetRef="Task_Counter_NoConfig">
+      <bpmn:extensionElements>
+        <synthea:ConditionConfig>
+          <synthea:condition conditionType="Attribute" attribute="smoker" operator="==" value="true" />
+        </synthea:ConditionConfig>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_NoDefault_B" sourceRef="Gateway_NoDefaultFlow" targetRef="Task_SetAttribute_NoConfig">
+      <bpmn:extensionElements>
+        <synthea:ConditionConfig>
+          <synthea:condition conditionType="Attribute" attribute="smoker" operator="==" value="false" />
+        </synthea:ConditionConfig>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+
+    <!-- no-delay-after-death: a Delay behind a Death state -->
+    <bpmn:task id="Task_DeathThenDelay" name="Death (then a delay, bad)">
+      <bpmn:extensionElements>
+        <synthea:StateTypeConfig stateType="Death" />
+      </bpmn:extensionElements>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="Event_DelayAfterDeath" name="Delay after death (bad)">
+      <bpmn:extensionElements>
+        <synthea:DelayConfig delayShape="EXACT" delayValue="1" delayUnit="days" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_DeathThenDelay" sourceRef="Task_DeathThenDelay" targetRef="Event_DelayAfterDeath" />
+
+    <!-- number-ranges-plausible: a delay range whose low value is above its high value -->
+    <bpmn:intermediateCatchEvent id="Event_DelayRangeReversed" name="Delay range reversed (bad)">
+      <bpmn:extensionElements>
+        <synthea:DelayConfig delayShape="RANGE" delayValue="9" delayValueHigh="2" delayUnit="days" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- time-unit-valid: "fortnights" is not a unit of time -->
+    <bpmn:intermediateCatchEvent id="Event_DelayBadUnit" name="Delay with a bad unit (bad)">
+      <bpmn:extensionElements>
+        <synthea:DelayConfig delayShape="EXACT" delayValue="2" delayUnit="fortnights" />
+      </bpmn:extensionElements>
+      <bpmn:timerEventDefinition />
+    </bpmn:intermediateCatchEvent>
+
+    <!-- unique-element-names: two elements with the same label in one process -->
+    <bpmn:task id="Task_DuplicateName_1" name="Duplicate name (bad)" />
+    <bpmn:task id="Task_DuplicateName_2" name="Duplicate name (bad)" />
   </bpmn:process>
 </bpmn:definitions>
