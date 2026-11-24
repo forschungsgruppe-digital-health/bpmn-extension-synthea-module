@@ -38,7 +38,7 @@ Two rules make this safe:
   "validate this child only if you happen to have its schema; otherwise accept
   it." So a stock BPMN validator will *never* reject — or check — your custom
   content. Establishing that your data is correct is *your* job, and that is
-  what this template automates.
+  what the checks in this repository automate.
 
 A "BPMN extension" in the bpmn.io sense is therefore the bundle of artifacts
 that **define, validate, and (optionally) edit** that namespaced data.
@@ -78,7 +78,7 @@ defaults to `false` — and an extension *must not contradict the semantics of a
 BPMN element*; it may add data, never redefine the standard. The OMG publishes
 the XSDs but **no normative conformance test suite or CLI** that validates
 extension content: establishing that correctness is the extension author's job.
-In this template that job is done by the **moddle round-trip** and the
+In this repository that job is done by the **moddle round-trip** and the
 **bpmnlint plugin**, exactly as Section 3 describes.
 
 ---
@@ -90,12 +90,12 @@ all of them, but it helps to know the layers:
 
 | Library | Layer | Role | Where it appears in this repo |
 |---------|-------|------|-------------------------------|
-| **[diagram-js](https://github.com/bpmn-io/diagram-js)** | foundation | Generic diagram rendering & interaction engine (shapes, canvas, events). BPMN-agnostic. | A `peerDependency`; only relevant once you add editor behaviour in `extension/src/`. |
-| **[bpmn-js](https://github.com/bpmn-io/bpmn-js)** | editor/viewer | The BPMN modeler/viewer built on diagram-js. Renders a `.bpmn` file as an editable diagram. | A `peerDependency`; your optional `extension/src/` modules plug into it via `additionalModules`. |
+| **[diagram-js](https://github.com/bpmn-io/diagram-js)** | foundation | Generic diagram rendering & interaction engine (shapes, canvas, events). BPMN-agnostic. | A `peerDependency`; used by the editor modules in `extension/src/`. |
+| **[bpmn-js](https://github.com/bpmn-io/bpmn-js)** | editor/viewer | The BPMN modeler/viewer built on diagram-js. Renders a `.bpmn` file as an editable diagram. | A `peerDependency`; the `extension/src/` modules plug into it via `additionalModules`. |
 | **[moddle](https://github.com/bpmn-io/moddle)** | meta-model | A library for describing a data model in JSON and mapping it to/from objects. The generic engine. | Indirect — the engine underneath bpmn-moddle. |
 | **[bpmn-moddle](https://github.com/bpmn-io/bpmn-moddle)** | meta-model (BPMN) | moddle pre-loaded with the BPMN 2.0 model. Reads BPMN XML into JS objects (`fromXML`) and writes them back (`toXML`). Accepts **extra descriptors** so it understands *your* namespace too. | `tools/moddle-roundtrip.mjs` registers your descriptor and round-trips every example. |
 | **[bpmnlint](https://github.com/bpmn-io/bpmnlint)** | linter | Rule engine that walks the parsed model and reports violations. Ships `recommended` rules; accepts custom **plugins** and **moddleExtensions**. | `extension/lint/bpmnlint-plugin-synthea/` + `.bpmnlintrc`. |
-| **[properties-panel](https://github.com/bpmn-io/properties-panel)** + **[bpmn-js-properties-panel](https://github.com/bpmn-io/bpmn-js-properties-panel)** | editor UI | The properties-panel framework (form entries) and its bpmn-js integration — where custom form controls for your data live. | **Optional** peer deps; the sample `extension/src/SyntheaPropertiesProvider.js` uses them, exercised in `demo/`. |
+| **[properties-panel](https://github.com/bpmn-io/properties-panel)** + **[bpmn-js-properties-panel](https://github.com/bpmn-io/bpmn-js-properties-panel)** | editor UI | The properties-panel framework (form entries) and its bpmn-js integration — where custom form controls for your data live. | **Optional** peer deps; `extension/src/SyntheaPropertiesProvider.js` uses them, exercised in `demo/`. |
 
 The key idea: **bpmn-moddle is the read/write layer, bpmn-js is the UI layer, and
 bpmnlint is the rules layer.** Your extension teaches each of them about your
@@ -110,7 +110,7 @@ The single most common point of confusion is the relationship between the
 cover *different parts of the file*:
 
 - **`BPMN20.xsd`** is the official XML Schema for the BPMN **core** — `bpmn:`
-  elements only. The template runs it via `xmllint` (`npm run xsd`) to prove
+  elements only. This repository runs it via `xmllint` (`npm run xsd`) to prove
   your example diagrams are structurally valid BPMN. Because of
   `processContents="lax"`, it stops at the boundary of `extensionElements`.
 - **The moddle descriptor** (`extension/model/synthea.json`) is effectively
@@ -126,8 +126,8 @@ So the two schemas are complementary, not competing:
 > never means "the extension is valid."
 
 What about *semantic* constraints the moddle descriptor can't express — e.g.
-"every annotation **must** have a category"? Shape is structural; "must" is a
-rule. Those go in the **bpmnlint plugin**. That is the whole reason the plugin
+"a delay with the shape `RANGE` **must** have a high value"? Shape is structural;
+"must" is a rule. Those go in the **bpmnlint plugin**. That is the whole reason the plugin
 exists.
 
 ### Optional: an extension XSD for XSD-native consumers
@@ -144,7 +144,7 @@ you can generate one, and sometimes it's worth it:
   plus round-trip already cover them, and a second hand-maintained schema would
   just drift.
 
-This template takes the safe path: `npm run xsd:gen` **derives** the XSD from
+This repository takes the safe path: `npm run xsd:gen` **derives** the XSD from
 the moddle descriptor (`tools/moddle-to-xsd.mjs`), so the descriptor stays the
 single source of truth and the two cannot diverge (CI fails on drift). Then
 `npm run xsd:ext` validates the examples against `BPMN20.xsd` **and** the
@@ -229,7 +229,7 @@ See [`demo/README.md`](../demo/README.md).
 **Building a bpmn.io extension — the canonical examples:**
 
 - [bpmn-js-examples](https://github.com/bpmn-io/bpmn-js-examples) — the official
-  example collection. The ones that map directly onto this template:
+  example collection. The ones that map directly onto this repository:
   - [custom-meta-model](https://github.com/bpmn-io/bpmn-js-examples/tree/main/custom-meta-model) — defining a moddle model extension (the descriptor side).
   - [properties-panel-extension](https://github.com/bpmn-io/bpmn-js-examples/tree/main/properties-panel-extension) — adding a custom properties-panel group (the pattern `extension/src/SyntheaPropertiesProvider.js` follows).
   - [custom-elements](https://github.com/bpmn-io/bpmn-js-examples/tree/main/custom-elements) and [custom-modeling-rules](https://github.com/bpmn-io/bpmn-js-examples/tree/main/custom-modeling-rules) — custom rendering and modeling rules for `extension/src/`.
@@ -246,5 +246,4 @@ See [`demo/README.md`](../demo/README.md).
 
 ---
 
-New to the workflow next? Go back to [`README.md`](../README.md) →
-**Using the template**.
+Next: the [`README.md`](../README.md) for the quick start and the commands.

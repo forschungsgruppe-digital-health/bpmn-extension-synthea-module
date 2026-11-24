@@ -25,7 +25,7 @@ run (`synthea:smoke`) run on their own. Individual checks:
 | `npm run xsd` | BPMN core of the examples and of `lung-cancer/` validates against `BPMN20.xsd` |
 | `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, XSD), then does the conversion work (converter tests, strict conversion, comparison) |
 | `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `lung-cancer/` against BPMN core + that XSD |
-| `npm run conventions` | `package.json` follows bpmn.io naming rules |
+| `npm run conventions` | `package.json` follows the bpmn.io conventions (name, `type: module`, `bpmn-js` only as a peer dependency) |
 | `npm run test:bpmn2gmf` | tests of the converter in `tools/bpmn2gmf/` |
 | `npm run convert:check` | the real pathways in `lung-cancer/` convert strictly (`--strict`) |
 | `npm run compare:structure` | converted modules vs. the upstream modules, state by state |

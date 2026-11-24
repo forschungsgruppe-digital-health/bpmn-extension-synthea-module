@@ -1,8 +1,8 @@
 name: deploy-demo
 
-# Build the demo/ modeler playground and publish it to GitHub Pages.
-# Enable once under Settings -> Pages -> Source: "GitHub Actions".
-# Independent of validate.yml and release-please.yml — a demo deploy is not a
+# Build the site (docs-site/ guides, the demo/ modeler, the converted modules) and publish it to
+# GitHub Pages. Enable once under Settings -> Pages -> Source: "GitHub Actions".
+# Independent of validate.yml and release-please.yml — a site deploy is not a
 # package gate and is not coupled to releases.
 
 on:

@@ -15,7 +15,7 @@ Synthea modules (`tools/bpmn2gmf`) and automated conformance checks. Node 22, ES
 - `skills/` — agent skills that orchestrate the checkers.
 - `docs-site/` — Astro + Starlight site (Pages root: overview and the guides from `docs/`, copied by `scripts/sync-docs.mjs`; not an npm workspace). `npm run site` builds the whole Pages site (docs, `demo/` at `/modeler/`, converter result at `/modules/`) into `site/`.
 - `demo/` — private (non-published) bpmn-js modeler playground for trying the extension by hand; an npm workspace. NOT a pass/fail gate.
-- `.devcontainer/` + `.github/workflows/pages.yml` — reproducible dev/Codespaces env and the GitHub Pages deploy for `demo/`.
+- `.devcontainer/` + `.github/workflows/pages.yml` — reproducible dev/Codespaces env and the GitHub Pages deploy of the whole site (built by `tools/build-site.mjs`).
 
 ## Always do
 - Run `npm run validate` before proposing a commit or PR.
