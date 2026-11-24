@@ -6,6 +6,7 @@ The `synthea:` extension is checked by 33 lint rules. They catch what the BPMN X
 - **Enabled by:** `.bpmnlintrc` extends `plugin:synthea/all`. The severity of each rule is set in the plugin's `index.js` (`configs.all.rules`).
 - **Run:** `npm run lint:valid` (the fixtures in `examples/valid/` and `lung-cancer/` must pass) and `npm run lint:invalid` (`examples/invalid/` must keep failing, so the rules are proven to fire).
 - **Severity:** an **error** fails the lint and so `validate`; a **warning** is reported but does not change the exit code. Warnings are used where the diagram only suggests a mistake.
+- **Names:** the table names the types of the model (`synthea:StateTypeConfig`); in the XML the element starts with a small letter (`<synthea:stateTypeConfig>`).
 - **Add a rule:** a file in `rules/`, an entry in `index.js` in `rules` **and** in `configs.all.rules`, a fixture in `examples/valid/` and a case in `examples/invalid/`.
 
 | ID | Rule | Severity | Group | What it checks |

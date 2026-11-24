@@ -11,25 +11,52 @@ fields?" Read top to bottom once, then use it as a lookup.
 
 ## 0. Setup
 
-```bash
-git clone -b dev <repo-url>   # the converter is on dev, not yet on main
-npm install
-npm run demo
-```
-
-Opens a bpmn-js modeler with the `synthea:` extension loaded and a pathway
-selector for the real lung-cancer files. Everything below is done by
-selecting an element on the canvas and filling in the matching group in the
-properties panel on the right — you rarely need to hand-write XML. The panel
+You need only a browser: open the [modeler](/modeler/) on this site, press
+**New** or open a file (the [quickstart](quickstart.md) shows how). Everything
+below is done by selecting an element on the canvas and filling in the
+matching group in the properties panel on the right — you rarely need to
+hand-write XML. The panel
 is **dynamic**: many groups only show the fields that are actually meaningful
 for the value you've already set (e.g. picking `conditionType="Age"` swaps in
 `Quantity`/`Unit` and hides the Attribute-only fields). If a field you expect
 isn't there, check whether a sibling dropdown needs to be set first.
 
-Before treating any change as done: `npm run validate` (lint, round trip, XSD, converter tests, strict conversion and structure comparison of the lung cancer files),
-`npx bpmnlint "lung-cancer/**/*.bpmn"` (your real pathway content), and a
-look at the element in the running demo. All three are cheap; skipping them
-is how silent mismatches happen.
+**Checking your work in the browser:** the modeler checks the diagram while
+you edit (the same lint rules as on the command line) and marks wrong or
+missing entries in the panel. **Convert to Synthea** shows the module and, on
+the **Messages** tab, every problem the converter found, each with an
+explanation. A diagram with no errors there converts.
+
+**The XML behind the panel.** When you read or edit the XML yourself:
+
+- The extension's namespace is
+  `https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0`, its
+  prefix `synthea`. Declare it on `definitions`:
+  `xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"`.
+- This guide names the **types** of the model, which start with a capital
+  letter (`synthea:StateTypeConfig`, `synthea:ConditionConfig`). In the XML
+  the **element** starts with a small letter: `<synthea:stateTypeConfig>`,
+  `<synthea:conditionConfig>`. Only the first letter changes. The
+  [type reference](extension-api-types.md) lists every type with its fields.
+- The example files write `bpmn2:task` where this guide writes `bpmn:task`.
+  The prefix is only a name for the BPMN namespace; both are the same.
+- The examples also carry `i18n:` (translated labels) and `cp:` (BPMN4CP
+  clinical pathway data) from other extensions. The converter ignores them;
+  you do not need them.
+
+**Working from a checkout** is only needed for the command-line converter, for
+converting many files at once and for running Synthea:
+
+```bash
+git clone -b dev https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module.git
+cd bpmn-extension-synthea-module
+npm install
+npm run demo        # the same modeler, served locally
+```
+
+There, before treating a change as done: `npm run validate` (lint, round trip,
+XSD, converter tests, strict conversion and structure comparison of the lung
+cancer files) and `npx bpmnlint "<your files>"` (your real pathway content).
 
 ---
 
@@ -138,6 +165,29 @@ before opening the properties panel for the first time.
   boundary event on a call activity — GMF has no boundary events and the
   converter rejects them.
 
+### When does the module start?
+
+Synthea runs every module for every patient **from birth**: the start event is
+reached on the day the patient is born. Whatever comes right after it happens
+to a newborn. A pathway therefore usually **waits first**:
+
+- **A Delay right after the start event** picks the age at which the pathway
+  begins. The lung cancer pathway starts with a delay of `RANGE` 45–65 years
+  (§3), then decides who gets the disease.
+- **A Guard** (§4c) with an `Age` condition (e.g. `>= 18 years`) waits until
+  the patient is old enough, then goes on.
+- **A risk over the whole life** is a loop: delay (e.g. 1 year) → probability
+  gateway → the "no" branch leads back to the delay. Each pass is one more
+  chance.
+
+Keep in mind that a decision is taken **once**, at the age the flow reaches
+it. A probability gateway after a delay of 1–10 years gives the disease only
+to children between 1 and 10; a later condition such as "adult?" is then never
+true. The converter warns (`INITIAL_WITHOUT_WAIT`) when a state that records
+something can run right after the start event without a Delay or Guard before
+it. That is fine for a submodule (it starts when it is called) or a disease
+that starts at birth on purpose.
+
 ---
 
 ## 3. Making the patient wait — `DelayConfig`
@@ -173,9 +223,22 @@ branch that receives the probability remainder). Lint rule SYN-27
 (`gateway-branches-require-condition-or-probability`) warns about gateways
 that break this.
 
+On a **probability** gateway the branch without a value receives the
+remainder. You may also mark it as the default flow; that changes nothing. On
+a **condition** gateway the branch without a condition must be the default
+flow (lint rule SYN-35, see 4c).
+
 An **inclusive** gateway is different: each branch is decided on its own, so none, some or all
 of them can happen, and there is no fallback or remainder branch. Every outgoing flow needs its
 own condition or probability (lint rule `inclusive-branches-require-condition-or-probability`).
+
+**Joining branches again:** draw an exclusive gateway with several incoming
+flows and one outgoing flow, or let the flows end directly on the next
+element. Both are fine. A joining gateway needs no configuration; it becomes a
+`Simple` state that only passes the patient on. One gateway may also join and
+split at once, e.g. the decision a loop leads back to (§2, "A risk over the
+whole life"): several flows in, the branches with their probabilities or
+conditions out.
 
 ### 4a. By fixed or dynamic probability — `ProbabilityConfig`
 
@@ -188,6 +251,18 @@ every flow's values across the group must sum to 1.0, checked by lint rule
 `probabilityDefault` (required; an attribute without a default is an error)
 for a runtime-computed weight read from a patient attribute instead of a
 hardcoded number.
+
+The choice "Probability as" is stored as `probabilityKind` (`FIXED` or
+`ATTRIBUTE`). In hand-written XML you can leave it out: the converter takes it
+from the field that is set.
+
+```xml
+<bpmn:sequenceFlow id="Flow_Yes" sourceRef="Gateway_Risk" targetRef="Task_Onset">
+  <bpmn:extensionElements>
+    <synthea:probabilityConfig probability="0.1" />
+  </bpmn:extensionElements>
+</bpmn:sequenceFlow>
+```
 
 **The order of the flows matters when the weights come from attributes.**
 Synthea gives whatever the other branches leave to the **last** branch. With
@@ -228,6 +303,21 @@ panel only shows those, not all 20 types' fields at once:
 | `PriorState` | `priorStateName`, `since`, `quantity`, `unit` | `quantity`/`unit` here mean Synthea's `within: {quantity, unit}` — the *same* fields Age uses, different meaning by context |
 | `True` / `False` | none | Constants, mainly for testing |
 
+In the XML the condition sits inside `synthea:conditionConfig` on the flow,
+for example "age 18 or older":
+
+```xml
+<bpmn:sequenceFlow id="Flow_Adult" sourceRef="Gateway_Age" targetRef="Task_Next">
+  <bpmn:extensionElements>
+    <synthea:conditionConfig>
+      <synthea:condition conditionType="Age" operator="&gt;=" quantity="18" unit="years" />
+    </synthea:conditionConfig>
+  </bpmn:extensionElements>
+</bpmn:sequenceFlow>
+```
+
+Write `>` and `<` as `&gt;` and `&lt;` in the XML; the panel does that for you.
+
 `negate` (a checkbox, always present) inverts the whole condition — it's our
 flat equivalent of Synthea's `Not` wrapper; `tools/bpmn2gmf` is responsible
 for expanding it back into a real `Not` object on export.
@@ -251,6 +341,20 @@ combinators), just reached via `allow` instead of `condition`. The
 difference from 4b isn't structural, it's *when* it's checked: a Guard
 re-evaluates on every simulation tick until it passes — a plain conditional
 flow checks once, when reached.
+
+In the XML the condition sits inside `synthea:guardConfig` on the gateway (the
+modeler writes the inner element as `synthea:condition`; `synthea:allow`, the
+name of the field, is read as well):
+
+```xml
+<bpmn:exclusiveGateway id="Gateway_Adult" name="Adult (18+)?">
+  <bpmn:extensionElements>
+    <synthea:guardConfig>
+      <synthea:condition conditionType="Age" operator="&gt;=" quantity="18" unit="years" />
+    </synthea:guardConfig>
+  </bpmn:extensionElements>
+</bpmn:exclusiveGateway>
+```
 
 A gateway that branches on conditions (4b) should have its **default flow**
 marked (right-click the flow → "Set as default flow", or the
@@ -322,7 +426,17 @@ files uses an allergy.
   "State Type" — system, code and display text. They are the attributes
   `codeSystem`, `code` and `codeDisplay` of `synthea:stateTypeConfig`. Synthea
   needs the code (a `ConditionOnset` without one stops the simulation). One code
-  per state.
+  per state. In the panel the system is a dropdown; in the XML it is the URI:
+
+  | System | `codeSystem` in the XML | Typical use |
+  |---|---|---|
+  | SNOMED CT | `http://snomed.info/sct` | conditions, procedures, encounters |
+  | LOINC | `http://loinc.org` | observations, lab panels |
+  | RxNorm | `http://www.nlm.nih.gov/research/umls/rxnorm` | medications |
+
+  The panel offers these three. The codes themselves come from the
+  terminology (e.g. the SNOMED CT browser, RxNav for RxNorm, the LOINC search)
+  or from an existing Synthea module for the same disease.
 - For `ConditionOnset`/`AllergyOnset` specifically: "Assign to Attribute" if
   a later state needs to reference this exact instance (see §8), and
   "Encounter Reference" (`targetEncounter`) if the diagnosis should only be
@@ -335,6 +449,7 @@ files uses an allergy.
 | State type | Panel group | What goes in |
 |---|---|---|
 | `Observation` | "Observation" + "Value" | **category** (HL7: `vital-signs`, `laboratory`, …) and **value** — `EXACT`, or a `RANGE` (lowest/highest) the simulation draws from — with **unit** (e.g. `{score}`, `mg/dL`) and optional **decimals** |
+| `MultiObservation` | "Observation" + report observations (XML) | **category**, the panel's LOINC code (group "Code") and at least one contained value as `synthea:reportObservation` — see below |
 | `ImagingStudy` | "Imaging series" | one series: body site (SNOMED code + text), modality (DICOM code, e.g. `CT`, + text), the kind of image (title, DICOM SOP class code + text), optional min/max number of instances. More series can be added in the XML (`synthea:imagingStudySeries`, repeatable) |
 
 The code of the state itself is the "Code" group (see above).
@@ -379,6 +494,31 @@ The properties panel only *lists* the contained observations (group "Report
 observations", read-only); add, change or remove `synthea:reportObservation`
 elements in the XML. (The state type of the `DiagnosticReport` itself is set in
 the panel as usual.)
+
+#### Several values measured together — `MultiObservation`
+
+A **blood pressure** is two values taken at once (systolic and diastolic).
+Synthea records that as a `MultiObservation`: one state with the panel's LOINC
+code and the single values inside, written like the values of a lab panel. It
+needs the category (group "Observation") as well:
+
+```xml
+<bpmn:task id="Task_BP" name="Blood pressure">
+  <bpmn:extensionElements>
+    <synthea:stateTypeConfig stateType="MultiObservation" codeSystem="http://loinc.org"
+        code="85354-9" codeDisplay="Blood pressure panel with all children optional" />
+    <synthea:observationConfig category="vital-signs" />
+    <synthea:reportObservation code="8480-6" codeDisplay="Systolic blood pressure"
+        category="vital-signs" unit="mm[Hg]" valueShape="RANGE" value="140" valueHigh="180" decimals="0" />
+    <synthea:reportObservation code="8462-4" codeDisplay="Diastolic blood pressure"
+        category="vital-signs" unit="mm[Hg]" valueShape="RANGE" value="90" valueHigh="110" decimals="0" />
+  </bpmn:extensionElements>
+</bpmn:task>
+```
+
+The difference to a `DiagnosticReport`: a report is a document that *contains*
+results (a lab panel); a `MultiObservation` is one measurement with several
+parts. Like every observation it needs a visit (§9).
 
 ---
 
@@ -461,11 +601,14 @@ instead — see [ADR-0003](adr/0003-encounter-context-implicit-scoping.md)).
 
 **How:** on *every* clinical state that belongs to the visit — group
 "Encounter Context":
-- `requiresEncounterContext` — check this (it's the actual opt-in; setting
-  `encounterId` alone without checking this does nothing).
+- `requiresEncounterContext` — check this: it says the state needs a visit,
+  and the consistency lint rules below only look at checked states.
 - `encounterId` — any string, shared by every member of this one visit
   instance. Must be unique enough not to collide with an unrelated visit
-  elsewhere in the same process.
+  elsewhere in the same process. The converter groups states **by this id**,
+  checked or not: a state with an `encounterId` belongs to that visit even
+  without the check (one state in the lung cancer main pathway, "Stem Cells",
+  is written that way; check the box in your own models).
 - `wellness` — is this a routine/preventive visit? **Not cosmetic**: when
   `true`, Synthea pauses the module until the next already-scheduled routine
   checkup actually occurs (managed by Synthea's own internal scheduler,
@@ -475,8 +618,14 @@ instead — see [ADR-0003](adr/0003-encounter-context-implicit-scoping.md)).
   requires it for every non-wellness encounter): `ambulatory`, `emergency`,
   `urgentcare`, `inpatient`, `outpatient`, `hospice`, `home`, `snf` or `virtual`
   (the encounter types of Synthea v4.0.0).
-- `reason` (optional) — an attribute name or a reference to a prior
-  `ConditionOnset` explaining why the visit happens.
+- `reason` (optional) — why the visit happens: the attribute a prior
+  `ConditionOnset` assigned its diagnosis to (§8), e.g. `reason="hypertension"`
+  for a follow-up visit after `assignToAttributeConfig attribute="hypertension"`.
+  Like the class and the code it belongs to the visit, so set it **the same on
+  every member** or not at all (otherwise `ENCOUNTER_INCONSISTENT`). Only the
+  visit has a reason in this extension: Synthea's own `reason` on
+  `MedicationOrder`, `Procedure` or `CarePlanStart` is not modeled, so the
+  converted states carry none.
 - **Encounter code** (`encounterCodeSystem`, `encounterCode`,
   `encounterCodeDisplay`; shown with the class, i.e. for non-wellness visits) —
   **required by Synthea** for every non-wellness encounter; all three parts
@@ -606,14 +755,23 @@ an endless recursion; found by running the converted modules in Synthea.)
 
 ## 12. Before you consider it done
 
-1. `npm run validate` — lint, round trip, XSD conformance, package
+In the browser:
+
+1. No entry in the panel is marked as wrong or missing.
+2. **Convert to Synthea** shows no error on the **Messages** tab; read the
+   warnings and notes too.
+3. Look at the **Graph** tab: does the patient go the way you meant? Think
+   about the age at which each decision is taken (§2, "When does the module
+   start?").
+
+With a checkout, in addition:
+
+4. `npm run validate` — lint, round trip, XSD conformance, package
    conventions, converter tests, strict conversion and structure comparison
    of the lung cancer files.
-2. `npx bpmnlint "lung-cancer/**/*.bpmn"` (or whichever real files you
-   touched) — your actual content, not just the example fixtures.
-3. Open it in `npm run demo`, click through the elements you changed, and
-   confirm the panel shows what you expect.
-4. If you added a genuinely new pattern, consider whether it needs a
+5. `npx bpmnlint "<your files>"` and `npm run bpmn2gmf -- <your files> --strict`
+   — your actual content, not just the example fixtures.
+6. If you added a genuinely new pattern, consider whether it needs a
    fixture in `examples/valid/` (and, for anything a lint rule should catch,
    `examples/invalid/`) so the pattern stays tested.
 
