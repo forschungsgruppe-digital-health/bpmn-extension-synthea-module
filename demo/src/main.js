@@ -48,7 +48,7 @@ const modeler = new BpmnModeler({
 const $ = (sel) => document.querySelector(sel);
 // Examples: the real lung cancer pathway of this repository, loaded only when asked for (one chunk
 // per file, so nothing is downloaded up front). Everything else in the modeler is the user's own.
-const exampleLoaders = import.meta.glob('../../lung-cancer/*.bpmn', { query: '?raw', import: 'default' });
+const exampleLoaders = import.meta.glob('../../examples/lung-cancer/*.bpmn', { query: '?raw', import: 'default' });
 const SESSION_KEY = 'synthea-modeler-session-v1';
 const files = []; // open entries, in the order they were opened
 let current = null; // the entry shown on the canvas

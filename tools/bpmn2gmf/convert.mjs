@@ -19,7 +19,7 @@ import { assignPaths } from './layout.mjs';
  * as `_`. It is also what CallSubmodule refers to until layout.mjs turns it into a path.
  *
  * @param {string} path the path of a .bpmn or .xml file
- * @returns {string} e.g. `anemia_submodule` for `lung-cancer/anemia-submodule.bpmn`
+ * @returns {string} e.g. `anemia_submodule` for `examples/lung-cancer/anemia-submodule.bpmn`
  */
 export const fileBaseFor = (path) =>
   path.split('/').pop().replace(/\.(bpmn|xml)$/i, '').replace(/-/g, '_');

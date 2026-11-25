@@ -26,8 +26,8 @@ test('the stored schema is the one the generator writes (no drift)', () => {
   assert.equal(readFileSync(SCHEMA_PATH, 'utf8'), render());
 });
 
-test('the schema accepts the modules of lung-cancer/ as the converter writes them', async () => {
-  const dir = here('../../../lung-cancer');
+test('the schema accepts the modules of examples/lung-cancer/ as the converter writes them', async () => {
+  const dir = here('../../../examples/lung-cancer');
   const files = readdirSync(dir).filter((f) => f.endsWith('.bpmn')).map((f) => ({ path: join(dir, f), xml: readFileSync(join(dir, f), 'utf8') }));
   const { modules, diagnostics } = await convert(files, { strict: true });
   assert.equal(diagnostics.errorCount, 0);

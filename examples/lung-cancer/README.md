@@ -19,10 +19,10 @@ The demo app's Pathway dropdown loads all five directly from here.
 ## Converting to Synthea and running it
 
 `tools/bpmn2gmf` turns these files into Synthea GMF JSON (concept and decisions:
-[`docs/bpmn2gmf-concept.md`](../docs/bpmn2gmf-concept.md)):
+[`docs/bpmn2gmf-concept.md`](../../docs/bpmn2gmf-concept.md)):
 
     npm run convert:check                                   # all five convert, strict, no warning (part of `npm run validate`)
-    npm run bpmn2gmf -- lung-cancer --out-dir out/modules   # write the modules (add --fuse-gateways for fewer Simple states)
+    npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules   # write the modules (add --fuse-gateways for fewer Simple states)
 
 Every `callActivity` carries a `synthea:submoduleConfig submodule="..."` with the
 bare name of the called file, written with underscores (`anemia_submodule`,

@@ -495,11 +495,11 @@ test('ImagingStudy uses the first code as procedure_code', async () => {
 
 test('all five real pathway files convert completely, even with --strict', async () => {
   const files = [
-    'lung-cancer/synthea-lung-cancer.bpmn',
-    'lung-cancer/anemia-submodule.bpmn',
-    'lung-cancer/lung-cancer-treatment-submodule.bpmn',
-    'lung-cancer/symptom-check-submodule.bpmn',
-    'lung-cancer/lung-cancer-probabilities-submodule.bpmn'
+    'examples/lung-cancer/synthea-lung-cancer.bpmn',
+    'examples/lung-cancer/anemia-submodule.bpmn',
+    'examples/lung-cancer/lung-cancer-treatment-submodule.bpmn',
+    'examples/lung-cancer/symptom-check-submodule.bpmn',
+    'examples/lung-cancer/lung-cancer-probabilities-submodule.bpmn'
   ];
   const { modules, diagnostics } = await convert(files.map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
   assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
@@ -997,8 +997,8 @@ test('--fuse-gateways: a gateway with several predecessors, one a PriorState ref
 
 test('--fuse-gateways keeps every non-gateway state and what each one leads to', async () => {
   const files = [
-    'lung-cancer/synthea-lung-cancer.bpmn', 'lung-cancer/anemia-submodule.bpmn', 'lung-cancer/lung-cancer-treatment-submodule.bpmn',
-    'lung-cancer/symptom-check-submodule.bpmn', 'lung-cancer/lung-cancer-probabilities-submodule.bpmn'
+    'examples/lung-cancer/synthea-lung-cancer.bpmn', 'examples/lung-cancer/anemia-submodule.bpmn', 'examples/lung-cancer/lung-cancer-treatment-submodule.bpmn',
+    'examples/lung-cancer/symptom-check-submodule.bpmn', 'examples/lung-cancer/lung-cancer-probabilities-submodule.bpmn'
   ];
   const inputs = files.map((path) => ({ path, xml: readFileSync(path, 'utf8') }));
   const a = await convert(inputs, { strict: true });
@@ -1665,7 +1665,7 @@ test('Physiology is rejected with its own code, not as "not implemented"', async
 });
 
 test('fileBaseFor: .bpmn and .xml files get the same module name, folders are dropped', () => {
-  assert.equal(fileBaseFor('lung-cancer/anemia-submodule.bpmn'), 'anemia_submodule');
-  assert.equal(fileBaseFor('lung-cancer/anemia-submodule.xml'), 'anemia_submodule');
+  assert.equal(fileBaseFor('examples/lung-cancer/anemia-submodule.bpmn'), 'anemia_submodule');
+  assert.equal(fileBaseFor('examples/lung-cancer/anemia-submodule.xml'), 'anemia_submodule');
   assert.equal(fileBaseFor('Anemia-Submodule.XML'), 'Anemia_Submodule');
 });

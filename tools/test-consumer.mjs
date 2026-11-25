@@ -29,7 +29,7 @@ try {
   run('npm', ['run', 'build'], app);
 
   // The converter must be in the installed package and runnable through its bin.
-  const sample = join(root, 'lung-cancer/anemia-submodule.bpmn');
+  const sample = join(root, 'examples/lung-cancer/anemia-submodule.bpmn');
   run('npx', ['bpmn2gmf', sample, '--out-dir', 'modules'], app);
   if (!readdirSync(join(app, 'modules')).some((f) => f.endsWith('.json'))) {
     throw new Error('converter wrote no module');

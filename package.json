@@ -40,7 +40,7 @@
   ],
   "scripts": {
     "site": "node tools/build-site.mjs / site",
-    "lint:valid": "bpmnlint \"examples/valid/**/*.bpmn\" \"lung-cancer/*.bpmn\"",
+    "lint:valid": "bpmnlint \"examples/valid/**/*.bpmn\" \"examples/lung-cancer/*.bpmn\"",
     "lint:invalid": "bpmnlint \"examples/invalid/**/*.bpmn\"",
     "roundtrip": "node tools/moddle-roundtrip.mjs",
     "xsd": "bash tools/validate-xsd.sh",
@@ -56,7 +56,7 @@
     "bpmn2gmf": "node tools/bpmn2gmf/cli.mjs",
     "test:bpmn2gmf": "node --test \"tools/bpmn2gmf/test/*.test.mjs\"",
     "convert:site": "node tools/build-converter-site.mjs lung-cancer --out-dir demo/dist/modules",
-    "convert:check": "node tools/bpmn2gmf/cli.mjs lung-cancer --check --strict",
+    "convert:check": "node tools/bpmn2gmf/cli.mjs examples/lung-cancer --check --strict",
     "synthea:smoke": "node tools/synthea-smoke.mjs",
     "schema:gen": "node tools/bpmn2gmf/gen-schema.mjs",
     "schema:gen:check": "node tools/bpmn2gmf/gen-schema.mjs --check",

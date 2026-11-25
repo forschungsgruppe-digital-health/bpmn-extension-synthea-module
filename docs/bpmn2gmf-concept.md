@@ -10,7 +10,7 @@ This document fixes the architecture, the build order, and — most importantly 
 
 ## 1. What the converter has to handle (measured on the real files)
 
-Inventory of the five `lung-cancer/*.bpmn` files:
+Inventory of the five `examples/lung-cancer/*.bpmn` files:
 
 | Construct | Count | Consequence |
 |---|---|---|
@@ -84,7 +84,7 @@ test/              node:test unit tests + golden files
 
 Added later: `convert.mjs` (the pipeline as a function, also used by the lint), `gateways.mjs`, `links.mjs`, `documentation.mjs`, `fuse.mjs`, `layout.mjs`, `write.mjs`, `diagnostics.mjs`, `explanations.mjs`, `required-fields.mjs`, `verify-flow.mjs`, `gen-schema.mjs` and `module.schema.json`, and the comparisons `compare.mjs`, `compare-upstream.mjs`, `compare-structure.mjs` with `structure.mjs`.
 
-CLI: `node tools/bpmn2gmf/cli.mjs lung-cancer/ --out-dir out/modules` (a directory so that submodule references can be resolved across files; a single file is allowed when it calls no submodule). npm script `bpmn2gmf`, plus `test:bpmn2gmf` added to `validate`.
+CLI: `node tools/bpmn2gmf/cli.mjs examples/lung-cancer/ --out-dir out/modules` (a directory so that submodule references can be resolved across files; a single file is allowed when it calls no submodule). npm script `bpmn2gmf`, plus `test:bpmn2gmf` added to `validate`.
 
 ### 3.1 Intermediate representation
 
@@ -252,7 +252,7 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 
 ## 10. Findings from the first run on the real files (phase 1)
 
-`npm run bpmn2gmf -- lung-cancer --check` on the first run — none of the five files converted; what was found and how it was resolved:
+`npm run bpmn2gmf -- examples/lung-cancer --check` on the first run — none of the five files converted; what was found and how it was resolved:
 
 | Finding | Where | Needed |
 |---|---|---|
@@ -325,7 +325,7 @@ The first run found problems that none of the checks against the documentation o
 
 After the first round of fixes the same patient gets the same diagnoses and dies of the same cause as with upstream's module (same seed), per stay the inpatient length (median 120 h vs 129 h, explained below), prescriptions, procedures and pain values match, and the lab reports carry 14.7 results each as upstream. Per treatment cycle 1.05 encounters (upstream 1.07).
 
-**Resolved — the symptom names.** The patient first had 6 emergency visits (upstream 1). Cause: Synthea sends a patient to the emergency room when the *sum* of all symptom values exceeds 500. The upstream `symptom_check` states are named after the diagram labels, but nine of ten have `symptom: "Cough"` and so overwrite each other; ours had ten different names and added up. Decision: the nine `symptomConfig` properties in `lung-cancer/symptom-check-submodule.bpmn` now say `Cough` like upstream, while the labels and state names stay as drawn. Result with the same seed: 1 emergency visit, as upstream. The consequence for modelers: the `symptom` field is what Synthea stores and sums, the label is only a name, and two states with the same `symptom` overwrite each other.
+**Resolved — the symptom names.** The patient first had 6 emergency visits (upstream 1). Cause: Synthea sends a patient to the emergency room when the *sum* of all symptom values exceeds 500. The upstream `symptom_check` states are named after the diagram labels, but nine of ten have `symptom: "Cough"` and so overwrite each other; ours had ten different names and added up. Decision: the nine `symptomConfig` properties in `examples/lung-cancer/symptom-check-submodule.bpmn` now say `Cough` like upstream, while the labels and state names stay as drawn. Result with the same seed: 1 emergency visit, as upstream. The consequence for modelers: the `symptom` field is what Synthea stores and sums, the label is only a name, and two states with the same `symptom` overwrite each other.
 
 **Second round: nine seeds, then a forced-diagnosis run.** Lung cancer is rare (about 1 in 400 here), so one seed shows one patient. The generated modules and upstream's module were run on the same populations (nine seeds of 3,000 patients aged 45–65, 27,000 per variant, 165 patients with a diagnosis; the raw output is 3 GB per run, so only per-patient summaries were kept). Counts agree within 0.5 % (all diagnosed patients, ours / upstream): encounters 13,806 / 13,816, inpatient 5,371 / 5,391, emergency 165 / 165, procedures 71,813 / 71,698, prescriptions 64,272 / 64,194, imaging 6,384 / 6,352, lab reports 30,166 / 30,233, deaths 113 / 111. Individual patients differ because the random draws drift apart as soon as the two modules draw a different number of values; only distributions are comparable. Two differences were left, and both came from optional fields the first comparison did not look at (it compared state types, codes and values, not every optional field):
 

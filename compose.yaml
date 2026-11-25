@@ -1,7 +1,7 @@
 # `docker compose up` builds the image and serves the modeler on http://localhost:5173/modeler/
 #
 # Convert a model to Synthea modules with the converter in the same image:
-#   docker compose run --rm app npm run bpmn2gmf -- lung-cancer --out-dir out/modules
+#   docker compose run --rm app npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules
 #
 # Generate a FHIR test data set into ./out (the Synthea jar is downloaded once and cached in a volume):
 #   docker compose run --rm testdata

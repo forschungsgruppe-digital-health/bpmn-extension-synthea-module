@@ -29,7 +29,7 @@ while IFS= read -r -d '' file; do
   if ! xmllint --noout --schema "$XSD" "$file"; then
     status=1
   fi
-done < <(find examples lung-cancer -name '*.bpmn' -print0)
+done < <(find examples -name '*.bpmn' -print0)
 
 if [ "$status" -eq 0 ]; then
   echo "All examples and pathways are BPMN-core conformant."

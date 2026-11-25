@@ -6,7 +6,7 @@
 // artifact per deployment:
 //   /          overview and guides   (docs-site, Astro + Starlight; pages generated from docs/)
 //   /modeler/  the bpmn-js modeler   (demo, Vite)
-//   /modules/  the converter result  (tools/build-converter-site.mjs, lung-cancer/)
+//   /modules/  the converter result  (tools/build-converter-site.mjs, examples/lung-cancer/)
 //   /examples/ the lung cancer .bpmn files, to download and open in the modeler
 // then runs tools/check-pages-build.mjs on it. Defaults: base "/", out dir "site".
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
@@ -40,8 +40,8 @@ cpSync(join(root, 'demo', 'dist'), out, { recursive: true });
 
 // The example files the Quickstart links to; the modeler itself ships none, people open their own.
 mkdirSync(join(out, 'examples'), { recursive: true });
-for (const f of readdirSync(join(root, 'lung-cancer')).filter((f) => f.endsWith('.bpmn'))) cpSync(join(root, 'lung-cancer', f), join(out, 'examples', f));
+for (const f of readdirSync(join(root, 'examples/lung-cancer')).filter((f) => f.endsWith('.bpmn'))) cpSync(join(root, 'examples/lung-cancer', f), join(out, 'examples', f));
 
-run('node', ['tools/build-converter-site.mjs', 'lung-cancer', '--out-dir', join(out, 'modules')]);
+run('node', ['tools/build-converter-site.mjs', 'examples/lung-cancer', '--out-dir', join(out, 'modules')]);
 run('node', ['tools/check-pages-build.mjs', out, base]);
 console.log(`site written to ${out}`);

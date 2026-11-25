@@ -61,7 +61,7 @@ Veröffentlichung liegt bei den Autor:innen.
 | **Properties panel** | `extension/src/` | One group "Synthea" in the bpmn-js properties panel, one collapsible section per type, showing only what fits the chosen State Type and what the converter accepts. |
 | **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 33 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. See [docs/lint-rules.md](docs/lint-rules.md). |
 | **Converter** | `tools/bpmn2gmf/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
-| **Example pathway** | `lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
+| **Example pathway** | `examples/lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
 | **Demo** | `demo/` | A bpmn-js modeler with the extension, for trying it by hand. Not published. |
 | **Documentation** | `docs/` | Modeling guide, mapping rules, converter concept, extension matrix, architecture decisions. |
 
@@ -79,7 +79,7 @@ npm run validate    # all checks (lint, round trip, XSD, tests, converter)
 ```
 
 The modeler opens your own `.bpmn` or `.xml` files or a whole folder (button, or drop them on the page).
-The **Examples** menu opens the five real pathway files of `lung-cancer/`. Click an
+The **Examples** menu opens the five real pathway files of `examples/lung-cancer/`. Click an
 element and open the group "Synthea" in the properties panel. Your files and changes stay in the
 browser (nothing is uploaded); **Save .bpmn** downloads the open diagram.
 
@@ -87,7 +87,7 @@ browser (nothing is uploaded); **Save .bpmn** downloads the open diagram.
 you made, and shows the Synthea module as a graph, as JSON and as messages (each kind of message
 comes with an explanation and what to do), with a download of the JSON. On the published site
 (GitHub Pages, built from the `dev` branch) the site root is the overview and the guides (from `docs/`, built by `docs-site/`), the modeler lives under `modeler/`, and the link **Converter result** opens the modules and
-the report that the converter made from `lung-cancer/` at that merge, with the commit they come from.
+the report that the converter made from `examples/lung-cancer/` at that merge, with the commit they come from.
 
 ### First steps in the modeler
 
@@ -128,7 +128,7 @@ docker compose up    # builds the image, serves the modeler on http://localhost:
 The image has the demo, the converter and `xmllint`. To run the converter in it:
 
 ```bash
-docker compose run --rm app npm run bpmn2gmf -- lung-cancer --out-dir out/modules
+docker compose run --rm app npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules
 ```
 
 ### As a dependency in your own project
@@ -199,7 +199,7 @@ model unchanged. A task that orders a medication, taken from the lung cancer tre
 ## From BPMN to Synthea
 
 ```bash
-npm run bpmn2gmf -- lung-cancer --out-dir out/modules --fuse-gateways
+npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules --fuse-gateways
 ```
 
 This writes `synthea_lung_cancer.json` and, in a folder of the same name, the four submodules (Synthea runs
@@ -215,8 +215,8 @@ submodules). Useful options:
 **Test data set.** To generate synthetic FHIR patients from a pathway folder, run the script (needs Java and Node; it downloads the pinned Synthea v4.0.0 jar, about 200 MB, once into `~/.cache/bpmn-extension-synthea` and checks its SHA-256):
 
 ```bash
-scripts/generate-testdata.sh out                                   # lung-cancer/, 1000 patients, seed 7, ages 45-65
-scripts/generate-testdata.sh out --dir lung-cancer --population 1000 --seed 3 --age 45-65
+scripts/generate-testdata.sh out                                   # examples/lung-cancer/, 1000 patients, seed 7, ages 45-65
+scripts/generate-testdata.sh out --dir examples/lung-cancer --population 1000 --seed 3 --age 45-65
 scripts/generate-testdata.sh out --force-diagnosis                 # only for the lung cancer module: every patient is diagnosed
 docker compose run --rm testdata                                   # the same in Docker, writes to ./out
 ```
@@ -279,7 +279,7 @@ lung cancer files must pass). `npm run lint:invalid` is **expected to fail**: th
 | [docs/synthea.md](docs/synthea.md) | Background: Synthea and its Generic Module Framework |
 | [docs/concepts.md](docs/concepts.md) | Background: what a BPMN extension is and how the pieces fit |
 | [docs/adr/](docs/adr/) | Architecture decisions (versioning, encounter scope) |
-| [lung-cancer/README.md](lung-cancer/README.md) | The example pathway and how it converts |
+| [examples/lung-cancer/README.md](examples/lung-cancer/README.md) | The example pathway and how it converts |
 | [CONTRIBUTING.md](CONTRIBUTING.md), [AGENTS.md](AGENTS.md) | Contributing, and the rules for AI coding agents |
 
 ## Contributing
@@ -304,10 +304,10 @@ If you use this software, please cite it using the metadata in [CITATION.cff](CI
 
 [MIT](LICENSE).
 
-The pathway models in `lung-cancer/` and the files in `tools/bpmn2gmf/test/golden/` are modeled after
+The pathway models in `examples/lung-cancer/` and the files in `tools/bpmn2gmf/test/golden/` are modeled after
 and generated from Synthea modules, which are Apache-2.0 licensed (Copyright The MITRE Corporation and the
 Synthea contributors); the license text and Synthea's notices on RxNorm, LOINC and SNOMED CT are in
-`LICENSE` and `NOTICE.md` in `lung-cancer/`.
+`LICENSE` and `NOTICE.md` in `examples/lung-cancer/`.
 
 The demo uses [bpmn-js](https://github.com/bpmn-io/bpmn-js), which is MIT licensed with one additional
 condition: the bpmn.io watermark must not be removed or hidden in any application that uses it. See

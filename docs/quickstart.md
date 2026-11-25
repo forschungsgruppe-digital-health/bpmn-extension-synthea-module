@@ -36,7 +36,7 @@ This is the smallest working module. More steps (conditions, branches, visits) f
 
 ## 5. Run it in Synthea
 
-The converter output is a standard Synthea module. How to run the converted lung cancer modules in Synthea itself is described in the [lung cancer pathway README](../lung-cancer/README.md). The page [Check and convert](converter-overview.md) explains the command-line converter for your own files.
+The converter output is a standard Synthea module. How to run the converted lung cancer modules in Synthea itself is described in the [lung cancer pathway README](../examples/lung-cancer/README.md). The page [Check and convert](converter-overview.md) explains the command-line converter for your own files.
 
 ## Next
 

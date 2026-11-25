@@ -20,7 +20,7 @@ It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copi
   them on the page; the open files are listed on the left. Everything stays in the browser (the
   session is kept in `localStorage`, nothing is uploaded). A main pathway whose `CallSubmodule` states
   (`bpmn:callActivity`, `calledElement` = the submodule's process id) point to other files needs those
-  files open as well: open the folder. The **Examples** menu opens the real files of `../lung-cancer/`
+  files open as well: open the folder. The **Examples** menu opens the real files of `../examples/lung-cancer/`
   (loaded on demand); the Quickstart of the site offers them for download as well.
 
 So whatever you change in `extension/` is reflected here on the next reload.

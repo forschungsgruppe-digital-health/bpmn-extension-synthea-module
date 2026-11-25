@@ -2,7 +2,7 @@
 // Runs the converted pathways in a real Synthea and checks that the engine loads and
 // processes them. Not part of `npm run validate` (needs Java and the Synthea jar).
 //
-//   node tools/synthea-smoke.mjs <synthea-with-dependencies.jar> [--dir lung-cancer]
+//   node tools/synthea-smoke.mjs <synthea-with-dependencies.jar> [--dir examples/lung-cancer]
 //        [--population 400] [--seed 7] [--age 45-65] [--keep <output dir>] [--force-diagnosis] [--trace-submodules]
 //
 // Jar: https://github.com/synthetichealth/synthea/releases (tested with v4.0.0).
@@ -26,10 +26,10 @@ const args = process.argv.slice(2);
 const jar = args.find((a) => !a.startsWith('--') && a.endsWith('.jar'));
 const opt = (name, fallback) => (args.includes(`--${name}`) ? args[args.indexOf(`--${name}`) + 1] : fallback);
 if (!jar || !existsSync(jar)) {
-  console.error('usage: node tools/synthea-smoke.mjs <synthea-with-dependencies.jar> [--dir lung-cancer] [--population 400] [--seed 7] [--age 45-65] [--keep <dir>] [--force-diagnosis] [--trace-submodules]');
+  console.error('usage: node tools/synthea-smoke.mjs <synthea-with-dependencies.jar> [--dir examples/lung-cancer] [--population 400] [--seed 7] [--age 45-65] [--keep <dir>] [--force-diagnosis] [--trace-submodules]');
   process.exit(2);
 }
-const dir = opt('dir', 'lung-cancer');
+const dir = opt('dir', 'examples/lung-cancer');
 const work = opt('keep', null) ?? mkdtempSync(join(tmpdir(), 'bpmn2gmf-synthea-'));
 mkdirSync(work, { recursive: true });
 

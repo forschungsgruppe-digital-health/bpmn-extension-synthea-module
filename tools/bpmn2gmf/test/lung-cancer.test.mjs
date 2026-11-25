@@ -1,4 +1,4 @@
-// Two facts about the converted lung cancer pathway in lung-cancer/ that its README relies on:
+// Two facts about the converted lung cancer pathway in examples/lung-cancer/ that its README relies on:
 // the treatment cycle never returns, and the main pathway ends the open encounter before it calls the
 // anemia module (the module starts without one).
 import { test } from 'node:test';
@@ -8,7 +8,7 @@ import { convert } from '../convert.mjs';
 
 const lungCancerModules = async () => {
   const files = ['synthea-lung-cancer', 'anemia-submodule', 'lung-cancer-treatment-submodule', 'symptom-check-submodule', 'lung-cancer-probabilities-submodule'];
-  const { modules } = await convert(files.map((f) => `lung-cancer/${f}.bpmn`).map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
+  const { modules } = await convert(files.map((f) => `examples/lung-cancer/${f}.bpmn`).map((path) => ({ path, xml: readFileSync(path, 'utf8') })), { strict: true });
   return Object.fromEntries(modules.map((m) => [m.fileBase, m.json.states]));
 };
 

@@ -52,10 +52,10 @@ function walk(node, visit, seen = new Set()) {
   }
 }
 
-const files = globSync('lung-cancer/**/*.bpmn').sort();
+const files = globSync('examples/lung-cancer/**/*.bpmn').sort();
 
 if (!files.length) {
-  console.error('No pathway files found under lung-cancer/.');
+  console.error('No pathway files found under examples/lung-cancer/.');
   process.exit(1);
 }
 

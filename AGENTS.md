@@ -9,9 +9,8 @@ A custom BPMN 2.0 / bpmn.io extension (`synthea:`) with a converter from BPMN to
 Synthea modules (`tools/bpmn2gmf`) and automated conformance checks. Node 22, ES modules.
 
 - `extension/` — the custom extension you author (moddle model descriptor, lint plugin, optional bpmn-js modules).
-- `examples/valid/` and `examples/invalid/` — abstract diagrams used as positive and negative validation fixtures.
+- `examples/` — `valid/` and `invalid/`: abstract diagrams used as positive and negative validation fixtures; `lung-cancer/`: the real pathways (main pathway and four submodules) that the converter is checked against (golden files); `drafts/`: the first draft diagrams (v0.1), kept to show where the models started, not checked; `consumer/`: a minimal app that installs the packed package (`npm run test:consumer`, CI).
 - `tools/` — deterministic checkers and the converter `tools/bpmn2gmf`; their exit code is the source of truth for pass/fail.
-- `lung-cancer/` — the real pathways (main pathway and four submodules) that the converter is checked against.
 - `skills/` — agent skills that orchestrate the checkers.
 - `docs-site/` — Astro + Starlight site (Pages root: overview and the guides from `docs/`, copied by `scripts/sync-docs.mjs`; not an npm workspace). `npm run site` builds the whole Pages site (docs, `demo/` at `/modeler/`, converter result at `/modules/`) into `site/`.
 - `demo/` — private (non-published) bpmn-js modeler playground for trying the extension by hand; an npm workspace. NOT a pass/fail gate.
@@ -39,10 +38,10 @@ into a release PR; merging it tags a release. Nothing is published to npm. See `
 
 ## Commands
 - Full check: `npm run validate` (two stages: `npm run validate:diagram`, then `npm run validate:convert`)
-- Lint, valid (must pass; covers `examples/valid/` and `lung-cancer/`): `npm run lint:valid`
+- Lint, valid (must pass; covers `examples/valid/` and `examples/lung-cancer/`): `npm run lint:valid`
 - Lint, invalid (must fail): `npm run lint:invalid`
 - Round-trip: `npm run roundtrip`
 - XSD core: `npm run xsd`
 - Extension XSD (optional, structure-only): generate `npm run xsd:gen`, drift-guard `npm run xsd:gen:check`, validate `npm run xsd:ext`
 - Conventions: `npm run conventions`
-- BPMN → Synthea converter (`docs/bpmn2gmf-concept.md`): tests `npm run test:bpmn2gmf`; convert the real pathways (must pass, strict) `npm run convert:check`; write the modules `npm run bpmn2gmf -- lung-cancer --out-dir out/modules` (`--fuse-gateways` for fewer Simple states, `--strict` to refuse incomplete modules); the golden files `tools/bpmn2gmf/test/golden/` pin the converted modules (rewrite with `UPDATE_GOLDEN=1 npm run test:bpmn2gmf`); run them in a real Synthea (needs Java + the release jar, not part of `validate`) `npm run synthea:smoke -- <synthea-with-dependencies.jar>`
+- BPMN → Synthea converter (`docs/bpmn2gmf-concept.md`): tests `npm run test:bpmn2gmf`; convert the real pathways (must pass, strict) `npm run convert:check`; write the modules `npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules` (`--fuse-gateways` for fewer Simple states, `--strict` to refuse incomplete modules); the golden files `tools/bpmn2gmf/test/golden/` pin the converted modules (rewrite with `UPDATE_GOLDEN=1 npm run test:bpmn2gmf`); run them in a real Synthea (needs Java + the release jar, not part of `validate`) `npm run synthea:smoke -- <synthea-with-dependencies.jar>`

@@ -5,8 +5,8 @@ An overview of `tools/bpmn2gmf/`. The full design, the build order and the decis
 **What it does:** turns BPMN pathway models that use the `synthea:` extension into Synthea Generic Module Framework (GMF) `.json` modules. The diagram stays the readable source; the JSON is the format the Synthea engine runs.
 
 ```bash
-npm run bpmn2gmf -- lung-cancer          # write the JSON modules to out/modules
-npm run bpmn2gmf -- lung-cancer --check  # convert and report, write nothing
+npm run bpmn2gmf -- examples/lung-cancer          # write the JSON modules to out/modules
+npm run bpmn2gmf -- examples/lung-cancer --check  # convert and report, write nothing
 ```
 
 | Option | Effect |
@@ -41,7 +41,7 @@ Problems are collected by `diagnostics.mjs` on three levels: **errors** stop a m
 
 ## Golden files
 
-The five files in `lung-cancer/` are converted together and strictly, and each module must equal its file in `tools/bpmn2gmf/test/golden/` (`golden.test.mjs`, part of `validate`). A change that alters a module fails there; if it is intended, `UPDATE_GOLDEN=1 npm run test:bpmn2gmf` rewrites the files and the diff shows what changed.
+The five files in `examples/lung-cancer/` are converted together and strictly, and each module must equal its file in `tools/bpmn2gmf/test/golden/` (`golden.test.mjs`, part of `validate`). A change that alters a module fails there; if it is intended, `UPDATE_GOLDEN=1 npm run test:bpmn2gmf` rewrites the files and the diff shows what changed.
 
 The comparison with Synthea's own lung cancer modules (by content and state by state) is kept on the branch `upstream-comparison`; it is not part of `dev`.
 
@@ -53,7 +53,7 @@ The comparison with Synthea's own lung cancer modules (by content and state by s
   `test/browser-parity.test.mjs` bundles the converter for the browser and checks that it gives the same
   modules and messages, which also fails on any Node-only import in the core.
 - **Converter result** (`modules/` on the published site, `npm run convert:site` locally) lists the
-  JSON modules and the report that `tools/build-converter-site.mjs` made from `lung-cancer/`, with
+  JSON modules and the report that `tools/build-converter-site.mjs` made from `examples/lung-cancer/`, with
   `build.json` (the commit it was built from). The Pages workflow runs it after the demo build and
   `tools/check-pages-build.mjs` before the deploy.
 

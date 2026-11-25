@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Usage: node tools/build-converter-site.mjs [<bpmn dir>] [--out-dir <dir>] [--fuse-gateways]
 //
-// Runs the bpmn2gmf converter on a pathway folder (default: lung-cancer/) and
+// Runs the bpmn2gmf converter on a pathway folder (default: examples/lung-cancer/) and
 // writes a small static site that a reviewer can open without a checkout:
 //   <out>/index.html      links to every module and the report
 //   <out>/report.txt      conversion report as text (errors, warnings, notes)
@@ -19,7 +19,7 @@ import { writeModules } from './bpmn2gmf/write.mjs';
 import { explain } from './bpmn2gmf/explanations.mjs';
 
 const args = process.argv.slice(2);
-let dir = 'lung-cancer';
+let dir = 'examples/lung-cancer';
 let outDir = 'out/converter-site';
 let fuse = false;
 for (let i = 0; i < args.length; i++) {

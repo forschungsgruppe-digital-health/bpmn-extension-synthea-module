@@ -23,7 +23,7 @@ test('the Node snippet runs and prints the state type of a state', () => {
   // the snippet imports the package by its name, which Node resolves from inside the repository
   const script = join(root, `.api-doc-snippet-${process.pid}.mjs`);
   try {
-    copyFileSync(join(root, 'lung-cancer/anemia-submodule.bpmn'), join(dir, 'diagram.bpmn'));
+    copyFileSync(join(root, 'examples/lung-cancer/anemia-submodule.bpmn'), join(dir, 'diagram.bpmn'));
     writeFileSync(script, blocks[1]);
     const stdout = execFileSync('node', [script], { cwd: dir, encoding: 'utf8' });
     assert.match(stdout, /Diagnosis: Anemia ConditionOnset 271737000/);

@@ -19,15 +19,15 @@ run (`synthea:smoke`) run on their own. Individual checks:
 
 | Command | Purpose |
 |---------|---------|
-| `npm run lint:valid` | `examples/valid/` and the real pathways in `lung-cancer/` must pass lint |
+| `npm run lint:valid` | `examples/valid/` and the real pathways in `examples/lung-cancer/` must pass lint |
 | `npm run lint:invalid` | `examples/invalid/` must fail lint (negative test) |
-| `npm run roundtrip` | extension data of the examples and of `lung-cancer/` round-trips through `bpmn-moddle` |
-| `npm run xsd` | BPMN core of the examples and of `lung-cancer/` validates against `BPMN20.xsd` |
+| `npm run roundtrip` | extension data of the examples and of `examples/lung-cancer/` round-trips through `bpmn-moddle` |
+| `npm run xsd` | BPMN core of the examples and of `examples/lung-cancer/` validates against `BPMN20.xsd` |
 | `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, XSD), then does the conversion work (module schema, converter tests with the golden files, strict conversion) |
-| `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `lung-cancer/` against BPMN core + that XSD |
+| `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `examples/lung-cancer/` against BPMN core + that XSD |
 | `npm run conventions` | `package.json` follows the bpmn.io conventions (name, `type: module`, `bpmn-js` only as a peer dependency) |
 | `npm run test:bpmn2gmf` | tests of the converter in `tools/bpmn2gmf/` |
-| `npm run convert:check` | the real pathways in `lung-cancer/` convert strictly (`--strict`) |
+| `npm run convert:check` | the real pathways in `examples/lung-cancer/` convert strictly (`--strict`) |
 | `npm run synthea:smoke` | (optional, needs Java) run the converted modules in a Synthea jar; not part of `validate` |
 | `npm run demo` | (optional) interactive modeler playground — not a pass/fail gate |
 
