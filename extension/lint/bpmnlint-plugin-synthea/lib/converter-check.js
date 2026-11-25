@@ -2,9 +2,9 @@
 // into a Synthea module and what it cannot; asking it from the lint means the diagram is checked
 // against the same rules before anyone converts it, with no second copy of them to keep in sync.
 //
-// The converter lives in this repository, not in the published `extension/` folder. If it cannot be
-// loaded (an installed copy of the extension), the two rules that use this bridge fail loudly instead
-// of silently checking nothing; leave them out of the configuration there (`plugin:synthea/all` does).
+// The lint plugin is not part of the published package (the converter is, in extension/src/converter).
+// If the converter cannot be loaded, the two rules that use this bridge fail loudly instead of silently
+// checking nothing; leave them out of the configuration there (`plugin:synthea/all` includes them).
 
 // Codes another lint rule already owns, so a problem is not reported twice.
 const OWNED_BY_OTHER_RULE = new Set([

@@ -62,8 +62,11 @@ Veröffentlichung liegt bei den Autor:innen.
 | **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 33 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. See [docs/lint-rules.md](docs/lint-rules.md). |
 | **Converter** | `extension/src/converter/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
 | **Example pathway** | `examples/lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
+| **Tests** | `extension/test/` | `npm test`: converter, lint rules, properties panel, and the golden files of the example pathway. |
+| **Checks and build scripts** | `tools/` | What `npm run validate` runs besides the tests (round trip, XSD, conventions), the generators of the XSD and the module schema, the site build. |
+| **Drafts** | `examples/drafts/` | The first draft diagrams (v0.1), kept to show where the models started. |
 | **Demo** | `demo/` | A bpmn-js modeler with the extension, for trying it by hand. Not published. |
-| **Documentation** | `docs/` | Modeling guide, mapping rules, converter concept, extension matrix, architecture decisions. |
+| **Documentation** | `docs/`, `docs-site/` | Modeling guide, mapping rules, converter concept, extension matrix, architecture decisions; `docs-site/` builds the GitHub Pages site from them. |
 
 ## Quick start
 
@@ -254,7 +257,7 @@ npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules 
 | add a lint rule | a file in `extension/lint/bpmnlint-plugin-synthea/rules/`, an entry in its `index.js` (in `rules` **and** `configs.all.rules`), a fixture in `examples/valid/` and `examples/invalid/` | `npm run lint:valid`, `npm run lint:invalid` |
 | write the field into the JSON | `extension/src/converter/emit.mjs` (per state type), `required-fields.mjs`, a test in `extension/test/convert.test.mjs` | `npm test`, `npm run convert:check` |
 | change how a BPMN element maps to a state | `docs/implicit-rules.md`, `extension/src/converter/resolve.mjs`, `transitions.mjs` | `npm test` |
-| offer another pathway in the demo | `PATHWAYS` in `demo/src/main.js` | `npm run demo` |
+| offer another example in the demo | the `.bpmn` file in `examples/lung-cancer/` (the **Examples** menu lists every file there), its menu name in `EXAMPLE_LABELS` in `demo/src/main.js` | `npm run demo` |
 
 `npm run validate` runs the whole gate in two stages: `validate:diagram` (is the BPMN a valid input: the
 positive fixtures must lint clean, including the converter's own checks and the values in the fields, the
