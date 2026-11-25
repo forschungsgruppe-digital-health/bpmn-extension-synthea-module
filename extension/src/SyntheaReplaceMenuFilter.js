@@ -1,6 +1,6 @@
 /**
  * Replace menu filter: takes out of the replace menu everything the converter does not accept or
- * cannot tell apart (tools/bpmn2gmf/ir.mjs: REJECTED, BOUNDARY_EVENT_UNSUPPORTED, kindOf):
+ * cannot tell apart (extension/src/converter/ir.mjs: REJECTED, BOUNDARY_EVENT_UNSUPPORTED, kindOf):
  *
  * - the complex and event-based gateway, transactions, ad-hoc and event sub-processes, the boundary
  *   events, and the loop / multi-instance markers (LOOP_MARKER_UNSUPPORTED) are rejected;
@@ -16,7 +16,7 @@
  *   probability of the flow is a `synthea:` setting).
  *
  * The parallel and the inclusive gateway are offered: a split and its join are rewritten
- * (tools/bpmn2gmf/gateways.mjs).
+ * (extension/src/converter/gateways.mjs).
  */
 export const UNSUPPORTED_ENTRIES = [
   'replace-with-complex-gateway',

@@ -2,7 +2,7 @@
 // matrix does not rest on reading the code alone. (The panel column is read out of the demo.)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { convert } from '../convert.mjs';
+import { convert } from '../src/converter/convert.mjs';
 import { wrap, start, end, task, timer, call, flow, gateway, stateType, prob, cond, attrCond, enc, coding, SNOMED, LOINC, RXNORM } from './helpers.mjs';
 
 const ext = (inner) => `<bpmn2:extensionElements>${inner}</bpmn2:extensionElements>`;

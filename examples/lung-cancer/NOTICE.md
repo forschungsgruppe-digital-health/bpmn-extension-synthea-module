@@ -1,6 +1,6 @@
 # Synthea license and notices for this pathway
 
-The five `.bpmn` files in this folder, and the modules generated from them (`tools/bpmn2gmf/test/golden/`),
+The five `.bpmn` files in this folder, and the modules generated from them (`extension/test/golden/`),
 are modeled after modules of the Synthea project:
 
 - Source: https://github.com/synthetichealth/synthea, `src/main/resources/modules/`

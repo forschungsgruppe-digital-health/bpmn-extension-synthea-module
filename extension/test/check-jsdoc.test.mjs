@@ -1,7 +1,7 @@
 // The JSDoc check (tools/check-jsdoc.mjs) accepts documented code and finds what is missing.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { checkSource } from '../../check-jsdoc.mjs';
+import { checkSource } from '../../tools/check-jsdoc.mjs';
 
 const documented = `/**
  * What this module is for.

@@ -5,7 +5,7 @@
 import BpmnModdle from 'bpmn-moddle';
 // A JSON import instead of readFileSync, so this file also runs in the browser
 // (the demo converts the open diagram client-side).
-import descriptor from '../../extension/model/synthea.json' with { type: 'json' };
+import descriptor from '../../model/synthea.json' with { type: 'json' };
 
 /**
  * The moddle descriptor of the `synthea:` extension (extension/model/synthea.json), re-exported for

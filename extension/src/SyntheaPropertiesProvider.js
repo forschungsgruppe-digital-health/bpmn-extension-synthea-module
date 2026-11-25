@@ -126,7 +126,7 @@ const CONDITION_FIELDS_BY_TYPE = {
   'Active CarePlan': ['referencedAttribute', 'codeSystem', 'code', 'codeDisplay'],
   // Synthea's `within` is a {quantity, unit} object, not free text — reuses
   // the same quantity/unit fields Age uses (different meaning, same shape;
-  // tools/bpmn2gmf nests them under "within" for PriorState, flat for Age).
+  // extension/src/converter nests them under "within" for PriorState, flat for Age).
   'PriorState': ['priorStateName', 'since', 'quantity', 'unit'],
   'True': [],
   'False': [],
@@ -158,7 +158,7 @@ function isCombinatorConditionType(conditionType) {
 }
 
 // Systems the code of an Observation/Active-* condition can come from; the value
-// is the system URI; tools/bpmn2gmf maps it to Synthea's name.
+// is the system URI; extension/src/converter maps it to Synthea's name.
 const CODE_SYSTEM_OPTIONS = [
   { value: 'http://loinc.org', label: 'LOINC' },
   { value: 'http://snomed.info/sct', label: 'SNOMED CT' },
@@ -171,7 +171,7 @@ const STATE_CODE_SYSTEM_OPTIONS = [
   { value: 'http://hl7.org/fhir/sid/cvx', label: 'CVX (vaccines)' }
 ];
 
-// The state types the converter accepts per kind of element (tools/bpmn2gmf/resolve.mjs,
+// The state types the converter accepts per kind of element (extension/src/converter/resolve.mjs,
 // ALLOWED_BY_KIND). Tasks and other events accept every state type.
 const TASK_EXCLUDED_STATE_TYPES = ['Initial', 'Terminal', 'CallSubmodule', 'Guard', 'Delay'];
 
@@ -188,7 +188,7 @@ function stateTypeValuesFor(element) {
 }
 
 /**
- * The state type the converter infers for an element that names none (tools/bpmn2gmf/resolve.mjs,
+ * The state type the converter infers for an element that names none (extension/src/converter/resolve.mjs,
  * `infer`): a start event is `Initial`, an end event `Terminal`, a call activity and a sub-process
  * `CallSubmodule`, a timer event `Delay`. The panel shows it as the value, so nothing has to be chosen by hand.
  *
@@ -392,7 +392,7 @@ function createSyntheaGroup(sections, element) {
   };
 }
 
-// The state types that carry a clinical code (the same list as tools/bpmn2gmf/codes.mjs).
+// The state types that carry a clinical code (the same list as extension/src/converter/codes.mjs).
 const CODED_STATE_TYPES = [
   'ConditionOnset', 'ConditionEnd', 'AllergyOnset', 'AllergyEnd', 'MedicationOrder', 'MedicationEnd',
   'CarePlanStart', 'CarePlanEnd', 'Procedure', 'ImagingStudy', 'Device', 'DeviceEnd',
@@ -536,7 +536,7 @@ function createGuardGroup(element) {
 }
 
 // Tasks, exclusive gateways and intermediate events can be marked "documentation only"
-// (tools/bpmn2gmf/documentation.mjs: DOCUMENTATION_ONLY_NOT_ALLOWED).
+// (extension/src/converter/documentation.mjs: DOCUMENTATION_ONLY_NOT_ALLOWED).
 function canBeDocumentationOnly(element) {
   return is(element, 'bpmn:Task') || is(element, 'bpmn:ExclusiveGateway') ||
     is(element, 'bpmn:IntermediateCatchEvent') || is(element, 'bpmn:IntermediateThrowEvent');
@@ -767,7 +767,7 @@ function stableValidator(cache, element, options, getConfig) {
   return validate;
 }
 
-// A field the converter needs for these state types (tools/bpmn2gmf/required-fields.mjs); it is marked
+// A field the converter needs for these state types (extension/src/converter/required-fields.mjs); it is marked
 // while it is empty. What is left to the converter and the lint: choices between fields, the lists
 // (series, supplies, report observations) and the encounter, whose requirements depend on the other
 // states of the same visit.

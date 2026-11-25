@@ -2,9 +2,9 @@
   "json.schemas": [
     {
       "fileMatch": [
-        "tools/bpmn2gmf/test/golden/*.json"
+        "extension/test/golden/*.json"
       ],
-      "url": "./tools/bpmn2gmf/module.schema.json"
+      "url": "./extension/src/converter/module.schema.json"
     }
   ]
 }

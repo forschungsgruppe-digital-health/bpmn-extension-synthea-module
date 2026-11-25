@@ -19,8 +19,8 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, mkdtempSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, delimiter } from 'node:path';
-import { convert } from './bpmn2gmf/convert.mjs';
-import { writeModules } from './bpmn2gmf/write.mjs';
+import { convert } from '../extension/src/converter/convert.mjs';
+import { writeModules } from '../extension/src/converter/write.mjs';
 
 const args = process.argv.slice(2);
 const jar = args.find((a) => !a.startsWith('--') && a.endsWith('.jar'));

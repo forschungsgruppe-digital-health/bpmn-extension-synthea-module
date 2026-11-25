@@ -1,6 +1,6 @@
 /**
  * Default: every start event gets the state type `Initial`, so nobody has to choose it. The
- * converter infers it anyway (tools/bpmn2gmf/resolve.mjs); writing it into the diagram makes it
+ * converter infers it anyway (extension/src/converter/resolve.mjs); writing it into the diagram makes it
  * visible in the properties panel and in the file. It is set when a start event is created, dropped
  * from the palette, or made out of another element with the replace menu (for example a message
  * start event, whose `bpmn:` event definition then stays). A start event the user already gave a

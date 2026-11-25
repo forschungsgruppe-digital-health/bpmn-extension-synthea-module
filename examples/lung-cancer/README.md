@@ -18,7 +18,7 @@ The demo app's Pathway dropdown loads all five directly from here.
 
 ## Converting to Synthea and running it
 
-`tools/bpmn2gmf` turns these files into Synthea GMF JSON (concept and decisions:
+`extension/src/converter` turns these files into Synthea GMF JSON (concept and decisions:
 [`docs/bpmn2gmf-concept.md`](../../docs/bpmn2gmf-concept.md)):
 
     npm run convert:check                                   # all five convert, strict, no warning (part of `npm run validate`)
@@ -48,7 +48,7 @@ the original starts with an `EncounterEnd` because other modules (colorectal can
 pregnancy, COPD, …) call it, ours leaves it out because the only caller,
 `synthea-lung-cancer.bpmn`, ends the visit before the call. Do not call it from
 another pathway without ending the encounter first. The tests in
-`tools/bpmn2gmf/test/lung-cancer.test.mjs` check this and that the treatment cycle
+`extension/test/lung-cancer.test.mjs` check this and that the treatment cycle
 never returns.
 
 The comparison with the hand-written lung cancer module of the Synthea project
@@ -61,7 +61,7 @@ concept.
 - The 44 clinical codes (SNOMED CT, LOINC, RxNorm) sit on the element's `synthea:stateTypeConfig` as `codeSystem`, `code` and `codeDisplay`. The converter writes them into `codes`; the properties panel has a "Code" section for the state types that carry one.
 - Every state-bearing element has an explicit `synthea:stateTypeConfig` (or an inferable element kind).
 - The Encounter codes are part of `synthea:encounterContext`.
-- `npm run convert:check` runs with `--strict` and passes; the golden files in `tools/bpmn2gmf/test/golden/` include the codes.
+- `npm run convert:check` runs with `--strict` and passes; the golden files in `extension/test/golden/` include the codes.
 
 ## BPMN conformance class (SYN-1)
 
@@ -85,5 +85,5 @@ which requires the BPMN conformance sub-class to be declared (SYN-1, *Muss*).
 - **Analytic** fits: a broader element vocabulary for detailed, analyzable
   modeling, explicitly not intended for execution. These diagrams are
   authored for clinical/domain review and as the source that
-  `tools/bpmn2gmf` translates into Synthea GMF JSON — not to
+  `extension/src/converter` translates into Synthea GMF JSON — not to
   be run by a BPMN engine directly.

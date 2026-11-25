@@ -1,6 +1,6 @@
 # What the converter does
 
-An overview of `tools/bpmn2gmf/`. The full design, the build order and the decisions are in [bpmn2gmf-concept.md](bpmn2gmf-concept.md); the mapping rules are in [implicit-rules.md](implicit-rules.md); what a modeler has to draw is in [modeling-guide.md](modeling-guide.md).
+An overview of `extension/src/converter/`. The full design, the build order and the decisions are in [bpmn2gmf-concept.md](bpmn2gmf-concept.md); the mapping rules are in [implicit-rules.md](implicit-rules.md); what a modeler has to draw is in [modeling-guide.md](modeling-guide.md).
 
 **What it does:** turns BPMN pathway models that use the `synthea:` extension into Synthea Generic Module Framework (GMF) `.json` modules. The diagram stays the readable source; the JSON is the format the Synthea engine runs.
 
@@ -41,7 +41,7 @@ Problems are collected by `diagnostics.mjs` on three levels: **errors** stop a m
 
 ## Golden files
 
-The five files in `examples/lung-cancer/` are converted together and strictly, and each module must equal its file in `tools/bpmn2gmf/test/golden/` (`golden.test.mjs`, part of `validate`). A change that alters a module fails there; if it is intended, `UPDATE_GOLDEN=1 npm run test:bpmn2gmf` rewrites the files and the diff shows what changed.
+The five files in `examples/lung-cancer/` are converted together and strictly, and each module must equal its file in `extension/test/golden/` (`golden.test.mjs`, part of `validate`). A change that alters a module fails there; if it is intended, `UPDATE_GOLDEN=1 npm test` rewrites the files and the diff shows what changed.
 
 The comparison with Synthea's own lung cancer modules (by content and state by state) is kept on the branch `upstream-comparison`; it is not part of `dev`.
 
@@ -49,7 +49,7 @@ The comparison with Synthea's own lung cancer modules (by content and state by s
 
 - **Convert to Synthea** in the demo (`npm run demo`, or the published site) runs this converter in the
   browser on the open diagram: graph of the states and transitions, JSON, and the messages grouped by
-  kind with an explanation (`tools/bpmn2gmf/explanations.mjs`). It is the same code as the command line;
+  kind with an explanation (`extension/src/converter/explanations.mjs`). It is the same code as the command line;
   `test/browser-parity.test.mjs` bundles the converter for the browser and checks that it gives the same
   modules and messages, which also fails on any Node-only import in the core.
 - **Converter result** (`modules/` on the published site, `npm run convert:site` locally) lists the
@@ -59,7 +59,7 @@ The comparison with Synthea's own lung cancer modules (by content and state by s
 
 ## Related
 
-- [validator-overview.md](validator-overview.md): the checks that `npm run validate` runs, including the converter tests with the golden files and `convert:check`.
+- [validator-overview.md](validator-overview.md): the checks that `npm run validate` runs, including `npm test` with the golden files and `convert:check`.
 - [lint-rules.md](lint-rules.md): the lint rules that check the `synthea:` data before it reaches the converter.
 
 ## Limits

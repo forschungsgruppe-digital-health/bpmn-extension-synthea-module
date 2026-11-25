@@ -4,7 +4,7 @@
 // separately and on their own (bpmn-js-bpmnlint, see main.js: icon on the element, count at the
 // bottom), so it is clear which of the two reports what. Unlike the lint, this is the plain
 // conversion of the diagram together with the other opened files, so it also sees missing sub-modules.
-import { fileBaseFor } from '../../tools/bpmn2gmf/convert.mjs';
+import { fileBaseFor } from '../../extension/src/converter/convert.mjs';
 
 const DEBOUNCE_MS = 500;
 const OVERLAY_TYPE = 'synthea-converter-issue';

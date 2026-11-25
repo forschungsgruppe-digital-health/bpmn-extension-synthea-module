@@ -7,7 +7,7 @@ const { is, getExtension } = require('../lib/utils');
  * Encounter/EncounterEnd are no longer drawn as explicit states (ADR-0003
  * supersedes ADR-0002's flow-node approach). Instead, every clinical state
  * belonging to an encounter carries synthea:EncounterContext with the same
- * encounterId, and tools/bpmn2gmf derives the encounter's span and
+ * encounterId, and extension/src/converter derives the encounter's span and
  * synthesizes the Encounter/EncounterEnd GMF states from it. `wellness`
  * moved onto EncounterContext itself (no more separate WellnessConfig) —
  * it describes the encounter as a whole, not an individual state, so every

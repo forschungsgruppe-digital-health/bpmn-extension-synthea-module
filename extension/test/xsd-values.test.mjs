@@ -10,11 +10,11 @@ import { mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { generateXsd, loadValues } from '../../moddle-to-xsd.mjs';
+import { generateXsd, loadValues } from '../../tools/moddle-to-xsd.mjs';
 import { wrap, start, end, task, timer, flow, gateway, stateType, cond } from './helpers.mjs';
 
-const descriptorPath = fileURLToPath(new URL('../../../extension/model/synthea.json', import.meta.url));
-const bpmnXsd = fileURLToPath(new URL('../../../node_modules/bpmn-moddle/resources/bpmn/xsd/BPMN20.xsd', import.meta.url));
+const descriptorPath = fileURLToPath(new URL('../model/synthea.json', import.meta.url));
+const bpmnXsd = fileURLToPath(new URL('../../node_modules/bpmn-moddle/resources/bpmn/xsd/BPMN20.xsd', import.meta.url));
 const descriptor = JSON.parse(readFileSync(descriptorPath, 'utf8'));
 
 const hasXmllint = spawnSync('xmllint', ['--version']).status !== null && !spawnSync('xmllint', ['--version']).error;

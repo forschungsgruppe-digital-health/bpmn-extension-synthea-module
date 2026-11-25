@@ -4,8 +4,8 @@
 // that it writes a complete state (VitalSign wrote nothing for a long time).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { descriptor } from '../parse.mjs';
-import { missingFields } from '../required-fields.mjs';
+import { descriptor } from '../src/converter/parse.mjs';
+import { missingFields } from '../src/converter/required-fields.mjs';
 import {
   run, start, end, task, flow, stateType, setAttr, coding, delay, SNOMED, LOINC, RXNORM
 } from './helpers.mjs';

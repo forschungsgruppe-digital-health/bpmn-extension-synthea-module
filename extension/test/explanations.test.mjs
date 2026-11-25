@@ -3,9 +3,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
-import { EXPLANATIONS } from '../explanations.mjs';
+import { EXPLANATIONS } from '../src/converter/explanations.mjs';
 
-const dir = new URL('..', import.meta.url);
+const dir = new URL('../src/converter/', import.meta.url);
 const sources = readdirSync(dir).filter((f) => f.endsWith('.mjs') && f !== 'explanations.mjs');
 const codes = new Set();
 for (const f of sources) {
@@ -20,7 +20,7 @@ test('the converter emits notes and warnings', () => {
 for (const code of codes) {
   test(`explanation for ${code}`, () => {
     const e = EXPLANATIONS[code];
-    assert.ok(e, `add an entry for ${code} to tools/bpmn2gmf/explanations.mjs`);
+    assert.ok(e, `add an entry for ${code} to extension/src/converter/explanations.mjs`);
     for (const k of ['what', 'why', 'fix']) assert.ok(e[k]?.length > 10, `${code}.${k}`);
   });
 }

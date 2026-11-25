@@ -60,7 +60,7 @@ Veröffentlichung liegt bei den Autor:innen.
 | **Moddle descriptor** | `extension/model/synthea.json` | The 28 `synthea:` types (and 13 enums): state type, clinical code, probability, condition, delay, guard, encounter, attribute links, … The XSD in `extension/model/synthea.xsd` is generated from it. |
 | **Properties panel** | `extension/src/` | One group "Synthea" in the bpmn-js properties panel, one collapsible section per type, showing only what fits the chosen State Type and what the converter accepts. |
 | **Lint plugin** | `extension/lint/bpmnlint-plugin-synthea/` | 33 [bpmnlint](https://github.com/bpmn-io/bpmnlint) rules that catch mistakes while modeling: probability sums over 1, inconsistent encounter groups, missing fields. See [docs/lint-rules.md](docs/lint-rules.md). |
-| **Converter** | `tools/bpmn2gmf/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
+| **Converter** | `extension/src/converter/` | Turns the BPMN files into Synthea GMF JSON and checks the result. |
 | **Example pathway** | `examples/lung-cancer/` | The Synthea lung cancer pathway: a main module and four submodules, called through call activities. |
 | **Demo** | `demo/` | A bpmn-js modeler with the extension, for trying it by hand. Not published. |
 | **Documentation** | `docs/` | Modeling guide, mapping rules, converter concept, extension matrix, architecture decisions. |
@@ -252,14 +252,14 @@ npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules 
 | add a field or a type | `extension/model/synthea.json` | `npm run xsd:gen`, `npm run roundtrip` |
 | show it in the panel | `extension/src/SyntheaPropertiesProvider.js` (`getGroups`, a `create…Group` function, an entry from `makeTextEntry` / `makeSelectEntry` / `makeCheckboxEntry`) | `npm run demo` |
 | add a lint rule | a file in `extension/lint/bpmnlint-plugin-synthea/rules/`, an entry in its `index.js` (in `rules` **and** `configs.all.rules`), a fixture in `examples/valid/` and `examples/invalid/` | `npm run lint:valid`, `npm run lint:invalid` |
-| write the field into the JSON | `tools/bpmn2gmf/emit.mjs` (per state type), `required-fields.mjs`, a test in `tools/bpmn2gmf/test/convert.test.mjs` | `npm run test:bpmn2gmf`, `npm run convert:check` |
-| change how a BPMN element maps to a state | `docs/implicit-rules.md`, `tools/bpmn2gmf/resolve.mjs`, `transitions.mjs` | `npm run test:bpmn2gmf` |
+| write the field into the JSON | `extension/src/converter/emit.mjs` (per state type), `required-fields.mjs`, a test in `extension/test/convert.test.mjs` | `npm test`, `npm run convert:check` |
+| change how a BPMN element maps to a state | `docs/implicit-rules.md`, `extension/src/converter/resolve.mjs`, `transitions.mjs` | `npm test` |
 | offer another pathway in the demo | `PATHWAYS` in `demo/src/main.js` | `npm run demo` |
 
 `npm run validate` runs the whole gate in two stages: `validate:diagram` (is the BPMN a valid input: the
 positive fixtures must lint clean, including the converter's own checks and the values in the fields, the
 round trip and both XSDs must pass, the generated XSD must match the descriptor) and `validate:convert` (the
-converter tests (including the golden files of the lung cancer pathway) and the strict conversion of the
+tests (`npm test`, including the golden files of the lung cancer pathway) and the strict conversion of the
 lung cancer files must pass). `npm run lint:invalid` is **expected to fail**: the diagrams in
 `examples/invalid/` prove that the rules fire.
 
@@ -304,7 +304,7 @@ If you use this software, please cite it using the metadata in [CITATION.cff](CI
 
 [MIT](LICENSE).
 
-The pathway models in `examples/lung-cancer/` and the files in `tools/bpmn2gmf/test/golden/` are modeled after
+The pathway models in `examples/lung-cancer/` and the files in `extension/test/golden/` are modeled after
 and generated from Synthea modules, which are Apache-2.0 licensed (Copyright The MITRE Corporation and the
 Synthea contributors); the license text and Synthea's notices on RxNorm, LOINC and SNOMED CT are in
 `LICENSE` and `NOTICE.md` in `examples/lung-cancer/`.

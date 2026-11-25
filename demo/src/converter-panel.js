@@ -1,7 +1,7 @@
 // "Convert to Synthea" panel: runs the bpmn2gmf converter in the browser on the
 // open diagram and shows the result as a graph, as JSON and as messages.
-import { convert, fileBaseFor } from '../../tools/bpmn2gmf/convert.mjs';
-import { explain } from '../../tools/bpmn2gmf/explanations.mjs';
+import { convert, fileBaseFor } from '../../extension/src/converter/convert.mjs';
+import { explain } from '../../extension/src/converter/explanations.mjs';
 import { renderGraph } from './gmf-graph.js';
 
 const $ = (sel) => document.querySelector(sel);

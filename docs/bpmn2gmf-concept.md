@@ -1,4 +1,4 @@
-# `tools/bpmn2gmf` — Concept
+# `extension/src/converter` — Concept
 
 - **Status:** all phases implemented; decisions made (see [§8](#8-build-order))
 - **Goal:** turn the BPMN pathway models (`synthea:`; the clinical codes are attributes of its state type) into Synthea Generic Module Framework (GMF) `.json` modules that the Synthea engine can load.
@@ -66,7 +66,7 @@ A pipeline of small, pure stages. Each stage takes plain data and returns plain 
  modules/<name>.json   +  diagnostics report (errors / warnings / "unmodeled field" notes)
 ```
 
-Layout (all under `tools/bpmn2gmf/`, no `package.json` of its own; the list is the first plan, the files that came later are named below it):
+Layout (all under `extension/src/converter/`, no `package.json` of its own; the list is the first plan, the files that came later are named below it):
 
 ```
 cli.mjs            argument parsing, file I/O, exit code
@@ -84,7 +84,7 @@ test/              node:test unit tests + golden files
 
 Added later: `convert.mjs` (the pipeline as a function, also used by the lint), `gateways.mjs`, `links.mjs`, `documentation.mjs`, `fuse.mjs`, `layout.mjs`, `write.mjs`, `diagnostics.mjs`, `explanations.mjs`, `required-fields.mjs`, `verify-flow.mjs`, `gen-schema.mjs` and `module.schema.json`, and the comparisons `compare.mjs`, `compare-upstream.mjs`, `compare-structure.mjs` with `structure.mjs`.
 
-CLI: `node tools/bpmn2gmf/cli.mjs examples/lung-cancer/ --out-dir out/modules` (a directory so that submodule references can be resolved across files; a single file is allowed when it calls no submodule). npm script `bpmn2gmf`, plus `test:bpmn2gmf` added to `validate`.
+CLI: `node extension/src/converter/cli.mjs examples/lung-cancer/ --out-dir out/modules` (a directory so that submodule references can be resolved across files; a single file is allowed when it calls no submodule). npm script `bpmn2gmf`, plus the tests added to `validate` (the script was `test:bpmn2gmf`; since 2026-11-25 it is `npm test`).
 
 ### 3.1 Intermediate representation
 
@@ -125,7 +125,7 @@ Each state type accepts only some systems (Procedure/ConditionOnset/CarePlanStar
 **Death** drawn as an end event has no outgoing flow; it continues to the module's `Terminal` state (one is added if there is none).
 
 ### 4.4 Encounter synthesis (ADR-0003)
-Implemented in `tools/bpmn2gmf/encounters.mjs`, between state resolution and emission. The Encounter/EncounterEnd states are spliced into the IR flow, so transitions (conditions, probabilities) stay on the original edges.
+Implemented in `extension/src/converter/encounters.mjs`, between state resolution and emission. The Encounter/EncounterEnd states are spliced into the IR flow, so transitions (conditions, probabilities) stay on the original edges.
 
 **Which part of the flow belongs to an encounter** (its *region*), per `encounterId` group:
 - **span:** the tagged states plus every node on a path between two of them. Another encounter's states and anything that ends an encounter (below) cannot lie inside a span.
@@ -213,7 +213,7 @@ These are our own checks (a small required-fields table in `required-fields.mjs`
 ## 7. Testing
 
 - **Unit tests** (`node:test`) per stage with tiny hand-written BPMN/IR fixtures: each transition type, condition recursion + `negate`, remainder probability, implicit Terminal, encounter synthesis (single group, two groups in one path, multiple entries/exits, re-entry error).
-- **Golden files** for the real models, built up in the order of §8, stored under `tools/bpmn2gmf/test/golden/`.
+- **Golden files** for the real models, built up in the order of §8, stored under `extension/test/golden/`.
 - **Structural comparison against upstream:** a script that compares our generated module to the real `lung_cancer*.json` by *multiset of (state type, codes)* and by transition-shape counts — not by names or exact text, since our BPMN deliberately differs (names, gateway states, the explicit simplifications). `npm run compare:upstream` reports the content, `npm run compare:structure` (§11) walks both modules together and fails on any difference that is not an accepted one.
 - **Smoke test:** `npm run synthea:smoke` loads the generated JSON in a local Synthea build (needs Java); it is not part of `validate` (§12).
 
@@ -224,11 +224,11 @@ These are our own checks (a small required-fields table in `required-fields.mjs`
 | Phase | Content | Done when |
 |---|---|---|
 | 0 | Spike (done): moddle loads all five files without warnings | — |
-| 1 | CLI, parse, IR, state-type/name resolution, `Initial`/`Terminal`/`Simple`/`Delay`/`SetAttribute`/`Counter`/`CallSubmodule`, all three transition types, conditions + `Not`, verify | **Implemented** (22 unit tests, `npm run test:bpmn2gmf`). The planned golden file for `lung-cancer-probabilities-submodule.bpmn` is blocked by the *model*: its 3 gateways have no `synthea:conditionConfig` (see §10) |
+| 1 | CLI, parse, IR, state-type/name resolution, `Initial`/`Terminal`/`Simple`/`Delay`/`SetAttribute`/`Counter`/`CallSubmodule`, all three transition types, conditions + `Not`, verify | **Implemented** (22 unit tests, `npm test`). The planned golden file for `lung-cancer-probabilities-submodule.bpmn` is blocked by the *model*: its 3 gateways have no `synthea:conditionConfig` (see §10) |
 | 2 | Codes, clinical states (`ConditionOnset/End`, `Procedure`, `MedicationOrder/End`, `CarePlanStart`, `Device*`, …), assign/referenced attributes | **Implemented** (41 tests). Four of the five real files convert without errors; `anemia_submodule` has the same 18 states (type + codes) as upstream `anemia_sub.json`. Remaining output gaps are reported as `REQUIRED_FIELD_MISSING` warnings and a `remarks` entry in the state; `--strict` turns them into errors |
 | 3 | Encounter synthesis + `targetEncounter` | **Implemented** (51 tests). Anemia and the treatment submodule get their Encounter/EncounterEnd states; the main module still waits for the boundary-timer remodeling |
 | 4 | Decisions 1/4 implemented: extension additions + emitters for the new fields | **Implemented** (61 tests). Encounter code, `SymptomConfig`, `ObservationConfig`, `ValueConfig`, `ImagingStudySeries` and `ReportObservation` (the contained values of a `DiagnosticReport`) are in schema, panel, converter, lint (SYN-28, SYN-29) and guide; the main pathway's boundary timer is replaced by `Death` states with time spans. **All five real files convert and pass `--strict` with no warning**; the nine lab reports (92 contained observations) are identical to upstream |
-| 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | **Implemented** (70 tests): `--fuse-gateways`, fewer `Encounter` copies, `npm run compare:upstream` with the three upstream modules kept in `tools/bpmn2gmf/test/upstream/` (Apache-2.0, see NOTICE.md), and `npm run validate` / the CI workflow now also run `xsd:gen:check`, `xsd:ext`, the converter tests and `convert:check` (all five real files, `--strict`). Loading the generated JSON in a real Synthea and the structure comparison came later (§11, §12) |
+| 5 | `--fuse-gateways`, upstream comparison script, CI step in `validate` | **Implemented** (70 tests): `--fuse-gateways`, fewer `Encounter` copies, `npm run compare:upstream` with the three upstream modules kept in `tools/bpmn2gmf/test/upstream/` (now on the branch `upstream-comparison`) (Apache-2.0, see NOTICE.md), and `npm run validate` / the CI workflow now also run `xsd:gen:check`, `xsd:ext`, the converter tests and `convert:check` (all five real files, `--strict`). Loading the generated JSON in a real Synthea and the structure comparison came later (§11, §12) |
 
 Phases 1–3 do not depend on the field decisions (missing fields only produce warnings), so they ran ahead of phase 4.
 
@@ -266,7 +266,7 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 
 ## 11. Comparison with upstream (phase 5)
 
-> **Since 2026-11-25** the comparison scripts (`compare*.mjs`, `structure.mjs`) and the copies of the Synthea modules are no longer on `dev`; they are kept on the branch `upstream-comparison`. On `dev` the golden files in `tools/bpmn2gmf/test/golden/` pin the converted modules instead. This section records what the comparison found.
+> **Since 2026-11-25** the comparison scripts (`compare*.mjs`, `structure.mjs`) and the copies of the Synthea modules are no longer on `dev`; they are kept on the branch `upstream-comparison`. On `dev` the golden files in `extension/test/golden/` pin the converted modules instead. This section records what the comparison found.
 
 `npm run compare:upstream` converts the five real files and compares them with the hand-written Synthea modules by *content* (`compare.mjs`): every state with clinical meaning is reduced to a signature — type, codes and the values that matter (ranges, units, observation lists, encounter class and code) — and the signatures are compared as multisets. Names, `Simple`/`EncounterEnd` states and the exact transition structure are left out on purpose.
 

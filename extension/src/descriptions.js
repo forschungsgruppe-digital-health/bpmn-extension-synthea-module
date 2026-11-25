@@ -1,7 +1,7 @@
 /**
  * Short explanations shown under a field in the properties panel, keyed by the label of the field
  * (the text in SyntheaPropertiesProvider.js). A label without an entry here shows no description.
- * A test (tools/bpmn2gmf/test/panel-descriptions.test.mjs) fails when a key matches no label.
+ * A test (extension/test/panel-descriptions.test.mjs) fails when a key matches no label.
  */
 
 /**

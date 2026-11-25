@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { convert } from '../convert.mjs';
+import { convert } from '../src/converter/convert.mjs';
 
 const lungCancerModules = async () => {
   const files = ['synthea-lung-cancer', 'anemia-submodule', 'lung-cancer-treatment-submodule', 'symptom-check-submodule', 'lung-cancer-probabilities-submodule'];

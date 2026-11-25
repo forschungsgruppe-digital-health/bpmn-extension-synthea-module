@@ -8,7 +8,7 @@ convention.
 
 ```bash
 npm install        # Node 22+; sets up the workspaces (lint plugin + demo)
-npm run validate   # lint, round-trip, XSD, conventions, converter tests, strict conversion
+npm run validate   # lint, round-trip, XSD, conventions, tests (npm test), strict conversion
 npm run demo       # optional: interactive modeler playground at http://localhost:5173/modeler/
 ```
 
@@ -23,10 +23,10 @@ run (`synthea:smoke`) run on their own. Individual checks:
 | `npm run lint:invalid` | `examples/invalid/` must fail lint (negative test) |
 | `npm run roundtrip` | extension data of the examples and of `examples/lung-cancer/` round-trips through `bpmn-moddle` |
 | `npm run xsd` | BPMN core of the examples and of `examples/lung-cancer/` validates against `BPMN20.xsd` |
-| `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, XSD), then does the conversion work (module schema, converter tests with the golden files, strict conversion) |
+| `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, XSD), then does the conversion work (module schema, `npm test` with the golden files, strict conversion) |
 | `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `examples/lung-cancer/` against BPMN core + that XSD |
 | `npm run conventions` | `package.json` follows the bpmn.io conventions (name, `type: module`, `bpmn-js` only as a peer dependency) |
-| `npm run test:bpmn2gmf` | tests of the converter in `tools/bpmn2gmf/` |
+| `npm test` | all tests in `extension/test/`: converter, lint rules, panel, golden files |
 | `npm run convert:check` | the real pathways in `examples/lung-cancer/` convert strictly (`--strict`) |
 | `npm run synthea:smoke` | (optional, needs Java) run the converted modules in a Synthea jar; not part of `validate` |
 | `npm run demo` | (optional) interactive modeler playground — not a pass/fail gate |

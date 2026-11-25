@@ -9,9 +9,9 @@ The checks follow the three levels of Kramer et al. 2025 ("Leveraging Generative
 `npm run validate` is two stages with a clear hand-over between them:
 
 1. **`npm run validate:diagram`**: is the BPMN a valid input for the conversion? XML structure and the allowed values (BPMN core XSD and the extension XSD, which also fixes the choices of fields such as state type, time unit, operator), the semantic rules (lint, including the converter's own checks run before the conversion, see [lint-rules.md](lint-rules.md#converter-checks-as-lint)), and the round trip. The conversion has no say here, and nothing is written.
-2. **`npm run validate:convert`**: does the conversion do the right thing with a valid diagram? The schema of the module JSON, the converter tests, the strict conversion of `examples/lung-cancer/` and its golden files.
+2. **`npm run validate:convert`**: does the conversion do the right thing with a valid diagram? The schema of the module JSON, the tests (`npm test`), the strict conversion of `examples/lung-cancer/` and its golden files.
 
-The contract between the two is the first stage: a diagram that passes it converts without an error (`tools/bpmn2gmf/test/lint-contract.test.mjs` tests this for the errors of the converter). The same first-stage checks run live in the modeler demo, so the author sees a problem while drawing.
+The contract between the two is the first stage: a diagram that passes it converts without an error (`extension/test/lint-contract.test.mjs` tests this for the errors of the converter). The same first-stage checks run live in the modeler demo, so the author sees a problem while drawing.
 
 ## The steps
 
@@ -33,9 +33,9 @@ The contract between the two is the first stage: a diagram that passes it conver
 
 | # | Check | Command and files | What it covers |
 |---|---|---|---|
-| 6 | Module schema | `schema:gen:check`: `tools/bpmn2gmf/gen-schema.mjs --check` (writes `tools/bpmn2gmf/module.schema.json` from `required-fields.mjs`) | the structure of every state; `--check` fails if the stored schema has drifted (see [Structure](#structure-of-a-module-the-json-schema)) |
-| 7 | Converter tests | `test:bpmn2gmf`: `tools/bpmn2gmf/test/*.test.mjs` (with `helpers.mjs`), which run the converter in `tools/bpmn2gmf/` | unit tests and the golden files of `examples/lung-cancer/` (see [Tests](#tests-of-the-converter)) |
-| 8 | Converter check | `convert:check`: `tools/bpmn2gmf/cli.mjs examples/lung-cancer --check --strict` | `examples/lung-cancer/` converts strictly, nothing is written |
+| 6 | Module schema | `schema:gen:check`: `tools/gen-module-schema.mjs --check` (writes `extension/src/converter/module.schema.json` from `required-fields.mjs`) | the structure of every state; `--check` fails if the stored schema has drifted (see [Structure](#structure-of-a-module-the-json-schema)) |
+| 7 | Tests | `test` (`npm test`): `extension/test/*.test.mjs` (with `helpers.mjs` and `lint-helper.mjs`) | the converter in `extension/src/converter/`, the lint rules, the panel, and the golden files of `examples/lung-cancer/` (see [Tests](#tests)) |
+| 8 | Converter check | `convert:check`: `extension/src/converter/cli.mjs examples/lung-cancer --check --strict` | `examples/lung-cancer/` converts strictly, nothing is written |
 
 The converter checks its own output while it converts (`verify.mjs`, `verify-flow.mjs`, and `codes.mjs` for the code system of each state type). Steps 7 and 8 run those checks, and a module with an error is not written.
 
@@ -47,7 +47,7 @@ The converter checks its own output while it converts (`verify.mjs`, `verify-flo
 
 ## Structure of a module: the JSON Schema
 
-`tools/bpmn2gmf/module.schema.json` is generated, never edited by hand (`npm run schema:gen` rewrites it). It is a second statement of the rules in `required-fields.mjs`, not an independent check; it exists so people who write or edit Synthea JSON without our converter can validate it (editors read a JSON Schema for completion and errors). `.vscode/settings.json` points VS Code at it for the modules in `tools/bpmn2gmf/test/golden/`: opening one underlines a missing field and offers the state types while typing. This happens in the editor only; it changes no file and is no part of `validate`. For your own modules, add their path to `fileMatch`.
+`extension/src/converter/module.schema.json` is generated, never edited by hand (`npm run schema:gen` rewrites it). It is a second statement of the rules in `required-fields.mjs`, not an independent check; it exists so people who write or edit Synthea JSON without our converter can validate it (editors read a JSON Schema for completion and errors). `.vscode/settings.json` points VS Code at it for the modules in `extension/test/golden/`: opening one underlines a missing field and offers the state types while typing. This happens in the editor only; it changes no file and is no part of `validate`. For your own modules, add their path to `fileMatch`.
 
 | In the schema | Left to the converter's checks (`verify.mjs`, `verify-flow.mjs`, `codes.mjs`) |
 |---|---|
@@ -60,7 +60,7 @@ It was tried on the 536 modules shipped with Synthea 4.0.0: 535 are valid. The o
 
 ## Order of states: the order checks
 
-`tools/bpmn2gmf/verify-flow.mjs` runs inside the converter (steps 7 and 8). The rules come from the States wiki and from the eight Level 1 checks of Kramer et al. Five of those checks existed before: path integrity (`STATE_UNREACHABLE`), transition completeness (`NO_TRANSITION`, `TERMINAL_HAS_TRANSITION`), existing sub-modules and targets (`SUBMODULE_NOT_FOUND`, `TRANSITION_TARGET_MISSING`), probabilities that sum to 1 (`DISTRIBUTION_SUM`, lint `probability-sum-valid`), and an EncounterEnd for every Encounter, which the converter derives from `encounterId`. A long Delay (a day or more after the last state of an encounter, a week or more inside it) ends the encounter there, so it does not keep one open for months, which Kramer et al. observed. The rules below are the rest. To see how many false alarms they give, they were run once over the 536 modules shipped in `synthea-with-dependencies.jar` (v4.0.0; 97 of them are not called by another module). This is a one-off measurement, not part of `validate`.
+`extension/src/converter/verify-flow.mjs` runs inside the converter (steps 7 and 8). The rules come from the States wiki and from the eight Level 1 checks of Kramer et al. Five of those checks existed before: path integrity (`STATE_UNREACHABLE`), transition completeness (`NO_TRANSITION`, `TERMINAL_HAS_TRANSITION`), existing sub-modules and targets (`SUBMODULE_NOT_FOUND`, `TRANSITION_TARGET_MISSING`), probabilities that sum to 1 (`DISTRIBUTION_SUM`, lint `probability-sum-valid`), and an EncounterEnd for every Encounter, which the converter derives from `encounterId`. A long Delay (a day or more after the last state of an encounter, a week or more inside it) ends the encounter there, so it does not keep one open for months, which Kramer et al. observed. The rules below are the rest. To see how many false alarms they give, they were run once over the 536 modules shipped in `synthea-with-dependencies.jar` (v4.0.0; 97 of them are not called by another module). This is a one-off measurement, not part of `validate`.
 
 | Code | Level | Check in Kramer et al. | Shipped modules hit | What the hits are |
 |---|---|---|---|---|
@@ -75,7 +75,9 @@ Two checks are covered only in part. Attribute validity covers a Guard and the a
 
 `examples/lung-cancer/` produces none of these. All of them are warnings or notes, because a graph cannot see that two branches exclude each other.
 
-## Tests of the converter
+## Tests
+
+`npm test` runs every `extension/test/*.test.mjs`.
 
 | File | Covers |
 |---|---|

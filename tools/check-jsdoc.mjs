@@ -6,13 +6,13 @@
 //
 //   node tools/check-jsdoc.mjs        # exit 1 and list what is missing
 //
-// Scope: extension/src/*.js and tools/bpmn2gmf/*.mjs (no tests). There is no TypeScript and no
+// Scope: extension/src/*.js and extension/src/converter/*.mjs (no tests). There is no TypeScript and no
 // ESLint in this repository, so this is a small script rather than a lint rule.
 import { readFileSync, globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const SCOPE = ['extension/src/*.js', 'tools/bpmn2gmf/*.mjs'];
+const SCOPE = ['extension/src/*.js', 'extension/src/converter/*.mjs'];
 
 /** Index of the parenthesis that closes the one at `open`, or -1. */
 function closingParen(text, open) {

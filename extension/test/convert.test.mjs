@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { convert, fileBaseFor } from '../convert.mjs';
+import { convert, fileBaseFor } from '../src/converter/convert.mjs';
 import {
   wrap, run, start, end, task, gateway, timer, call, flow,
   stateType, setAttr, prob, cond, attrCond, coding, SNOMED, LOINC, RXNORM,

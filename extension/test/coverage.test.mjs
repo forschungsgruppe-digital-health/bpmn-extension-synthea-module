@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { descriptor } from '../parse.mjs';
+import { descriptor } from '../src/converter/parse.mjs';
 import { run, start, end, task, flow, stateType } from './helpers.mjs';
 
 const SYNTHEA_STATES = [
@@ -81,7 +81,7 @@ test('a state type of the descriptor has an emitter, unless it is listed as not 
 });
 
 test('the fields shipped modules use that the converter never writes are listed, and really are not written', () => {
-  const sources = ['emit.mjs', 'encounters.mjs', 'transitions.mjs', 'codes.mjs'].map((f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
+  const sources = ['emit.mjs', 'encounters.mjs', 'transitions.mjs', 'codes.mjs'].map((f) => readFileSync(new URL(`../src/converter/${f}`, import.meta.url), 'utf8')).join('\n');
   for (const entry of Object.keys(FIELDS_NOT_WRITTEN)) {
     const field = entry.split('.')[1];
     assert.ok(!sources.includes(field), `${entry} appears in the converter: remove it from FIELDS_NOT_WRITTEN`);
@@ -93,7 +93,7 @@ test('the extension offers no state type that Synthea does not have', () => {
 });
 
 test('the keys the engine ignores are left out of the output', () => {
-  const sources = ['emit.mjs', 'encounters.mjs', 'transitions.mjs', 'codes.mjs'].map((f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
+  const sources = ['emit.mjs', 'encounters.mjs', 'transitions.mjs', 'codes.mjs'].map((f) => readFileSync(new URL(`../src/converter/${f}`, import.meta.url), 'utf8')).join('\n');
   for (const entry of Object.keys(FIELDS_IGNORED_BY_ENGINE)) {
     assert.ok(!sources.includes(entry.split('.')[1]), `${entry} is ignored by Synthea; the converter should not write it`);
   }

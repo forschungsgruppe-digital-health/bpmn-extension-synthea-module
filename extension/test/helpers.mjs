@@ -1,4 +1,4 @@
-import { convert } from '../convert.mjs';
+import { convert } from '../src/converter/convert.mjs';
 
 const NS =
   'xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" ' +

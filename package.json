@@ -18,11 +18,11 @@
     ".": "./extension/src/index.js",
     "./model": "./extension/model/synthea.json",
     "./xsd": "./extension/model/synthea.xsd",
-    "./converter": "./tools/bpmn2gmf/convert.mjs",
+    "./converter": "./extension/src/converter/convert.mjs",
     "./package.json": "./package.json"
   },
   "bin": {
-    "bpmn2gmf": "./tools/bpmn2gmf/cli.mjs"
+    "bpmn2gmf": "./extension/src/converter/cli.mjs"
   },
   "engines": {
     "node": ">=22"
@@ -34,9 +34,7 @@
   "files": [
     "extension/src",
     "extension/model",
-    "extension/README.md",
-    "tools/bpmn2gmf/*.mjs",
-    "tools/bpmn2gmf/module.schema.json"
+    "extension/README.md"
   ],
   "scripts": {
     "site": "node tools/build-site.mjs / site",
@@ -53,15 +51,15 @@
     "jsdoc:check": "node tools/check-jsdoc.mjs",
     "test:consumer": "node tools/test-consumer.mjs",
     "check:attributes": "node tools/check-attribute-usage.mjs",
-    "bpmn2gmf": "node tools/bpmn2gmf/cli.mjs",
-    "test:bpmn2gmf": "node --test \"tools/bpmn2gmf/test/*.test.mjs\"",
+    "bpmn2gmf": "node extension/src/converter/cli.mjs",
+    "test": "node --test \"extension/test/*.test.mjs\"",
     "convert:site": "node tools/build-converter-site.mjs lung-cancer --out-dir demo/dist/modules",
-    "convert:check": "node tools/bpmn2gmf/cli.mjs examples/lung-cancer --check --strict",
+    "convert:check": "node extension/src/converter/cli.mjs examples/lung-cancer --check --strict",
     "synthea:smoke": "node tools/synthea-smoke.mjs",
-    "schema:gen": "node tools/bpmn2gmf/gen-schema.mjs",
-    "schema:gen:check": "node tools/bpmn2gmf/gen-schema.mjs --check",
+    "schema:gen": "node tools/gen-module-schema.mjs",
+    "schema:gen:check": "node tools/gen-module-schema.mjs --check",
     "validate:diagram": "npm run lint:valid && npm run roundtrip && npm run xsd && npm run xsd:gen:check && npm run xsd:ext && npm run api:gen:check",
-    "validate:convert": "npm run schema:gen:check && npm run test:bpmn2gmf && npm run convert:check",
+    "validate:convert": "npm run schema:gen:check && npm test && npm run convert:check",
     "validate": "npm run validate:diagram && npm run conventions && npm run jsdoc:check && npm run validate:convert",
     "demo": "npm --prefix demo run dev",
     "check:pages": "node tools/build-site.mjs /bpmn-extension-synthea-module/ site",

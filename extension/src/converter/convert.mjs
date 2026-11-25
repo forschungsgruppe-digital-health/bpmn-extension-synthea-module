@@ -108,7 +108,7 @@ export function convertDefinitions(definitions, fileBase, diag, modules, { stric
 }
 
 /**
- * Synchronous check of one parsed diagram, for the lint (tools/bpmn2gmf is the single source of what
+ * Synchronous check of one parsed diagram, for the lint (extension/src/converter is the single source of what
  * the converter can and cannot convert). Strict, like `npm run convert:check` and the validation: a
  * field Synthea requires that is missing is an error, where a plain conversion only marks the state
  * as incomplete. Not run here: the check that sub-modules exist (they are other files) and the

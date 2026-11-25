@@ -2,10 +2,10 @@
 // pass and one that must be reported. They work on JSON, so the cases are written as JSON.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Diagnostics } from '../diagnostics.mjs';
+import { Diagnostics } from '../src/converter/diagnostics.mjs';
 import {
   checkInitialWait, checkEncounterScope, checkStartEndOrder, checkGuardAttributes, verifyFlow
-} from '../verify-flow.mjs';
+} from '../src/converter/verify-flow.mjs';
 
 const where = { module: 'm' };
 const codesOf = (fn) => {

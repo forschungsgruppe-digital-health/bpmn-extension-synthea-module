@@ -3,9 +3,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { DESCRIPTIONS } from '../../../extension/src/descriptions.js';
+import { DESCRIPTIONS } from '../src/descriptions.js';
 
-const provider = readFileSync(new URL('../../../extension/src/SyntheaPropertiesProvider.js', import.meta.url), 'utf8');
+const provider = readFileSync(new URL('../src/SyntheaPropertiesProvider.js', import.meta.url), 'utf8');
 
 test('every description key is the label of a field in the panel', () => {
   for (const label of Object.keys(DESCRIPTIONS)) {

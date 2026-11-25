@@ -4,9 +4,9 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import BpmnModdle from 'bpmn-moddle';
-import { descriptor } from '../parse.mjs';
+import { descriptor } from '../src/converter/parse.mjs';
 
-const root = new URL('../../../', import.meta.url).pathname;
+const root = new URL('../../', import.meta.url).pathname;
 const require = createRequire(root);
 const Linter = require('bpmnlint/lib/linter');
 const NodeResolver = require('bpmnlint/lib/resolver/node-resolver');

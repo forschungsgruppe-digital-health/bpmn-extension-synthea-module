@@ -6,10 +6,10 @@ import { execFileSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { generateApiReference } from '../../gen-extension-api.mjs';
-import { loadValues } from '../../moddle-to-xsd.mjs';
+import { generateApiReference } from '../../tools/gen-extension-api.mjs';
+import { loadValues } from '../../tools/moddle-to-xsd.mjs';
 
-const root = resolve(import.meta.dirname, '../../..');
+const root = resolve(import.meta.dirname, '../..');
 const doc = readFileSync(join(root, 'docs/extension-api.md'), 'utf8');
 const blocks = [...doc.matchAll(/```js\n([\s\S]*?)```/g)].map((m) => m[1]);
 

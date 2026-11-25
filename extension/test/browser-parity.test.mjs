@@ -13,9 +13,9 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { convert as nodeConvert } from '../convert.mjs';
+import { convert as nodeConvert } from '../src/converter/convert.mjs';
 
-const root = new URL('../../../', import.meta.url).pathname;
+const root = new URL('../../', import.meta.url).pathname;
 const dir = join(root, 'examples/lung-cancer');
 const files = readdirSync(dir).filter((f) => f.endsWith('.bpmn')).sort().map((f) => join('examples/lung-cancer', f));
 const inputs = () => files.map((path) => ({ path, xml: readFileSync(join(root, path), 'utf8') }));
@@ -27,7 +27,7 @@ before(async () => {
   tmp = mkdtempSync(join(tmpdir(), 'browser-parity-'));
   const outfile = join(tmp, 'convert.browser.mjs');
   await build({
-    entryPoints: [join(root, 'tools/bpmn2gmf/convert.mjs')],
+    entryPoints: [join(root, 'extension/src/converter/convert.mjs')],
     bundle: true,
     format: 'esm',
     platform: 'browser',
@@ -52,7 +52,7 @@ test('browser and Node give the same modules and messages', async () => {
 
 test('the command line writes the same JSON as the browser build', async () => {
   const out = join(tmp, 'cli');
-  const r = spawnSync(process.execPath, [join(root, 'tools/bpmn2gmf/cli.mjs'), 'examples/lung-cancer', '--out-dir', out], { cwd: root, encoding: 'utf8' });
+  const r = spawnSync(process.execPath, [join(root, 'extension/src/converter/cli.mjs'), 'examples/lung-cancer', '--out-dir', out], { cwd: root, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stdout + r.stderr);
   const { modules } = await browserConvert(inputs());
   for (const m of modules.filter((x) => x.ok)) {

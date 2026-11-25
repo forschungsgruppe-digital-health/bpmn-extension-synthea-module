@@ -5,9 +5,9 @@
 // model alone: the modeler lints the model the user is editing.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { convert } from '../convert.mjs';
+import { convert } from '../src/converter/convert.mjs';
 import BpmnModdle from 'bpmn-moddle';
-import { descriptor } from '../parse.mjs';
+import { descriptor } from '../src/converter/parse.mjs';
 import { lintReports, linter, rc } from './lint-helper.mjs';
 import { wrap, start, end, task, flow, gateway, stateType, prob, cond, attrCond, coding, SNOMED } from './helpers.mjs';
 

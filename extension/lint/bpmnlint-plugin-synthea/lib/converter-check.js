@@ -1,4 +1,4 @@
-// Bridge to the converter's own checks (tools/bpmn2gmf). The converter knows exactly what it can turn
+// Bridge to the converter's own checks (extension/src/converter). The converter knows exactly what it can turn
 // into a Synthea module and what it cannot; asking it from the lint means the diagram is checked
 // against the same rules before anyone converts it, with no second copy of them to keep in sync.
 //
@@ -21,9 +21,9 @@ function load() {
   if (!checkDefinitions) {
     try {
       // require() of an ES module: Node >= 22.12 (bundlers resolve it statically).
-      ({ checkDefinitions } = require('../../../../tools/bpmn2gmf/convert.mjs'));
+      ({ checkDefinitions } = require('../../../src/converter/convert.mjs'));
     } catch (err) {
-      throw new Error(`the converter (tools/bpmn2gmf) cannot be loaded, so the converter checks cannot run: ${err.message}`);
+      throw new Error(`the converter (extension/src/converter) cannot be loaded, so the converter checks cannot run: ${err.message}`);
     }
   }
   return checkDefinitions;

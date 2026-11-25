@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Usage: node tools/bpmn2gmf/cli.mjs <file.bpmn|dir> [...] [--out-dir <dir>] [--check] [--strict] [--fuse-gateways]
+ * Usage: node extension/src/converter/cli.mjs <file.bpmn|dir> [...] [--out-dir <dir>] [--check] [--strict] [--fuse-gateways]
  *   --fuse-gateways  merge the Simple states that only exist for gateways (closer to hand-written modules)
  *   --strict  required fields the extension cannot express yet are errors (module is not written)
  *

@@ -14,7 +14,7 @@ const { is } = require('../lib/utils');
  * defined as equivalent to that `Not` wrapper (see implicit-rules.md
  * Section A); this rule only guards against an empty/meaningless negation,
  * it does not — and cannot — validate the Not-equivalence itself, since
- * that's an export-time (tools/bpmn2gmf) concern, not a structural one.
+ * that's an export-time (extension/src/converter) concern, not a structural one.
  *
  * Checks `conditionType` alone (not `conditionType && operator`): operator
  * is only meaningful for a handful of condition types (Attribute/Age/Date/

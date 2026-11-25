@@ -46,7 +46,7 @@ and derive each encounter's scope from `synthea:EncounterContext` instead.
 - Every clinical state inside an encounter carries `EncounterContext` with
   that identifier individually; there is no single "start" or "end" marker to
   draw.
-- `tools/bpmn2gmf` groups marked states by identifier, takes each group's
+- `extension/src/converter` groups marked states by identifier, takes each group's
   first-to-last span in sequence-flow order, and **synthesizes** the
   `Encounter` and `EncounterEnd` GMF states around that span in the generated
   JSON — they exist only in the output, not in the source BPMN diagram.

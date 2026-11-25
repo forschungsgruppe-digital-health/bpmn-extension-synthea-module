@@ -9,7 +9,7 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const root = new URL('../../../', import.meta.url).pathname;
+const root = new URL('../../', import.meta.url).pathname;
 
 const cond = (v) =>
   `<bpmn2:extensionElements><synthea:conditionConfig><synthea:condition conditionType="Attribute" attribute="t" operator="==" value="${v}"/></synthea:conditionConfig></bpmn2:extensionElements>`;

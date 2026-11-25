@@ -7,9 +7,9 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from 'ajv';
-import { convert } from '../convert.mjs';
-import { REQUIRED_FIELDS, missingFields } from '../required-fields.mjs';
-import { render, SCHEMA_PATH } from '../gen-schema.mjs';
+import { convert } from '../src/converter/convert.mjs';
+import { REQUIRED_FIELDS, missingFields } from '../src/converter/required-fields.mjs';
+import { render, SCHEMA_PATH } from '../../tools/gen-module-schema.mjs';
 
 const here = (p) => fileURLToPath(new URL(p, import.meta.url));
 const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'));
@@ -27,7 +27,7 @@ test('the stored schema is the one the generator writes (no drift)', () => {
 });
 
 test('the schema accepts the modules of examples/lung-cancer/ as the converter writes them', async () => {
-  const dir = here('../../../examples/lung-cancer');
+  const dir = here('../../examples/lung-cancer');
   const files = readdirSync(dir).filter((f) => f.endsWith('.bpmn')).map((f) => ({ path: join(dir, f), xml: readFileSync(join(dir, f), 'utf8') }));
   const { modules, diagnostics } = await convert(files, { strict: true });
   assert.equal(diagnostics.errorCount, 0);

@@ -35,7 +35,7 @@ module.exports = {
         'synthea/observation-condition-needs-observation': 'warn'
       }
     },
-    // The converter's own checks (tools/bpmn2gmf), as lint. Needs this repository, so it is a config
+    // The converter's own checks (extension/src/converter), as lint. Needs this repository, so it is a config
     // of its own and not part of `all`; `.bpmnlintrc` here extends both.
     converter: {
       rules: {

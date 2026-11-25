@@ -104,7 +104,7 @@ remodelled. Complex and event-based gateways have no counterpart.
 
 **3. Embedded subprocesses and placeholders.** An embedded (expanded)
 `subProcess` with ordinary sequential content inside — no multi-instance loop,
-no boundary events — is converted by `tools/bpmn2gmf`: its content becomes a
+no boundary events — is converted by `extension/src/converter`: its content becomes a
 module of its own and the subprocess becomes the call of it (see below).
 Remove the subprocess boundary and wire its states into the parent flow only
 if you want one module instead of two. A subprocess that's actually an empty
@@ -319,7 +319,7 @@ for example "age 18 or older":
 Write `>` and `<` as `&gt;` and `&lt;` in the XML; the panel does that for you.
 
 `negate` (a checkbox, always present) inverts the whole condition — it's our
-flat equivalent of Synthea's `Not` wrapper; `tools/bpmn2gmf` is responsible
+flat equivalent of Synthea's `Not` wrapper; `extension/src/converter` is responsible
 for expanding it back into a real `Not` object on export.
 
 **Combining conditions — `And` / `Or` / `At Least` / `At Most`:** pick one of
@@ -650,7 +650,7 @@ encounter info at all there either, despite being reachable from both
 `Anemia_Encounter`'s own workup and, via `Consult_Referral_to_Experts_Encounter`,
 the blood-panel branch — our `anemia-submodule.bpmn` now matches this. A
 second `encounterId` field on the element wouldn't help here even if it
-existed: `tools/bpmn2gmf` would still have to emit two separate generated
+existed: `extension/src/converter` would still have to emit two separate generated
 states for the one diagram node, which untagging already achieves more
 simply by not forcing a choice at all.
 
@@ -664,7 +664,7 @@ See `implicit-rules.md` Section E for the full explanation of why (real
 Synthea doesn't have this problem; our static tagging approach trades that
 flexibility away).
 
-**How far does a visit reach?** `tools/bpmn2gmf` opens the encounter before the
+**How far does a visit reach?** `extension/src/converter` opens the encounter before the
 first tagged state and closes it again where the visit ends:
 - every state on a path *between* two tagged states is inside the visit;
 - untagged states *after* the last tagged one stay inside it (that is what
@@ -697,7 +697,7 @@ diagnosed and charted* (at a later encounter) — e.g. a disease process
 begins now, but isn't recorded until a scheduled follow-up confirms it.
 
 Set `targetEncounter` to the `encounterId` of the encounter group (§9) this
-diagnosis should attach to; `tools/bpmn2gmf` replaces it by the name of that
+diagnosis should attach to; `extension/src/converter` replaces it by the name of that
 group's generated `Encounter` state (`target_encounter`).
 
 **Why it matters — a diagnosis without it can be lost.** A `ConditionOnset`
@@ -712,7 +712,7 @@ before treatment starts).
 
 **The encounter must be in the same module** as the diagnosis: Synthea
 looks for the target among the states this module has already processed.
-`tools/bpmn2gmf` reports a `targetEncounter` that is not the `encounterId` of
+`extension/src/converter` reports a `targetEncounter` that is not the `encounterId` of
 a group in the same file (`TARGET_ENCOUNTER_UNKNOWN`), and one whose group is
 entered at several places that cannot share one `Encounter` state
 (`TARGET_ENCOUNTER_AMBIGUOUS`). That is why `Procedure: MRI Brain` — the state
@@ -742,7 +742,7 @@ of the same run.
 **Where the files end up is the converter's job, and it matters.** Synthea
 runs every file directly in its modules directory as a module of its own, for
 every patient, and treats only files in a *subdirectory* as submodules (loaded,
-never run by themselves). So `tools/bpmn2gmf` writes the module nobody calls
+never run by themselves). So `extension/src/converter` writes the module nobody calls
 (`synthea_lung_cancer.json`) to the top and the modules it calls into a
 subdirectory named after it (`synthea_lung_cancer/anemia_submodule.json`, …),
 and turns every `submodule` name into that path

@@ -4,7 +4,7 @@ const { is, getExtension } = require('../lib/utils');
  * inclusive-branches-require-condition-or-probability.
  *
  * Every branch of an inclusive gateway is decided on its own, so none, some or all of them can
- * happen (tools/bpmn2gmf/gateways.mjs). The converter makes one deciding state per branch, and that
+ * happen (extension/src/converter/gateways.mjs). The converter makes one deciding state per branch, and that
  * state needs the branch's own `synthea:conditionConfig` or `synthea:probabilityConfig`. Unlike an
  * exclusive gateway there is no fallback or remainder branch that may omit it: a branch without it
  * cannot be decided.

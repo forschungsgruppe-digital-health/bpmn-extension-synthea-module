@@ -2,7 +2,7 @@
  * Checks for the fields of the properties panel: a wrong entry is marked in red under the field as
  * it is typed, not only later in the converter and lint messages. Each check returns the message
  * to show, or null when the value is fine (an empty field is fine: what is required is the
- * converter's job, `tools/bpmn2gmf/required-fields.mjs`).
+ * converter's job, `extension/src/converter/required-fields.mjs`).
  *
  * The shapes of codes and attribute names are the ones of the lint rules (`patterns` in
  * extension/model/synthea.values.json), so the panel and the lint never disagree. Only an entry that
