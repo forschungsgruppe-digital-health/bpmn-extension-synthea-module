@@ -215,9 +215,9 @@ submodules). Useful options:
 **Test data set.** To generate synthetic FHIR patients from a pathway folder, run the script (needs Java and Node; it downloads the pinned Synthea v4.0.0 jar, about 200 MB, once into `~/.cache/bpmn-extension-synthea` and checks its SHA-256):
 
 ```bash
-scripts/generate-testdata.sh out                                   # examples/lung-cancer/, 1000 patients, seed 7, ages 45-65
-scripts/generate-testdata.sh out --dir examples/lung-cancer --population 1000 --seed 3 --age 45-65
-scripts/generate-testdata.sh out --force-diagnosis                 # only for the lung cancer module: every patient is diagnosed
+tools/generate-testdata.sh out                                   # examples/lung-cancer/, 1000 patients, seed 7, ages 45-65
+tools/generate-testdata.sh out --dir examples/lung-cancer --population 1000 --seed 3 --age 45-65
+tools/generate-testdata.sh out --force-diagnosis                 # only for the lung cancer module: every patient is diagnosed
 docker compose run --rm testdata                                   # the same in Docker, writes to ./out
 ```
 

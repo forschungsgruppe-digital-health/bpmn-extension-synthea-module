@@ -1,9 +1,8 @@
 # Modeling playground (demo)
 
-An interactive [bpmn-js](https://bpmn.io) modeler for **trying your extension by
-hand** — open a diagram, select an element, edit its `synthea:` properties
-groups (e.g. `State type`, `Encounter Context`), and download the resulting
-XML to see your custom data.
+An interactive [bpmn-js](https://bpmn.io) modeler for the Synthea extension — open a
+diagram, select an element, edit its `synthea:` properties groups (e.g. `State type`,
+`Encounter Context`), convert it to Synthea modules, and save the resulting `.bpmn`.
 
 This is a **private, non-published** workspace (it is not in the npm package's
 `files`). It exists to demonstrate and manually test the extension; the
@@ -15,8 +14,8 @@ remain the source of truth for pass/fail.
 It instantiates a bpmn-js `Modeler` with the **real** repo artifacts — no copies:
 
 - `moddleExtensions: { synthea: <descriptor> }` — `../extension/model/synthea.json`
-- `additionalModules: [ …, syntheaModule ]` — `../extension/src/index.js` (the sample properties-panel provider)
-- your own diagrams — the modeler ships **no diagrams**. Open `.bpmn` or `.xml` files (BPMN XML), a whole folder or drop
+- `additionalModules: [ …, syntheaModule ]` — `../extension/src/index.js` (the properties panel, the palette and menu filters, the modeling rules)
+- your own diagrams — the modeler opens no diagram by itself. Open `.bpmn` or `.xml` files (BPMN XML), a whole folder or drop
   them on the page; the open files are listed on the left. Everything stays in the browser (the
   session is kept in `localStorage`, nothing is uploaded). A main pathway whose `CallSubmodule` states
   (`bpmn:callActivity`, `calledElement` = the submodule's process id) point to other files needs those
@@ -50,11 +49,9 @@ The two slots are the whole mental model: **`moddleExtensions` is the data layer
 **`additionalModules` is the UI layer** (the editing controls — optional). See
 [`../docs/concepts.md`](../docs/concepts.md).
 
-> The sample panel covers the `synthea:` types (`ProbabilityConfig`,
-> `ConditionConfig`/`Condition`, `StateTypeConfig`, `DelayConfig`, `GuardConfig`,
-> `SubmoduleConfig`, `EncounterContext`, `EncounterReference`, `CounterConfig`,
-> `SetAttributeConfig`, `AssignToAttributeConfig`, `ReferencedByAttributeConfig`) — see
-> `SyntheaPropertiesProvider.js` for which BPMN element each group appears on.
+> Which `synthea:` group appears on which BPMN element is decided in
+> `../extension/src/SyntheaPropertiesProvider.js`; [`../docs/extension-matrix.md`](../docs/extension-matrix.md)
+> lists it per state type.
 
 ## Run it
 

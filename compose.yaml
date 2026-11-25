@@ -22,7 +22,7 @@ services:
   testdata:
     build: .
     profiles: ["tools"]
-    entrypoint: ["scripts/generate-testdata.sh"]
+    entrypoint: ["tools/generate-testdata.sh"]
     command: ["/out"]
     environment:
       SYNTHEA_CACHE_DIR: /cache

@@ -83,7 +83,7 @@ for (const [src, section] of Object.entries(PAGES)) {
         const [path, hash = ''] = target.split('#');
         const resolved = posix.normalize(posix.join(fromDir, path)); // relative to docs/
         if (resolved in PAGES) return `](${urlOf(resolved)}${hash ? '#' + hash : ''})`;
-        if (resolved.startsWith('img/')) return `](/${resolved})`;
+        if (resolved.startsWith('images/')) return `](/${resolved})`;
         const repoPath = posix.normalize(posix.join('docs', resolved)).replace(/\/$/, ''); // relative to the repository root
         if (repoPath === 'demo') return '](/modeler/)';
         const kind = /\.\w+$/.test(repoPath) ? 'blob' : 'tree';
@@ -100,8 +100,8 @@ for (const [src, section] of Object.entries(PAGES)) {
   writeFileSync(out, front.join('\n') + '\n' + body);
 }
 // Images referenced by the guides are served from the site's public folder.
-if (existsSync(join(docsDir, 'img'))) {
-  rmSync(join(here, '..', 'public', 'img'), { recursive: true, force: true });
-  cpSync(join(docsDir, 'img'), join(here, '..', 'public', 'img'), { recursive: true });
+if (existsSync(join(docsDir, 'images'))) {
+  rmSync(join(here, '..', 'public', 'images'), { recursive: true, force: true });
+  cpSync(join(docsDir, 'images'), join(here, '..', 'public', 'images'), { recursive: true });
 }
 console.log(`sync-docs: ${Object.keys(PAGES).length} pages written to ${outRoot}`);

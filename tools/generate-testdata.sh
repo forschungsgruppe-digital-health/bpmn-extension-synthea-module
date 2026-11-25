@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Generates a synthetic FHIR test data set from a BPMN pathway folder.
 #
-#   scripts/generate-testdata.sh <output dir> [--dir examples/lung-cancer] [--population 1000]
+#   tools/generate-testdata.sh <output dir> [--dir examples/lung-cancer] [--population 1000]
 #                                [--seed 7] [--age 45-65] [--force-diagnosis]
 #
 # What it does: checks for Java, downloads the pinned Synthea jar (v4.0.0, the version the

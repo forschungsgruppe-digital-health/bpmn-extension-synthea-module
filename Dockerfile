@@ -1,6 +1,6 @@
 # Modeler demo (bpmn.io + synthea extension) and the converter, in one image.
 # xmllint (libxml2-utils) is included so `npm run validate` also works inside.
-# A Java runtime and curl are included so scripts/generate-testdata.sh can run Synthea.
+# A Java runtime and curl are included so tools/generate-testdata.sh can run Synthea.
 FROM node:22-bookworm-slim
 
 RUN apt-get update \
