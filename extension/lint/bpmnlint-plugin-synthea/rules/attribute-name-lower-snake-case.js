@@ -21,7 +21,7 @@ const LOWER_SNAKE_CASE = new RegExp(patterns.attributeName.pattern);
 
 // Attributes that Synthea itself defines (not ours to rename) and that don't
 // follow the convention. Conditions read them, so the name has to match
-// Synthea's exactly. Verified against upstream modules (lung_cancer_probabilities.json).
+// Synthea's exactly. Verified against Synthea's lung_cancer_probabilities.json.
 const SYNTHEA_BUILT_IN_ATTRIBUTES = new Set(patterns.attributeName.builtIn);
 
 const ATTRIBUTE_PROPERTIES_BY_TYPE = [

@@ -39,14 +39,11 @@ The input is one or more `.bpmn` files or a folder. Every process in a file, and
 
 Problems are collected by `diagnostics.mjs` on three levels: **errors** stop a module from being written, **warnings** and **notes** are only reported. Every message has a code, the module and the element id.
 
-## Comparison with the original modules
+## Golden files
 
-| Check | Files | Result |
-|---|---|---|
-| Content (`npm run compare:upstream`, not part of `validate`) | `compare.mjs`, `compare-upstream.mjs` | each clinical state reduced to type, codes and key values; both lists compared as sets; informational, exit 0 |
-| Structure (`npm run compare:structure`, part of `validate`) | `structure.mjs`, `compare-structure.mjs` | both state graphs walked from `Initial` together; compares paired states, conditions, probabilities (with order) and targets; names, `remarks`, `reason` and pure pass-through states do not count; known differences are listed with a reason, anything else is exit 1 |
+The five files in `lung-cancer/` are converted together and strictly, and each module must equal its file in `tools/bpmn2gmf/test/golden/` (`golden.test.mjs`, part of `validate`). A change that alters a module fails there; if it is intended, `UPDATE_GOLDEN=1 npm run test:bpmn2gmf` rewrites the files and the diff shows what changed.
 
-The reference is the module set of Synthea master in `tools/bpmn2gmf/test/upstream/`.
+The comparison with Synthea's own lung cancer modules (by content and state by state) is kept on the branch `upstream-comparison`; it is not part of `dev`.
 
 ## Try it without a checkout
 
@@ -62,7 +59,7 @@ The reference is the module set of Synthea master in `tools/bpmn2gmf/test/upstre
 
 ## Related
 
-- [validator-overview.md](validator-overview.md): the checks that `npm run validate` runs, including the converter tests, `convert:check` and `compare:structure`.
+- [validator-overview.md](validator-overview.md): the checks that `npm run validate` runs, including the converter tests with the golden files and `convert:check`.
 - [lint-rules.md](lint-rules.md): the lint rules that check the `synthea:` data before it reaches the converter.
 
 ## Limits

@@ -3,7 +3,7 @@
 The five `.bpmn` files in this folder are the real Synthea lung-cancer patient
 pathway — not test fixtures. They are modeled after the Synthea modules
 (Apache-2.0, Copyright The MITRE Corporation and the Synthea contributors; license and notices in
-[`tools/bpmn2gmf/test/upstream/`](../tools/bpmn2gmf/test/upstream/NOTICE.md)). `synthea-lung-cancer.bpmn` is the top-level
+[`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md) in this folder). `synthea-lung-cancer.bpmn` is the top-level
 module; the other four are its submodules, called via `bpmn:callActivity`
 (`calledElement` pointing at each file's own process id):
 
@@ -48,7 +48,7 @@ the original starts with an `EncounterEnd` because other modules (colorectal can
 pregnancy, COPD, …) call it, ours leaves it out because the only caller,
 `synthea-lung-cancer.bpmn`, ends the visit before the call. Do not call it from
 another pathway without ending the encounter first. The tests in
-`tools/bpmn2gmf/test/structure.test.mjs` check this and that the treatment cycle
+`tools/bpmn2gmf/test/lung-cancer.test.mjs` check this and that the treatment cycle
 never returns.
 
 The comparison with the hand-written lung cancer module of the Synthea project
@@ -61,7 +61,7 @@ concept.
 - The 44 clinical codes (SNOMED CT, LOINC, RxNorm) sit on the element's `synthea:stateTypeConfig` as `codeSystem`, `code` and `codeDisplay`. The converter writes them into `codes`; the properties panel has a "Code" section for the state types that carry one.
 - Every state-bearing element has an explicit `synthea:stateTypeConfig` (or an inferable element kind).
 - The Encounter codes are part of `synthea:encounterContext`.
-- `npm run convert:check` runs with `--strict` and passes; the comparison with the upstream module includes the codes.
+- `npm run convert:check` runs with `--strict` and passes; the golden files in `tools/bpmn2gmf/test/golden/` include the codes.
 
 ## BPMN conformance class (SYN-1)
 

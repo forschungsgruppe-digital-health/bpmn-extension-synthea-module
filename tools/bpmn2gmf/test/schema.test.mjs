@@ -1,5 +1,5 @@
 // The JSON Schema of a Synthea module (module.schema.json, generated from required-fields.mjs):
-// it is not stale, it accepts what the converter writes and what Synthea ships, it rejects broken
+// it is not stale, it accepts what the converter writes, it rejects broken
 // modules, and it agrees with missingFields() for every state type.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -33,13 +33,6 @@ test('the schema accepts the modules of lung-cancer/ as the converter writes the
   assert.equal(diagnostics.errorCount, 0);
   assert.ok(modules.length >= 5);
   for (const m of modules) assert.ok(ok(m.json), `${m.fileBase}: ${JSON.stringify(validate.errors?.slice(0, 2))}`);
-});
-
-test('the schema accepts the modules copied from Synthea (test/upstream)', () => {
-  const dir = here('./upstream');
-  const files = readdirSync(dir).filter((f) => f.endsWith('.json'));
-  assert.ok(files.length >= 3);
-  for (const f of files) assert.ok(ok(JSON.parse(readFileSync(join(dir, f), 'utf8'))), f);
 });
 
 test('negative: each of these broken modules must fail', () => {

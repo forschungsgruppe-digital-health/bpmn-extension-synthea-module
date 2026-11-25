@@ -229,8 +229,6 @@ The converted modules run in Synthea v4.0.0 (needs Java and `synthea-with-depend
 npm run synthea:smoke -- <path to synthea-with-dependencies.jar>
 npm run synthea:smoke -- <path to the jar> --force-diagnosis   # every patient takes the disease and treatment path
 npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules   # shows which submodules were entered
-npm run compare:upstream      # compares the result with Synthea's own lung cancer module by content
-npm run compare:structure     # compares every state and transition (conditions, probabilities, their order)
 ```
 
 ## What is supported and what is not
@@ -261,8 +259,8 @@ npm run compare:structure     # compares every state and transition (conditions,
 `npm run validate` runs the whole gate in two stages: `validate:diagram` (is the BPMN a valid input: the
 positive fixtures must lint clean, including the converter's own checks and the values in the fields, the
 round trip and both XSDs must pass, the generated XSD must match the descriptor) and `validate:convert` (the
-converter tests, the strict conversion of the lung cancer files and the comparison with Synthea's own module
-must pass). `npm run lint:invalid` is **expected to fail**: the diagrams in
+converter tests (including the golden files of the lung cancer pathway) and the strict conversion of the
+lung cancer files must pass). `npm run lint:invalid` is **expected to fail**: the diagrams in
 `examples/invalid/` prove that the rules fire.
 
 ## Documentation
@@ -272,7 +270,7 @@ must pass). `npm run lint:invalid` is **expected to fail**: the diagrams in
 | [docs/modeling-guide.md](docs/modeling-guide.md) | How to model a pathway so it converts: what to draw, what to set in the panel |
 | [docs/implicit-rules.md](docs/implicit-rules.md) | The mapping rules BPMN → Synthea: nodes, edges, gateway chains |
 | [docs/bpmn2gmf-concept.md](docs/bpmn2gmf-concept.md) | The converter: pipeline, decisions, comparison with Synthea's lung cancer module |
-| [docs/converter-overview.md](docs/converter-overview.md) | What the converter does: options, the stages of the pipeline, the comparison with Synthea's modules |
+| [docs/converter-overview.md](docs/converter-overview.md) | What the converter does: options, the stages of the pipeline, the golden files |
 | [docs/validator-overview.md](docs/validator-overview.md) | What the validator does: the checks that `npm run validate` runs, in order |
 | [docs/lint-rules.md](docs/lint-rules.md) | The 33 lint rules in one table: ID, severity and what each one checks |
 | [docs/extension-api.md](docs/extension-api.md) | The extension API: register it in bpmn-js, read the data in Node, what the XSD checks |
@@ -306,11 +304,10 @@ If you use this software, please cite it using the metadata in [CITATION.cff](CI
 
 [MIT](LICENSE).
 
-The hand-written Synthea modules used as test references in `tools/bpmn2gmf/test/upstream/` are
-Apache-2.0 licensed (Copyright The MITRE Corporation and the Synthea contributors); the license text and
-Synthea's notices on RxNorm, LOINC and SNOMED CT are in `LICENSE` and `NOTICE.md` there. The pathway
-models in `lung-cancer/` and the files in `tools/bpmn2gmf/test/golden/` are modeled after and generated
-from these Synthea modules, so the same notices apply to them.
+The pathway models in `lung-cancer/` and the files in `tools/bpmn2gmf/test/golden/` are modeled after
+and generated from Synthea modules, which are Apache-2.0 licensed (Copyright The MITRE Corporation and the
+Synthea contributors); the license text and Synthea's notices on RxNorm, LOINC and SNOMED CT are in
+`LICENSE` and `NOTICE.md` in `lung-cancer/`.
 
 The demo uses [bpmn-js](https://github.com/bpmn-io/bpmn-js), which is MIT licensed with one additional
 condition: the bpmn.io watermark must not be removed or hidden in any application that uses it. See

@@ -55,7 +55,7 @@ npm run demo        # the same modeler, served locally
 ```
 
 There, before treating a change as done: `npm run validate` (lint, round trip,
-XSD, converter tests, strict conversion and structure comparison of the lung
+XSD, the tests with the golden files and the strict conversion of the lung
 cancer files) and `npx bpmnlint "<your files>"` (your real pathway content).
 
 ---
@@ -767,7 +767,7 @@ In the browser:
 With a checkout, in addition:
 
 4. `npm run validate` — lint, round trip, XSD conformance, package
-   conventions, converter tests, strict conversion and structure comparison
+   conventions, the tests with the golden files and the strict conversion
    of the lung cancer files.
 5. `npx bpmnlint "<your files>"` and `npm run bpmn2gmf -- <your files> --strict`
    — your actual content, not just the example fixtures.

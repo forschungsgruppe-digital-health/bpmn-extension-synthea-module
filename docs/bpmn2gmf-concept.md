@@ -266,6 +266,8 @@ Each addition touches five places: `synthea.json`, `SyntheaPropertiesProvider.js
 
 ## 11. Comparison with upstream (phase 5)
 
+> **Since 2026-11-25** the comparison scripts (`compare*.mjs`, `structure.mjs`) and the copies of the Synthea modules are no longer on `dev`; they are kept on the branch `upstream-comparison`. On `dev` the golden files in `tools/bpmn2gmf/test/golden/` pin the converted modules instead. This section records what the comparison found.
+
 `npm run compare:upstream` converts the five real files and compares them with the hand-written Synthea modules by *content* (`compare.mjs`): every state with clinical meaning is reduced to a signature — type, codes and the values that matter (ranges, units, observation lists, encounter class and code) — and the signatures are compared as multisets. Names, `Simple`/`EncounterEnd` states and the exact transition structure are left out on purpose.
 
 | Our module | Upstream | Result |

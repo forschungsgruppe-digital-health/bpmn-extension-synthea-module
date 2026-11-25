@@ -9,13 +9,13 @@ The checks follow the three levels of Kramer et al. 2025 ("Leveraging Generative
 `npm run validate` is two stages with a clear hand-over between them:
 
 1. **`npm run validate:diagram`**: is the BPMN a valid input for the conversion? XML structure and the allowed values (BPMN core XSD and the extension XSD, which also fixes the choices of fields such as state type, time unit, operator), the semantic rules (lint, including the converter's own checks run before the conversion, see [lint-rules.md](lint-rules.md#converter-checks-as-lint)), and the round trip. The conversion has no say here, and nothing is written.
-2. **`npm run validate:convert`**: does the conversion do the right thing with a valid diagram? The schema of the module JSON, the converter tests, the strict conversion of `lung-cancer/`, the comparison with Synthea's own module.
+2. **`npm run validate:convert`**: does the conversion do the right thing with a valid diagram? The schema of the module JSON, the converter tests, the strict conversion of `lung-cancer/` and its golden files.
 
 The contract between the two is the first stage: a diagram that passes it converts without an error (`tools/bpmn2gmf/test/lint-contract.test.mjs` tests this for the errors of the converter). The same first-stage checks run live in the modeler demo, so the author sees a problem while drawing.
 
 ## The steps
 
-`npm run validate` runs these in order. Steps 1 to 5 check the extension and the diagrams (stage one, plus the package conventions), steps 6 to 9 the Synthea modules the converter generates from them (stage two).
+`npm run validate` runs these in order. Steps 1 to 5 check the extension and the diagrams (stage one, plus the package conventions), steps 6 to 8 the Synthea modules the converter generates from them (stage two).
 
 ### Extension and diagrams
 
@@ -34,9 +34,8 @@ The contract between the two is the first stage: a diagram that passes it conver
 | # | Check | Command and files | What it covers |
 |---|---|---|---|
 | 6 | Module schema | `schema:gen:check`: `tools/bpmn2gmf/gen-schema.mjs --check` (writes `tools/bpmn2gmf/module.schema.json` from `required-fields.mjs`) | the structure of every state; `--check` fails if the stored schema has drifted (see [Structure](#structure-of-a-module-the-json-schema)) |
-| 7 | Converter tests | `test:bpmn2gmf`: `tools/bpmn2gmf/test/*.test.mjs` (with `helpers.mjs`), which run the converter in `tools/bpmn2gmf/` | unit and golden tests (see [Tests](#tests-of-the-converter)) |
+| 7 | Converter tests | `test:bpmn2gmf`: `tools/bpmn2gmf/test/*.test.mjs` (with `helpers.mjs`), which run the converter in `tools/bpmn2gmf/` | unit tests and the golden files of `lung-cancer/` (see [Tests](#tests-of-the-converter)) |
 | 8 | Converter check | `convert:check`: `tools/bpmn2gmf/cli.mjs lung-cancer --check --strict` | `lung-cancer/` converts strictly, nothing is written |
-| 9 | Structure comparison | `compare:structure`: `tools/bpmn2gmf/compare-structure.mjs` with `structure.mjs`, against `tools/bpmn2gmf/test/upstream/` | the converted modules against Synthea master (see [converter-overview.md](converter-overview.md)) |
 
 The converter checks its own output while it converts (`verify.mjs`, `verify-flow.mjs`, and `codes.mjs` for the code system of each state type). Steps 7 and 8 run those checks, and a module with an error is not written.
 
@@ -48,7 +47,7 @@ The converter checks its own output while it converts (`verify.mjs`, `verify-flo
 
 ## Structure of a module: the JSON Schema
 
-`tools/bpmn2gmf/module.schema.json` is generated, never edited by hand (`npm run schema:gen` rewrites it). It is a second statement of the rules in `required-fields.mjs`, not an independent check; it exists so people who write or edit Synthea JSON without our converter can validate it (editors read a JSON Schema for completion and errors). `.vscode/settings.json` points VS Code at it for the modules in `tools/bpmn2gmf/test/golden/` and `tools/bpmn2gmf/test/upstream/`: opening one underlines a missing field and offers the state types while typing. This happens in the editor only; it changes no file and is no part of `validate`. For your own modules, add their path to `fileMatch`.
+`tools/bpmn2gmf/module.schema.json` is generated, never edited by hand (`npm run schema:gen` rewrites it). It is a second statement of the rules in `required-fields.mjs`, not an independent check; it exists so people who write or edit Synthea JSON without our converter can validate it (editors read a JSON Schema for completion and errors). `.vscode/settings.json` points VS Code at it for the modules in `tools/bpmn2gmf/test/golden/`: opening one underlines a missing field and offers the state types while typing. This happens in the editor only; it changes no file and is no part of `validate`. For your own modules, add their path to `fileMatch`.
 
 | In the schema | Left to the converter's checks (`verify.mjs`, `verify-flow.mjs`, `codes.mjs`) |
 |---|---|
@@ -84,9 +83,10 @@ Two checks are covered only in part. Attribute validity covers a Guard and the a
 | `matrix.test.mjs` | keeps [extension-matrix.md](extension-matrix.md) and the behavior of panel and converter together |
 | `coverage.test.mjs` | which Synthea v4.0.0 state and transition classes the converter covers |
 | `complete.test.mjs` | for every offered state type a fully filled example converts strictly and every state has all required fields |
-| `schema.test.mjs` | the schema is not stale, accepts the converted `lung-cancer/` modules and the upstream modules, rejects eleven broken modules, and agrees with `missingFields()` for every state type |
+| `schema.test.mjs` | the schema is not stale, accepts the converted `lung-cancer/` modules, rejects eleven broken modules, and agrees with `missingFields()` for every state type |
 | `verify-flow.test.mjs` | the order checks of `verify-flow.mjs` on plain module JSON: one module that passes and one that is reported per rule |
-| `compare.test.mjs`, `structure.test.mjs` | negative tests: the comparisons must report real differences |
+| `golden.test.mjs` | the five `lung-cancer/` files convert to exactly the modules in `golden/` |
+| `lung-cancer.test.mjs` | two facts about the converted pathway: the treatment cycle never returns, every call of the anemia module follows an `EncounterEnd` |
 
 ## What is not automated
 

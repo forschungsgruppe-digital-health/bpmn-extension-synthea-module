@@ -8,13 +8,13 @@ convention.
 
 ```bash
 npm install        # Node 22+; sets up the workspaces (lint plugin + demo)
-npm run validate   # lint, round-trip, XSD, conventions, converter tests, convert and structure checks
+npm run validate   # lint, round-trip, XSD, conventions, converter tests, strict conversion
 npm run demo       # optional: interactive modeler playground at http://localhost:5173/modeler/
 ```
 
 `npm run validate` chains the **positive** lint, round-trip, XSD core, the
 generated extension XSD (drift guard and validation), conventions, the converter
-tests, `convert:check` and `compare:structure`. The negative lint and the engine
+tests (including the golden files) and `convert:check`. The negative lint and the engine
 run (`synthea:smoke`) run on their own. Individual checks:
 
 | Command | Purpose |
@@ -23,12 +23,11 @@ run (`synthea:smoke`) run on their own. Individual checks:
 | `npm run lint:invalid` | `examples/invalid/` must fail lint (negative test) |
 | `npm run roundtrip` | extension data of the examples and of `lung-cancer/` round-trips through `bpmn-moddle` |
 | `npm run xsd` | BPMN core of the examples and of `lung-cancer/` validates against `BPMN20.xsd` |
-| `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, XSD), then does the conversion work (converter tests, strict conversion, comparison) |
+| `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, XSD), then does the conversion work (module schema, converter tests with the golden files, strict conversion) |
 | `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `lung-cancer/` against BPMN core + that XSD |
 | `npm run conventions` | `package.json` follows the bpmn.io conventions (name, `type: module`, `bpmn-js` only as a peer dependency) |
 | `npm run test:bpmn2gmf` | tests of the converter in `tools/bpmn2gmf/` |
 | `npm run convert:check` | the real pathways in `lung-cancer/` convert strictly (`--strict`) |
-| `npm run compare:structure` | converted modules vs. the upstream modules, state by state |
 | `npm run synthea:smoke` | (optional, needs Java) run the converted modules in a Synthea jar; not part of `validate` |
 | `npm run demo` | (optional) interactive modeler playground — not a pass/fail gate |
 

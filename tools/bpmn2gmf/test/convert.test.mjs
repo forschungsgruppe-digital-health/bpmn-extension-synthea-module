@@ -362,16 +362,6 @@ test('circular submodule calls are an error', async () => {
 
 import { readFileSync } from 'node:fs';
 
-test('lung-cancer-probabilities-submodule.bpmn converts to the golden file', async () => {
-  const path = 'lung-cancer/lung-cancer-probabilities-submodule.bpmn';
-  const { modules, diagnostics } = await convert([{ path, xml: readFileSync(path, 'utf8') }]);
-  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
-  const golden = JSON.parse(
-    readFileSync(new URL('./golden/lung_cancer_probabilities_submodule.json', import.meta.url), 'utf8')
-  );
-  assert.deepEqual(modules[0].json, golden);
-});
-
 // ---- clinical states and codes (phase 2) -------------------------------------------
 
 // start -> one clinical task -> end; `inner` is the task's extension content
@@ -540,14 +530,6 @@ test('--strict does not write a module that is incomplete', async () => {
   const complete = { path: 'q.bpmn', xml: wrap(start() + end() + flow('f1', 'S', 'E')) };
   const { modules } = await convert([incomplete, complete], { strict: true });
   assert.deepEqual(modules.map((m) => [m.fileBase, m.ok]), [['p', false], ['q', true]]);
-});
-
-test('symptom-check-submodule.bpmn converts to the golden file', async () => {
-  const path = 'lung-cancer/symptom-check-submodule.bpmn';
-  const { modules, diagnostics } = await convert([{ path, xml: readFileSync(path, 'utf8') }], { strict: true });
-  assert.equal(diagnostics.errorCount, 0, diagnostics.format().join('\n'));
-  const golden = JSON.parse(readFileSync(new URL('./golden/symptom_check_submodule.json', import.meta.url), 'utf8'));
-  assert.deepEqual(modules[0].json, golden);
 });
 
 // ---- encounter synthesis (phase 3) -----------------------------------------------------

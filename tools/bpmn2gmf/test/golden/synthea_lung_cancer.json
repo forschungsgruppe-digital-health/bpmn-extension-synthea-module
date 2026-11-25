@@ -1,0 +1,755 @@
+{
+  "name": "Process_1",
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "direct_transition": "Ages_45_65"
+    },
+    "Ages_45_65": {
+      "type": "Delay",
+      "range": {
+        "low": 45,
+        "high": 65,
+        "unit": "years"
+      },
+      "direct_transition": "Lung Cancer Probabilities"
+    },
+    "Lung Cancer Probabilities": {
+      "type": "CallSubmodule",
+      "submodule": "synthea_lung_cancer/lung_cancer_probabilities_submodule",
+      "direct_transition": "Simple_Gateway_0qihhud"
+    },
+    "Simple_Gateway_0qihhud": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Onset_Lung_Cancer: Set lung_cancer = true",
+          "distribution": {
+            "attribute": "probability_of_lung_cancer",
+            "default": 0.0645
+          }
+        },
+        {
+          "transition": "Terminal",
+          "distribution": {
+            "attribute": "probability_of_no_lung_cancer",
+            "default": 0.93355
+          }
+        }
+      ]
+    },
+    "Terminal": {
+      "type": "Terminal"
+    },
+    "Onset_Lung_Cancer: Set lung_cancer = true": {
+      "type": "SetAttribute",
+      "attribute": "lung_cancer",
+      "value": true,
+      "direct_transition": "Init_Lung_Cancer_Counter: Set lung_cancer_nondiagnosis_counter = 0"
+    },
+    "Init_Lung_Cancer_Counter: Set lung_cancer_nondiagnosis_counter = 0": {
+      "type": "SetAttribute",
+      "attribute": "lung_cancer_nondiagnosis_counter",
+      "value": 0,
+      "direct_transition": "Undiagnosed_Lung_Cancer (Delay: 1 month)"
+    },
+    "Undiagnosed_Lung_Cancer (Delay: 1 month)": {
+      "type": "Delay",
+      "exact": {
+        "quantity": 1,
+        "unit": "months"
+      },
+      "direct_transition": "Simple_Gateway_18bs6oo"
+    },
+    "Simple_Gateway_18bs6oo": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Symptom Check",
+          "distribution": {
+            "attribute": "probability_of_lung_cancer_treatment",
+            "default": 0.2
+          }
+        },
+        {
+          "transition": "Increment_Counter: increment value of lung_cancer_nondiagnosis by 1",
+          "distribution": {
+            "attribute": "probability_of_no_lung_cancer_treatment",
+            "default": 0.8
+          }
+        }
+      ]
+    },
+    "Increment_Counter: increment value of lung_cancer_nondiagnosis by 1": {
+      "type": "Counter",
+      "attribute": "lung_cancer_nondiagnosis_counter",
+      "action": "increment",
+      "amount": 1,
+      "direct_transition": "Undiagnosed_Lung_Cancer (Delay: 1 month)"
+    },
+    "Symptom Check": {
+      "type": "CallSubmodule",
+      "submodule": "synthea_lung_cancer/symptom_check_submodule",
+      "direct_transition": "ConditionOnset: Suspected Lung Cancer"
+    },
+    "ConditionOnset: Suspected Lung Cancer": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "162573006",
+          "display": "Suspected lung cancer (situation)"
+        }
+      ],
+      "assign_to_attribute": "suspected_lung_cancer",
+      "target_encounter": "Diagnosis_Encounter_I",
+      "direct_transition": "Diagnosis_Encounter_I"
+    },
+    "Measurement: Pain_Vital": {
+      "type": "Observation",
+      "category": "vital-signs",
+      "unit": "{score}",
+      "codes": [
+        {
+          "system": "LOINC",
+          "code": "72514-3",
+          "display": "Pain severity - 0-10 verbal numeric rating [Score] - Reported"
+        }
+      ],
+      "range": {
+        "low": 4,
+        "high": 8,
+        "decimals": 0
+      },
+      "direct_transition": "Procedure: Chest X-Ray"
+    },
+    "Procedure: Chest X-Ray": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "399208008",
+          "display": "Plain X-ray of chest (procedure)"
+        }
+      ],
+      "duration": {
+        "low": 10,
+        "high": 25,
+        "unit": "minutes"
+      },
+      "direct_transition": "Diagnosis_Encounter_I_End"
+    },
+    "Schedule Follow-Up I (Delay: 2-9 days)": {
+      "type": "Delay",
+      "range": {
+        "low": 2,
+        "high": 9,
+        "unit": "days"
+      },
+      "direct_transition": "Diagnosis_Encounter_II"
+    },
+    "Procedure: Chest CT Scan": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "418891003",
+          "display": "Computed tomography of chest and abdomen (procedure)"
+        }
+      ],
+      "duration": {
+        "low": 20,
+        "high": 60,
+        "unit": "minutes"
+      },
+      "direct_transition": "Diagnosis_Encounter_II_End"
+    },
+    "Schedule Follow-Up II (Delay: 1-9 days)": {
+      "type": "Delay",
+      "range": {
+        "low": 1,
+        "high": 9,
+        "unit": "days"
+      },
+      "direct_transition": "Simple_Gateway_1f7964q"
+    },
+    "Simple_Gateway_1f7964q": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Non-Small Cell Lung Cancer Set Lung Cancer Type = NSCLC",
+          "distribution": 0.85
+        },
+        {
+          "transition": "Small Cell Lung Cancer Set Lung Cancer Type = SCLC",
+          "distribution": 0.15
+        }
+      ]
+    },
+    "Non-Small Cell Lung Cancer Set Lung Cancer Type = NSCLC": {
+      "type": "SetAttribute",
+      "attribute": "lung_cancer_type",
+      "value": "NSCLC",
+      "direct_transition": "Diagnosis: NSCLC"
+    },
+    "Small Cell Lung Cancer Set Lung Cancer Type = SCLC": {
+      "type": "SetAttribute",
+      "attribute": "lung_cancer_type",
+      "value": "SCLC",
+      "direct_transition": "Diagnosis: SCLC"
+    },
+    "Diagnosis: NSCLC": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "254637007",
+          "display": "Non-small cell lung cancer (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_diagnosis",
+      "target_encounter": "Diagnosis_Encounter_III",
+      "direct_transition": "Simple_Gateway_14o5s0b"
+    },
+    "Diagnosis: SCLC": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "254632001",
+          "display": "Small cell carcinoma of lung (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_diagnosis",
+      "target_encounter": "Diagnosis_Encounter_III",
+      "direct_transition": "Simple_Gateway_14o5s0b"
+    },
+    "Simple_Gateway_128lqmu": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Procedure: Sputum Cytology (Phlegm)",
+          "distribution": 0.25
+        },
+        {
+          "transition": "Procedure: Thoracentesis (Fluid)",
+          "distribution": 0.25
+        },
+        {
+          "transition": "Procedure: Needle Biopsy (Cells)",
+          "distribution": 0.25
+        },
+        {
+          "transition": "Procedure: Bronchoscopy (Tube)",
+          "distribution": 0.25
+        }
+      ]
+    },
+    "Procedure: Sputum Cytology (Phlegm)": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "167995008",
+          "display": "Sputum microscopy (procedure)"
+        }
+      ],
+      "direct_transition": "Diagnosis_Encounter_III_End"
+    },
+    "Procedure: Thoracentesis (Fluid)": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "91602002",
+          "display": "Thoracentesis (procedure)"
+        }
+      ],
+      "direct_transition": "Diagnosis_Encounter_III_End"
+    },
+    "Procedure: Needle Biopsy (Cells)": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "432231006",
+          "display": "Fine needle aspiration biopsy of lung (procedure)"
+        }
+      ],
+      "direct_transition": "Diagnosis_Encounter_III_End"
+    },
+    "Procedure: Bronchoscopy (Tube)": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "85765000",
+          "display": "Fiberoptic bronchoscopy (procedure)"
+        }
+      ],
+      "direct_transition": "Diagnosis_Encounter_III_End"
+    },
+    "Anemia Submodule": {
+      "type": "CallSubmodule",
+      "submodule": "synthea_lung_cancer/anemia_submodule",
+      "direct_transition": "Simple_Gateway_1nqy9eu"
+    },
+    "Will Use Hospice Set hospice = true": {
+      "type": "SetAttribute",
+      "attribute": "hospice",
+      "value": true,
+      "direct_transition": "Hospice Reason Set hospice_reason = [lung_cancer_diagnosis]"
+    },
+    "Schedule Follow-Up III (Delay: 1-3 days)": {
+      "type": "Delay",
+      "range": {
+        "low": 1,
+        "high": 3,
+        "unit": "days"
+      },
+      "direct_transition": "Simple_Gateway_1uozeaa"
+    },
+    "Simple_Gateway_1nqy9eu": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Will Use Hospice Set hospice = true",
+          "distribution": 0.3
+        },
+        {
+          "transition": "Schedule Follow-Up III (Delay: 1-3 days)",
+          "distribution": 0.7
+        }
+      ]
+    },
+    "Hospice Reason Set hospice_reason = [lung_cancer_diagnosis]": {
+      "type": "SetAttribute",
+      "attribute": "hospice_reason",
+      "value_attribute": "lung_cancer_diagnosis",
+      "direct_transition": "Schedule Follow-Up III (Delay: 1-3 days)"
+    },
+    "Simple_Gateway_1uozeaa": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lung_cancer_nondiagnosis_counter",
+            "operator": "<=",
+            "value": 36
+          },
+          "transition": "Stage I (Survival Time: 2-6 years)"
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lung_cancer_nondiagnosis_counter",
+            "operator": "<=",
+            "value": 72
+          },
+          "transition": "Stage II (Survival Time: 16-28 months)"
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lung_cancer_nondiagnosis_counter",
+            "operator": "<=",
+            "value": 108
+          },
+          "transition": "Stage III (Survival Time: 9-18 months)"
+        },
+        {
+          "transition": "Stage IV (Survival Time: 6-10 months)"
+        }
+      ]
+    },
+    "Survival (stage I)": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lung_cancer_type",
+            "operator": "==",
+            "value": "SCLC"
+          },
+          "transition": "Diagnosis: SCLC I"
+        },
+        {
+          "transition": "Diagnosis: NSCLC I"
+        }
+      ]
+    },
+    "Survival (stage II)": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lung_cancer_type",
+            "operator": "==",
+            "value": "SCLC"
+          },
+          "transition": "Diagnosis: SCLC II"
+        },
+        {
+          "transition": "Diagnosis: NSCLC II"
+        }
+      ]
+    },
+    "Simple_Gateway_06fku0u": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lung_cancer_type",
+            "operator": "==",
+            "value": "SCLC"
+          },
+          "transition": "Diagnosis: SCLC III"
+        },
+        {
+          "transition": "Diagnosis: NSCLC III"
+        }
+      ]
+    },
+    "Survival (stage IV)": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lung_cancer_type",
+            "operator": "==",
+            "value": "SCLC"
+          },
+          "transition": "Diagnosis: SCLC IV"
+        },
+        {
+          "transition": "Diagnosis: NSCLC IV"
+        }
+      ]
+    },
+    "Diagnosis: SCLC I": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "67811000119102",
+          "display": "Primary small cell malignant neoplasm of lung, TNM stage 1 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Diagnosis: NSCLC I": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "424132000",
+          "display": "Non-small cell carcinoma of lung, TNM stage 1 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Diagnosis: SCLC II": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "67821000119109",
+          "display": "Primary small cell malignant neoplasm of lung, TNM stage 2 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Diagnosis: NSCLC II": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "425048006",
+          "display": "Non-small cell carcinoma of lung, TNM stage 2 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Diagnosis: SCLC III": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "67831000119107",
+          "display": "Primary small cell malignant neoplasm of lung, TNM stage 3 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Diagnosis: NSCLC III": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "422968005",
+          "display": "Non-small cell carcinoma of lung, TNM stage 3 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Diagnosis: SCLC IV": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "67841000119103",
+          "display": "Primary small cell malignant neoplasm of lung, TNM stage 4 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Diagnosis: NSCLC IV": {
+      "type": "ConditionOnset",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "423121009",
+          "display": "Non-small cell carcinoma of lung, TNM stage 4 (disorder)"
+        }
+      ],
+      "assign_to_attribute": "lung_cancer_condition",
+      "target_encounter": "Diagnosis_Encounter_IV",
+      "direct_transition": "Simple_Gateway_0t93mpq"
+    },
+    "Stage I (Survival Time: 2-6 years)": {
+      "type": "Death",
+      "referenced_by_attribute": "lung_cancer_diagnosis",
+      "range": {
+        "low": 2,
+        "high": 6,
+        "unit": "years"
+      },
+      "direct_transition": "Survival (stage I)"
+    },
+    "Stage II (Survival Time: 16-28 months)": {
+      "type": "Death",
+      "referenced_by_attribute": "lung_cancer_diagnosis",
+      "range": {
+        "low": 16,
+        "high": 28,
+        "unit": "months"
+      },
+      "direct_transition": "Survival (stage II)"
+    },
+    "Stage III (Survival Time: 9-18 months)": {
+      "type": "Death",
+      "referenced_by_attribute": "lung_cancer_diagnosis",
+      "range": {
+        "low": 9,
+        "high": 18,
+        "unit": "months"
+      },
+      "direct_transition": "Simple_Gateway_06fku0u"
+    },
+    "Stage IV (Survival Time: 6-10 months)": {
+      "type": "Death",
+      "referenced_by_attribute": "lung_cancer_diagnosis",
+      "range": {
+        "low": 6,
+        "high": 10,
+        "unit": "months"
+      },
+      "direct_transition": "Survival (stage IV)"
+    },
+    "Simple_Gateway_0bp5mqd": {
+      "type": "Simple",
+      "direct_transition": "Simple_Gateway_0fqthje"
+    },
+    "Simple_Gateway_0t93mpq": {
+      "type": "Simple",
+      "direct_transition": "Diagnosis_Encounter_IV"
+    },
+    "Simple_Gateway_14o5s0b": {
+      "type": "Simple",
+      "direct_transition": "Diagnosis_Encounter_III"
+    },
+    "Simple_Gateway_11iwyj4": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "anemia",
+            "operator": "is nil"
+          },
+          "transition": "Anemia Submodule"
+        },
+        {
+          "transition": "Simple_Gateway_1nqy9eu"
+        }
+      ]
+    },
+    "Simple_Gateway_0fqthje": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Simple_Gateway_11iwyj4",
+          "distribution": 0.77
+        },
+        {
+          "transition": "Simple_Gateway_1nqy9eu",
+          "distribution": 0.23
+        }
+      ]
+    },
+    "Lung Cancer Treatment Cycle": {
+      "type": "CallSubmodule",
+      "submodule": "synthea_lung_cancer/lung_cancer_treatment_submodule",
+      "direct_transition": "Terminal (after treatment cycle)"
+    },
+    "Terminal (after treatment cycle)": {
+      "type": "Terminal"
+    },
+    "CarePlanStart: Lung_Cancer_CarePlan": {
+      "type": "CarePlanStart",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "182964004",
+          "display": "Terminal care (regime/therapy)"
+        }
+      ],
+      "activities": [
+        {
+          "system": "SNOMED-CT",
+          "code": "133918004",
+          "display": "Comfort measures (regime/therapy)"
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": "408957008",
+          "display": "Chronic pain control management (procedure)"
+        },
+        {
+          "system": "SNOMED-CT",
+          "code": "243072006",
+          "display": "Cancer education (procedure)"
+        }
+      ],
+      "direct_transition": "Procedure: MRI Brain"
+    },
+    "Procedure: MRI Brain": {
+      "type": "Procedure",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "698354004",
+          "display": "Magnetic resonance imaging for measurement of brain volume (procedure)"
+        }
+      ],
+      "duration": {
+        "low": 30,
+        "high": 120,
+        "unit": "minutes"
+      },
+      "direct_transition": "Simple_Gateway_StemCells"
+    },
+    "Simple_Gateway_StemCells": {
+      "type": "Simple",
+      "distributed_transition": [
+        {
+          "transition": "Stem Cells Set bone_marrow = True",
+          "distribution": 0.01
+        },
+        {
+          "transition": "Diagnosis_Encounter_IV_End",
+          "distribution": 0.99
+        }
+      ]
+    },
+    "Stem Cells Set bone_marrow = True": {
+      "type": "SetAttribute",
+      "attribute": "bone_marrow",
+      "value": true,
+      "direct_transition": "Diagnosis_Encounter_IV_End"
+    },
+    "Diagnosis_Encounter_I": {
+      "type": "Encounter",
+      "encounter_class": "emergency",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "50849002",
+          "display": "Emergency room admission (procedure)"
+        }
+      ],
+      "direct_transition": "Measurement: Pain_Vital"
+    },
+    "Diagnosis_Encounter_I_End": {
+      "type": "EncounterEnd",
+      "direct_transition": "Schedule Follow-Up I (Delay: 2-9 days)"
+    },
+    "Diagnosis_Encounter_II": {
+      "type": "Encounter",
+      "encounter_class": "outpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "185347001",
+          "display": "Encounter for problem (procedure)"
+        }
+      ],
+      "direct_transition": "Procedure: Chest CT Scan"
+    },
+    "Diagnosis_Encounter_II_End": {
+      "type": "EncounterEnd",
+      "direct_transition": "Schedule Follow-Up II (Delay: 1-9 days)"
+    },
+    "Diagnosis_Encounter_III_End": {
+      "type": "EncounterEnd",
+      "direct_transition": "Simple_Gateway_0bp5mqd"
+    },
+    "Diagnosis_Encounter_IV": {
+      "type": "Encounter",
+      "encounter_class": "outpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "185347001",
+          "display": "Encounter for problem (procedure)"
+        }
+      ],
+      "direct_transition": "CarePlanStart: Lung_Cancer_CarePlan"
+    },
+    "Diagnosis_Encounter_III": {
+      "type": "Encounter",
+      "encounter_class": "outpatient",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "185347001",
+          "display": "Encounter for problem (procedure)"
+        }
+      ],
+      "direct_transition": "Simple_Gateway_128lqmu"
+    },
+    "Diagnosis_Encounter_IV_End": {
+      "type": "EncounterEnd",
+      "direct_transition": "Lung Cancer Treatment Cycle"
+    }
+  }
+}

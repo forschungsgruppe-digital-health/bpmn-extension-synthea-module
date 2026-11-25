@@ -13,7 +13,7 @@ pass/fail decision comes from the tools, never from your own reading.
 3. `npm run roundtrip` — moddle `fromXML`/`toXML` with the custom extension registered. Confirms extension data parses and serialises without warnings or loss.
 4. `npm run xsd` — validates the BPMN **core** against the official BPMN20.xsd.
 
-`npm run validate` chains 1, 3, 4, the generated-XSD checks (5), the conventions check and the converter checks (`npm run test:bpmn2gmf`, `convert:check`, `compare:structure`) for the common case, in two stages: `npm run validate:diagram` (is the BPMN a valid input) and `npm run validate:convert` (does the conversion work). Step 2 and `npm run synthea:smoke` run on their own.
+`npm run validate` chains 1, 3, 4, the generated-XSD checks (5), the conventions check and the converter checks (`npm run test:bpmn2gmf` with the golden files, `convert:check`) for the common case, in two stages: `npm run validate:diagram` (is the BPMN a valid input) and `npm run validate:convert` (does the conversion work). Step 2 and `npm run synthea:smoke` run on their own.
 
 5. `npm run xsd:gen:check` and `npm run xsd:ext` — the extension XSD is generated from the moddle descriptor and `extension/model/synthea.values.json`; `xsd:gen:check` confirms the committed copy matches, `xsd:ext` validates the examples against the BPMN core XSD **and** the extension XSD. Both are part of `npm run validate`.
 

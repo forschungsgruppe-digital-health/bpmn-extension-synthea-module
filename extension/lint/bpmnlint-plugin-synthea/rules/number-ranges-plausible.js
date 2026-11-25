@@ -16,7 +16,7 @@ const { nearestReportableId, isSet, numberOf } = require('../lib/values');
  *
  * Left out on purpose: "a Symptom value is between 0 and 100". The wiki says so (and contradicts
  * itself, "1-100" in one place), but the lung cancer module of Synthea itself uses 250 and 350, and
- * it converts to exactly that module (npm run compare:structure).
+ * the pathway in lung-cancer/ uses them as well.
  */
 module.exports = function() {
 
