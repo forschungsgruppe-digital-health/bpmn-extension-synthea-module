@@ -11,10 +11,17 @@ Synthea modules (`tools/bpmn2gmf`) and automated conformance checks. Node 22, ES
 - `extension/` — the custom extension you author (moddle model descriptor, lint plugin, optional bpmn-js modules).
 - `examples/` — `valid/` and `invalid/`: abstract diagrams used as positive and negative validation fixtures; `lung-cancer/`: the real pathways (main pathway and four submodules) that the converter is checked against (golden files); `drafts/`: the first draft diagrams (v0.1), kept to show where the models started, not checked; `consumer/`: a minimal app that installs the packed package (`npm run test:consumer`, CI).
 - `tools/` — deterministic checkers and the converter `tools/bpmn2gmf`; their exit code is the source of truth for pass/fail.
-- `skills/` — agent skills that orchestrate the checkers.
+- `skills/` — agent skills that orchestrate the checkers (see "Agent skills" below); `.claude/skills` and `.agents/skills` are symlinks to it.
 - `docs-site/` — Astro + Starlight site (Pages root: overview and the guides from `docs/`, copied by `scripts/sync-docs.mjs`; not an npm workspace). `npm run site` builds the whole Pages site (docs, `demo/` at `/modeler/`, converter result at `/modules/`) into `site/`.
 - `demo/` — private (non-published) bpmn-js modeler playground for trying the extension by hand; an npm workspace. NOT a pass/fail gate.
 - `.devcontainer/` + `.github/workflows/pages.yml` — reproducible dev/Codespaces env and the GitHub Pages deploy of the whole site (built by `tools/build-site.mjs`).
+
+## Agent skills
+`skills/<name>/SKILL.md` is the single source; Claude Code finds the skills through `.claude/skills`,
+Codex and Copilot through `.agents/skills` (both symlinks to `skills/`). See `skills/README.md`.
+
+- `bpmn-conformance`: when checking or changing a `.bpmn` file or the extension. Gate: `npm run validate`, `npm run lint:invalid`.
+- `moddle-extension-review`: when changing `extension/model/synthea.json`. Gate: `npm run roundtrip`.
 
 ## Always do
 - Run `npm run validate` before proposing a commit or PR.

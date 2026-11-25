@@ -8,7 +8,7 @@ description: Validate a .bpmn file or a custom BPMN extension for BPMN 2.0 confo
 Run the deterministic checks in order and report results per stage. The
 pass/fail decision comes from the tools, never from your own reading.
 
-1. `npm run lint:valid` — bpmnlint (`recommended` + plugin rules) over `examples/valid/`. Must pass.
+1. `npm run lint:valid` — bpmnlint (`recommended` + plugin rules) over `examples/valid/` and `examples/lung-cancer/`. Must pass.
 2. `npm run lint:invalid` — over `examples/invalid/`. Must FAIL. This is a negative test proving the rules actually fire; a pass here means a rule is broken.
 3. `npm run roundtrip` — moddle `fromXML`/`toXML` with the custom extension registered. Confirms extension data parses and serialises without warnings or loss.
 4. `npm run xsd` — validates the BPMN **core** against the official BPMN20.xsd.
