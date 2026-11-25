@@ -12,7 +12,7 @@ const $ = (sel) => document.querySelector(sel);
  * @param {() => {file: string}|null} opts.getCurrent  the open file ({ file } is its path)
  * @param {() => {file: string, xml: string}[]} opts.getFiles  all files the user opened (submodules are called by the main one)
  */
-export function initConverterPanel({ getXml, getCurrent, getFiles }) {
+export function initConverterPanel({ getXml, getCurrent, getFiles, onResult = () => {}, onError = () => {} }) {
   const panel = $('#converter-panel');
   const select = $('#cp-module');
   const body = $('#cp-body');
@@ -23,7 +23,7 @@ export function initConverterPanel({ getXml, getCurrent, getFiles }) {
   let graph = null;
 
   // Converts the open diagram together with the other opened files (the main pathway calls the
-  // submodules). The live check uses this too and only reads the diagnostics.
+  // submodules). Runs only when asked for (the Convert button, the converter status, a "C" badge).
   async function compute() {
     const current = getCurrent();
     const xml = await getXml();
@@ -35,6 +35,7 @@ export function initConverterPanel({ getXml, getCurrent, getFiles }) {
     const current = getCurrent();
     if (!current) return;
     result = await compute();
+    onResult(result.diagnostics);
     const own = fileBaseFor(current.file);
     select.innerHTML = '';
     for (const m of result.modules) {
@@ -137,11 +138,13 @@ export function initConverterPanel({ getXml, getCurrent, getFiles }) {
     applyScale();
   };
 
-  $('#convert').addEventListener('click', () => run().catch((err) => {
+  const runShowingErrors = (openTab) => run(openTab).catch((err) => {
     console.error('conversion failed', err);
+    onError(err);
     panel.hidden = false;
     body.textContent = `Conversion failed: ${err.message}`;
-  }));
+  });
+  $('#convert').addEventListener('click', () => runShowingErrors());
   $('#cp-close').addEventListener('click', () => { panel.hidden = true; });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !panel.hidden) panel.hidden = true;
@@ -166,5 +169,5 @@ export function initConverterPanel({ getXml, getCurrent, getFiles }) {
     URL.revokeObjectURL(link.href);
   });
 
-  return { compute, show: run };
+  return { show: runShowingErrors };
 }

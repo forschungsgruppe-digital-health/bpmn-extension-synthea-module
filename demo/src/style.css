@@ -317,7 +317,7 @@ button.link { border: 0; background: none; color: var(--accent); cursor: pointer
 /* The graph is drawn for a light background. */
 .cp-graph { background: #fff; color: #17181c; }
 
-/* ---- Live converter check: status in the toolbar and problems on the elements ---- */
+/* ---- Result of the last conversion: status in the toolbar and problems on the elements ---- */
 .toolbar .live-status { background: #757575; border-color: #757575; color: #fff; min-width: 110px; white-space: nowrap; }
 .toolbar .live-status[hidden] { display: none; }
 .toolbar .live-status.ok { background: var(--ok); border-color: var(--ok); }

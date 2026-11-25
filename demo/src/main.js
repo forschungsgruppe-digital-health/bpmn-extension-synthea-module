@@ -14,7 +14,7 @@ import {
 import lintModule from 'bpmn-js-bpmnlint';
 
 import { initConverterPanel } from './converter-panel.js';
-import { initLiveCheck } from './live-check.js';
+import { initConverterResult } from './converter-result.js';
 import { NEW_DIAGRAM_XML } from './new-diagram.js';
 // Generated from .bpmnlintrc and the lint plugin by tools/pack-lint-config.mjs (npm run dev / build).
 import bpmnlintConfig from './generated/lint-config.js';
@@ -492,17 +492,18 @@ if (import.meta.env.DEV) {
   }
 }
 
+// The conversion runs only when asked for; its result stays on the canvas until the next change.
+const converterResult = initConverterResult({
+  modeler,
+  getCurrent: () => current,
+  showMessages: () => converterPanel.show('messages')
+});
 const converterPanel = initConverterPanel({
   getXml: async () => (await modeler.saveXML({ format: true })).xml,
   getCurrent: () => current,
-  getFiles: () => files
-});
-
-initLiveCheck({
-  modeler,
-  compute: converterPanel.compute,
-  getCurrent: () => current,
-  showMessages: () => converterPanel.show('messages')
+  getFiles: () => files,
+  onResult: converterResult.report,
+  onError: converterResult.failed
 });
 
 // Restore the last session of this browser.

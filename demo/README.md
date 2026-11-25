@@ -26,9 +26,10 @@ So whatever you change in `extension/` is reflected here on the next reload.
 
 `npm run demo:build` builds the static site (the same build the GitHub Pages workflow runs).
 
-## Problems while you draw
+## Problems while you draw, and when you convert
 
-Two checks run live, so a mistake shows while you model it, and they are shown apart:
+The lint runs live, so a mistake shows while you model it. The conversion runs only when you ask for
+it. The two are shown apart:
 
 - **Lint** (the same rules as `npm run lint:valid`, through `bpmn-js-bpmnlint`): an icon on the
   element and the count at the bottom of the canvas. This includes the converter's own checks, run
@@ -36,10 +37,12 @@ Two checks run live, so a mistake shows while you model it, and they are shown a
   units, operators, ranges, code shapes). The rules are bundled for the browser from `.bpmnlintrc`
   by `tools/pack-lint-config.mjs`, which `npm run dev` and `build` run first; after changing a rule,
   restart the dev server.
-- **Converter** (`src/live-check.js`): half a second after each change the open diagram is converted
-  in the background. A problem gets a dashed outline and a **C** badge on the element (the message
-  on hover), and the toolbar shows the count; a click opens the Messages tab with an explanation of
-  each code. Unlike the lint this is the plain conversion together with the example pathways, so it
+- **Converter** (`src/converter-result.js`): runs when you press **Convert to Synthea** (or the
+  converter status in the toolbar). A problem gets a dashed outline and a **C** badge on the element
+  (the message on hover), and the toolbar shows the count; a click opens the Messages tab with an
+  explanation of each code. The next change removes the result and the toolbar says
+  "Converter: not run since the last change", so an old result is never taken for the current
+  diagram. Unlike the lint this is the plain conversion together with the other opened files, so it
   also sees a missing sub-module.
 
 Red is an error, orange a warning. The decision is still the one from `npm run validate`.

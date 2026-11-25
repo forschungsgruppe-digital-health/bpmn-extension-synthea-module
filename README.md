@@ -99,9 +99,9 @@ the report that the converter made from `examples/lung-cancer/` at that merge, w
 
    ![The Synthea group in the properties panel](docs/images/quickstart-2-panel.png)
 
-3. Click a flow that leaves a gateway: the group **Probability** holds its probability. The numbers of all flows of one gateway must add up to 1.0. Change one and the green **No Issues** at the bottom and the **Converter** button tell you what is wrong, while you work.
+3. Click a flow that leaves a gateway: the group **Probability** holds its probability. The numbers of all flows of one gateway must add up to 1.0. Change one and the green **No Issues** at the bottom tells you what is wrong, while you work.
 
-4. Click **Convert to Synthea**. The result is the Synthea module as a graph, as JSON and as a list of messages, each with an explanation and what to do.
+4. Click **Convert to Synthea**. The result is the Synthea module as a graph, as JSON and as a list of messages, each with an explanation and what to do. The conversion runs only when you click; after the next change the toolbar says it has not run since.
 
    ![The converter result as a graph](docs/images/quickstart-3-convert.png)
 

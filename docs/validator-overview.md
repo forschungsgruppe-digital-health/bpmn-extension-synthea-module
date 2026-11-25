@@ -11,7 +11,7 @@ The checks follow the three levels of Kramer et al. 2025 ("Leveraging Generative
 1. **`npm run validate:diagram`**: is the BPMN a valid input for the conversion? XML structure and the allowed values (BPMN core XSD and the extension XSD, which also fixes the choices of fields such as state type, time unit, operator), the semantic rules (lint, including the converter's own checks run before the conversion, see [lint-rules.md](lint-rules.md#converter-checks-as-lint)), and the round trip. The conversion has no say here, and nothing is written.
 2. **`npm run validate:convert`**: does the conversion do the right thing with a valid diagram? The schema of the module JSON, the tests (`npm test`), the strict conversion of `examples/lung-cancer/` and its golden files.
 
-The contract between the two is the first stage: a diagram that passes it converts without an error (`extension/test/lint-contract.test.mjs` tests this for the errors of the converter). The same first-stage checks run live in the modeler demo, so the author sees a problem while drawing.
+The contract between the two is the first stage: a diagram that passes it converts without an error (`extension/test/lint-contract.test.mjs` tests this for the errors of the converter). The same first-stage checks run live in the modeler demo, so the author sees a problem while drawing; the conversion itself runs there only when the author presses **Convert to Synthea**.
 
 ## The steps
 
