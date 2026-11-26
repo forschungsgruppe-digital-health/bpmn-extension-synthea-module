@@ -81,173 +81,56 @@ npm run demo        # the modeler with the extension, in the browser
 npm run validate    # all checks (lint, round trip, XSD, tests, converter)
 ```
 
-The modeler opens your own `.bpmn` or `.xml` files or a whole folder (button, or drop them on the page).
-The **Examples** menu opens the five real pathway files of `examples/lung-cancer/`. Click an
-element and open the group "Synthea" in the properties panel. Your files and changes stay in the
-browser (nothing is uploaded); **Save .bpmn** downloads the open diagram.
+Or with Docker: `docker compose up` serves the modeler on <http://localhost:5173/>.
 
-**Convert to Synthea** runs the converter in the browser on the diagram that is open, with the edits
-you made, and shows the Synthea module as a graph, as JSON and as messages (each kind of message
-comes with an explanation and what to do), with a download of the JSON. On the published site
-(GitHub Pages, built from the `dev` branch) the site root is the overview and the guides (from `docs/`, built by `docs-site/`), the modeler lives under `modeler/`, and the link **Converter result** opens the modules and
-the report that the converter made from `examples/lung-cancer/` at that merge, with the commit they come from.
+The modeler opens your own `.bpmn` files or a whole folder; the **Examples** menu opens the lung cancer
+pathway. Everything stays in the browser. **Convert to Synthea** shows the Synthea module as a graph, as
+JSON and as messages that explain what to fix.
 
-### First steps in the modeler
-
-1. Start the modeler (`npm run demo`, `docker compose up`, or open the live preview) and choose **Examples → Anemia (submodule)** in the toolbar.
-
-   ![The modeler with the anemia pathway](docs/images/quickstart-1-modeler.png)
-
-2. Click the task **Diagnosis: Anemia**. In the properties panel on the right open the group **Synthea**. **State Type** says `ConditionOnset`, the section **Code** holds the code system, the code and the display text. Fields that are easy to get wrong have a short explanation under them.
-
-   ![The Synthea group in the properties panel](docs/images/quickstart-2-panel.png)
-
-3. Click a flow that leaves a gateway: the group **Probability** holds its probability. The numbers of all flows of one gateway must add up to 1.0. Change one and the green **No Issues** at the bottom tells you what is wrong, while you work.
-
-4. Click **Convert to Synthea**. The result is the Synthea module as a graph, as JSON and as a list of messages, each with an explanation and what to do. The conversion runs only when you click; after the next change the toolbar says it has not run since.
-
-   ![The converter result as a graph](docs/images/quickstart-3-convert.png)
-
-### Your own small pathway
-
-1. Click **New**. You get a start event joined to an end event; drag a task from the palette onto the arrow between them. The start event is the state `Initial` and the end event the state `Terminal`, whatever their labels say.
-2. Click the task. Under **Synthea** choose a **State Type**, for example `ConditionOnset`, and fill in the section **Code** (system, code, display text). The panel shows only the fields that fit the state type you chose.
-3. **Save .bpmn** and put the file into a folder of its own: one folder is one pathway, and the files in it may call each other.
-4. Convert the folder (`--strict` makes a missing required field an error):
-
-   ```bash
-   npm run bpmn2gmf -- my-pathway --strict --out-dir out/modules
-   ```
-
-   The JSON lands in `out/modules`. An error names the element and says what to do. A warning is a hint: here it would tell you that a `ConditionOnset` right after `Initial` gives every patient the condition at birth, which is fine for a submodule that another module calls.
-5. Run the modules in Synthea as described under [From BPMN to Synthea](#from-bpmn-to-synthea). Which element needs which fields is in the [modeling guide](docs/modeling-guide.md), from section 1 on.
-
-### With Docker
-
-```bash
-docker compose up    # builds the image, serves the modeler on http://localhost:5173/modeler/
-```
-
-The image has the demo, the converter and `xmllint`. To run the converter in it:
-
-```bash
-docker compose run --rm app npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules
-```
-
-### As a dependency in your own project
-
-The package resolves through `exports`, so a project that has the repository checked out (or a
-tarball from `npm pack`) can depend on it as a file:
-
-```json
-{ "dependencies": { "bpmn-js-synthea-extension": "file:../bpmn-extension-synthea-module" } }
-```
-
-| Import | What it is |
-|---|---|
-| `bpmn-js-synthea-extension` | the bpmn-js module |
-| `bpmn-js-synthea-extension/model` | the moddle descriptor |
-| `bpmn-js-synthea-extension/xsd` | the XSD file |
-| `bpmn-js-synthea-extension/converter` | the converter as a function |
-| `npx bpmn2gmf <files>` | the converter on the command line |
-
-`bpmn-js` and `diagram-js` are peer dependencies the project installs itself; the properties panel
-packages (`@bpmn-io/properties-panel`, `bpmn-js-properties-panel`) are optional peers, needed only for the
-panel groups (see [docs/extension-api.md](docs/extension-api.md)). A working project is in
-[`examples/consumer/`](examples/consumer/); `npm run test:consumer` packs the package, installs it
-there and builds it.
-
-To use the extension in your own bpmn-js modeler, register the module and the moddle descriptor
-(this is what `demo/src/main.js` does; with the package, import from `bpmn-js-synthea-extension`
-and `bpmn-js-synthea-extension/model`):
-
-```js
-import BpmnModeler from 'bpmn-js/lib/Modeler';
-import { BpmnPropertiesPanelModule, BpmnPropertiesProviderModule } from 'bpmn-js-properties-panel';
-import syntheaModule from './extension/src/index.js';
-import syntheaModdle from './extension/model/synthea.json';
-
-const modeler = new BpmnModeler({
-  container: '#canvas',
-  propertiesPanel: { parent: '#properties' },
-  additionalModules: [BpmnPropertiesPanelModule, BpmnPropertiesProviderModule, syntheaModule],
-  moddleExtensions: { synthea: syntheaModdle }
-});
-```
+**First steps:** the [Quickstart](docs/quickstart.md) (with screenshots) walks through an example, a
+change, a conversion and a tiny pathway of your own, in about ten minutes. On the
+[live preview](https://forschungsgruppe-digital-health.github.io/bpmn-extension-synthea-module/) the same
+guides sit next to the modeler.
 
 ## What the XML looks like
 
-Everything is stored as standard BPMN `extensionElements`. Tools that do not know the extension keep the
-model unchanged. A task that orders a medication, taken from the lung cancer treatment submodule:
+Everything is stored as standard BPMN `extensionElements` in the namespace `synthea:`; tools that do not
+know the extension keep the model unchanged:
 
 ```xml
-<bpmn2:task id="Activity_1j8wfnd" name="Medication Prescription: Chemotherapy I">
-  <bpmn2:extensionElements>
-    <synthea:stateTypeConfig stateType="MedicationOrder"
-        codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854"
-        codeDisplay="Cisplatin 50 MG Injection" />
-    <synthea:medicationConfig administration="true" />
-    <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
-    <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter"
-        encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct"
-        encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
-  </bpmn2:extensionElements>
-</bpmn2:task>
+<bpmn:task id="Task_1" name="Diagnosis: Anemia">
+  <bpmn:extensionElements>
+    <synthea:stateTypeConfig stateType="ConditionOnset" codeSystem="http://snomed.info/sct"
+                             code="271737000" codeDisplay="Anemia (disorder)" />
+  </bpmn:extensionElements>
+</bpmn:task>
 ```
 
-- `stateTypeConfig` says which Synthea state the task is, and which clinical code it carries (one code per state).
-- Probabilities and conditions sit on the **sequence flows** (`synthea:probabilityConfig`, `synthea:conditionConfig`), not on the gateway.
-- Encounters are **not drawn**: all states of one visit carry the same `encounterId`, and the converter creates the `Encounter` and `EncounterEnd` states.
-- `assignToAttributeConfig` and `referencedByAttributeConfig` link a start state to its end state through an attribute name (for example which medication is discontinued).
+A larger example, and how to register the extension in your own bpmn-js modeler or read the data in
+Node, is in [docs/extension-api.md](docs/extension-api.md). The package is not on npm; use it as a file
+dependency (`"bpmn-js-synthea-extension": "file:../bpmn-extension-synthea-module"`), as
+[`examples/consumer/`](examples/consumer/) does.
 
 ## From BPMN to Synthea
 
 ```bash
-npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules --fuse-gateways
+npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules   # write the Synthea modules
+tools/generate-testdata.sh out                                    # convert, run Synthea v4.0.0, write FHIR patients to out/
+docker compose run --rm testdata                                  # the same in Docker
 ```
 
-This writes `synthea_lung_cancer.json` and, in a folder of the same name, the four submodules (Synthea runs
-every file in the modules directory as a module of its own and treats only files in a subfolder as
-submodules). Useful options:
-
-| Option | Effect |
-|---|---|
-| `--strict` | A field Synthea requires and the model lacks is an error, not a warning (`npm run convert:check` uses it). |
-| `--fuse-gateways` | Merges the helper states that exist only because of a gateway, and folds a condition followed by probabilities into one `complex_transition`. |
-| `--check` | Converts and checks without writing files. |
-
-**Test data set.** To generate synthetic FHIR patients from a pathway folder, run the script (needs Java and Node; it downloads the pinned Synthea v4.0.0 jar, about 200 MB, once into `~/.cache/bpmn-extension-synthea` and checks its SHA-256):
-
-```bash
-tools/generate-testdata.sh out                                   # examples/lung-cancer/, 1000 patients, seed 7, ages 45-65
-tools/generate-testdata.sh out --dir examples/lung-cancer --population 1000 --seed 3 --age 45-65
-tools/generate-testdata.sh out --force-diagnosis                 # only for the lung cancer module: every patient is diagnosed
-docker compose run --rm testdata                                   # the same in Docker, writes to ./out
-```
-
-The FHIR bundles are in `out/out/fhir`, the converted modules in `out/modules`. `SYNTHEA_JAR=<path>` uses a jar you already have. With the same options it produces the same patients on every machine and in Docker (the script fixes the time zone to UTC; without that, the host time zone shifts the simulated dates). The file contents differ only in time stamps. The script is a thin wrapper around the lower-level command below, which it calls with `--keep`.
-
-The converted modules run in Synthea v4.0.0 (needs Java and `synthea-with-dependencies.jar`, not part of `validate`):
-
-```bash
-npm run synthea:smoke -- <path to synthea-with-dependencies.jar>
-npm run synthea:smoke -- <path to the jar> --force-diagnosis   # every patient takes the disease and treatment path
-npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules   # shows which submodules were entered
-```
+[docs/converter-overview.md](docs/converter-overview.md) has the options (`--strict`, `--check`,
+`--fuse-gateways`), the stages of the converter, how to convert your own pathway and the options of the
+test data script.
 
 ## What is supported and what is not
 
-- **Gateways:** exclusive gateways pick one path (conditions or probabilities on the flows). A **parallel** or **inclusive** split with its join is rewritten into a sequence: parallel branches run one after the other in the order of the flows, and each inclusive branch is decided on its own by the condition or probability on its flow. Both only as a structured block (every branch a region with one way in and one way out, ending in one join of the same kind; see `docs/extension-matrix.md`). Complex and event-based gateways are an error (`COMPLEX_GATEWAY_UNSUPPORTED`, `EVENT_BASED_GATEWAY_UNSUPPORTED`), and the menus do not offer them.
-- **Events:** start, end (`Terminal` or `Death`), timer (`Delay`) and other intermediate events with an explicit state type. A link throw and the link catch event with the same name become one direct flow. Boundary events are an error.
-- **Sub-processes:** what is drawn inside a sub-process becomes a module of its own (`<file>_<sub-process name>.json`, a submodule), and the sub-process becomes the `CallSubmodule` state that calls it; nested ones likewise. An empty sub-process names a module of a file of its own (`synthea:submoduleConfig`), like a call activity. An encounter cannot span the boundary (example: `examples/valid/sub-process.bpmn`). Event sub-processes, ad-hoc sub-processes and transactions are an error. A **call activity** becomes a `CallSubmodule`.
-- **Transitions:** direct, distributed, conditional and complex. `lookup_table_transition` and `type_of_care_transition` have no BPMN pattern.
-- **Codes:** one code per state, SNOMED CT, LOINC, RxNorm or (for `Vaccine`) CVX, depending on the state type. The discharge disposition of an encounter is a NUBC code with a fixed system.
-- **Documentation only:** a task, an exclusive gateway or an intermediate event marked `synthea:documentationOnly` stays in the diagram but gets no state; the flows around it are joined.
-- **Pools:** each pool becomes a module of its own; message flows between pools are reported (`MESSAGE_FLOWS_IGNORED`), not converted.
-- **Rejected with their own error code:** event, ad-hoc sub-processes and transactions, complex and event-based gateways, loop and multi-instance markers, and the `Physiology` state. `docs/extension-matrix.md` has the codes and the reasons.
-- **Other:** text annotations and data objects are ignored; the direction GMF → BPMN does not exist.
-
-`docs/extension-matrix.md` lists, per BPMN element, which `synthea:` type the panel offers and the converter reads.
+Exclusive gateways with probabilities or conditions on their flows, timers, call activities and
+sub-processes convert directly; structured parallel and inclusive blocks are rewritten into a sequence.
+Boundary events, complex and event-based gateways, event and ad-hoc sub-processes, transactions, loop
+markers and the `Physiology` state are rejected with their own error code, and the menus of the modeler
+do not offer them. [docs/extension-matrix.md](docs/extension-matrix.md) lists, per BPMN element, which
+`synthea:` type the panel offers and what the converter does with it.
 
 ## Where do I change what?
 
@@ -270,6 +153,9 @@ is **expected to fail**: the diagrams in `examples/invalid/` prove that the rule
 
 | Document | Content |
 |---|---|
+| [docs/basics.md](docs/basics.md) | BPMN and Synthea in five minutes, for readers who know neither |
+| [docs/quickstart.md](docs/quickstart.md) | The first module, step by step with screenshots |
+| [docs/glossary.md](docs/glossary.md) | The words used in this documentation |
 | [docs/modeling-guide.md](docs/modeling-guide.md) | How to model a pathway so it converts: what to draw, what to set in the panel |
 | [docs/implicit-rules.md](docs/implicit-rules.md) | The mapping rules BPMN → Synthea: nodes, edges, gateway chains |
 | [docs/bpmn2gmf-concept.md](docs/bpmn2gmf-concept.md) | The converter: pipeline, decisions, comparison with Synthea's lung cancer module |

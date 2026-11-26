@@ -45,6 +45,41 @@ The five files in `examples/lung-cancer/` are converted together and strictly, a
 
 The comparison with Synthea's own lung cancer modules (by content and state by state) is kept on the branch `upstream-comparison`; it is not part of `dev`.
 
+## Your own pathway
+
+Put the `.bpmn` files of one pathway into a folder of their own; the files in it may call each other. Then:
+
+```bash
+npm run bpmn2gmf -- my-pathway --strict --out-dir out/modules
+```
+
+An error names the element and says what to do, and a module with an error is not written. A warning is a hint: for a `ConditionOnset` right after `Initial` it says that every patient gets the condition at birth, which is fine for a submodule that another module calls. Which element needs which fields is in the [modeling guide](modeling-guide.md).
+
+A module that nobody calls is written to `<name>.json`, the modules it calls to the folder `<name>/` next to it, because Synthea runs every file directly in its modules directory for every patient and treats only files in a subfolder as submodules (stage 12 above).
+
+## Run the modules in Synthea
+
+To generate synthetic FHIR patients from a pathway folder, run the script. It needs Java and Node; it downloads the pinned Synthea v4.0.0 jar (about 200 MB) once into `~/.cache/bpmn-extension-synthea` and checks its SHA-256:
+
+```bash
+tools/generate-testdata.sh out                                   # examples/lung-cancer/, 1000 patients, seed 7, ages 45-65
+tools/generate-testdata.sh out --dir my-pathway --population 1000 --seed 3 --age 45-65
+tools/generate-testdata.sh out --force-diagnosis                 # only for the lung cancer module: every patient is diagnosed
+docker compose run --rm testdata                                 # the same in Docker, writes to ./out
+```
+
+The FHIR bundles are in `out/out/fhir`, the converted modules in `out/modules`. `SYNTHEA_JAR=<path>` uses a jar you already have. With the same options it produces the same patients on every machine and in Docker (the script fixes the time zone to UTC; without that, the host time zone shifts the simulated dates); the file contents differ only in time stamps.
+
+The script is a thin wrapper around `tools/synthea-smoke.mjs`, which it calls with `--keep`. That lower-level command checks that Synthea loads the modules and finds the submodules, and can show which submodules were entered:
+
+```bash
+npm run synthea:smoke -- <path to synthea-with-dependencies.jar>
+npm run synthea:smoke -- <path to the jar> --force-diagnosis                      # every patient takes the disease and treatment path
+npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules   # shows which submodules were entered
+```
+
+Neither is part of `validate`.
+
 ## Try it without a checkout
 
 - **Convert to Synthea** in the demo (`npm run demo`, or the published site) runs this converter in the

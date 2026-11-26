@@ -201,6 +201,8 @@ See [`demo/README.md`](../demo/README.md).
 
 ## 5. Glossary
 
+The terms of the extension machinery. The words of the pathway side (state, transition, encounter, module) are in the [glossary](glossary.md).
+
 | Term | Meaning |
 |------|---------|
 | **BPMN 2.0** | The OMG Business Process Model and Notation standard; the closed core vocabulary and the XML serialisation your diagrams use. |

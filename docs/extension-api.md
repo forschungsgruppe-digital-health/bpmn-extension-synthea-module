@@ -81,6 +81,28 @@ The extension data sits in `<bpmn:extensionElements>` of the element it belongs 
 </bpmn:task>
 ```
 
+A task with more data, from the lung cancer treatment submodule (in the example files the BPMN prefix is `bpmn2`):
+
+```xml
+<bpmn:task id="Activity_1j8wfnd" name="Medication Prescription: Chemotherapy I">
+  <bpmn:extensionElements>
+    <synthea:stateTypeConfig stateType="MedicationOrder"
+        codeSystem="http://www.nlm.nih.gov/research/umls/rxnorm" code="1736854"
+        codeDisplay="Cisplatin 50 MG Injection" />
+    <synthea:medicationConfig administration="true" />
+    <synthea:assignToAttributeConfig attribute="chemotherapy_i_order" />
+    <synthea:encounterContext requiresEncounterContext="true" encounterId="SCLC_Treatment_Encounter"
+        encounterClass="inpatient" encounterCodeSystem="http://snomed.info/sct"
+        encounterCode="185347001" encounterCodeDisplay="Encounter for problem (procedure)" />
+  </bpmn:extensionElements>
+</bpmn:task>
+```
+
+- `stateTypeConfig` says which Synthea state the element is, and which clinical code it carries (one code per state).
+- Probabilities and conditions sit on the **sequence flows** (`synthea:probabilityConfig`, `synthea:conditionConfig`), not on the gateway.
+- Encounters are **not drawn**: all states of one visit carry the same `encounterId`, and the converter creates the `Encounter` and `EncounterEnd` states.
+- `assignToAttributeConfig` and `referencedByAttributeConfig` link a start state to its end state through an attribute name (for example which medication is discontinued).
+
 All attributes are optional in the model. Which ones a state needs depends on its state type, and that is what the lint rules and the converter check. Which type belongs on which BPMN element is in the [extension matrix](extension-matrix.md), and how to model a pathway with the types is in the [modeling guide](modeling-guide.md).
 
 ## The XSD
