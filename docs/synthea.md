@@ -1,8 +1,6 @@
-# Synthea: Concepts and Relevance to the MiHUB Lung Cancer Pathway
+# Synthea in depth
 
-> **Purpose.** A self-contained introduction to Synthea and its Generic Module Framework (GMF) for a reader who knows the MiHUB lung cancer pathway project but not necessarily Synthea. This is the accessible entry point. The concrete engineering plan, the full BPMN/GMF mapping with citations, the data source catalog and the tracked model-readiness findings each live in their own document ([§6](#sec-6)) and are linked here instead of repeated.
-
-> **Status:** Draft v0.1. This document lives in [`bpmn-extension-synthea-module`](https://github.com/forschungsgruppe-digital-health/bpmn-extension-synthea-module/tree/dev/docs). The companion documents live in the separate [`mihub-lung-cancer-pathway`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/tree/research/synthea-dataset-generation/docs) repository: [`synthea-and-bpmn-primer.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/synthea-and-bpmn-primer.md) (the detailed mapping) and [`synthea-dataset-generation-plan.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/synthea-dataset-generation-plan.md) (the execution plan).
+> **Purpose.** An introduction to Synthea and its Generic Module Framework (GMF) for readers who know BPMN but not necessarily Synthea: how Synthea works (§1–§3), where BPMN and GMF meet and where they diverge (§4), and what follows for modeling a pathway (§5). What the converter of this repository does with each BPMN element is in [Conversion rules](implicit-rules.md) and the [extension matrix](extension-matrix.md). A shorter start is [Basics](basics.md).
 
 ---
 
@@ -20,7 +18,7 @@ The mental model has four parts:
 
 Modules are authored visually in the Synthea Module Builder [[10]](#ref-10), without hand-editing JSON.
 
-> **Validation caveat.** An independent validation found that Synthea reproduces demographics and the probability of receiving services reliably, but does not realistically model post-diagnosis outcomes or deviations from guideline-concordant care (Chen et al., 2019 [[2]](#ref-2)). This matters for us: a lung-cancer cohort will look plausible at the population level, but realism of disease trajectories must be engineered deliberately. Deliberately engineered heterogeneity (non-adherence, comorbidity, recurrence, loss to follow-up), calibrated against registry benchmarks, has to be added on top of a literal guideline translation ([§5](#sec-5), point 8).
+> **Validation caveat.** An independent validation found that Synthea reproduces demographics and the probability of receiving services reliably, but does not realistically model post-diagnosis outcomes or deviations from guideline-concordant care (Chen et al., 2019 [[2]](#ref-2)). This matters for any pathway: a cohort will look plausible at the population level, but realism of disease trajectories must be engineered deliberately. Deliberately engineered heterogeneity (non-adherence, comorbidity, recurrence, loss to follow-up), calibrated against registry benchmarks, has to be added on top of a literal guideline translation ([§5](#sec-5), point 8).
 
 ---
 
@@ -160,7 +158,7 @@ Both the Generic Module Framework and BPMN 2.0 (the notation used throughout thi
 <a id="sec-4-1"></a>
 ### 4.1 Concept mapping
 
-**Fit** legend: ✅ direct, ⚠️ works with a caveat, ❌ no native equivalent (must be worked around).
+**Fit** legend: ✅ direct, ⚠️ works with a caveat, ❌ no native equivalent (must be worked around). The table explains why a concept fits or not; what the converter actually does with each element is in [Conversion rules](implicit-rules.md).
 
 | BPMN concept | Closest GMF construct | Fit | What a modeler must know |
 |---|---|---|---|
@@ -186,7 +184,7 @@ Both the Generic Module Framework and BPMN 2.0 (the notation used throughout thi
 
 **Concurrency:** GMF is single-token and sequential; there is no fork/join. A BPMN AND-split with a matching join has no direct GMF counterpart. The branches must be linearized (if order does not matter) or refactored into separately, sequentially invoked submodules. An inclusive (OR) gateway is worse: GMF has no construct that activates multiple downstream branches at once. The converter of this project does both rewrites for structured blocks: parallel branches run one after the other, inclusive branches are decided one by one ([modeling guide](modeling-guide.md), section 1).
 
-**Time semantics:** GMF simulates fixed time steps over a patient's entire life, with waiting, aging and recurring wellness encounters as first-class concepts (`Delay`, `Guard`, `wellness` encounters). BPMN process instances are typically case-scoped and use Timer Events for delays, but have no built-in notion of simulating a case forward year by year. The MiHUB overarching pathway spans a full patient journey, screening through aftercare, which is closer to GMF's time horizon than a typical single BPMN case. This is one reason the pathway is modeled as multiple linked sub-pathways.
+**Time semantics:** GMF simulates fixed time steps over a patient's entire life, with waiting, aging and recurring wellness encounters as first-class concepts (`Delay`, `Guard`, `wellness` encounters). BPMN process instances are typically case-scoped and use Timer Events for delays, but have no built-in notion of simulating a case forward year by year. A pathway that spans a full patient journey, from screening through aftercare, is closer to GMF's time horizon than a typical single BPMN case; this is one reason to model it as several linked sub-pathways (submodules).
 
 **Actors and responsibility:** BPMN's pools/lanes explicitly assign responsibility (primary care physician, tumor board, specialist, patient), which is structurally central to BPMN and to this project's cross-sectoral focus. GMF has no actor model at all; it is written entirely from the perspective of a single simulated patient's record, with no representation of who performs an encounter, refers a case, or hands off care.
 
@@ -199,39 +197,30 @@ Both the Generic Module Framework and BPMN 2.0 (the notation used throughout thi
 ---
 
 <a id="sec-5"></a>
-## 5. Implications for BPMN modeling in this project
+## 5. What follows for modeling a pathway
 
-These follow directly from the concept mapping and paradigm differences in [§4](#sec-4), grounded in the model-readiness findings tracked under [`model-issues/`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/tree/research/synthea-dataset-generation/docs/model-issues) (in the `mihub-lung-cancer-pathway` repository).
+These follow from the concept mapping and the differences in [§4](#sec-4).
 
-1. **BPMN remains the authoritative source; Synthea is downstream.** As already decided (see the plan, §2), the GMF modules are generated from the `.bpmn` files; nobody edits the JSON by hand. In the `mihub-lung-cancer-pathway` repository, findings against its models are reported in `docs/model-issues/` for a human modeler to resolve.
+1. **BPMN is the source; Synthea is downstream.** The GMF modules are generated from the `.bpmn` files; nobody edits the JSON by hand. A problem in a module is fixed in the diagram.
 
-2. **OR-gateways only as structured blocks.** GMF has no inclusive-OR semantics ([§4.1](#sec-4-1)). The converter of this repository rewrites a structured inclusive split/join into one decision per branch, and every branch needs its own condition or probability (lint rule `inclusive-branches-require-condition-or-probability`); an unstructured one is an error (`INCLUSIVE_NOT_STRUCTURED`). The modeling conventions of `mihub-lung-cancer-pathway` (7PMG, `CONVENTIONS.md` R5) still discourage OR-gateways there. The baseline of that repository has 11 unresolved OR-gateways: 4 in `treatment`/`aftercare` ([`model-issues/2026-06-25-baseline.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/model-issues/2026-06-25-baseline.md), Issue 1) and 7 in the work-in-progress `palliative-care` sub-pathway ([`model-issues/2026-06-29-palliative-care.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/model-issues/2026-06-29-palliative-care.md), Issue P1), each to be checked: a structured block converts, an unstructured one has to be remodelled first.
+2. **OR-gateways only as structured blocks.** GMF has no inclusive-OR semantics ([§4.1](#sec-4-1)). The converter rewrites a structured inclusive split/join into one decision per branch, and every branch needs its own condition or probability (lint rule `inclusive-branches-require-condition-or-probability`); an unstructured one is an error (`INCLUSIVE_NOT_STRUCTURED`) and has to be remodelled.
 
-3. **Concurrency must be linearized or decomposed, deliberately.** Because GMF has no fork/join, the converter runs the branches of a structured AND-block one after the other, in the order of the split's outgoing flows. So the modeler puts them in the order that matters clinically, or extracts them into separate, sequentially invoked submodules. There must be no hidden ordering dependency between "parallel" branches. This is the structured split/join discipline the project's modeling conventions already call for (R4).
+3. **Concurrency is linearized, so the order of the branches matters.** Because GMF has no fork/join, the converter runs the branches of a structured AND-block one after the other, in the order of the split's outgoing flows. Put them in the order that matters clinically, or extract them into separate, sequentially called submodules. There must be no hidden ordering dependency between "parallel" branches.
 
-4. **Single start, explicitly named end-states, per sub-pathway.** This mirrors GMF's exactly-one-`Initial` and named-`Terminal`/`Death` requirement: the overarching pathway currently has 5 start events and 140 flow elements (more than the 50-element guideline), which needs decomposing via Call Activities before it can become a single top-level module with clean submodule boundaries (see [`model-issues/2026-06-25-baseline.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/model-issues/2026-06-25-baseline.md), Issue 6).
+4. **One start and named ends per module.** GMF has exactly one `Initial` per module and ends in `Terminal` or `Death`. A large pathway with several entry points is split into submodules (call activities) first, each with one start event.
 
-5. **Every decision-relevant gateway needs a machine-readable branch rule.** Free-text "ja"/"nein" gateway labels are not transpilable. Each XOR outflow needs an explicit `synthea:` BPMN annotation: either a `synthea:conditionConfig` (an attribute expression, mapping to `conditional_transition`) or a `synthea:probabilityConfig` (mapping to `distributed_transition`, weights summing to 1.0 per gateway), and the modeler must decide, per branch, whether it represents a deterministic clinical rule or a population split. These are structurally different in GMF and must not be conflated.
+5. **Every decision needs a machine-readable branch rule.** Free-text "yes"/"no" labels on a gateway are not converted. Each outgoing flow of an exclusive gateway carries either a `synthea:conditionConfig` (an attribute expression, mapping to `conditional_transition`) or a `synthea:probabilityConfig` (mapping to `distributed_transition`, weights summing to 1.0 per gateway). For each branch, decide whether it is a deterministic clinical rule or a population split; the two are structurally different in GMF and must not be conflated.
 
-6. **Soundness has to be checked before transpilation.** A GMF module built from an unsound BPMN model will itself deadlock or livelock in simulation. The molecular-tumor-board sub-pathway has a known finding that illustrates this risk concretely: no option-to-complete, meaning at least one path cannot reach an end event (see [`model-issues/2026-06-25-baseline.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/model-issues/2026-06-25-baseline.md), Issue 3). Resolving it, by re-pairing mismatched gateways, is required before that sub-pathway can become a submodule.
+6. **Soundness before conversion.** A module built from an unsound BPMN model deadlocks or never finishes in simulation: every path has to reach an end event, and gateways that split and join have to match. The converter reports unreachable states and missing transitions, but a model that only loops is a modeling question.
 
-7. **Every clinical Task needs a Synthea-native code, in addition to a German one.** GMF states resolve almost entirely on SNOMED CT (condition/procedure/encounter), LOINC (observation) and RxNorm (medication): the codes the `synthea:` extension carries for every clinically meaningful task. German codes (ICD-10-GM/OPS/ATC) remain relevant, but only at the later MII-conformance export step (via Flexporter and ConceptMaps).
+7. **Every clinical task needs a Synthea-native code.** GMF states resolve on SNOMED CT (condition, procedure, encounter), LOINC (observation) and RxNorm (medication): the codes the `synthea:` extension carries for every clinically meaningful task. German codes (ICD-10-GM, OPS, ATC) belong to a later export step (for example via Flexporter [[11]](#ref-11) and concept maps), not to the module.
 
-8. **A literal 1:1 translation of the guideline will produce an unrealistically uniform cohort.**
-   Per the Chen et al. (2019) validation caveat ([§1](#sec-1)), Synthea reproduces demographics and service-probability well but not realistic outcome variation on its own. Translating the guideline-ideal BPMN pathway directly into GMF states, with no further work, yields a population where everyone follows the guideline perfectly. Deliberately engineered heterogeneity (non-adherence, comorbidity, recurrence, loss to follow-up), calibrated against registry benchmarks, has to be added on top (see the data-sources catalog's tiered v1/v2 approach for how this project plans to do that).
-
----
+8. **A literal 1:1 translation of a guideline gives an unrealistically uniform cohort.** Per the validation caveat in [§1](#sec-1), Synthea reproduces demographics and service probability well, but not realistic outcome variation on its own. Translating a guideline-ideal pathway directly into GMF yields a population in which everyone follows the guideline perfectly. Heterogeneity (non-adherence, comorbidity, recurrence, loss to follow-up), calibrated against registry data, has to be added on purpose.
 
 <a id="sec-6"></a>
-## 6. Related documents
+## 6. The MiHUB lung cancer pathway
 
-All four documents below live in the [`mihub-lung-cancer-pathway`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/tree/research/synthea-dataset-generation/docs) repository, not in this one.
-
-- [`synthea-and-bpmn-primer.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/synthea-and-bpmn-primer.md): the detailed companion primer, covering the full BPMN to GMF mapping table with per-row citations, the complete list of what BPMN does not give Synthea and the three annotation extensions.
-- [`synthea-dataset-generation-plan.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/synthea-dataset-generation-plan.md): the concrete engineering plan, covering pipeline architecture, phased execution TODOs, GMF-compatibility modeling conventions and the portal consumption contract.
-- [`data-sources-for-probabilities-and-timing.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/data-sources-for-probabilities-and-timing.md):
-  the verified catalog of data sources for every GMF probability and timing parameter, with a tiered (v1 guideline-based / v2 registry-derived) methodology.
-- [`model-issues/2026-06-25-baseline.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/model-issues/2026-06-25-baseline.md) and [`model-issues/2026-06-29-palliative-care.md`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/blob/research/synthea-dataset-generation/docs/model-issues/2026-06-29-palliative-care.md): the tracked model-readiness findings referenced in [§5](#sec-5).
+This page started as background for the MiHUB lung cancer pathway. The work on that pathway (its modeling conventions, the findings against its models, the plan for generating a data set and the sources for its probabilities and timings) lives in the [`mihub-lung-cancer-pathway`](https://github.com/forschungsgruppe-digital-health/mihub-lung-cancer-pathway/tree/research/synthea-dataset-generation/docs) repository, not in this one.
 
 ---
 

@@ -165,7 +165,7 @@ is **expected to fail**: the diagrams in `examples/invalid/` prove that the rule
 | [docs/extension-api.md](docs/extension-api.md) | The extension API: register it in bpmn-js, read the data in Node, what the XSD checks |
 | [docs/extension-api-types.md](docs/extension-api-types.md) | The `synthea:` types, attributes and enumerations (generated from the moddle descriptor) |
 | [docs/extension-matrix.md](docs/extension-matrix.md) | Which `synthea:` type sits on which BPMN element (panel and converter) |
-| [docs/synthea.md](docs/synthea.md) | Background: Synthea and its Generic Module Framework |
+| [docs/synthea.md](docs/synthea.md) | Background: Synthea in depth, its Generic Module Framework and where it meets BPMN |
 | [docs/concepts.md](docs/concepts.md) | Background: what a BPMN extension is and how the pieces fit |
 | [docs/adr/](docs/adr/) | Architecture decisions (versioning, encounter scope) |
 | [examples/lung-cancer/README.md](examples/lung-cancer/README.md) | The example pathway and how it converts |

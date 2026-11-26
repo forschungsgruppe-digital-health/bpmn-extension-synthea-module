@@ -83,7 +83,7 @@ export default defineConfig({
         },
         {
           label: '4. Background',
-          items: [{ label: 'Synthea and the lung cancer pathway', link: '/background/synthea/' }]
+          items: [{ label: 'Synthea in depth', link: '/background/synthea/' }]
         },
         {
           label: '5. For developers',
