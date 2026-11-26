@@ -44,11 +44,13 @@ Use [Conventional Commits](https://www.conventionalcommits.org/): `fix:` → pat
 into a release PR; merging it tags a release. Nothing is published to npm. See `CONTRIBUTING.md`.
 
 ## Commands
-- Full check: `npm run validate` (two stages: `npm run validate:diagram`, then `npm run validate:convert`)
+- Full check: `npm run validate` (two stages: `npm run validate:diagram`, then `npm run validate:convert`; `conventions` and `jsdoc:check` run between them)
 - Lint, valid (must pass; covers `examples/valid/` and `examples/lung-cancer/`): `npm run lint:valid`
 - Lint, invalid (must fail): `npm run lint:invalid`
 - Round-trip: `npm run roundtrip`
 - XSD core: `npm run xsd`
-- Extension XSD (optional, structure-only): generate `npm run xsd:gen`, drift-guard `npm run xsd:gen:check`, validate `npm run xsd:ext`
+- Extension XSD (structure only; drift guard and validation run in `validate`): generate `npm run xsd:gen`, drift-guard `npm run xsd:gen:check`, validate `npm run xsd:ext`
+- Generated type reference: `npm run api:gen` (drift guard `npm run api:gen:check`, in `validate`); JSDoc: `npm run jsdoc:check` (in `validate`)
+- What each step of `validate` covers: `docs/validator-overview.md`
 - Conventions: `npm run conventions`
 - BPMN → Synthea converter (`docs/bpmn2gmf-concept.md`): tests `npm test`; convert the real pathways (must pass, strict) `npm run convert:check`; write the modules `npm run bpmn2gmf -- examples/lung-cancer --out-dir out/modules` (`--fuse-gateways` for fewer Simple states, `--strict` to refuse incomplete modules); the golden files `extension/test/golden/` pin the converted modules (rewrite with `UPDATE_GOLDEN=1 npm test`); run them in a real Synthea (needs Java + the release jar, not part of `validate`) `npm run synthea:smoke -- <synthea-with-dependencies.jar>`

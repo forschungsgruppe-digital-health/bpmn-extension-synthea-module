@@ -14,7 +14,7 @@ module; the other four are its submodules, called via `bpmn:callActivity`
 | `symptom-check-submodule.bpmn` | `Process_SymptomCheck` |
 | `anemia-submodule.bpmn` | `Process_AnemiaSubmodule` |
 
-The demo app's Pathway dropdown loads all five directly from here.
+The **Examples** menu of the modeler (`npm run demo`, or the published site) opens them from here, one at a time or all five together.
 
 ## Converting to Synthea and running it
 

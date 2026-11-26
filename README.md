@@ -151,8 +151,9 @@ tarball from `npm pack`) can depend on it as a file:
 | `bpmn-js-synthea-extension/converter` | the converter as a function |
 | `npx bpmn2gmf <files>` | the converter on the command line |
 
-The properties panel packages (`@bpmn-io/properties-panel`, `bpmn-js-properties-panel`) and `bpmn-js`
-are peer dependencies; the project installs them itself. A working project is in
+`bpmn-js` and `diagram-js` are peer dependencies the project installs itself; the properties panel
+packages (`@bpmn-io/properties-panel`, `bpmn-js-properties-panel`) are optional peers, needed only for the
+panel groups (see [docs/extension-api.md](docs/extension-api.md)). A working project is in
 [`examples/consumer/`](examples/consumer/); `npm run test:consumer` packs the package, installs it
 there and builds it.
 
@@ -259,12 +260,11 @@ npm run synthea:smoke -- <path to the jar> --force-diagnosis --trace-submodules 
 | change how a BPMN element maps to a state | `docs/implicit-rules.md`, `extension/src/converter/resolve.mjs`, `transitions.mjs` | `npm test` |
 | offer another example in the demo | the `.bpmn` file in `examples/lung-cancer/` (the **Examples** menu lists every file there), its menu name in `EXAMPLE_LABELS` in `demo/src/main.js` | `npm run demo` |
 
-`npm run validate` runs the whole gate in two stages: `validate:diagram` (is the BPMN a valid input: the
-positive fixtures must lint clean, including the converter's own checks and the values in the fields, the
-round trip and both XSDs must pass, the generated XSD must match the descriptor) and `validate:convert` (the
-tests (`npm test`, including the golden files of the lung cancer pathway) and the strict conversion of the
-lung cancer files must pass). `npm run lint:invalid` is **expected to fail**: the diagrams in
-`examples/invalid/` prove that the rules fire.
+`npm run validate` runs the whole gate in two stages: `validate:diagram` (is the BPMN a valid input: lint,
+round trip, both XSDs, generated files up to date) and `validate:convert` (module schema, `npm test` with the
+golden files of the lung cancer pathway, strict conversion), with the package conventions and the JSDoc check
+in between. [docs/validator-overview.md](docs/validator-overview.md) lists every step. `npm run lint:invalid`
+is **expected to fail**: the diagrams in `examples/invalid/` prove that the rules fire.
 
 ## Documentation
 

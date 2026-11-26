@@ -44,4 +44,4 @@ Short explanations of the words used in this documentation, in alphabetical orde
 
 **Transition.** The connection from one state to the next. A transition can be fixed, or chosen by a probability or a condition.
 
-**XSD.** The XML schema of BPMN. It checks the standard part of a file but not the `synthea:` data, which is why the lint rules exist.
+**XSD.** An XML schema. The official BPMN schema checks the standard part of a file but not the `synthea:` data. This project generates a second XSD from its own data model, which checks the structure and the fixed choices of the `synthea:` data; what a value means and how fields depend on each other is checked by the lint rules.

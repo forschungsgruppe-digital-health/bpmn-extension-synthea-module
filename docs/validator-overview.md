@@ -15,7 +15,7 @@ The contract between the two is the first stage: a diagram that passes it conver
 
 ## The steps
 
-`npm run validate` runs these in order. Steps 1 to 5 check the extension and the diagrams (stage one, plus the package conventions), steps 6 to 8 the Synthea modules the converter generates from them (stage two).
+`npm run validate` runs these in order. Steps 1 to 5 are stage one (the extension and the diagrams, and the generated type reference), steps 6 and 7 check the package and its source (conventions, JSDoc), steps 8 to 10 are stage two (the Synthea modules the converter generates).
 
 ### Extension and diagrams
 
@@ -25,7 +25,9 @@ The contract between the two is the first stage: a diagram that passes it conver
 | 2 | Round trip | `roundtrip`: `tools/moddle-roundtrip.mjs` | every example goes through `bpmn-moddle` and back; nothing may be lost and no warning may appear. This is the check that really covers `<extensionElements>` |
 | 3 | XSD, core | `xsd`: `tools/validate-xsd.sh` | BPMN structure against the official BPMN 2.0 schema. Extension elements are not covered |
 | 4 | XSD, extension | `xsd:gen:check`: `tools/moddle-to-xsd.mjs --check` (generates `extension/model/synthea.xsd`); `xsd:ext`: `tools/validate-xsd-ext.mjs` | a schema generated from the moddle descriptor and the value lists in `extension/model/synthea.values.json` (the single sources); `--check` fails if the stored schema has drifted. Structure, the enumerations of the model (state type, condition type, encounter class, ...) and the fixed value lists (time units, operators, gender, race); the lint covers meaning and everything that depends on another field |
-| 5 | Conventions | `conventions`: `tools/check-package-conventions.mjs` | package names (`bpmn-js-*`, `bpmnlint-plugin-*`), `bpmn-js` only as a peer dependency |
+| 5 | Type reference | `api:gen:check`: `tools/gen-extension-api.mjs --check` | `docs/extension-api-types.md` is generated from the moddle descriptor; fails if the page has drifted from it |
+| 6 | Conventions | `conventions`: `tools/check-package-conventions.mjs` | package names (`bpmn-js-*`, `bpmnlint-plugin-*`), `bpmn-js` only as a peer dependency |
+| 7 | JSDoc | `jsdoc:check`: `tools/check-jsdoc.mjs` | every file in `extension/src/` and `extension/src/converter/` (no tests) starts with a JSDoc block that says what it is for, and every exported symbol has one with a description (a function also an `@param` per parameter) |
 
 "XSD passed" never means "extension valid": the XSD does not cover `<extensionElements>`. Checks 2 and 4 plus the lint do.
 
@@ -33,11 +35,11 @@ The contract between the two is the first stage: a diagram that passes it conver
 
 | # | Check | Command and files | What it covers |
 |---|---|---|---|
-| 6 | Module schema | `schema:gen:check`: `tools/gen-module-schema.mjs --check` (writes `extension/src/converter/module.schema.json` from `required-fields.mjs`) | the structure of every state; `--check` fails if the stored schema has drifted (see [Structure](#structure-of-a-module-the-json-schema)) |
-| 7 | Tests | `test` (`npm test`): `extension/test/*.test.mjs` (with `helpers.mjs` and `lint-helper.mjs`) | the converter in `extension/src/converter/`, the lint rules, the panel, and the golden files of `examples/lung-cancer/` (see [Tests](#tests)) |
-| 8 | Converter check | `convert:check`: `extension/src/converter/cli.mjs examples/lung-cancer --check --strict` | `examples/lung-cancer/` converts strictly, nothing is written |
+| 8 | Module schema | `schema:gen:check`: `tools/gen-module-schema.mjs --check` (writes `extension/src/converter/module.schema.json` from `required-fields.mjs`) | the structure of every state; `--check` fails if the stored schema has drifted (see [Structure](#structure-of-a-module-the-json-schema)) |
+| 9 | Tests | `test` (`npm test`): `extension/test/*.test.mjs` (with `helpers.mjs` and `lint-helper.mjs`) | the converter in `extension/src/converter/`, the lint rules, the panel, and the golden files of `examples/lung-cancer/` (see [Tests](#tests)) |
+| 10 | Converter check | `convert:check`: `extension/src/converter/cli.mjs examples/lung-cancer --check --strict` | `examples/lung-cancer/` converts strictly, nothing is written |
 
-The converter checks its own output while it converts (`verify.mjs`, `verify-flow.mjs`, and `codes.mjs` for the code system of each state type). Steps 7 and 8 run those checks, and a module with an error is not written.
+The converter checks its own output while it converts (`verify.mjs`, `verify-flow.mjs`, and `codes.mjs` for the code system of each state type). Steps 9 and 10 run those checks, and a module with an error is not written.
 
 ### Not part of `validate`
 
@@ -60,7 +62,7 @@ It was tried on the 536 modules shipped with Synthea 4.0.0: 535 are valid. The o
 
 ## Order of states: the order checks
 
-`extension/src/converter/verify-flow.mjs` runs inside the converter (steps 7 and 8). The rules come from the States wiki and from the eight Level 1 checks of Kramer et al. Five of those checks existed before: path integrity (`STATE_UNREACHABLE`), transition completeness (`NO_TRANSITION`, `TERMINAL_HAS_TRANSITION`), existing sub-modules and targets (`SUBMODULE_NOT_FOUND`, `TRANSITION_TARGET_MISSING`), probabilities that sum to 1 (`DISTRIBUTION_SUM`, lint `probability-sum-valid`), and an EncounterEnd for every Encounter, which the converter derives from `encounterId`. A long Delay (a day or more after the last state of an encounter, a week or more inside it) ends the encounter there, so it does not keep one open for months, which Kramer et al. observed. The rules below are the rest. To see how many false alarms they give, they were run once over the 536 modules shipped in `synthea-with-dependencies.jar` (v4.0.0; 97 of them are not called by another module). This is a one-off measurement, not part of `validate`.
+`extension/src/converter/verify-flow.mjs` runs inside the converter (steps 9 and 10). The rules come from the States wiki and from the eight Level 1 checks of Kramer et al. Five of those checks existed before: path integrity (`STATE_UNREACHABLE`), transition completeness (`NO_TRANSITION`, `TERMINAL_HAS_TRANSITION`), existing sub-modules and targets (`SUBMODULE_NOT_FOUND`, `TRANSITION_TARGET_MISSING`), probabilities that sum to 1 (`DISTRIBUTION_SUM`, lint `probability-sum-valid`), and an EncounterEnd for every Encounter, which the converter derives from `encounterId`. A long Delay (a day or more after the last state of an encounter, a week or more inside it) ends the encounter there, so it does not keep one open for months, which Kramer et al. observed. The rules below are the rest. To see how many false alarms they give, they were run once over the 536 modules shipped in `synthea-with-dependencies.jar` (v4.0.0; 97 of them are not called by another module). This is a one-off measurement, not part of `validate`.
 
 | Code | Level | Check in Kramer et al. | Shipped modules hit | What the hits are |
 |---|---|---|---|---|

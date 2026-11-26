@@ -8,14 +8,14 @@ convention.
 
 ```bash
 npm install        # Node 22+; sets up the workspaces (lint plugin + demo)
-npm run validate   # lint, round-trip, XSD, conventions, tests (npm test), strict conversion
+npm run validate   # every automated check, see docs/validator-overview.md
 npm run demo       # optional: interactive modeler playground at http://localhost:5173/modeler/
 ```
 
-`npm run validate` chains the **positive** lint, round-trip, XSD core, the
-generated extension XSD (drift guard and validation), conventions, the converter
-tests (including the golden files) and `convert:check`. The negative lint and the engine
-run (`synthea:smoke`) run on their own. Individual checks:
+`npm run validate` runs every automated check in ten steps and two stages; the
+full list, with what each step covers, is in
+[docs/validator-overview.md](docs/validator-overview.md). The negative lint and the
+engine run (`synthea:smoke`) run on their own. The commands you will use most:
 
 | Command | Purpose |
 |---------|---------|
@@ -23,8 +23,10 @@ run (`synthea:smoke`) run on their own. Individual checks:
 | `npm run lint:invalid` | `examples/invalid/` must fail lint (negative test) |
 | `npm run roundtrip` | extension data of the examples and of `examples/lung-cancer/` round-trips through `bpmn-moddle` |
 | `npm run xsd` | BPMN core of the examples and of `examples/lung-cancer/` validates against `BPMN20.xsd` |
-| `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, XSD), then does the conversion work (module schema, `npm test` with the golden files, strict conversion) |
-| `npm run xsd:gen` / `xsd:ext` | (optional) generate the extension XSD; validate the examples and `examples/lung-cancer/` against BPMN core + that XSD |
+| `npm run validate:diagram` / `validate:convert` | the two stages of `validate`: is the diagram a valid input (lint, round trip, both XSDs, type reference), then does the conversion work (module schema, `npm test` with the golden files, strict conversion); `validate` runs the conventions and the JSDoc check between them |
+| `npm run xsd:gen` / `xsd:ext` | regenerate the extension XSD after a change to the descriptor; validate the examples and `examples/lung-cancer/` against BPMN core + that XSD (both checked in `validate`) |
+| `npm run api:gen` | regenerate `docs/extension-api-types.md` after a change to the descriptor (checked in `validate`) |
+| `npm run jsdoc:check` | every source file and exported symbol in `extension/src/` has JSDoc |
 | `npm run conventions` | `package.json` follows the bpmn.io conventions (name, `type: module`, `bpmn-js` only as a peer dependency) |
 | `npm test` | all tests in `extension/test/`: converter, lint rules, panel, golden files |
 | `npm run convert:check` | the real pathways in `examples/lung-cancer/` convert strictly (`--strict`) |
