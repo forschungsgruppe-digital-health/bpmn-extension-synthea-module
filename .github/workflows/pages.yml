@@ -1,13 +1,19 @@
-name: deploy-demo
+name: deploy-pages
 
-# Build the demo/ modeler playground and publish it to GitHub Pages.
-# Enable once under Settings -> Pages -> Source: "GitHub Actions".
-# Independent of validate.yml and release-please.yml — a demo deploy is not a
-# package gate and is not coupled to releases.
+# Publishes the state of the dev branch on GitHub Pages: the overview and guides at the root, the
+# modeler under modeler/, the converter result under modules/ (built by tools/build-site.mjs on dev).
+#
+# Why this file lives on main: the github-pages environment only allows deployments that run from
+# main. A workflow_run workflow always runs from the default branch (main), so this one may deploy,
+# and it checks out exactly the dev commit that the validate workflow has just passed. It starts by
+# itself after every green validate run on dev, and by hand ("Run workflow", then it takes the tip
+# of dev).
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: [validate]
+    types: [completed]
+    branches: [dev]
   workflow_dispatch:
 
 # Least-privilege token scopes required by actions/deploy-pages.
@@ -23,38 +29,36 @@ concurrency:
 
 jobs:
   build:
+    # only after a green validate run of a push to dev (not of a pull request), or by hand
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: dev
+          ref: ${{ github.event.workflow_run.head_sha || 'dev' }}
+
+      - name: Name the checked-out commit dev
+        # the result page records the branch it was built from; a checked-out SHA has none, and
+        # GITHUB_REF_NAME would say main
+        run: git checkout -B dev
 
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
 
       - name: Install dependencies (workspaces incl. demo)
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
-      - name: Build demo
-        # Project Pages serve from https://<owner>.github.io/<repo>/, so assets
-        # must be requested from that sub-path.
-        run: npm --prefix demo run build
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}/
-
-      - name: Add the converter result (modules and report)
-        # Runs the converter on the lung cancer pathway and publishes the JSON
-        # modules and the report under <site>/modules/. Fails on conversion errors.
-        run: node tools/build-converter-site.mjs lung-cancer --out-dir demo/dist/modules
-
-      - name: Check the site before it is deployed
-        # Asset paths under the repo sub-path, converter result complete, no errors.
-        run: node tools/check-pages-build.mjs demo/dist /${{ github.event.repository.name }}/
+      - name: Build the site (overview and guides, modeler, converter result) and check it
+        # Project Pages serve from /<repo>/, so every asset must be requested from that sub-path; the
+        # check fails the job on a wrong path, a missing page, a dead link or a conversion error.
+        run: node tools/build-site.mjs /${{ github.event.repository.name }}/ site
 
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: demo/dist
+          path: site
 
   deploy:
     needs: build
