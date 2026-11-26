@@ -45,6 +45,10 @@ it. The two are shown apart:
   diagram. Unlike the lint this is the plain conversion together with the other opened files, so it
   also sees a missing sub-module.
 
+Both also show in the properties panel: the list **Problems** at the top of the group "Synthea"
+lists what the lint and the last conversion found on the selected element, and a message that belongs
+to one field appears under that field too (`extension/src/SyntheaDiagnostics.js`).
+
 Red is an error, orange a warning. The decision is still the one from `npm run validate`.
 
 The two slots are the whole mental model: **`moddleExtensions` is the data layer**

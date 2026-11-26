@@ -26,6 +26,8 @@ export function initConverterResult({ modeler, getCurrent, showMessages }) {
   const canvas = modeler.get('canvas');
   const overlays = modeler.get('overlays');
   const registry = modeler.get('elementRegistry');
+  // the same messages in the properties panel, under the field to change (extension/src/SyntheaDiagnostics.js)
+  const panelDiagnostics = modeler.get('syntheaDiagnostics', false);
   const status = document.querySelector('#live-status');
 
   let marked = []; // [elementId, marker] currently on the canvas
@@ -51,11 +53,16 @@ export function initConverterResult({ modeler, getCurrent, showMessages }) {
 
   function report(diagnostics) {
     clear();
-    const problems = ownItems(diagnostics.items).filter((i) => i.level === 'error' || i.level === 'warning');
+    const own = ownItems(diagnostics.items);
+    panelDiagnostics?.setConverterMessages(own);
+    // the converter names an element by its id or by the name of its state
+    const elementOf = (ref) => (panelDiagnostics ? panelDiagnostics.resolve(ref) : registry.get(ref) && ref);
+    const problems = own.filter((i) => i.level === 'error' || i.level === 'warning');
     const byElement = new Map();
     for (const i of problems) {
-      if (!i.element || !registry.get(i.element)) continue; // flows made by the converter have no shape
-      byElement.set(i.element, [...(byElement.get(i.element) ?? []), i]);
+      const id = i.element && elementOf(i.element);
+      if (!id) continue; // flows and states made by the converter have no shape
+      byElement.set(id, [...(byElement.get(id) ?? []), i]);
     }
     for (const [id, list] of byElement) {
       const level = list.some((i) => i.level === 'error') ? 'error' : 'warning';
@@ -81,6 +88,7 @@ export function initConverterResult({ modeler, getCurrent, showMessages }) {
 
   function failed(err) {
     clear();
+    panelDiagnostics?.clearConverterMessages();
     status.className = 'live-status has-errors';
     status.textContent = 'Converter: failed';
     status.title = String(err?.message ?? err);

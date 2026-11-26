@@ -14,6 +14,8 @@ import {
 } from '@bpmn-io/properties-panel';
 import * as panelApi from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
+import { jsx, jsxs } from '@bpmn-io/properties-panel/preact/jsx-runtime';
+import { PROBLEMS_ENTRY_ID } from './SyntheaDiagnostics.js';
 import { describe } from './descriptions.js';
 import { numberError, rangeError, codeError, patternError, attributeNameError } from './fieldValidation.js';
 
@@ -345,7 +347,9 @@ export default function SyntheaMiniPropertiesProvider(propertiesPanel, injector)
       // Everything above is ours: fold it into one "Synthea" group whose sections open and
       // close on their own, so the panel shows a single entry instead of a long list.
       const own = groups.splice(firstOwn);
-      if (own.length) {
+      const diagnostics = injector.get('syntheaDiagnostics', false);
+      const hasProblems = !!(diagnostics && diagnostics.messagesFor(element.id).length);
+      if (own.length || hasProblems) {
         groups.push(createSyntheaGroup(own, element));
       }
 
@@ -375,21 +379,53 @@ function isSectionEdited(input) {
 }
 
 // One group "Synthea" holding every synthea: group as a collapsible section of its own.
-// The first section starts open.
+// The first section starts open. Above them the list "Problems" of what the lint and the converter
+// found on the element (SyntheaDiagnostics.js); it shows nothing while there is nothing. An element
+// without sections gets the group only when it has problems already when the panel draws it.
 function createSyntheaGroup(sections, element) {
+  const problems = [{ id: PROBLEMS_ENTRY_ID, element, component: ProblemsEntry }];
   return {
     id: 'synthea',
     label: 'Synthea',
     shouldOpen: true,
-    entries: sections.map((section, index) => ({
+    entries: [...problems, ...sections.map((section, index) => ({
       id: `synthea-section-${section.id}@${element.id}`,
       component: CollapsibleEntry,
       label: section.label,
       open: openSections.get(`synthea-section-${section.id}@${element.id}`) ?? index === 0,
       entries: section.entries,
       isEdited: isSectionEdited
-    }))
+    }))]
   };
+}
+
+const SEVERITY_CLASS = { error: 'bio-properties-panel-error', warning: 'bio-properties-panel-warning', info: 'bio-properties-panel-info' };
+const SOURCE_LABEL = { lint: 'Lint', converter: 'Converter' };
+
+// The list of what the lint and the converter found on the element, most severe first. Messages that
+// belong to one field are also shown under that field (SyntheaDiagnostics.js).
+function ProblemsEntry(props) {
+  const { element, id } = props;
+  const diagnostics = useService('syntheaDiagnostics');
+  const translate = useService('translate');
+  const rank = { error: 2, warning: 1, info: 0 };
+  const messages = [...(diagnostics ? diagnostics.messagesFor(element.id) : [])].sort((a, b) => rank[b.severity] - rank[a.severity]);
+  if (!messages.length) return null;
+  return jsxs('div', {
+    class: 'bio-properties-panel-entry synthea-problems',
+    'data-entry-id': id,
+    children: [
+      jsx('div', { class: 'bio-properties-panel-label', children: `${translate('Problems')} (${messages.length})` }),
+      ...messages.map((m) => jsx('div', {
+        class: SEVERITY_CLASS[m.severity] || SEVERITY_CLASS.error,
+        children: jsx('span', {
+          class: 'bio-properties-panel-error-message bio-properties-panel-diagnostic-message',
+          title: m.code,
+          children: `${translate(SOURCE_LABEL[m.source] || m.source)}: ${m.message}`
+        })
+      }))
+    ]
+  });
 }
 
 // The state types that carry a clinical code (the same list as extension/src/converter/codes.mjs).

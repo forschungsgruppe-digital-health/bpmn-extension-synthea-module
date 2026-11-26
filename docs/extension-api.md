@@ -68,6 +68,25 @@ for (const element of rootElement.rootElements[0].flowElements) {
 }
 ```
 
+## Problems in the properties panel
+
+The module shows in the panel what the lint and the converter found on the selected element: all of it in a list **Problems** at the top of the group "Synthea" (red for an error, orange for a warning), and the message again under the field to change, where it clearly belongs to one field (a missing code under **Code**, a duplicate name under **Name**). It uses the panel's own mechanism for this (`propertiesPanel.setDiagnostics`), so the panel also marks the group. This needs a version of `@bpmn-io/properties-panel` that has that event (tested with 3.56 and 3.60).
+
+- **Lint:** taken over by itself when the host registers `bpmn-js-bpmnlint` (its event `linting.completed`). The lint plugin is not part of the package; without it the panel still checks the values in the fields.
+- **Converter:** the host hands over the messages of a conversion. They are dropped at the next change of the diagram:
+
+```js
+import { convert } from 'bpmn-js-synthea-extension/converter';
+
+const { xml } = await modeler.saveXML();
+const { diagnostics } = await convert([{ path: 'diagram.bpmn', xml }]);
+modeler.get('syntheaDiagnostics').setConverterMessages(diagnostics.items);
+```
+
+- **Elsewhere:** every update fires `synthea.diagnostics.changed` with the selected element and its messages (`{ element, messages }`, each message with `source`, `severity`, `code` and `message`), for a host that wants to show them in its own place.
+
+Which message goes under which field is the table `FIELD` in `extension/src/SyntheaDiagnostics.js`; a test checks that every field in it exists in the panel.
+
 ## What the XML looks like
 
 The extension data sits in `<bpmn:extensionElements>` of the element it belongs to, in the namespace `https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0` with the prefix `synthea`. The type `StateTypeConfig` is written as the element `<synthea:stateTypeConfig>`:

@@ -1,13 +1,15 @@
 /**
  * Entry point of the extension: the bpmn-js module that wires the parts together (the
  * properties panel provider, the replace menu filter, the palette and context pad filter, the
- * `Initial` default of start events and the modeling rule that forbids boundary events). The moddle descriptor is a separate entry point (`bpmn-js-synthea-extension/model`).
+ * `Initial` default of start events, the modeling rule that forbids boundary events and the lint and
+ * converter messages in the panel, SyntheaDiagnostics). The moddle descriptor is a separate entry point (`bpmn-js-synthea-extension/model`).
  */
 import SyntheaPropertiesProvider from './SyntheaPropertiesProvider.js';
 import SyntheaReplaceMenuFilter from './SyntheaReplaceMenuFilter.js';
 import SyntheaNoBoundaryRules from './SyntheaNoBoundaryRules.js';
 import SyntheaPaletteFilter from './SyntheaPaletteFilter.js';
 import SyntheaStartEventDefaults from './SyntheaStartEventDefaults.js';
+import SyntheaDiagnostics from './SyntheaDiagnostics.js';
 
 /**
  * The bpmn-js editor module for the synthea extension, injected via
@@ -26,11 +28,18 @@ import SyntheaStartEventDefaults from './SyntheaStartEventDefaults.js';
 export default {
   __init__: [
     'syntheaPropertiesProvider', 'syntheaReplaceMenuFilter', 'syntheaNoBoundaryRules',
-    'syntheaPaletteFilter', 'syntheaStartEventDefaults'
+    'syntheaPaletteFilter', 'syntheaStartEventDefaults', 'syntheaDiagnostics'
   ],
   syntheaPropertiesProvider: ['type', SyntheaPropertiesProvider],
   syntheaReplaceMenuFilter: ['type', SyntheaReplaceMenuFilter],
   syntheaNoBoundaryRules: ['type', SyntheaNoBoundaryRules],
   syntheaPaletteFilter: ['type', SyntheaPaletteFilter],
-  syntheaStartEventDefaults: ['type', SyntheaStartEventDefaults]
+  syntheaStartEventDefaults: ['type', SyntheaStartEventDefaults],
+  syntheaDiagnostics: ['type', SyntheaDiagnostics]
 };
+
+/**
+ * The event fired with the problems of the selected element (`synthea.diagnostics.changed`) and the id
+ * of the Problems entry in the panel, for hosts that show the problems elsewhere (SyntheaDiagnostics.js).
+ */
+export { DIAGNOSTICS_CHANGED_EVENT, PROBLEMS_ENTRY_ID } from './SyntheaDiagnostics.js';

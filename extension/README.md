@@ -13,8 +13,8 @@ into Synthea modules. The parts:
   [`docs/lint-rules.md`](../docs/lint-rules.md).
 - `src/` — the bpmn-js module (`index.js`, the `additionalModules` entry): the Synthea group of the
   properties panel (`SyntheaPropertiesProvider.js`, with `descriptions.js` and `fieldValidation.js`),
-  the palette and replace menu filters, the `Initial` default of start events and the rule that
-  forbids boundary events. Try it with the [`demo/`](../demo/) modeler (`npm run demo`).
+  the palette and replace menu filters, the `Initial` default of start events, the rule that
+  forbids boundary events, and the lint and converter messages in the panel (`SyntheaDiagnostics.js`). Try it with the [`demo/`](../demo/) modeler (`npm run demo`).
 - `src/converter/` — the converter from BPMN to Synthea modules (`convert.mjs`, exported as
   `bpmn-js-synthea-extension/converter`) and its command line `bpmn2gmf` (`cli.mjs`). See
   [`docs/converter-overview.md`](../docs/converter-overview.md).
