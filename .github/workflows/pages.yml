@@ -1,25 +1,20 @@
-name: deploy-demo
+name: pages-build
 
-# Build the site (docs-site/ guides, the demo/ modeler, the converted modules) and publish it to
-# GitHub Pages. Enable once under Settings -> Pages -> Source: "GitHub Actions".
-# Independent of validate.yml and release-please.yml — a site deploy is not a
-# package gate and is not coupled to releases.
+# Builds the whole GitHub Pages site (docs-site/ guides at the root, the demo/ modeler at /modeler/,
+# the converter result at /modules/) and checks it, on every push to dev and every pull request.
+#
+# It does not deploy. The github-pages environment only allows deployments that run from main, so
+# the deploy is the workflow .github/workflows/pages.yml on main ("deploy-pages"): it starts after
+# every green validate run on dev, checks out that dev commit and runs the same tools/build-site.mjs.
 
 on:
   push:
     branches: [dev]
+  pull_request:
   workflow_dispatch:
 
-# Least-privilege token scopes required by actions/deploy-pages.
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-# Never run two Pages deploys at once; let an in-progress run finish.
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -35,22 +30,6 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Build the site (overview and guides, modeler, converter result) and check it
-        # docs-site (Astro + Starlight) at /, the modeler at /modeler/, the converter result at
-        # /modules/, assembled into ./site because Pages takes one artifact. Project Pages serve
-        # from /<repo>/, so every asset must be requested from that sub-path; the check fails the
-        # job on a wrong path, a missing page, a dead link or a conversion error.
+        # Project Pages serve from /<repo>/, so every asset must be requested from that sub-path; the
+        # check fails the job on a wrong path, a missing page, a dead link or a conversion error.
         run: node tools/build-site.mjs /${{ github.event.repository.name }}/ site
-
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v5

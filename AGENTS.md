@@ -14,7 +14,7 @@ Synthea modules (`extension/src/converter`) and automated conformance checks. No
 - `skills/` — agent skills that orchestrate the checkers (see "Agent skills" below); `.claude/skills` and `.agents/skills` are symlinks to it.
 - `docs-site/` — Astro + Starlight site (Pages root: overview and the guides from `docs/`, copied by `scripts/sync-docs.mjs`; not an npm workspace). `npm run site` builds the whole Pages site (docs, `demo/` at `/modeler/`, converter result at `/modules/`) into `site/`.
 - `demo/` — private (non-published) bpmn-js modeler playground for trying the extension by hand; an npm workspace. NOT a pass/fail gate.
-- `.devcontainer/` + `.github/workflows/pages.yml` — reproducible dev/Codespaces env and the GitHub Pages deploy of the whole site (built by `tools/build-site.mjs`).
+- `.devcontainer/` + `.github/workflows/pages.yml` — reproducible dev/Codespaces env, and the build and check of the whole Pages site (`tools/build-site.mjs`). The deploy is `pages.yml` on `main`: it runs after every green `validate` on `dev`, because the `github-pages` environment only allows `main`.
 
 ## Agent skills
 `skills/<name>/SKILL.md` is the single source; Claude Code finds the skills through `.claude/skills`,

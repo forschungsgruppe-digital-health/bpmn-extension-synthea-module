@@ -80,10 +80,10 @@ Or from here: `npm run dev` / `npm run build` / `npm run preview`.
   briefly unavailable while dependencies install.
 - **Docker** — `docker compose up` in the repo root runs this dev server in a
   container; `http://localhost:5173/` leads to the modeler.
-- **GitHub Pages** — `.github/workflows/pages.yml` runs `tools/build-site.mjs` on
-  every push to `dev`: the overview and guides (`docs-site/`) at the root, this
-  modeler under `modeler/` and the converter result under `modules/`, published
-  as one static site.
+- **GitHub Pages** — `tools/build-site.mjs` builds the whole site: the overview and guides
+  (`docs-site/`) at the root, this modeler under `modeler/` and the converter result under
+  `modules/`. `.github/workflows/pages.yml` on `dev` builds and checks it on every push; the same
+  file on `main` deploys it after every green `validate` run on `dev`.
 
 > Static hosting is enough because bpmn-js runs entirely in the browser. The
 > published bundle is public, so keep only abstract/synthetic diagrams here —
