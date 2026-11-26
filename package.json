@@ -53,7 +53,7 @@
     "check:attributes": "node tools/check-attribute-usage.mjs",
     "bpmn2gmf": "node extension/src/converter/cli.mjs",
     "test": "node --test \"extension/test/*.test.mjs\"",
-    "convert:site": "node tools/build-converter-site.mjs lung-cancer --out-dir demo/dist/modules",
+    "convert:site": "node tools/build-converter-site.mjs examples/lung-cancer --out-dir demo/dist/modules",
     "convert:check": "node extension/src/converter/cli.mjs examples/lung-cancer --check --strict",
     "synthea:smoke": "node tools/synthea-smoke.mjs",
     "schema:gen": "node tools/gen-module-schema.mjs",
