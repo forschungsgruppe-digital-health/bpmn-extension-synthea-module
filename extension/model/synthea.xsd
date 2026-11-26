@@ -2,7 +2,7 @@
 <!-- GENERATED from the moddle descriptor by tools/moddle-to-xsd.mjs. Do not edit by hand. -->
 <!-- Scope: structure, plus the allowed values of fixed-choice fields (enumerations of the model and
      extension/model/synthea.values.json). Semantic rules (required attributes, rules across elements) live in the bpmnlint plugin. -->
-<!-- extension version 0.1.0 (kept in sync by Release Please) x-release-please-version -->
+<!-- extension version 0.2.0 (kept in sync by Release Please) x-release-please-version -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:synthea="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"
             targetNamespace="https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0"

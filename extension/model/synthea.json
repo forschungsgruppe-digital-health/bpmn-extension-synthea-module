@@ -2,7 +2,7 @@
   "name": "Synthea",
   "uri": "https://forschungsgruppe-digital-health.github.io/schema/synthea/1.0",
   "prefix": "synthea",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "xml": {
     "tagAlias": "lowerCase"
   },
